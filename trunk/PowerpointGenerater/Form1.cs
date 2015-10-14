@@ -175,11 +175,20 @@ namespace PowerpointGenerater
                 instellingen.Templateliederen = formulier.textBox1.Text;
                 instellingen.Templatetheme = formulier.textBox2.Text;
                 instellingen.Databasepad = formulier.textBox3.Text;
-                bool result = System.Int32.TryParse(formulier.textBox4.Text, out instellingen.regelsperslide);
+                bool result = System.Int32.TryParse(formulier.textBox4.Text, out instellingen.Regelsperslide);
                 if (!result)
                 {
-                    instellingen.regelsperslide = 6;
+                    instellingen.Regelsperslide = 6;
                 }
+
+                instellingen.StandaardTekst.Volgende = formulier.tbVolgende.Text;
+                instellingen.StandaardTekst.Voorganger = formulier.tbVoorganger.Text;
+                instellingen.StandaardTekst.Collecte = formulier.tbCollecte.Text;
+                instellingen.StandaardTekst.Collecte1 = formulier.tbCollecte1.Text;
+                instellingen.StandaardTekst.Collecte2 = formulier.tbCollecte2.Text;
+                instellingen.StandaardTekst.Lezen = formulier.tbLezen.Text;
+                instellingen.StandaardTekst.Tekst = formulier.tbTekst.Text;
+                instellingen.StandaardTekst.Liturgie = formulier.tbLiturgie.Text;
 
                 if (!Instellingen.WriteXML(instellingen, ProgramDirectory))
                     MessageBox.Show("Niet opgeslagen wegens te lang pad");
@@ -187,7 +196,7 @@ namespace PowerpointGenerater
         }
         private void bekijkDatabaseToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            Process.Start("explorer.exe", "/root, \"" + instellingen.Databasepad + "\"");
+            Process.Start("explorer.exe", "/root, \"" + instellingen.FullDatabasePath + "\"");
         }
         private void stopPowerpointToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -242,7 +251,7 @@ namespace PowerpointGenerater
                         //creeer een plek om de opgehaalde liturgie op te gaan slaan
                         Liturgielezer.Add(new Uitlezen_Liturgie());
                         //creeer mappaden van de meegegeven liturgieregel
-                        List<String> liturgie = Liturgielezer[i].ParseInputToPaths(richTextBox1.Lines[i], instellingen.Databasepad, instellingen.GetMasks());
+                        List<String> liturgie = Liturgielezer[i].ParseInputToPaths(richTextBox1.Lines[i], instellingen.FullDatabasePath, instellingen.GetMasks());
                         //lees de bijbehorende bestanden uit
                         Liturgielezer[i].LeesLiturgie(liturgie);
 
@@ -277,7 +286,7 @@ namespace PowerpointGenerater
                 Thread t = new Thread(this.CheckProgress);
                 t.IsBackground = true;
                 t.Start();
-                ppf.InputGeneratePresentation(Liturgielezer, instellingen.Templateliederen, textBox2.Text, textBox3.Text, textBox4.Text, textBox1.Text, textBox5.Text);
+                ppf.InputGeneratePresentation(Liturgielezer, instellingen.FullTemplateliederen, textBox2.Text, textBox3.Text, textBox4.Text, textBox1.Text, textBox5.Text);
                 GenerateThread = new Thread(ppf.GeneratePresentation);
                 GenerateThread.IsBackground = true;
                 //genereer de presentatie
@@ -301,6 +310,7 @@ namespace PowerpointGenerater
         }
         #endregion formulier eventhandlers
         #endregion Eventhandlers
+
         #region functies
         #region Algemene functies
 

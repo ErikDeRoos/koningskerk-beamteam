@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+using System.Xml.Serialization;
+using System;
 
 namespace PowerpointGenerater
 {
@@ -9,8 +11,9 @@ namespace PowerpointGenerater
         public string Databasepad;
         public string Templateliederen;
         public string Templatetheme;
-        public int regelsperslide = 4;
+        public int Regelsperslide = 4;
         private List<Mapmask> lijstmasks = new List<Mapmask>();
+        public StandaardTeksten StandaardTekst { get; set; }
 
         public Instellingen()
             : this("", "", "",4)
@@ -23,7 +26,18 @@ namespace PowerpointGenerater
             this.Databasepad = databasepad;
             this.Templateliederen = templateliederen;
             this.Templatetheme = templatetheme;
-            this.regelsperslide = regelsperslide;
+            this.Regelsperslide = regelsperslide;
+            this.StandaardTekst = new StandaardTeksten()
+            {
+                Volgende = "Straks :",
+                Voorganger = "Voorganger :",
+                Collecte1 = "1e collecte :",
+                Collecte2 = "2e collecte :",
+                Collecte = "Collecte :",
+                Lezen = "Lezen :",
+                Tekst = "Tekst :",
+                Liturgie = "liturgie"
+            };
         }
 
         public bool AddMask(Mapmask mask)
@@ -44,6 +58,39 @@ namespace PowerpointGenerater
         {
             lijstmasks.Clear();
         }
+
+        public string FullDatabasePath
+        {
+            get
+            {
+                if (Databasepad.StartsWith("."))
+                    return System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Databasepad.Remove(0,1));
+
+                return Databasepad;
+            }
+        }
+
+        public string FullTemplatetheme
+        {
+            get
+            {
+                if (Templatetheme.StartsWith("."))
+                    return System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Templatetheme.Remove(0, 1));
+
+                return Templatetheme;
+            }
+        }
+
+        public string FullTemplateliederen
+        {
+            get
+            {
+                if (Templateliederen.StartsWith("."))
+                    return System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Templateliederen.Remove(0, 1));
+
+                return Templateliederen;
+            }
+        }
         
         public static bool WriteXML(Instellingen instellingen, string path)
         {
@@ -53,27 +100,14 @@ namespace PowerpointGenerater
                 xws.Indent = true;
 
                 //schrijf instellingen weg
-                XmlWriter xw = XmlWriter.Create(path + "instellingen.xml", xws);
-                xw.WriteStartDocument();
-                    xw.WriteStartElement("Instellingen");
-                        xw.WriteStartElement("Databasepad");
-                            xw.WriteString(instellingen.Databasepad);
-                        xw.WriteEndElement();
-                        xw.WriteStartElement("Templateliederen");
-                            xw.WriteString(instellingen.Templateliederen);
-                        xw.WriteEndElement();
-                        xw.WriteStartElement("Templatetheme");
-                            xw.WriteString(instellingen.Templatetheme);
-                        xw.WriteEndElement();
-                        xw.WriteStartElement("RegelsperSlide");
-                            xw.WriteString(instellingen.regelsperslide.ToString());
-                        xw.WriteEndElement();
-                    xw.WriteEndElement();
-                xw.WriteEndDocument();
+                XmlWriter xw; 
 
-                xw.Flush();
-                xw.Close();
-
+                XmlSerializer serializer = new XmlSerializer(typeof(Instellingen));
+                using (TextWriter sw = new StreamWriter(path + "instellingen.xml"))
+                {
+                    serializer.Serialize(sw, instellingen);
+                }
+               
                 //schrijf Masks weg
                 xw = XmlWriter.Create(path + "masks.xml", xws);
                 xw.WriteStartDocument();
@@ -107,35 +141,43 @@ namespace PowerpointGenerater
             Instellingen instellingen = new Instellingen();
             XmlDocument xdoc = new XmlDocument();
 
-            xdoc.Load(path + "masks.xml");
-            XmlElement root = xdoc.DocumentElement;
-            XmlNodeList nodelist = root.GetElementsByTagName("Name");
-            XmlNodeList nodelist2 = root.GetElementsByTagName("RealName");
-            if (nodelist.Count == nodelist2.Count)
+            
+
+            //XmlNodeList nodelist = root.GetElementsByTagName("Name");
+            //XmlNodeList nodelist2 = root.GetElementsByTagName("RealName");
+            //if (nodelist.Count == nodelist2.Count)
+            //{
+            //    for (int i = 0; i < nodelist.Count; i++)
+            //    {
+            //        instellingen.lijstmasks.Add(new Mapmask(nodelist[i].InnerText, nodelist2[i].InnerText));
+            //    }
+            //}
+
+            string fileName = path + "instellingen.xml";
+            if (!File.Exists(fileName))
+                throw new FileNotFoundException("Instellingenbestand niet gevonden", fileName);
+
+            XmlSerializer serializer = new XmlSerializer(typeof(Instellingen));
+            XmlReaderSettings settings = new XmlReaderSettings();
+            // No settings need modifying here
+
+            using (StreamReader textReader = new StreamReader(fileName))
             {
-                for (int i = 0; i < nodelist.Count; i++)
+                using (XmlReader xmlReader = XmlReader.Create(textReader, settings))
                 {
-                    instellingen.lijstmasks.Add(new Mapmask(nodelist[i].InnerText, nodelist2[i].InnerText));
+                    instellingen = (Instellingen)serializer.Deserialize(xmlReader);
                 }
             }
 
-            xdoc.Load(path + "instellingen.xml");
-            root = xdoc.DocumentElement;
-            nodelist = root.GetElementsByTagName("Databasepad");
-            foreach (XmlNode item in nodelist)
-                instellingen.Databasepad = item.InnerText;
-            nodelist = root.GetElementsByTagName("Templateliederen");
-            foreach (XmlNode item in nodelist)
-                instellingen.Templateliederen = item.InnerText;
-            nodelist = root.GetElementsByTagName("Templatetheme");
-            foreach (XmlNode item in nodelist)
-                instellingen.Templatetheme = item.InnerText;
-            nodelist = root.GetElementsByTagName("RegelsperSlide");
-            foreach (XmlNode item in nodelist)
+            xdoc.Load(path + "masks.xml");
+            XmlElement root = xdoc.DocumentElement;
+
+            XmlNodeList masklist = root.GetElementsByTagName("Mask");
+            foreach (XmlNode mask in masklist)
             {
-                bool result = System.Int32.TryParse(item.InnerText, out instellingen.regelsperslide);
-                if (!result)
-                    instellingen.regelsperslide = 6;
+                XmlNode nameNode = mask.SelectSingleNode("Name");
+                XmlNode realnameNode = mask.SelectSingleNode("RealName");
+                instellingen.lijstmasks.Add(new Mapmask(nameNode.InnerText, realnameNode.InnerText));
             }
 
             return instellingen;
@@ -143,7 +185,7 @@ namespace PowerpointGenerater
 
         public override string ToString()
         {
-            return string.Format("databasepad: {0}\n templateliederen: {1}\n templatetheme: {2}\n regels per slide: {3}\n", Databasepad, Templateliederen, Templatetheme, regelsperslide);
+            return string.Format("databasepad: {0}\n templateliederen: {1}\n templatetheme: {2}\n regels per slide: {3}\n", FullDatabasePath, FullTemplateliederen, FullTemplatetheme, Regelsperslide);
         }
     }
 }

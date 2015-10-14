@@ -6,7 +6,7 @@ using System.Linq;
 using Microsoft.Office.Interop.PowerPoint;
 using Microsoft.Office.Core;
 
-namespace PowerpointGenerater
+namespace PowerpointGenerater 
 {
     class PowerpointFunctions
     {
@@ -24,16 +24,18 @@ namespace PowerpointGenerater
         private string Collecte2;
         private string Lezen;
         private string Tekst;
+        private Instellingen instellingen;
 
         public PowerpointFunctions(Form1 hoofdformulier)
         {
-            if (File.Exists(hoofdformulier.instellingen.Templatetheme))
+            instellingen = hoofdformulier.instellingen;
+            if (File.Exists(hoofdformulier.instellingen.FullTemplatetheme))
             {
                 //Creeer een nieuwe lege presentatie volgens een bepaald thema
                 objApp = new Microsoft.Office.Interop.PowerPoint.Application();
                 objApp.Visible = MsoTriState.msoTrue;
                 objPresSet = objApp.Presentations;
-                objPres = objPresSet.Open(hoofdformulier.instellingen.Templatetheme,
+                objPres = objPresSet.Open(hoofdformulier.instellingen.FullTemplatetheme,
                     MsoTriState.msoFalse, MsoTriState.msoTrue, MsoTriState.msoTrue);
                 //sla het thema op, zodat dat in iedere nieuwe slide kan worden meegenomen
                 layout = objPres.SlideMaster.CustomLayouts[PpSlideLayout.ppLayoutTitle];
@@ -94,157 +96,123 @@ namespace PowerpointGenerater
             if (objApp == null)
                 return;
 
-            
-            int counterliturgieregel = 0;
-            //voor elke regel in de liturgie moeten sheets worden gemaakt
-            foreach (Uitlezen_Liturgie regel in Liturgie)
-            {                
-                int counterliedtekst = 0;
-                //als de regel tekst bevat moet er voor ieder vers een sheet worden gemaakt
-                if (regel.Liturgiebord)
+            try
+            {
+
+                int counterliturgieregel = 0;
+                //voor elke regel in de liturgie moeten sheets worden gemaakt
+                foreach (Uitlezen_Liturgie regel in Liturgie)
                 {
-                    #region Liederen
-                    foreach (String inhoud in regel.inhoud)
+                    int counterliedtekst = 0;
+                    //als de regel tekst bevat moet er voor ieder vers een sheet worden gemaakt
+                    if (regel.Liturgiebord)
                     {
-                        String tempinhoud = inhoud;
-                        int currentSlide = 1; //starts at 1 instead of 0
-                        //zolang er nog iets is in te voegen in sheets
-                        while (!tempinhoud.Equals(""))
+                        #region Liederen
+                        foreach (String inhoud in regel.inhoud)
                         {
-                            _Presentation presentatie;
-                            if (File.Exists(templateLiederen))
+                            String tempinhoud = inhoud;
+                            int currentSlide = 1; //starts at 1 instead of 0
+                            //zolang er nog iets is in te voegen in sheets
+                            while (!tempinhoud.Equals(""))
                             {
-                                //lees de template uit
-                                presentatie = OpenPPS(templateLiederen);
-                            }
-                            else
-                            {
-                                MessageBox.Show("het pad naar de liederen template powerpoint presentatie kan niet worden gevonden\n stel de achtergrond opnieuw in bij de templates", "Template niet gevonden", MessageBoxButtons.OK);
-                                ClosePPS();
-                                return;
-                            }
-                            //voor elke slide in de presentatie(in principe moet dit er 1 zijn)
-                            foreach (Slide slide in presentatie.Slides)
-                            {
-                                //voor elk object op de slides (we zoeken naar de tekst die vervangen moet worden in de template)
-                                foreach (Microsoft.Office.Interop.PowerPoint.Shape shape in slide.Shapes)
+                                _Presentation presentatie;
+                                if (File.Exists(templateLiederen))
                                 {
-                                    //als de shape gelijk is aan een textbox bevat het dus tekst
-                                    if (shape.Type == MsoShapeType.msoTextBox)
+                                    //lees de template uit
+                                    presentatie = OpenPPS(templateLiederen);
+                                }
+                                else
+                                {
+                                    MessageBox.Show("het pad naar de liederen template powerpoint presentatie kan niet worden gevonden\n stel de achtergrond opnieuw in bij de templates", "Template niet gevonden", MessageBoxButtons.OK);
+                                    ClosePPS();
+                                    return;
+                                }
+                                //voor elke slide in de presentatie(in principe moet dit er 1 zijn)
+                                foreach (Slide slide in presentatie.Slides)
+                                {
+                                    //voor elk object op de slides (we zoeken naar de tekst die vervangen moet worden in de template)
+                                    foreach (Microsoft.Office.Interop.PowerPoint.Shape shape in slide.Shapes)
                                     {
-                                        //als de template de tekst bevat "Liturgieregel" moet daar de liturgieregel komen
-                                        if (shape.TextFrame.TextRange.Text.Equals("<Liturgieregel>"))
+                                        //als de shape gelijk is aan een textbox bevat het dus tekst
+                                        if (shape.Type == MsoShapeType.msoTextBox)
                                         {
-                                            shape.TextFrame.TextRange.Text = regel.mappath + " ";
-                                            if (0 == counterliedtekst)
+                                            //als de template de tekst bevat "Liturgieregel" moet daar de liturgieregel komen
+                                            if (shape.TextFrame.TextRange.Text.Equals("<Liturgieregel>"))
                                             {
-                                                shape.TextFrame.TextRange.Text += regel.bestandsnamen[0];
+                                                InvullenLiturgieRegel(regel, counterliedtekst, shape);
                                             }
+                                            //als de template de tekst bevat "Inhoud" moet daar de inhoud van het vers komen
 
-                                            //zoek de juiste bestandsnaam op
-                                            for (int i = 1; i < regel.bestandsnamen.Count; i++)
+                                            bool skipProcessing = false;
+                                            if (shape.TextFrame.TextRange.Text.Equals("<Inhoud>"))
                                             {
-                                                if (i == counterliedtekst)
-                                                {
-                                                    shape.TextFrame.TextRange.Text += regel.bestandsnamen[i];
-                                                }
-                                                else if (i > counterliedtekst)
-                                                {
-                                                    shape.TextFrame.TextRange.Text += ", " + regel.bestandsnamen[i];
-                                                }
+                                                InvullenLiedTekst(ref tempinhoud, ref currentSlide, slide, shape, ref skipProcessing);
+                                                if (skipProcessing)
+                                                    continue;
+                                            }
+                                            //als de template de tekst bevat "Volgende" moet daar de Liturgieregel van de volgende sheet komen
+                                            if (shape.TextFrame.TextRange.Text.Equals("<Volgende>"))
+                                            {
+                                                InvullenVolgende(counterliturgieregel, regel, counterliedtekst, shape);
                                             }
                                         }
-                                        //als de template de tekst bevat "Inhoud" moet daar de inhoud van het vers komen
-                                        if (shape.TextFrame.TextRange.Text.Equals("<Inhoud>"))
-                                        {
-                                            if (File.Exists(tempinhoud))
-                                            {
-                                                shape.Delete();                                                
-                                                //open de presentatie met de sheets erin
-                                                _Presentation presentatieAdd = OpenPPS(tempinhoud);
+                                    }
+                                }
+                                //voeg slide in in het grote geheel
+                                VoegSlideinPresentatiein(presentatie.Slides);
+                                //sluit de template weer af
+                                presentatie.Close();
+                            }
+                            counterliedtekst++;
+                        }
+                        #endregion Liederen
+                    }
+                    else
+                    {
 
-                                                if (currentSlide <= presentatieAdd.Slides.Count)
-                                                {
-                                                    Slide slideAdd = presentatieAdd.Slides[currentSlide];
-
-                                                    //voor elk shape in de slide (we zoeken naar de tekst of andere dingen die vervangen moet worden in de geopende sheet)
-                                                    foreach (Microsoft.Office.Interop.PowerPoint.Shape shapeAdd in slideAdd.Shapes)
-                                                    {
-                                                        if (shapeAdd.Type == MsoShapeType.msoPicture || shapeAdd.Type == MsoShapeType.msoLinkedPicture)
-                                                        {
-                                                            shapeAdd.Copy();
-                                                            slide.Shapes.Paste();
-                                                        }
-                                                    }
-                                                    currentSlide++;
-                                                }
-                                                if (currentSlide > presentatieAdd.Slides.Count)
-                                                {
-                                                    //leeg de variabele van wat in te voegen
-                                                    tempinhoud = "";
-                                                }
-                                                continue;
-                                            }
-                                            else
-                                            {
-                                                System.Windows.Forms.RichTextBox text = new System.Windows.Forms.RichTextBox();
-                                                text.Text = tempinhoud;
-                                                //leeg het tekstveld
-                                                shape.TextFrame.TextRange.Text = "";
-                                                //leeg de variabele liedtekst
-                                                tempinhoud = "";
-                                                //haal maximaal regelsperslide regels van het vers op en zet de rest terug in liedtekst
-                                                int counter = 0;
-                                                bool NewSlide = false;
-                                                foreach (String line in text.Lines)
-                                                {
-                                                    if (!line.Equals(""))
-                                                    {
-                                                        //zet in de sheet
-                                                        if (counter < hoofdformulier.instellingen.regelsperslide)
-                                                        {
-                                                            //update de tekst
-                                                            shape.TextFrame.TextRange.Text += line;
-                                                            if ((counter + 1) < hoofdformulier.instellingen.regelsperslide)
-                                                                shape.TextFrame.TextRange.Text += "\r\n";
-                                                        }
-                                                        //zet terug in liedtekst
-                                                        else
-                                                        {
-                                                            NewSlide = true;
-                                                            tempinhoud += line;
-                                                            tempinhoud += "\r\n";
-                                                        }
-                                                        counter++;
-                                                    }
-                                                }
-                                                if (NewSlide)
-                                                    shape.TextFrame.TextRange.Text += " >>";
-                                            }
-                                        }
-                                        //als de template de tekst bevat "Volgende" moet daar de Liturgieregel van de volgende sheet komen
-                                        if (shape.TextFrame.TextRange.Text.Equals("<Volgende>"))
+                        #region Slides
+                        foreach (String inhoud in regel.inhoud)
+                        {
+                            //als de regel kant en klare sheets bevat voegen wij deze in
+                            if (!inhoud.Equals(""))
+                            {
+                                //open de presentatie met de sheets erin
+                                _Presentation presentatie = OpenPPS(inhoud);
+                                //voor elke slide in de presentatie(in principe moet dit er 1 zijn)
+                                foreach (Slide slide in presentatie.Slides)
+                                {
+                                    //voor elk shape in de slide (we zoeken naar de tekst of andere dingen die vervangen moet worden in de geopende sheet)
+                                    foreach (Microsoft.Office.Interop.PowerPoint.Shape shape in slide.Shapes)
+                                    {
+                                        //als de shape gelijk is aan een textbox bevat het dus tekst
+                                        if (shape.Type == MsoShapeType.msoTextBox)
                                         {
-                                            //zoek de juiste bestandsnaam op, dat is dus niet de huidige maar de volgende daarom -1
-                                            int bestandsnamencounter = 0;
-                                            String bestandsnaam = "";
-                                            foreach (String tempstring in regel.bestandsnamen)
+                                            //als de template de tekst bevat "Voorganger: " moet daar de Voorgangersnaam achter komen
+                                            if (shape.TextFrame.TextRange.Text.Equals("<Voorganger:>"))
                                             {
-                                                if ((bestandsnamencounter - 1) == counterliedtekst)
-                                                {
-                                                    bestandsnaam = tempstring;
-                                                }
-                                                bestandsnamencounter++;
+                                                shape.TextFrame.TextRange.Text = instellingen.StandaardTekst.Voorganger;
+                                                shape.TextFrame.TextRange.Text += Voorganger;
                                             }
-                                            //als er een volgende is gevonden
-                                            if (!bestandsnaam.Equals(""))
+                                            //als de template de tekst bevat "Collecte: " moet daar de collectedoel achter komen
+                                            if (shape.TextFrame.TextRange.Text.Equals("<Collecte:>"))
                                             {
-                                                //update de tekst met het bestandsnaam (bestandsnaam is in het geval van een lied de Liturgieregel)
-                                                //shape.TextFrame.TextRange.Text = "Hierna: ";
-                                                //shape.TextFrame.TextRange.Text += bestandsnaam;
-                                                shape.TextFrame.TextRange.Text = "";
+                                                shape.TextFrame.TextRange.Text = instellingen.StandaardTekst.Collecte;
+                                                shape.TextFrame.TextRange.Text += Collecte1;
                                             }
-                                            else
+                                            //als de template de tekst bevat "1e Collecte: " moet daar de 1e collecte achter komen
+                                            if (shape.TextFrame.TextRange.Text.Equals("<1e Collecte:>"))
+                                            {
+                                                shape.TextFrame.TextRange.Text = instellingen.StandaardTekst.Collecte1;
+                                                shape.TextFrame.TextRange.Text += Collecte1;
+                                            }
+                                            //als de template de tekst bevat "2e Collecte: " moet daar de 2e collecte achter komen
+                                            if (shape.TextFrame.TextRange.Text.Equals("<2e Collecte:>"))
+                                            {
+                                                shape.TextFrame.TextRange.Text = instellingen.StandaardTekst.Collecte2;
+                                                shape.TextFrame.TextRange.Text += Collecte2;
+                                            }
+                                            //als de template de tekst bevat "Volgende" moet daar de Liturgieregel van de volgende sheet komen
+                                            if (shape.TextFrame.TextRange.Text.Equals("<Volgende>"))
                                             {
                                                 //update de tekst met de volgende liturgie als die er is
                                                 if (Liturgie.Count > (counterliturgieregel + 1))
@@ -252,9 +220,9 @@ namespace PowerpointGenerater
                                                     //update alleen als de tekst niet blanco is, omdat het lelijk is om blanco te zien staan
                                                     if (!Liturgie[counterliturgieregel + 1].bestandsnamen[0].Equals("Blanco"))
                                                     {
-                                                        shape.TextFrame.TextRange.Text = "Aansluitend: ";
+                                                        shape.TextFrame.TextRange.Text = instellingen.StandaardTekst.Volgende;
                                                         shape.TextFrame.TextRange.Text += Liturgie[counterliturgieregel + 1].mappath + " " + Liturgie[counterliturgieregel + 1].bestandsnamen[0];
-                                                        //zoek de juiste bestandsnaam op
+                                                        //zoek de juiste bestandsnamen op
                                                         for (int i = 1; i < Liturgie[counterliturgieregel + 1].bestandsnamen.Count; i++)
                                                         {
                                                             shape.TextFrame.TextRange.Text += ", " + Liturgie[counterliturgieregel + 1].bestandsnamen[i];
@@ -266,189 +234,271 @@ namespace PowerpointGenerater
                                                 else
                                                     shape.TextFrame.TextRange.Text = "";
                                             }
-                                        }
-                                    }
-                                }
-                            }
-                            //voeg slide in in het grote geheel
-                            VoegSlideinPresentatiein(presentatie.Slides);
-                            //sluit de template weer af
-                            presentatie.Close();
-                        }
-                        counterliedtekst++;
-                    }
-                    #endregion Liederen
-                }                
-                else
-                {                
-                    
-                    #region Slides
-                    foreach(String inhoud in regel.inhoud) {
-                        //als de regel kant en klare sheets bevat voegen wij deze in
-                        if (!inhoud.Equals(""))
-                        {
-                            //open de presentatie met de sheets erin
-                            _Presentation presentatie = OpenPPS(inhoud);
-                            //voor elke slide in de presentatie(in principe moet dit er 1 zijn)
-                            foreach (Slide slide in presentatie.Slides)
-                            {
-                                //voor elk shape in de slide (we zoeken naar de tekst of andere dingen die vervangen moet worden in de geopende sheet)
-                                foreach (Microsoft.Office.Interop.PowerPoint.Shape shape in slide.Shapes)
-                                {
-                                    //als de shape gelijk is aan een textbox bevat het dus tekst
-                                    if (shape.Type == MsoShapeType.msoTextBox)
-                                    {
-                                        //als de template de tekst bevat "Voorganger: " moet daar de Voorgangersnaam achter komen
-                                        if (shape.TextFrame.TextRange.Text.Equals("<Voorganger:>"))
-                                        {
-                                            shape.TextFrame.TextRange.Text = "Voorganger: ";
-                                            shape.TextFrame.TextRange.Text += Voorganger;
-                                        }
-                                        //als de template de tekst bevat "1e Collecte: " moet daar de Voorgangersnaam achter komen
-                                        if (shape.TextFrame.TextRange.Text.Equals("<1e Collecte:>"))
-                                        {
-                                            shape.TextFrame.TextRange.Text = "1e Collecte: ";
-                                            shape.TextFrame.TextRange.Text += Collecte1;
-                                        }
-                                        //als de template de tekst bevat "2e Collecte: " moet daar de Voorgangersnaam achter komen
-                                        if (shape.TextFrame.TextRange.Text.Equals("<2e Collecte:>"))
-                                        {
-                                            shape.TextFrame.TextRange.Text = "2e Collecte: ";
-                                            shape.TextFrame.TextRange.Text += Collecte2;
-                                        }
-                                        //als de template de tekst bevat "Volgende" moet daar de Liturgieregel van de volgende sheet komen
-                                        if (shape.TextFrame.TextRange.Text.Equals("<Volgende>"))
-                                        {
-                                            //update de tekst met de volgende liturgie als die er is
-                                            if (Liturgie.Count > (counterliturgieregel + 1))
+                                            //als de template de tekst bevat "Volgende" moet daar de te lezen schriftgedeeltes komen
+                                            if (shape.TextFrame.TextRange.Text.Equals("<Lezen>"))
                                             {
-                                                //update alleen als de tekst niet blanco is, omdat het lelijk is om blanco te zien staan
-                                                if (!Liturgie[counterliturgieregel + 1].bestandsnamen[0].Equals("Blanco"))
-                                                {
-                                                    shape.TextFrame.TextRange.Text = "Aansluitend: ";
-                                                    shape.TextFrame.TextRange.Text += Liturgie[counterliturgieregel + 1].mappath + " " + Liturgie[counterliturgieregel + 1].bestandsnamen[0];
-                                                    //zoek de juiste bestandsnamen op
-                                                    for (int i = 1; i < Liturgie[counterliturgieregel + 1].bestandsnamen.Count; i++)
-                                                    {
-                                                        shape.TextFrame.TextRange.Text += ", " + Liturgie[counterliturgieregel + 1].bestandsnamen[i];
-                                                    }
-                                                }
-                                                else
-                                                    shape.TextFrame.TextRange.Text = "";
+                                                shape.TextFrame.TextRange.Text = "Schriftlezing:\n";
+                                                shape.TextFrame.TextRange.Text += Lezen;
                                             }
-                                            else
-                                                shape.TextFrame.TextRange.Text = "";
-                                        }
-                                        //als de template de tekst bevat "Volgende" moet daar de te lezen schriftgedeeltes komen
-                                        if (shape.TextFrame.TextRange.Text.Equals("<Lezen>"))
-                                        {
-                                            shape.TextFrame.TextRange.Text = "Schriftlezing:\n";
-                                            shape.TextFrame.TextRange.Text += Lezen;
-                                        }
-                                        if (shape.TextFrame.TextRange.Text.Equals("<Tekst>"))
-                                        {
-                                            shape.TextFrame.TextRange.Text = "Tekst:\n";
-                                            shape.TextFrame.TextRange.Text += Tekst;
-                                        }
-                                        if (shape.TextFrame.TextRange.Text.Equals("<Tekst_Onder>"))
-                                        {
-                                            shape.TextFrame.TextRange.Text = Tekst;
-                                        }
-                                    }
-                                    if (shape.Type == MsoShapeType.msoTable)
-                                    {
-                                        if (shape.Table.Rows[1].Cells[1].Shape.TextFrame.TextRange.Text.Equals("<Liturgie>"))
-                                        {
-                                            int tempcounter = 0;
-                                            bool legeregel = false;
-                                            bool lezengehad = false;
-                                            bool tekstgehad = false;
-                                            List<Row> deleterows = new List<Row>();
-                                            for (int index = 1; index <= shape.Table.Rows.Count; index++)
+                                            if (shape.TextFrame.TextRange.Text.Equals("<Tekst>"))
                                             {
-                                                if (!shape.Table.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text.Equals("<Liturgie>"))
+                                                shape.TextFrame.TextRange.Text = "Tekst:\n";
+                                                shape.TextFrame.TextRange.Text += Tekst;
+                                            }
+                                            if (shape.TextFrame.TextRange.Text.Equals("<Tekst_Onder>"))
+                                            {
+                                                shape.TextFrame.TextRange.Text = Tekst;
+                                            }
+                                        }
+                                        if (shape.Type == MsoShapeType.msoTable)
+                                        {
+                                            if (shape.Table.Rows[1].Cells[1].Shape.TextFrame.TextRange.Text.Equals("<Liturgie>"))
+                                            {
+                                                int tempcounter = 0;
+                                                bool legeregel = false;
+                                                bool lezengehad = false;
+                                                bool tekstgehad = false;
+                                                List<Row> deleterows = new List<Row>();
+                                                for (int index = 1; index <= shape.Table.Rows.Count; index++)
                                                 {
-                                                    Boolean liturgiegevonden = false;
-                                                    while ((Liturgie.Count > tempcounter) && (!liturgiegevonden))
+                                                    if (!shape.Table.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text.Equals("<Liturgie>"))
                                                     {
-                                                        if (Liturgie[tempcounter].Liturgiebord)
+                                                        Boolean liturgiegevonden = false;
+                                                        while ((Liturgie.Count > tempcounter) && (!liturgiegevonden))
                                                         {
-                                                            string[] tempdelen = Liturgie[tempcounter].mappath.Split(' ');
-                                                            for (int i = 0; i < tempdelen.Count(); i++)
+                                                            if (Liturgie[tempcounter].Liturgiebord)
                                                             {
-                                                                if (!tempdelen[i].Equals(" "))
+                                                                string[] tempdelen = Liturgie[tempcounter].mappath.Split(' ');
+                                                                for (int i = 0; i < tempdelen.Count(); i++)
                                                                 {
-                                                                    shape.Table.Rows[index].Cells[i + 1].Shape.TextFrame.TextRange.Text = tempdelen[i];
+                                                                    if (!tempdelen[i].Equals(" "))
+                                                                    {
+                                                                        shape.Table.Rows[index].Cells[i + 1].Shape.TextFrame.TextRange.Text = tempdelen[i];
+                                                                    }
                                                                 }
+                                                                shape.Table.Rows[index].Cells[tempdelen.Count()].Shape.TextFrame.TextRange.Text = Liturgie[tempcounter].bestandsnamen[0];
+                                                                for (int i = 1; i < Liturgie[tempcounter].bestandsnamen.Count; i++)
+                                                                {
+                                                                    shape.Table.Rows[index].Cells[tempdelen.Count()].Shape.TextFrame.TextRange.Text += ", " + Liturgie[tempcounter].bestandsnamen[i];
+                                                                }
+                                                                liturgiegevonden = true;
                                                             }
-                                                            shape.Table.Rows[index].Cells[tempdelen.Count()].Shape.TextFrame.TextRange.Text = Liturgie[tempcounter].bestandsnamen[0];
-                                                            for (int i = 1; i < Liturgie[tempcounter].bestandsnamen.Count; i++)
-                                                            {
-                                                                shape.Table.Rows[index].Cells[tempdelen.Count()].Shape.TextFrame.TextRange.Text += ", " + Liturgie[tempcounter].bestandsnamen[i];
-                                                            }
-                                                            liturgiegevonden = true;
+                                                            tempcounter++;
                                                         }
-                                                        tempcounter++;
-                                                    }
-                                                    if (!liturgiegevonden)
-                                                    {
-                                                        shape.Table.Rows[index].Cells[1].Merge(shape.Table.Rows[index].Cells[2]);
-                                                        if (shape.Table.Rows[index].Cells.Count >= 3)
-                                                            shape.Table.Rows[index].Cells[2].Merge(shape.Table.Rows[index].Cells[3]);
+                                                        if (!liturgiegevonden)
+                                                        {
+                                                            shape.Table.Rows[index].Cells[1].Merge(shape.Table.Rows[index].Cells[2]);
+                                                            if (shape.Table.Rows[index].Cells.Count >= 3)
+                                                                shape.Table.Rows[index].Cells[2].Merge(shape.Table.Rows[index].Cells[3]);
 
-                                                        //volgorde voor het liturgiebord is
-                                                        //liederen
-                                                        //lezen
-                                                        //tekst
-                                                        //if (!legeregel)
-                                                        //{
-                                                        //    legeregel = true;
-                                                        //}
-                                                        //else 
-                                                        if (!lezengehad)
-                                                        {
-                                                            shape.Table.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = "L ";
-                                                            shape.Table.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text += Lezen;
-                                                            shape.Table.Rows[index].Cells[1].Shape.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignLeft;
-                                                            lezengehad = true;
-                                                        }
-                                                        else if (!tekstgehad)
-                                                        {
-                                                            shape.Table.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = "T ";
-                                                            shape.Table.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text += Tekst;
-                                                            shape.Table.Rows[index].Cells[1].Shape.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignLeft;
-                                                            tekstgehad = true;
-                                                        }
-                                                        else
-                                                        {
-                                                            shape.Table.Rows[index].Delete();
-                                                            index--;
+                                                            //volgorde voor het liturgiebord is
+                                                            //liederen
+                                                            //lezen
+                                                            //tekst
+                                                            //if (!legeregel)
+                                                            //{
+                                                            //    legeregel = true;
+                                                            //}
+                                                            //else 
+                                                            if (!lezengehad)
+                                                            {
+                                                                shape.Table.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = "L ";
+                                                                shape.Table.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text += Lezen;
+                                                                shape.Table.Rows[index].Cells[1].Shape.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignLeft;
+                                                                lezengehad = true;
+                                                            }
+                                                            else if (!tekstgehad)
+                                                            {
+                                                                shape.Table.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = "T ";
+                                                                shape.Table.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text += Tekst;
+                                                                shape.Table.Rows[index].Cells[1].Shape.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignLeft;
+                                                                tekstgehad = true;
+                                                            }
+                                                            else
+                                                            {
+                                                                shape.Table.Rows[index].Delete();
+                                                                index--;
+                                                            }
                                                         }
                                                     }
+                                                    else
+                                                        shape.Table.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = "Liturgie";
                                                 }
-                                                else
-                                                    shape.Table.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = "Liturgie";
                                             }
                                         }
                                     }
                                 }
+                                //voeg de slides in in het grote geheel
+                                VoegSlideinPresentatiein(presentatie.Slides);
+                                //sluit de geopende presentatie weer af
+                                presentatie.Close();
                             }
-                            //voeg de slides in in het grote geheel
-                            VoegSlideinPresentatiein(presentatie.Slides);
-                            //sluit de geopende presentatie weer af
-                            presentatie.Close();
+                        }
+                        #endregion Slides
+                    }
+                    hoofdformulier.progressBar1.PerformStep();
+                    counterliturgieregel++;
+                }
+
+                //maximaliseer de presentatie ter controle voor de gebruiker
+                objApp.WindowState = PpWindowState.ppWindowMaximized;
+
+                hoofdformulier.autoEvent.Set();
+
+            }
+            catch (Exception ex)
+            {
+                using (var sw = new StreamWriter("ppgenerator.log", false))
+                {
+                    sw.WriteLine(ex.ToString());
+                }
+            }
+        }
+
+        private void InvullenVolgende(int counterliturgieregel, Uitlezen_Liturgie regel, int counterliedtekst, Microsoft.Office.Interop.PowerPoint.Shape shape)
+        {
+            //zoek de juiste bestandsnaam op, dat is dus niet de huidige maar de volgende daarom -1
+            int bestandsnamencounter = 0;
+            String bestandsnaam = "";
+            foreach (String tempstring in regel.bestandsnamen)
+            {
+                if ((bestandsnamencounter - 1) == counterliedtekst)
+                {
+                    bestandsnaam = tempstring;
+                }
+                bestandsnamencounter++;
+            }
+            //als er een volgende is gevonden
+            if (!bestandsnaam.Equals(""))
+            {
+                //update de tekst met het bestandsnaam (bestandsnaam is in het geval van een lied de Liturgieregel)
+                //shape.TextFrame.TextRange.Text = "Hierna: ";
+                //shape.TextFrame.TextRange.Text += bestandsnaam;
+                shape.TextFrame.TextRange.Text = string.Empty; // instellingen.StandaardTekst.Volgende + bestandsnaam;
+            }
+            else
+            {
+                //update de tekst met de volgende liturgie als die er is
+                if (Liturgie.Count > (counterliturgieregel + 1))
+                {
+                    //update alleen als de tekst niet blanco is, omdat het lelijk is om blanco te zien staan
+                    if (!Liturgie[counterliturgieregel + 1].bestandsnamen[0].Equals("Blanco"))
+                    {
+                        shape.TextFrame.TextRange.Text = instellingen.StandaardTekst.Volgende +
+                                  Liturgie[counterliturgieregel + 1].mappath + " " + Liturgie[counterliturgieregel + 1].bestandsnamen[0];
+                        //zoek de juiste bestandsnaam op
+                        for (int i = 1; i < Liturgie[counterliturgieregel + 1].bestandsnamen.Count; i++)
+                        {
+                            shape.TextFrame.TextRange.Text += ", " + Liturgie[counterliturgieregel + 1].bestandsnamen[i];
                         }
                     }
-                    #endregion Slides
+                    else
+                        shape.TextFrame.TextRange.Text = "";
                 }
-                hoofdformulier.progressBar1.PerformStep();
-                counterliturgieregel++;
+                else
+                    shape.TextFrame.TextRange.Text = "";
             }
-            
-            //maximaliseer de presentatie ter controle voor de gebruiker
-            objApp.WindowState = PpWindowState.ppWindowMaximized;
+        }
 
-            hoofdformulier.autoEvent.Set();
+        private void InvullenLiedTekst(ref String tempinhoud, ref int currentSlide, Slide slide, Microsoft.Office.Interop.PowerPoint.Shape shape, ref bool skipProcessing)
+        {
+            if (File.Exists(tempinhoud))
+            {
+                shape.Delete();
+                //open de presentatie met de sheets erin
+                _Presentation presentatieAdd = OpenPPS(tempinhoud);
+
+                if (currentSlide <= presentatieAdd.Slides.Count)
+                {
+                    Slide slideAdd = presentatieAdd.Slides[currentSlide];
+
+                    //voor elk shape in de slide (we zoeken naar de tekst of andere dingen die vervangen moet worden in de geopende sheet)
+                    foreach (Microsoft.Office.Interop.PowerPoint.Shape shapeAdd in slideAdd.Shapes)
+                    {
+                        if (shapeAdd.Type == MsoShapeType.msoPicture || shapeAdd.Type == MsoShapeType.msoLinkedPicture)
+                        {
+                            shapeAdd.Copy();
+                            slide.Shapes.Paste();
+                        }
+                    }
+                    currentSlide++;
+                }
+                if (currentSlide > presentatieAdd.Slides.Count)
+                {
+                    //leeg de variabele van wat in te voegen
+                    tempinhoud = "";
+                }
+                skipProcessing = true;
+            }
+            else
+            {
+                System.Windows.Forms.RichTextBox text = new System.Windows.Forms.RichTextBox();
+                text.Text = tempinhoud;
+                //leeg het tekstveld
+                shape.TextFrame.TextRange.Text = "";
+                //leeg de variabele liedtekst
+                tempinhoud = "";
+                //haal maximaal regelsperslide regels van het vers op en zet de rest terug in liedtekst
+                int counter = 0;
+                bool NewSlide = false;
+                bool copyBack = false;
+                foreach (String line in text.Lines)
+                {
+                    if (!string.IsNullOrWhiteSpace(line))
+                    {
+                        var liedRegel = line.Trim();
+                        //zet in de sheet
+                        if ((counter < hoofdformulier.instellingen.Regelsperslide) && (liedRegel != "#") && (!copyBack))
+                        {
+                            //update de tekst
+                            shape.TextFrame.TextRange.Text += liedRegel;
+                            if ((counter + 1) < hoofdformulier.instellingen.Regelsperslide)
+                                shape.TextFrame.TextRange.Text += "\r\n";
+                        }
+                        //zet terug in liedtekst
+                        else
+                        {
+                            NewSlide = true;
+                            counter++;
+
+                            if (liedRegel != "#" || copyBack)
+                            {
+                                tempinhoud += liedRegel;
+                                tempinhoud += "\r\n";                                
+                            }
+
+                            if (liedRegel == "#")
+                            {
+                                copyBack = true;
+                            }
+                        }                        
+                    }
+                }
+                if (NewSlide)
+                    shape.TextFrame.TextRange.Text += " >>";
+            }
+        }
+
+        private static void InvullenLiturgieRegel(Uitlezen_Liturgie regel, int counterliedtekst, Microsoft.Office.Interop.PowerPoint.Shape shape)
+        {
+            shape.TextFrame.TextRange.Text = regel.mappath + " ";
+            if (0 == counterliedtekst)
+            {
+                shape.TextFrame.TextRange.Text += regel.bestandsnamen[0];
+            }
+
+            //zoek de juiste bestandsnaam op
+            for (int i = 1; i < regel.bestandsnamen.Count; i++)
+            {
+                if (i == counterliedtekst)
+                {
+                    shape.TextFrame.TextRange.Text += regel.bestandsnamen[i];
+                }
+                else if (i > counterliedtekst)
+                {
+                    shape.TextFrame.TextRange.Text += ", " + regel.bestandsnamen[i];
+                }
+            }
         }
 
         /// <summary>
@@ -474,8 +524,12 @@ namespace PowerpointGenerater
                 //voeg de dingen van de template toe
                 foreach (Microsoft.Office.Interop.PowerPoint.Shape shape in slide.Shapes)
                 {
-                    shape.Copy();
-                    voeginslide.Shapes.Paste();
+                    try
+                    {
+                        shape.Copy();
+                        voeginslide.Shapes.Paste();
+                    }
+                    catch (Exception) { }
                 }
 
                 slideteller++;
