@@ -168,6 +168,7 @@
     <Compile Include="Instellingenform.Designer.cs">
       <DependentUpon>Instellingenform.cs</DependentUpon>
     </Compile>
+    <Compile Include="StandaardTeksten.cs" />
     <Compile Include="Uitlezen_Liturgie.cs" />
   </ItemGroup>
   <ItemGroup>
