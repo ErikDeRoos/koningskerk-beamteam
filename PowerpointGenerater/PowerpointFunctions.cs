@@ -15,7 +15,7 @@ namespace PowerpointGenerater {
     private Form1 _hoofdformulier;
     private int _slideteller = 1;
 
-    private const String NieuwregelAanduiding = "#";
+    private const String NieuweSlideAanduiding = "#";
 
     private IEnumerable<ILiturgieZoekresultaat> _liturgie = new List<ILiturgieZoekresultaat>();
     private string _templateLiederen;
@@ -189,11 +189,11 @@ namespace PowerpointGenerater {
             }
             //als de template de tekst bevat "Volgende" moet daar de te lezen schriftgedeeltes komen
             if (shape.TextFrame.TextRange.Text.Equals("<Lezen>")) {
-              shape.TextFrame.TextRange.Text = "Schriftlezing:\n";
+              shape.TextFrame.TextRange.Text = "Schriftlezing: ";
               shape.TextFrame.TextRange.Text += _lezen;
             }
             if (shape.TextFrame.TextRange.Text.Equals("<Tekst>")) {
-              shape.TextFrame.TextRange.Text = "Tekst:\n";
+              shape.TextFrame.TextRange.Text = "Tekst: ";
               shape.TextFrame.TextRange.Text += _tekst;
             }
             if (shape.TextFrame.TextRange.Text.Equals("<Tekst_Onder>")) {
@@ -202,7 +202,7 @@ namespace PowerpointGenerater {
           }
           if (shape.Type == MsoShapeType.msoTable) {
             if (shape.Table.Rows[1].Cells[1].Shape.TextFrame.TextRange.Text.Equals("<Liturgie>"))
-              VulLiturgieTabel(shape.Table, _liturgie, _lezen, _tekst);
+              VulLiturgieTabel(shape.Table, _liturgie, _lezen, _tekst, _instellingen.StandaardTekst.Liturgie);
           }
         }
       }
@@ -212,7 +212,7 @@ namespace PowerpointGenerater {
       presentatie.Close();
     }
 
-    private static void VulLiturgieTabel(Table inTabel, IEnumerable<ILiturgieZoekresultaat> liturgie, String lezen, String tekst) {
+    private static void VulLiturgieTabel(Table inTabel, IEnumerable<ILiturgieZoekresultaat> liturgie, String lezen, String tekst, String instellingLiturgie) {
       // Te tonen liturgie in lijst plaatsen zodat we de plek per index weten
       int liturgieIndex = 0;
       var teTonenLiturgie = liturgie.Where(l => l.Type != LiturgieType.EnkelZonderDeel).ToList();
@@ -273,7 +273,7 @@ namespace PowerpointGenerater {
           }
         }
         else
-          inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = "Liturgie";
+          inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = instellingLiturgie;
       }
     }
 
@@ -293,40 +293,66 @@ namespace PowerpointGenerater {
     }
 
     private String InvullenLiedTekst(String tempinhoud, Slide slide, Microsoft.Office.Interop.PowerPoint.Shape shape) {
-      // gebruik een textBox voor het auto-line systeem
-      var textBox = new System.Windows.Forms.RichTextBox();
-      textBox.Text = tempinhoud;
+      var regels = tempinhoud.Split(new[] { "\r\n" }, StringSplitOptions.None);
       
-      // haal maximaal regelsperslide regels van het vers op en zet de rest terug in liedtekst
-      var insertLines = new List<String>();
-      int invoegIndex = 0;
-      foreach (var line in textBox.Lines) {
-        if (String.IsNullOrWhiteSpace(line) && !insertLines.Any()) {  // Eerste lege regels overslaan
-          invoegIndex++;
-          continue;
-        }
-        var liedRegel = (line ?? "").Trim();
-        if (liedRegel == NieuwregelAanduiding || insertLines.Count >= _hoofdformulier.instellingen.Regelsperslide)
-          break;
-        insertLines.Add(liedRegel);
-        invoegIndex++;
+      // We moeten goed opletten bij het invullen van een liedtekst op een slide:
+      // -Het mogen niet te veel regels zijn (instellingen beperken dat)
+      // -We willen niet beginregels verspillen aan witruimte
+      // -Tussenwitregels willen we wel respecteren
+      // -Als we afbreken in een aaneengesloten stuk tekst moeten we kijken of we toch niet
+      //  naar een voorgaande witruimte kunnen afbreken
+      
+      // kijk waar we gaan beginnen. Sla begin witregels over
+      var beginIndex = regels.Select((r, i) => new { Regel = r, Index = i })
+        .Where(r => !SkipRegel(r.Regel))
+        .Select(r => (int?)r.Index)  // nullable int zodat als we niets vinden we dat weten
+        .FirstOrDefault();
+      if (!beginIndex.HasValue)
+        return null;  // er is niets over
+
+      // kijk waar we eindigen als we instellinge-aantal tellen vanaf ons startpunt
+      var eindIndex = regels.Select((r, i) => new { Regel = r, Index = i })
+        .Where(r => r.Index >= beginIndex && (r.Index - beginIndex) < _hoofdformulier.instellingen.Regelsperslide && r.Regel != NieuweSlideAanduiding)
+        .Select(r => r.Index)  // eindindex is er altijd als er een begin is
+        .LastOrDefault();
+
+      var optimaliseerEindIndex = eindIndex;
+      // Kijk of we niet beter op een eerdere witregel kunnen stoppen
+      if (!SkipRegel(regels[optimaliseerEindIndex]) && regels.Length != optimaliseerEindIndex + 1) {
+        var tryOptimaliseerEindIndex = regels.Select((r, i) => new { Regel = r, Index = i })
+          .Skip(beginIndex.Value).Take(optimaliseerEindIndex + 1 - beginIndex.Value)
+          .OrderByDescending(r => r.Index)
+          .Where(r => SkipRegel(r.Regel))
+          .Select(r => (int?)r.Index)
+          .FirstOrDefault();
+        if (tryOptimaliseerEindIndex.HasValue && tryOptimaliseerEindIndex.Value > beginIndex.Value)
+          optimaliseerEindIndex = tryOptimaliseerEindIndex.Value;
       }
+
+      // haal regels van het vers op
+      var insertLines = regels
+        .Skip(beginIndex.Value).Take(optimaliseerEindIndex + 1 - beginIndex.Value)
+        .Select(r => (r ?? "").Trim()).ToList();
 
       // plaats de in te voegen regels in het tekstveld (geen enter aan het einde)
       shape.TextFrame.TextRange.Text = String.Join("", insertLines.Select((l, i) => l + (i + 1 == insertLines.Count ? "" : "\r\n")));
 
-      // zoek uit wat er over is
-      var overLines = new List<String>();
-      if (invoegIndex < textBox.Lines.Length) {
-        var overVanafIndex = invoegIndex;
-        if (textBox.Lines[overVanafIndex] == NieuwregelAanduiding)
-          overVanafIndex++;
-        overLines = textBox.Lines.Skip(overVanafIndex).ToList();
-      }
+      var overStart = optimaliseerEindIndex + 1;
+      if (overStart >= regels.Length)
+        return null;
+      if (regels[overStart] == NieuweSlideAanduiding)
+        overStart++;
+      var overLines = regels.Skip(overStart).ToList();
 
-      if (overLines.Any())
-        shape.TextFrame.TextRange.Text += "\n\r >>";
+      // afbreek teken tonen alleen als een vers doormidden gebroken is
+      if (!SkipRegel(insertLines.Last()) && overLines.Any() && !SkipRegel(overLines.First()))
+        shape.TextFrame.TextRange.Text += "\r\n >>";
+
+      // Geef de resterende regels terug
       return String.Join("", overLines.Select((l, i) => l + (i + 1 == overLines.Count ? "" : "\r\n")));
+    }
+    private static Boolean SkipRegel(String regel) {
+      return String.IsNullOrWhiteSpace(regel) || regel == NieuweSlideAanduiding;
     }
 
     private static void InvullenLiturgieRegel(ILiturgieZoekresultaat regel, Microsoft.Office.Interop.PowerPoint.Shape shape) {
