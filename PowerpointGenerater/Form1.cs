@@ -98,24 +98,6 @@ namespace PowerpointGenerater {
       else if (e.Control && e.KeyCode == Keys.E) {
         Close();
       }
-      else if (e.Control && e.KeyCode == Keys.Z) {
-        richTextBox1.Undo();
-      }
-      else if (e.Control && e.KeyCode == Keys.Y) {
-        richTextBox1.Redo();
-      }
-      else if (e.Control && e.KeyCode == Keys.X) {
-        richTextBox1.Cut();
-      }
-      else if (e.Control && e.KeyCode == Keys.C) {
-        richTextBox1.Copy();
-      }
-      else if (e.Control && e.KeyCode == Keys.V) {
-        richTextBox1.Paste();
-      }
-      else if (e.Control && e.KeyCode == Keys.A) {
-        richTextBox1.SelectAll();
-      }
     }
     void toolStripMenuItem4_Click(object sender, EventArgs e) {
       richTextBox1.Redo();
