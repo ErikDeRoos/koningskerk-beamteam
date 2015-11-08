@@ -225,7 +225,7 @@ namespace PowerpointGenerater {
           var liturgiegevonden = liturgieIndex < teTonenLiturgie.Count;
           if (liturgiegevonden) {
             var toonItem = teTonenLiturgie[liturgieIndex];
-            inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = toonItem.EchteBenaming;
+            inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = toonItem.VirtueleBenaming;
             if (toonItem.Type != LiturgieType.EnkelZonderDeel) {
               inTabel.Rows[index].Cells[2].Shape.TextFrame.TextRange.Text = toonItem.DeelBenaming;
               if (toonItem.Type == LiturgieType.MeerMetDeel)
@@ -361,12 +361,12 @@ namespace PowerpointGenerater {
 
     private static String LiedNaam(ILiturgieZoekresultaat regel, ILiturgieZoekresultaatDeel vanafDeelHint = null) {
       if (regel.Type == LiturgieType.EnkelZonderDeel)
-        return regel.EchteBenaming;
+        return regel.VirtueleBenaming;
       else if (regel.Type == LiturgieType.EnkelMetDeel)
-        return String.Format("{0} {1}", regel.EchteBenaming, regel.DeelBenaming);
+        return String.Format("{0} {1}", regel.VirtueleBenaming, regel.DeelBenaming);
       var vanafDeel = vanafDeelHint ?? regel.Resultaten.FirstOrDefault();  // Bij een deel hint tonen we alleen nog de huidige en komende versen
       var gebruikDeelRegels = regel.Resultaten.SkipWhile(r => r != vanafDeel);
-      return String.Format("{0} {1}: {2}", regel.EchteBenaming, regel.DeelBenaming, LiedVerzen(gebruikDeelRegels));
+      return String.Format("{0} {1}: {2}", regel.VirtueleBenaming, regel.DeelBenaming, LiedVerzen(gebruikDeelRegels));
     }
     private static String LiedVerzen(IEnumerable<ILiturgieZoekresultaatDeel> vanDelen) {
       return String.Join(",", vanDelen.Select(r => " " + r.Nummer)).TrimEnd(new char[] { ',' });
