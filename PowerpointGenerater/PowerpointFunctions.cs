@@ -135,7 +135,7 @@ namespace PowerpointGenerater {
             if (shape.Type == MsoShapeType.msoTextBox) {
               //als de template de tekst bevat "Liturgieregel" moet daar de liturgieregel komen
               if (shape.TextFrame.TextRange.Text.Equals("<Liturgieregel>"))
-                InvullenLiturgieRegel(regel, shape);
+                InvullenLiturgieRegel(regel, inhoud, shape);
               //als de template de tekst bevat "Inhoud" moet daar de inhoud van het vers komen
               if (shape.TextFrame.TextRange.Text.Equals("<Inhoud>")) {
                 // plaats zo veel mogelijk tekst op de slide totdat het niet meer past, krijg de restjes terug
@@ -229,7 +229,7 @@ namespace PowerpointGenerater {
             if (toonItem.Type != LiturgieType.EnkelZonderDeel) {
               inTabel.Rows[index].Cells[2].Shape.TextFrame.TextRange.Text = toonItem.DeelBenaming;
               if (toonItem.Type == LiturgieType.MeerMetDeel)
-                inTabel.Rows[index].Cells[3].Shape.TextFrame.TextRange.Text = ":" + LiedVerzen(toonItem);
+                inTabel.Rows[index].Cells[3].Shape.TextFrame.TextRange.Text = ":" + LiedVerzen(toonItem.Resultaten);
             }
             liturgieIndex++;
           }
@@ -355,19 +355,21 @@ namespace PowerpointGenerater {
       return String.IsNullOrWhiteSpace(regel) || regel == NieuweSlideAanduiding;
     }
 
-    private static void InvullenLiturgieRegel(ILiturgieZoekresultaat regel, Microsoft.Office.Interop.PowerPoint.Shape shape) {
-      shape.TextFrame.TextRange.Text = LiedNaam(regel);
+    private static void InvullenLiturgieRegel(ILiturgieZoekresultaat regel, ILiturgieZoekresultaatDeel vanafDeel, Microsoft.Office.Interop.PowerPoint.Shape shape) {
+      shape.TextFrame.TextRange.Text = LiedNaam(regel, vanafDeelHint: vanafDeel);
     }
 
-    private static String LiedNaam(ILiturgieZoekresultaat regel) {
+    private static String LiedNaam(ILiturgieZoekresultaat regel, ILiturgieZoekresultaatDeel vanafDeelHint = null) {
       if (regel.Type == LiturgieType.EnkelZonderDeel)
         return regel.EchteBenaming;
       else if (regel.Type == LiturgieType.EnkelMetDeel)
         return String.Format("{0} {1}", regel.EchteBenaming, regel.DeelBenaming);
-      return String.Format("{0} {1}: {2}", regel.EchteBenaming, regel.DeelBenaming, LiedVerzen(regel));
+      var vanafDeel = vanafDeelHint ?? regel.Resultaten.FirstOrDefault();  // Bij een deel hint tonen we alleen nog de huidige en komende versen
+      var gebruikDeelRegels = regel.Resultaten.SkipWhile(r => r != vanafDeel);
+      return String.Format("{0} {1}: {2}", regel.EchteBenaming, regel.DeelBenaming, LiedVerzen(gebruikDeelRegels));
     }
-    private static String LiedVerzen(ILiturgieZoekresultaat regel) {
-      return String.Join(",", regel.Resultaten.Select(r => " " + r.Nummer)).TrimEnd(new char[] { ',' });
+    private static String LiedVerzen(IEnumerable<ILiturgieZoekresultaatDeel> vanDelen) {
+      return String.Join(",", vanDelen.Select(r => " " + r.Nummer)).TrimEnd(new char[] { ',' });
     }
 
     /// <summary>
