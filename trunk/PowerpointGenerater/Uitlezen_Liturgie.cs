@@ -39,6 +39,7 @@ namespace PowerpointGenerater {
       // Verzen als '1,2' in 'psalm 110:1,2'
       regel.Verzen = (voorBenamingStukken.Length > 1 ? voorBenamingStukken[1] : "")
         .Split(_versScheidingstekens, StringSplitOptions.RemoveEmptyEntries)
+        .Select(v => v.Trim())
         .ToList();
       return regel;
     }
@@ -122,7 +123,7 @@ namespace PowerpointGenerater {
         if (!String.IsNullOrEmpty(invoer.Deel))
           basisPad += invoer.Deel + Path.DirectorySeparatorChar; 
         //deel de verschillende bestandsnamen op(er zijn verschillende verzen mogelijk uit één map bijvoorbeeld)
-        regel.ZoekactieHints = invoer.Verzen.Select(v => new OnderdeelHint() { Nummer = v, ZoekPad = basisPad + v.Trim() }).ToList();
+        regel.ZoekactieHints = invoer.Verzen.Select(v => new OnderdeelHint() { Nummer = v, ZoekPad = basisPad + v }).ToList();
       }
       else if (regel.Type == LiturgieType.EnkelMetDeel) {
         // Benaming deel is het gezochte item, rest is pad
