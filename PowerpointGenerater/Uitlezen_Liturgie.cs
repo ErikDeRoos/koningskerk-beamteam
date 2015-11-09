@@ -89,18 +89,7 @@ namespace PowerpointGenerater {
       // Bepaal basis pad. Deze is relatief: bewust nog geen database pad ervoor geplaatst. Dat gebeurd pas bij inlezen.
       var basisPad = "" + Path.DirectorySeparatorChar; 
 
-      // Hardcoded afkortingen oplossen
-      switch (invoer.Benaming.ToLower()) {
-        case "ps":
-          regel.EchteBenaming = "psalm";
-          break;
-        case "gz":
-          regel.EchteBenaming = "gezang";
-          break;
-        case "lied":
-          regel.EchteBenaming = "lied";  // Lowercase
-          break;
-      }
+      // Bepaal hoe de liturgie regel in delen is opgedeeld
       if (!String.IsNullOrWhiteSpace(regel.Ruw.Deel))
         regel.Type = LiturgieType.EnkelMetDeel;
       // Het is mogelijk een bestand in een map aan te wijzen door spaties te gebruiken. Ook dit oplossen
@@ -112,6 +101,7 @@ namespace PowerpointGenerater {
             .Where(o => o.Index != benamingOnderdelen.Length -1)
             .Select(o => o.Naam + Path.DirectorySeparatorChar));
       }
+      // liturgie regel met verzen is de uitgebreidste variant
       if (invoer.Verzen.Any())
         regel.Type = LiturgieType.MeerMetDeel;
 
@@ -134,8 +124,8 @@ namespace PowerpointGenerater {
         regel.ZoekactieHints = new[] { new OnderdeelHint() { ZoekPad = basisPad + invoer.Benaming } };
       }
 
-      // Virtuele benaming is de 'mooie' benaming die op het liturgie bord verschijnt. Maar hij
-      // wordt 'normaal' ingevoerd. Deze virtuele naam is een 'mask' en daar dan ook te vinden
+      // Virtuele benaming is de 'mooie' benaming die op het liturgie bord /volgende verschijnt. Maar
+      // hij wordt 'normaal' ingevoerd. Deze virtuele naam is een 'mask' en daar dan ook te vinden
       // TODO verplaatsen? virtuele benaming is pas relevant in liturgie bord generator
       regel.VirtueleBenaming = regel.EchteBenaming;
       // Check of er een mask op de benaming zit
