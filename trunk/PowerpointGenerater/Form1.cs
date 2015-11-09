@@ -152,10 +152,10 @@ namespace PowerpointGenerater {
       }
     }
     private void invoerenMasksToolStripMenuItem_Click(object sender, EventArgs e) {
-      MaskInvoer formulier = new MaskInvoer(instellingen.GetMasks());
+      var formulier = new MaskInvoer(instellingen.GetMasks());
       if (formulier.ShowDialog() == DialogResult.OK) {
         instellingen.ClearMasks();
-        foreach (Mapmask mask in formulier.listBox1.Items) {
+        foreach (var mask in formulier.Masks) {
           instellingen.AddMask(mask);
         }
       }
