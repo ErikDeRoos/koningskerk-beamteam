@@ -189,11 +189,11 @@ namespace PowerpointGenerater {
             }
             //als de template de tekst bevat "Volgende" moet daar de te lezen schriftgedeeltes komen
             if (shape.TextFrame.TextRange.Text.Equals("<Lezen>")) {
-              shape.TextFrame.TextRange.Text = "Schriftlezing: ";
+              shape.TextFrame.TextRange.Text = _instellingen.StandaardTekst.Lezen;
               shape.TextFrame.TextRange.Text += _lezen;
             }
             if (shape.TextFrame.TextRange.Text.Equals("<Tekst>")) {
-              shape.TextFrame.TextRange.Text = "Tekst: ";
+              shape.TextFrame.TextRange.Text = _instellingen.StandaardTekst.Tekst;
               shape.TextFrame.TextRange.Text += _tekst;
             }
             if (shape.TextFrame.TextRange.Text.Equals("<Tekst_Onder>")) {
@@ -280,12 +280,8 @@ namespace PowerpointGenerater {
     private void InvullenVolgende(ILiturgieZoekresultaat regel, ILiturgieZoekresultaatDeel deel, ILiturgieZoekresultaat volgende, Microsoft.Office.Interop.PowerPoint.Shape shape) {
       // Alleen volgende tonen als we op het laatste item zitten en als volgende er is
       var tonen = regel.Resultaten.Last() == deel && volgende != null;
-      // Kijk of er redenen zijn om t toch niet te tonen
-      if (tonen) {
-        if (volgende.EchteBenaming == "Blanco")
-          tonen = false;
-      }
-      
+      // Check of de volgende 'blanco' heet, want dan tonen we m niet
+      tonen = tonen && String.Compare(volgende.VirtueleBenaming, "Blanco", true) != 0;
       if (tonen)
         shape.TextFrame.TextRange.Text = String.Format("{0} {1}", _instellingen.StandaardTekst.Volgende, LiedNaam(volgende));
       else
