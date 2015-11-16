@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace PowerpointGenerater {
+namespace PowerpointGenerater.Database {
   /// <summary>
   /// Maak een ruwe lijst van een tekstuele liturgie
   /// </summary>
