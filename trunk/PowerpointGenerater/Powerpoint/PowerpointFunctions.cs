@@ -5,20 +5,19 @@ using System.Windows.Forms;
 using System.Linq;
 using Microsoft.Office.Interop.PowerPoint;
 using Microsoft.Office.Core;
+using PowerpointGenerater.Database;
 
-namespace PowerpointGenerater {
-  class PowerpointFunctions {
+namespace PowerpointGenerater.Powerpoint {
+  class PowerpointFunctions : IDisposable {
     private Microsoft.Office.Interop.PowerPoint.Application _objApp;
-    private Presentations _objPresSet;
     private _Presentation _objPres;
     private CustomLayout _layout;
-    private Form1 _hoofdformulier;
     private int _slideteller = 1;
+    private bool _stop = false;
 
     private const String NieuweSlideAanduiding = "#";
 
     private IEnumerable<ILiturgieZoekresultaat> _liturgie = new List<ILiturgieZoekresultaat>();
-    private string _templateLiederen;
     private string _voorganger;
     private string _collecte1;
     private string _collecte2;
@@ -26,24 +25,14 @@ namespace PowerpointGenerater {
     private string _tekst;
     private Instellingen _instellingen;
 
-    public PowerpointFunctions(Form1 hoofdformulier) {
-      _instellingen = hoofdformulier.instellingen;
-      if (File.Exists(hoofdformulier.instellingen.FullTemplatetheme)) {
-        //Creeer een nieuwe lege presentatie volgens een bepaald thema
-        _objApp = new Microsoft.Office.Interop.PowerPoint.Application();
-        _objApp.Visible = MsoTriState.msoTrue;
-        _objPresSet = _objApp.Presentations;
-        _objPres = _objPresSet.Open(hoofdformulier.instellingen.FullTemplatetheme,
-            MsoTriState.msoFalse, MsoTriState.msoTrue, MsoTriState.msoTrue);
-        //sla het thema op, zodat dat in iedere nieuwe slide kan worden meegenomen
-        _layout = _objPres.SlideMaster.CustomLayouts[PpSlideLayout.ppLayoutTitle];
-        //minimaliseer powerpoint
-        _objApp.WindowState = PpWindowState.ppWindowMinimized;
+    public delegate void Voortgang(int lijstStart, int lijstEind, int bijItem);
+    private Voortgang _setVoortgang;
+    public delegate void StatusWijziging(Status nieuweStatus);
+    private StatusWijziging _setStatus;
 
-        this._hoofdformulier = hoofdformulier;
-      }
-      else
-        MessageBox.Show("het pad naar de achtergrond powerpoint presentatie kan niet worden gevonden.\n\n stel de achtergrond opnieuw in bij de templates", "Stel template opnieuw in", MessageBoxButtons.OK);
+    public PowerpointFunctions(Voortgang voortgangDelegate, StatusWijziging statusDelegate) {
+      _setVoortgang = voortgangDelegate;
+      _setStatus = statusDelegate;
     }
 
     /// <summary>
@@ -51,7 +40,7 @@ namespace PowerpointGenerater {
     /// </summary>
     /// <param name="path">het pad waar de powerpointpresentatie kan worden gevonden</param>
     /// <returns>de powerpoint presentatie</returns>
-    public _Presentation OpenPPS(String path) {
+    private _Presentation OpenPPS(String path) {
       //controleer voor het openen van de presentatie op het meegegeven path of de presentatie bestaat
       if (File.Exists(path)) {
         return _objApp.Presentations.Open(path,
@@ -60,21 +49,24 @@ namespace PowerpointGenerater {
       return null;
     }
 
-    public void ClosePPS() {
-      if (_objApp != null && _objPres != null) {
-        _objPres.Close();
-        _objApp.Quit();
-      }
-    }
-
-    public void InputGeneratePresentation(IEnumerable<ILiturgieZoekresultaat> liturgie, string templateLiederen, string Voorganger, string Collecte1, string Collecte2, string Lezen, string Tekst) {
+    public void PreparePresentation(IEnumerable<ILiturgieZoekresultaat> liturgie, string Voorganger, string Collecte1, string Collecte2, string Lezen, string Tekst, Instellingen gebruikInstellingen) {
       this._liturgie = liturgie;
-      this._templateLiederen = templateLiederen;
       this._voorganger = Voorganger;
       this._collecte1 = Collecte1;
       this._collecte2 = Collecte2;
       this._lezen = Lezen;
       this._tekst = Tekst;
+      this._instellingen = gebruikInstellingen;
+      //Creeer een nieuwe lege presentatie volgens een bepaald thema
+      _objApp = new Microsoft.Office.Interop.PowerPoint.Application();
+      _objApp.Visible = MsoTriState.msoTrue;
+      var presSet = _objApp.Presentations;
+      _objPres = presSet.Open(_instellingen.FullTemplatetheme,
+          MsoTriState.msoFalse, MsoTriState.msoTrue, MsoTriState.msoTrue);
+      //sla het thema op, zodat dat in iedere nieuwe slide kan worden meegenomen
+      _layout = _objPres.SlideMaster.CustomLayouts[PpSlideLayout.ppLayoutTitle];
+      //minimaliseer powerpoint
+      _objApp.WindowState = PpWindowState.ppWindowMinimized;
     }
 
     /// <summary>
@@ -82,22 +74,15 @@ namespace PowerpointGenerater {
     /// </summary>
     /// <param name="Liturgie">Liturgie die de indeling en inhoud van de gegenereerde presentatie bepaald</param>
     public void GeneratePresentation() {
-      if (_objApp == null)
-        return;
-
-      if (!File.Exists(_templateLiederen)) {
-        MessageBox.Show("het pad naar de liederen template powerpoint presentatie kan niet worden gevonden\n stel de achtergrond opnieuw in bij de templates", "Template niet gevonden", MessageBoxButtons.OK);
-        ClosePPS();
-        return;
-      }
-      
+      _setStatus.Invoke(Status.Gestart);
       try {
         // Lijst maken zodat volgorde bekend is
         var lijst = _liturgie.ToList();
 
         //voor elke regel in de liturgie moeten sheets worden gemaakt
         foreach (var regel in lijst) {
-          var volgendeIndex = lijst.IndexOf(regel) + 1;
+          var huidigeItemIndex = lijst.IndexOf(regel);
+          var volgendeIndex = huidigeItemIndex + 1;
           var volgende = volgendeIndex < lijst.Count ? lijst[volgendeIndex] : null;
 
           foreach (var inhoud in regel.Resultaten) {
@@ -105,20 +90,28 @@ namespace PowerpointGenerater {
               InvullenTekst(regel, inhoud, volgende);
             else
               InvullenSlide(regel, inhoud, volgende);
+            if (_stop)
+              break;
           }
-          _hoofdformulier.progressBar1.PerformStep();
+          _setVoortgang.Invoke(0, _liturgie.Count(), volgendeIndex);
+          if (_stop)
+            break;
         }
 
         //maximaliseer de presentatie ter controle voor de gebruiker
         _objApp.WindowState = PpWindowState.ppWindowMaximized;
-
-        _hoofdformulier.autoEvent.Set();
+        _setStatus.Invoke(Status.StopGoed);
       }
       catch (Exception ex) {
         using (var sw = new StreamWriter("ppgenerator.log", false)) {
           sw.WriteLine(ex.ToString());
         }
+        _setStatus.Invoke(Status.StopFout);
       }
+    }
+
+    public void Stop() {
+      _stop = true;
     }
 
     private void InvullenTekst(ILiturgieZoekresultaat regel, ILiturgieZoekresultaatDeel inhoud, ILiturgieZoekresultaat volgende) {
@@ -126,7 +119,7 @@ namespace PowerpointGenerater {
       //zolang er nog iets is in te voegen in sheets
       while (!String.IsNullOrWhiteSpace(tekstOmTeRenderen)) {
         //regel de template om het lied op af te beelden
-        var presentatie = OpenPPS(_templateLiederen);
+        var presentatie = OpenPPS(_instellingen.FullTemplateliederen);
         //voor elke slide in de presentatie(in principe moet dit er 1 zijn)
         foreach (Slide slide in presentatie.Slides) {
           //voor elk object op de slides (we zoeken naar de tekst die vervangen moet worden in de template)
@@ -308,7 +301,7 @@ namespace PowerpointGenerater {
 
       // kijk waar we eindigen als we instellinge-aantal tellen vanaf ons startpunt
       var eindIndex = regels.Select((r, i) => new { Regel = r, Index = i })
-        .Where(r => r.Index >= beginIndex && (r.Index - beginIndex) < _hoofdformulier.instellingen.Regelsperslide && r.Regel != NieuweSlideAanduiding)
+        .Where(r => r.Index >= beginIndex && (r.Index - beginIndex) < _instellingen.Regelsperslide && r.Regel != NieuweSlideAanduiding)
         .Select(r => r.Index)  // eindindex is er altijd als er een begin is
         .LastOrDefault();
 
@@ -396,6 +389,22 @@ namespace PowerpointGenerater {
 
         _slideteller++;
       }
+    }
+
+    public void Dispose() {
+      _layout = null;
+      //if (_objPres != null)   // Sluit dit, dan wordt de presentatie afgesloten
+      //  _objPres.Close();
+      _objPres = null;
+      if (_objApp != null)
+        _objApp.Quit();
+      _objApp = null;
+    }
+
+    public enum Status {
+      Gestart,
+      StopFout,
+      StopGoed,
     }
   }
 }

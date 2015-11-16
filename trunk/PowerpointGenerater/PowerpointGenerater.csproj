@@ -119,6 +119,7 @@
     <Compile Include="MaskInvoer.Designer.cs">
       <DependentUpon>MaskInvoer.cs</DependentUpon>
     </Compile>
+    <Compile Include="Powerpoint\PowerpointWrapper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Contactform.resx">
@@ -161,7 +162,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="PowerpointFunctions.cs" />
+    <Compile Include="Powerpoint\PowerpointFunctions.cs" />
     <Compile Include="Instellingenform.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -169,7 +170,7 @@
       <DependentUpon>Instellingenform.cs</DependentUpon>
     </Compile>
     <Compile Include="StandaardTeksten.cs" />
-    <Compile Include="Uitlezen_Liturgie.cs" />
+    <Compile Include="Database\Uitlezen_Liturgie.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
