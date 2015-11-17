@@ -65,10 +65,19 @@ namespace PowerpointGenerater.Powerpoint {
           return new StatusMelding(_huidigeStatus, "Kan powerpoint niet starten", "Start het programma opnieuw op");
         _powerpoint = new PowerpointFunctions(PresentatieVoortgangCallback, PresentatieStatusWijzigingCallback);
         _powerpoint.PreparePresentation(_liturgie, _voorganger, _collecte1, _collecte2, _lezen, _tekst, _instellingen);
-        _generatorThread = new Thread(new ThreadStart(_powerpoint.GeneratePresentation));
+        _generatorThread = new Thread(new ThreadStart(StartThread));
         _generatorThread.Start();
         _huidigeStatus = State.Gestart;
         return new StatusMelding(_huidigeStatus);
+      }
+    }
+    private void StartThread() {
+      MessageFilter.Register();  // COM retry messages afvangen
+      try {
+        _powerpoint.GeneratePresentation();
+      }
+      finally {
+        MessageFilter.Revoke();
       }
     }
 
