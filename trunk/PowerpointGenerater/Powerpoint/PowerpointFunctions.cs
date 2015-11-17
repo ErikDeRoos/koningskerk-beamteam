@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Linq;
 using Microsoft.Office.Interop.PowerPoint;
@@ -103,9 +103,7 @@ namespace PowerpointGenerater.Powerpoint {
         _setStatus.Invoke(Status.StopGoed);
       }
       catch (Exception ex) {
-        using (var sw = new StreamWriter("ppgenerator.log", false)) {
-          sw.WriteLine(ex.ToString());
-        }
+        FoutmeldingSchrijver.Log(ex.ToString());
         _setStatus.Invoke(Status.StopFout);
       }
     }
