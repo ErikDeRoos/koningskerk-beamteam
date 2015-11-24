@@ -9,8 +9,8 @@ using PowerpointGenerater.Database;
 
 namespace PowerpointGenerater.Powerpoint {
   class PowerpointFunctions : IDisposable {
-    private Microsoft.Office.Interop.PowerPoint.Application _objApp;
-    private _Presentation _objPres;
+    private Microsoft.Office.Interop.PowerPoint.Application _applicatie;
+    private _Presentation _presentatie;
     private CustomLayout _layout;
     private int _slideteller = 1;
     private bool _stop = false;
@@ -24,10 +24,11 @@ namespace PowerpointGenerater.Powerpoint {
     private string _lezen;
     private string _tekst;
     private Instellingen _instellingen;
+    private String _opslaanAls;
 
     public delegate void Voortgang(int lijstStart, int lijstEind, int bijItem);
     private Voortgang _setVoortgang;
-    public delegate void StatusWijziging(Status nieuweStatus);
+    public delegate void StatusWijziging(Status nieuweStatus, String foutmelding = null);
     private StatusWijziging _setStatus;
 
     public PowerpointFunctions(Voortgang voortgangDelegate, StatusWijziging statusDelegate) {
@@ -35,21 +36,7 @@ namespace PowerpointGenerater.Powerpoint {
       _setStatus = statusDelegate;
     }
 
-    /// <summary>
-    /// Open een presentatie op het meegegeven pad
-    /// </summary>
-    /// <param name="path">het pad waar de powerpointpresentatie kan worden gevonden</param>
-    /// <returns>de powerpoint presentatie</returns>
-    private _Presentation OpenPPS(String path) {
-      //controleer voor het openen van de presentatie op het meegegeven path of de presentatie bestaat
-      if (File.Exists(path)) {
-        return _objApp.Presentations.Open(path,
-            MsoTriState.msoFalse, MsoTriState.msoTrue, MsoTriState.msoFalse);
-      }
-      return null;
-    }
-
-    public void PreparePresentation(IEnumerable<ILiturgieZoekresultaat> liturgie, string Voorganger, string Collecte1, string Collecte2, string Lezen, string Tekst, Instellingen gebruikInstellingen) {
+    public void PreparePresentation(IEnumerable<ILiturgieZoekresultaat> liturgie, string Voorganger, string Collecte1, string Collecte2, string Lezen, string Tekst, Instellingen gebruikInstellingen, String opslaanAls) {
       this._liturgie = liturgie;
       this._voorganger = Voorganger;
       this._collecte1 = Collecte1;
@@ -57,16 +44,9 @@ namespace PowerpointGenerater.Powerpoint {
       this._lezen = Lezen;
       this._tekst = Tekst;
       this._instellingen = gebruikInstellingen;
-      //Creeer een nieuwe lege presentatie volgens een bepaald thema
-      _objApp = new Microsoft.Office.Interop.PowerPoint.Application();
-      _objApp.Visible = MsoTriState.msoTrue;
-      var presSet = _objApp.Presentations;
-      _objPres = presSet.Open(_instellingen.FullTemplatetheme,
-          MsoTriState.msoFalse, MsoTriState.msoTrue, MsoTriState.msoTrue);
-      //sla het thema op, zodat dat in iedere nieuwe slide kan worden meegenomen
-      _layout = _objPres.SlideMaster.CustomLayouts[PpSlideLayout.ppLayoutTitle];
-      //minimaliseer powerpoint
-      _objApp.WindowState = PpWindowState.ppWindowMinimized;
+      this._opslaanAls = opslaanAls;
+      this._slideteller = 1;
+      // Hier GEEN COM calls want dit kan nog in n andere thread zijn
     }
 
     /// <summary>
@@ -75,10 +55,21 @@ namespace PowerpointGenerater.Powerpoint {
     /// <param name="Liturgie">Liturgie die de indeling en inhoud van de gegenereerde presentatie bepaald</param>
     public void GeneratePresentation() {
       _setStatus.Invoke(Status.Gestart);
+      
+      //Creeer een nieuwe lege presentatie volgens een bepaald thema
+      _applicatie = new Microsoft.Office.Interop.PowerPoint.Application();
+      _applicatie.Visible = MsoTriState.msoTrue;
+      var presSet = _applicatie.Presentations;
+      _presentatie = presSet.Open(_instellingen.FullTemplatetheme, MsoTriState.msoFalse, MsoTriState.msoTrue, MsoTriState.msoTrue);
+      //sla het thema op, zodat dat in iedere nieuwe slide kan worden meegenomen
+      _layout = _presentatie.SlideMaster.CustomLayouts[PpSlideLayout.ppLayoutTitle];
+      //minimaliseer powerpoint
+      _applicatie.WindowState = PpWindowState.ppWindowMinimized;
+
       try {
         // Lijst maken zodat volgorde bekend is
         var lijst = _liturgie.ToList();
-
+        
         //voor elke regel in de liturgie moeten sheets worden gemaakt
         foreach (var regel in lijst) {
           var huidigeItemIndex = lijst.IndexOf(regel);
@@ -98,14 +89,15 @@ namespace PowerpointGenerater.Powerpoint {
             break;
         }
 
-        //maximaliseer de presentatie ter controle voor de gebruiker
-        _objApp.WindowState = PpWindowState.ppWindowMaximized;
+        //sla de presentatie op
+        _presentatie.SaveAs(_opslaanAls);
         _setStatus.Invoke(Status.StopGoed);
       }
       catch (Exception ex) {
         FoutmeldingSchrijver.Log(ex.ToString());
-        _setStatus.Invoke(Status.StopFout);
+        _setStatus.Invoke(Status.StopFout, foutmelding: ex.ToString());
       }
+      SluitAlles();
     }
 
     public void Stop() {
@@ -124,17 +116,20 @@ namespace PowerpointGenerater.Powerpoint {
           foreach (Microsoft.Office.Interop.PowerPoint.Shape shape in slide.Shapes) {
             //als de shape gelijk is aan een textbox bevat het dus tekst
             if (shape.Type == MsoShapeType.msoTextBox) {
+              var text = shape.TextFrame.TextRange.Text;
               //als de template de tekst bevat "Liturgieregel" moet daar de liturgieregel komen
-              if (shape.TextFrame.TextRange.Text.Equals("<Liturgieregel>"))
-                InvullenLiturgieRegel(regel, inhoud, shape);
+              if (text.Equals("<Liturgieregel>"))
+                shape.TextFrame.TextRange.Text = InvullenLiturgieRegel(regel, inhoud);
               //als de template de tekst bevat "Inhoud" moet daar de inhoud van het vers komen
-              if (shape.TextFrame.TextRange.Text.Equals("<Inhoud>")) {
+              else if (text.Equals("<Inhoud>")) {
                 // plaats zo veel mogelijk tekst op de slide totdat het niet meer past, krijg de restjes terug
-                tekstOmTeRenderen = InvullenLiedTekst(tekstOmTeRenderen, slide, shape);
+                var uitzoeken = InvullenLiedTekst(tekstOmTeRenderen);
+                shape.TextFrame.TextRange.Text = uitzoeken.Invullen;
+                tekstOmTeRenderen = uitzoeken.Over;
               }
               //als de template de tekst bevat "Volgende" moet daar de Liturgieregel van de volgende sheet komen
-              if (shape.TextFrame.TextRange.Text.Equals("<Volgende>"))
-                InvullenVolgende(regel, inhoud, volgende, shape);
+              else if (text.Equals("<Volgende>"))
+                shape.TextFrame.TextRange.Text = InvullenVolgende(regel, inhoud, volgende);
             }
           }
         }
@@ -154,44 +149,31 @@ namespace PowerpointGenerater.Powerpoint {
         foreach (Microsoft.Office.Interop.PowerPoint.Shape shape in slide.Shapes) {
           //als de shape gelijk is aan een textbox bevat het dus tekst
           if (shape.Type == MsoShapeType.msoTextBox) {
+            var text = shape.TextFrame.TextRange.Text;
             //als de template de tekst bevat "Voorganger: " moet daar de Voorgangersnaam achter komen
-            if (shape.TextFrame.TextRange.Text.Equals("<Voorganger:>")) {
-              shape.TextFrame.TextRange.Text = _instellingen.StandaardTekst.Voorganger;
-              shape.TextFrame.TextRange.Text += _voorganger;
-            }
+            if (text.Equals("<Voorganger:>"))
+              shape.TextFrame.TextRange.Text = _instellingen.StandaardTekst.Voorganger + _voorganger;
             //als de template de tekst bevat "Collecte: " moet daar de collectedoel achter komen
-            if (shape.TextFrame.TextRange.Text.Equals("<Collecte:>")) {
-              shape.TextFrame.TextRange.Text = _instellingen.StandaardTekst.Collecte;
-              shape.TextFrame.TextRange.Text += _collecte1;
-            }
+            else if (text.Equals("<Collecte:>"))
+              shape.TextFrame.TextRange.Text = _instellingen.StandaardTekst.Collecte + _collecte1;
             //als de template de tekst bevat "1e Collecte: " moet daar de 1e collecte achter komen
-            if (shape.TextFrame.TextRange.Text.Equals("<1e Collecte:>")) {
-              shape.TextFrame.TextRange.Text = _instellingen.StandaardTekst.Collecte1;
-              shape.TextFrame.TextRange.Text += _collecte1;
-            }
+            else if (text.Equals("<1e Collecte:>"))
+              shape.TextFrame.TextRange.Text = _instellingen.StandaardTekst.Collecte1 + _collecte1;
             //als de template de tekst bevat "2e Collecte: " moet daar de 2e collecte achter komen
-            if (shape.TextFrame.TextRange.Text.Equals("<2e Collecte:>")) {
-              shape.TextFrame.TextRange.Text = _instellingen.StandaardTekst.Collecte2;
-              shape.TextFrame.TextRange.Text += _collecte2;
-            }
+            else if (text.Equals("<2e Collecte:>"))
+              shape.TextFrame.TextRange.Text = _instellingen.StandaardTekst.Collecte2 + _collecte2;
             //als de template de tekst bevat "Volgende" moet daar de Liturgieregel van de volgende sheet komen
-            if (shape.TextFrame.TextRange.Text.Equals("<Volgende>")) {
-              InvullenVolgende(regel, inhoud, volgende, shape);
-            }
+            else if (text.Equals("<Volgende>"))
+              shape.TextFrame.TextRange.Text = InvullenVolgende(regel, inhoud, volgende);
             //als de template de tekst bevat "Volgende" moet daar de te lezen schriftgedeeltes komen
-            if (shape.TextFrame.TextRange.Text.Equals("<Lezen>")) {
-              shape.TextFrame.TextRange.Text = _instellingen.StandaardTekst.Lezen;
-              shape.TextFrame.TextRange.Text += _lezen;
-            }
-            if (shape.TextFrame.TextRange.Text.Equals("<Tekst>")) {
-              shape.TextFrame.TextRange.Text = _instellingen.StandaardTekst.Tekst;
-              shape.TextFrame.TextRange.Text += _tekst;
-            }
-            if (shape.TextFrame.TextRange.Text.Equals("<Tekst_Onder>")) {
+            else if (text.Equals("<Lezen>"))
+              shape.TextFrame.TextRange.Text = _instellingen.StandaardTekst.Lezen + _lezen;
+            else if (text.Equals("<Tekst>"))
+              shape.TextFrame.TextRange.Text = _instellingen.StandaardTekst.Tekst + _tekst;
+            else if (text.Equals("<Tekst_Onder>"))
               shape.TextFrame.TextRange.Text = _tekst;
-            }
           }
-          if (shape.Type == MsoShapeType.msoTable) {
+          else if (shape.Type == MsoShapeType.msoTable) {
             if (shape.Table.Rows[1].Cells[1].Shape.TextFrame.TextRange.Text.Equals("<Liturgie>"))
               VulLiturgieTabel(shape.Table, _liturgie, _lezen, _tekst, _instellingen.StandaardTekst.Liturgie);
           }
@@ -268,18 +250,18 @@ namespace PowerpointGenerater.Powerpoint {
       }
     }
 
-    private void InvullenVolgende(ILiturgieZoekresultaat regel, ILiturgieZoekresultaatDeel deel, ILiturgieZoekresultaat volgende, Microsoft.Office.Interop.PowerPoint.Shape shape) {
+    private String InvullenVolgende(ILiturgieZoekresultaat regel, ILiturgieZoekresultaatDeel deel, ILiturgieZoekresultaat volgende) {
       // Alleen volgende tonen als we op het laatste item zitten en als volgende er is
       var tonen = regel.Resultaten.Last() == deel && volgende != null;
       // Check of de volgende 'blanco' heet, want dan tonen we m niet
       tonen = tonen && String.Compare(volgende.VirtueleBenaming, "Blanco", true) != 0;
       if (tonen)
-        shape.TextFrame.TextRange.Text = String.Format("{0} {1}", _instellingen.StandaardTekst.Volgende, LiedNaam(volgende));
-      else
-        shape.TextFrame.TextRange.Text = string.Empty;
+        return String.Format("{0} {1}", _instellingen.StandaardTekst.Volgende, LiedNaam(volgende));
+      return string.Empty;
     }
 
-    private String InvullenLiedTekst(String tempinhoud, Slide slide, Microsoft.Office.Interop.PowerPoint.Shape shape) {
+    private SlideVuller InvullenLiedTekst(String tempinhoud) {
+      var returnValue = new SlideVuller();
       var regels = tempinhoud.Split(new[] { "\r\n" }, StringSplitOptions.None);
       
       // We moeten goed opletten bij het invullen van een liedtekst op een slide:
@@ -295,7 +277,7 @@ namespace PowerpointGenerater.Powerpoint {
         .Select(r => (int?)r.Index)  // nullable int zodat als we niets vinden we dat weten
         .FirstOrDefault();
       if (!beginIndex.HasValue)
-        return null;  // er is niets over
+        return returnValue;  // er is niets over
 
       // kijk waar we eindigen als we instellinge-aantal tellen vanaf ons startpunt
       var eindIndex = regels.Select((r, i) => new { Regel = r, Index = i })
@@ -322,28 +304,29 @@ namespace PowerpointGenerater.Powerpoint {
         .Select(r => (r ?? "").Trim()).ToList();
 
       // plaats de in te voegen regels in het tekstveld (geen enter aan het einde)
-      shape.TextFrame.TextRange.Text = String.Join("", insertLines.Select((l, i) => l + (i + 1 == insertLines.Count ? "" : "\r\n")));
+      returnValue.Invullen = String.Join("", insertLines.Select((l, i) => l + (i + 1 == insertLines.Count ? "" : "\r\n")));
 
       var overStart = optimaliseerEindIndex + 1;
       if (overStart >= regels.Length)
-        return null;
+        return returnValue;
       if (regels[overStart] == NieuweSlideAanduiding)
         overStart++;
       var overLines = regels.Skip(overStart).ToList();
 
       // afbreek teken tonen alleen als een vers doormidden gebroken is
       if (!SkipRegel(insertLines.Last()) && overLines.Any() && !SkipRegel(overLines.First()))
-        shape.TextFrame.TextRange.Text += "\r\n >>";
+        returnValue.Invullen += "\r\n >>";
 
       // Geef de resterende regels terug
-      return String.Join("", overLines.Select((l, i) => l + (i + 1 == overLines.Count ? "" : "\r\n")));
+      returnValue.Over = String.Join("", overLines.Select((l, i) => l + (i + 1 == overLines.Count ? "" : "\r\n")));
+      return returnValue;
     }
     private static Boolean SkipRegel(String regel) {
       return String.IsNullOrWhiteSpace(regel) || regel == NieuweSlideAanduiding;
     }
 
-    private static void InvullenLiturgieRegel(ILiturgieZoekresultaat regel, ILiturgieZoekresultaatDeel vanafDeel, Microsoft.Office.Interop.PowerPoint.Shape shape) {
-      shape.TextFrame.TextRange.Text = LiedNaam(regel, vanafDeelHint: vanafDeel);
+    private static String InvullenLiturgieRegel(ILiturgieZoekresultaat regel, ILiturgieZoekresultaatDeel vanafDeel) {
+      return LiedNaam(regel, vanafDeelHint: vanafDeel);
     }
 
     private static String LiedNaam(ILiturgieZoekresultaat regel, ILiturgieZoekresultaatDeel vanafDeelHint = null) {
@@ -368,9 +351,9 @@ namespace PowerpointGenerater.Powerpoint {
         //dit gedeelte is om het probleem van de eerste slide die al bestaat op te lossen voor alle andere gevallen maken we gewoon een nieuwe slide aan
         Slide voeginslide;
         if (_slideteller == 1)
-          voeginslide = _objPres.Slides[_slideteller];
+          voeginslide = _presentatie.Slides[_slideteller];
         else
-          voeginslide = _objPres.Slides.AddSlide(_slideteller, _layout);
+          voeginslide = _presentatie.Slides.AddSlide(_slideteller, _layout);
 
         //verwijder alle standaard toegevoegde dingen
         while (voeginslide.Shapes.Count > 0) {
@@ -384,25 +367,44 @@ namespace PowerpointGenerater.Powerpoint {
           }
           catch (Exception) { }
         }
-
         _slideteller++;
       }
     }
 
-    public void Dispose() {
+    /// <summary>
+    /// Open een presentatie op het meegegeven pad
+    /// </summary>
+    /// <param name="path">het pad waar de powerpointpresentatie kan worden gevonden</param>
+    /// <returns>de powerpoint presentatie</returns>
+    private _Presentation OpenPPS(String path) {
+      //controleer voor het openen van de presentatie op het meegegeven path of de presentatie bestaat
+      if (File.Exists(path))
+        return _applicatie.Presentations.Open(path, MsoTriState.msoFalse, MsoTriState.msoTrue, MsoTriState.msoFalse);
+      return null;
+    }
+
+    private void SluitAlles() {
       _layout = null;
-      //if (_objPres != null)   // Sluit dit, dan wordt de presentatie afgesloten
-      //  _objPres.Close();
-      _objPres = null;
-      if (_objApp != null)
-        _objApp.Quit();
-      _objApp = null;
+      if (_presentatie != null)
+        _presentatie.Close();
+      _presentatie = null;
+      if (_applicatie != null)
+        _applicatie.Quit();
+      _applicatie = null;
+    }
+    public void Dispose() {
+      SluitAlles();
     }
 
     public enum Status {
       Gestart,
       StopFout,
       StopGoed,
+    }
+
+    private class SlideVuller {
+      public String Invullen { get; set; }
+      public String Over { get; set; }
     }
   }
 }

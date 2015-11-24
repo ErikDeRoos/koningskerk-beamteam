@@ -20,7 +20,7 @@ namespace PowerpointGenerater {
     //instellingen
     private Instellingen _instellingen;
     //generator
-    private PowerpointWrapper _powerpoint;
+    private PPGenerator _powerpoint;
 
     public Form1(string[] args) {
       InitializeComponent();
@@ -47,7 +47,7 @@ namespace PowerpointGenerater {
         _instellingen.AddMask(new Mapmask("Opw", "opwekking"));
       }
 
-      _powerpoint = new PowerpointWrapper(PresentatieVoortgangCallback, PresentatieGereedmeldingCallback);
+      _powerpoint = new PPGenerator(PresentatieVoortgangCallback, PresentatieGereedmeldingCallback);
       progressBar1.Visible = false;
 
       if (args.Count() >= 1) {
@@ -182,14 +182,25 @@ namespace PowerpointGenerater {
         progressBar1.Value = 0;
         progressBar1.Minimum = 0;
         progressBar1.Maximum = ingeladenLiturgie.Count();
+        
+        //open een save window met bepaalde instellingen
+        var saveFileDialog1 = new SaveFileDialog();
+        saveFileDialog1.Filter = "Powerpoint bestand (*.ppt)|*.ppt|Powerpoint bestanden (*.pptx)|*.pptx";
+        saveFileDialog1.Title = "Sla de presentatie op";
 
-        button1.Text = "Stop";
-        _powerpoint.Initialiseer(ingeladenLiturgie, textBox2.Text, textBox3.Text, textBox4.Text, textBox1.Text, textBox5.Text, _instellingen);
-        var status = _powerpoint.Start();
-        if (status.Fout != null)
-          MessageBox.Show(status.Fout.Melding + "\n\n" + status.Fout.Oplossing, status.Fout.Oplossing);
-        if (status.NieuweStatus != PowerpointWrapper.State.Gestart)
-          PresentatieGereedmeldingCallback();
+        //return als er word geannuleerd
+        if (saveFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.Cancel || String.IsNullOrEmpty(saveFileDialog1.FileName)) {
+          progressBar1.Visible = false;
+        }
+        else {
+          button1.Text = "Stop";
+          _powerpoint.Initialiseer(ingeladenLiturgie, textBox2.Text, textBox3.Text, textBox4.Text, textBox1.Text, textBox5.Text, _instellingen, saveFileDialog1.FileName);
+          var status = _powerpoint.Start();
+          if (status.Fout != null)
+            MessageBox.Show(status.Fout.Melding + "\n\n" + status.Fout.Oplossing, status.Fout.Oplossing);
+          if (status.NieuweStatus != PPGenerator.State.Gestart)
+            PresentatieGereedmeldingCallback(null);
+        }
       }
       else {
         var status = _powerpoint.Stop();
@@ -426,12 +437,16 @@ namespace PowerpointGenerater {
       });
       this.Invoke(actie);
     }
-    private void PresentatieGereedmeldingCallback(String foutmelding = null) {
+    private void PresentatieGereedmeldingCallback(String opgeslagenAlsBestand, String foutmelding = null) {
       var actie = new Action(() => {
         button1.Text = "Generate";
         progressBar1.Visible = false;
         if (File.Exists(_tempLiturgiePath))
           File.Delete(_tempLiturgiePath);
+        var startInfo = new ProcessStartInfo();
+        startInfo.FileName = @"POWERPNT.exe";
+        startInfo.Arguments = opgeslagenAlsBestand;
+        Process.Start(startInfo);
       });
       this.Invoke(actie);
     }
