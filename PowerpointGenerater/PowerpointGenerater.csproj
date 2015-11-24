@@ -120,8 +120,7 @@
     <Compile Include="MaskInvoer.Designer.cs">
       <DependentUpon>MaskInvoer.cs</DependentUpon>
     </Compile>
-    <Compile Include="Powerpoint\COMMessageFilter.cs" />
-    <Compile Include="Powerpoint\PowerpointWrapper.cs" />
+    <Compile Include="Powerpoint\PPGenerator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Contactform.resx">
