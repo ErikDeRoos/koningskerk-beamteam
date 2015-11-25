@@ -156,6 +156,37 @@ namespace PowerpointGenerater {
     #region formulier eventhandlers
     private void button1_Click(object sender, EventArgs e) {
       if (button1.Text == "Generate") {
+        //open een save window
+        var saveFileDialog1 = new SaveFileDialog();
+        saveFileDialog1.Filter = "Powerpoint bestand (*.ppt)|*.ppt|Powerpoint bestanden (*.pptx)|*.pptx";
+        saveFileDialog1.Title = "Sla de presentatie op";
+        //return als er word geannuleerd
+        var fileName = saveFileDialog1.ShowDialog() != System.Windows.Forms.DialogResult.Cancel ? saveFileDialog1.FileName : null;
+        if (String.IsNullOrEmpty(fileName))
+          return;
+
+        // Check bestandsnaam
+        if (!Path.HasExtension(fileName))
+          fileName += ".ppt";
+        if (File.Exists(fileName)) {
+          try {
+            File.Delete(fileName);
+          }
+          catch {
+            MessageBox.Show("Het geselecteerde bestand kan niet aangepast worden.\n\nControleer of het bestand nog geopend is.", "Bestand niet toegankelijk", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+          }
+        }
+        try {
+          // Maak het bestand empty aan en check daarmee of er op die plek te schrijven is
+          var file = File.Create(fileName);
+          file.Close();
+        }
+        catch {
+          MessageBox.Show("Kan niet schrijven naar de opgegeven bestandsnaam.\n\nControleer of het pad toegankelijk is.", "Bestand niet toegankelijk", MessageBoxButtons.OK, MessageBoxIcon.Error);
+          return;
+        }
+
         //sla een back up voor als er iets fout gaat
         Opslaan_Op_Locatie(GetWorkingFile(), _tempLiturgiePath);
         #region creeer lijst van liturgie
@@ -182,25 +213,14 @@ namespace PowerpointGenerater {
         progressBar1.Value = 0;
         progressBar1.Minimum = 0;
         progressBar1.Maximum = ingeladenLiturgie.Count();
-        
-        //open een save window met bepaalde instellingen
-        var saveFileDialog1 = new SaveFileDialog();
-        saveFileDialog1.Filter = "Powerpoint bestand (*.ppt)|*.ppt|Powerpoint bestanden (*.pptx)|*.pptx";
-        saveFileDialog1.Title = "Sla de presentatie op";
 
-        //return als er word geannuleerd
-        if (saveFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.Cancel || String.IsNullOrEmpty(saveFileDialog1.FileName)) {
-          progressBar1.Visible = false;
-        }
-        else {
-          button1.Text = "Stop";
-          _powerpoint.Initialiseer(ingeladenLiturgie, textBox2.Text, textBox3.Text, textBox4.Text, textBox1.Text, textBox5.Text, _instellingen, saveFileDialog1.FileName);
-          var status = _powerpoint.Start();
-          if (status.Fout != null)
-            MessageBox.Show(status.Fout.Melding + "\n\n" + status.Fout.Oplossing, status.Fout.Oplossing);
-          if (status.NieuweStatus != PPGenerator.State.Gestart)
-            PresentatieGereedmeldingCallback(null);
-        }
+        button1.Text = "Stop";
+        _powerpoint.Initialiseer(ingeladenLiturgie, textBox2.Text, textBox3.Text, textBox4.Text, textBox1.Text, textBox5.Text, _instellingen, fileName);
+        var status = _powerpoint.Start();
+        if (status.Fout != null)
+          MessageBox.Show(status.Fout.Melding + "\n\n" + status.Fout.Oplossing, status.Fout.Oplossing);
+        if (status.NieuweStatus != PPGenerator.State.Gestart)
+          PresentatieGereedmeldingCallback(null);
       }
       else {
         var status = _powerpoint.Stop();
