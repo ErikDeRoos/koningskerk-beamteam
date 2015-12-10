@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace PowerpointGenerater
+namespace mppt
 {
     class FoutmeldingSchrijver
     {

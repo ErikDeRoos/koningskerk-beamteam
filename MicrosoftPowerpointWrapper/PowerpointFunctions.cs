@@ -101,7 +101,7 @@ namespace mppt
             }
             catch (Exception ex)
             {
-                //FoutmeldingSchrijver.Log(ex.ToString());
+                FoutmeldingSchrijver.Log(ex.ToString());
                 if (StatusWijziging != null)
                     StatusWijziging.Invoke(Status.StopFout, ex.ToString());
             }
