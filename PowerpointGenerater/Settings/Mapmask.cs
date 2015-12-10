@@ -1,6 +1,8 @@
-﻿namespace PowerpointGenerater
+﻿using ISettings;
+
+namespace PowerpointGenerater
 {
-    public class Mapmask
+    public class Mapmask : IMapmask
     {
         public string Name { get; set; }
         public string RealName { get; set; }

@@ -7,7 +7,7 @@ namespace PowerpointGenerater
         public LiturgieNotFoundFormulier(string liturgieregel)
         {
             InitializeComponent();
-            this.textBox1.Text = liturgieregel;
+            textBox1.Text = liturgieregel;
         }
     }
 }

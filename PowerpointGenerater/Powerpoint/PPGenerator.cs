@@ -1,9 +1,10 @@
-﻿using PowerpointGenerater.Database;
+﻿using IDatabase;
+using ISlideBuilder;
+using Microsoft.Practices.Unity;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 
 namespace PowerpointGenerater.Powerpoint
@@ -21,48 +22,50 @@ namespace PowerpointGenerater.Powerpoint
         private string _lezen;
         private string _tekst;
         private Instellingen _instellingen;
-        private String _opslaanAls;
+        private string _opslaanAls;
+        private IUnityContainer _di;
 
-        private PowerpointFunctions _powerpoint;
+        private IBuilder _powerpoint;
         private Thread _generatorThread;
         private Thread _stopThread;
         private Object _locker = new Object();
 
         public delegate void Voortgang(int lijstStart, int lijstEind, int bijItem);
         private Voortgang _setVoortgang;
-        public delegate void GereedMelding(String opgeslagenAlsBestand, String foutmelding = null);
+        public delegate void GereedMelding(string opgeslagenAlsBestand = null, string foutmelding = null);
         private GereedMelding _setGereedmelding;
-        private String _gereedMetFout;
+        private string _gereedMetFout;
 
-        public PPGenerator(Voortgang voortgangDelegate, GereedMelding gereedmeldingDelegate)
+        public PPGenerator(IUnityContainer di, Voortgang voortgangDelegate, GereedMelding gereedmeldingDelegate)
         {
+            _di = di;
             _huidigeStatus = State.Onbekend;
             _setVoortgang = voortgangDelegate;
             _setGereedmelding = gereedmeldingDelegate;
         }
 
         public StatusMelding Initialiseer(IEnumerable<ILiturgieZoekresultaat> liturgie, string Voorganger, string Collecte1, string Collecte2, string Lezen,
-          string Tekst, Instellingen instellingen, String opslaanAls)
+          string Tekst, Instellingen instellingen, string opslaanAls)
         {
             lock (_locker)
             {
                 if (_huidigeStatus != State.Onbekend && _huidigeStatus != State.Geinitialiseerd)
                     return new StatusMelding(_huidigeStatus, "Kan powerpoint niet initialiseren", "Start het programma opnieuw op");
-                this._liturgie = liturgie.ToList();
-                this._voorganger = Voorganger;
-                this._collecte1 = Collecte1;
-                this._collecte2 = Collecte2;
-                this._lezen = Lezen;
-                this._tekst = Tekst;
-                this._instellingen = instellingen;
-                this._opslaanAls = opslaanAls;
+                _liturgie = liturgie.ToList();
+                _voorganger = Voorganger;
+                _collecte1 = Collecte1;
+                _collecte2 = Collecte2;
+                _lezen = Lezen;
+                _tekst = Tekst;
+                _instellingen = instellingen;
+                _opslaanAls = opslaanAls;
 
                 if (!File.Exists(_instellingen.FullTemplatetheme))
                     return new StatusMelding(_huidigeStatus, "Het pad naar de achtergrond powerpoint presentatie kan niet worden gevonden", "Stel de achtergrond opnieuw in bij de templates");
                 else if (!File.Exists(instellingen.FullTemplateliederen))
                     return new StatusMelding(_huidigeStatus, "Het pad naar de liederen template powerpoint presentatie kan niet worden gevonden", "Stel de achtergrond opnieuw in bij de templates");
 
-                this._huidigeStatus = State.Geinitialiseerd;
+                _huidigeStatus = State.Geinitialiseerd;
                 return new StatusMelding(_huidigeStatus);
             }
         }
@@ -73,7 +76,11 @@ namespace PowerpointGenerater.Powerpoint
             {
                 if (_huidigeStatus != State.Geinitialiseerd)
                     return new StatusMelding(_huidigeStatus, "Kan powerpoint niet starten", "Start het programma opnieuw op");
-                _powerpoint = new PowerpointFunctions(PresentatieVoortgangCallback, PresentatieStatusWijzigingCallback);
+                _powerpoint = _di.Resolve<IBuilder>();
+                if (_powerpoint == null)
+                    return new StatusMelding(_huidigeStatus, "Kan powerpoint niet starten", "Powerpoint koppeling kon niet geladen worden");
+                _powerpoint.StatusWijziging = PresentatieStatusWijzigingCallback;
+                _powerpoint.Voortgang = PresentatieVoortgangCallback;
                 _gereedMetFout = null;
                 _powerpoint.PreparePresentation(_liturgie, _voorganger, _collecte1, _collecte2, _lezen, _tekst, _instellingen, _opslaanAls);
                 _generatorThread = new Thread(new ThreadStart(StartThread));
@@ -120,10 +127,10 @@ namespace PowerpointGenerater.Powerpoint
         {
             _setVoortgang.Invoke(lijstStart, lijstEind, bijItem);
         }
-        private void PresentatieStatusWijzigingCallback(PowerpointGenerater.Powerpoint.PowerpointFunctions.Status nieuweStatus, String foutmelding = null)
+        private void PresentatieStatusWijzigingCallback(Status nieuweStatus, string foutmelding = null)
         {
             _gereedMetFout = foutmelding;
-            if (nieuweStatus == PowerpointFunctions.Status.StopFout || nieuweStatus == PowerpointFunctions.Status.StopGoed)
+            if (nieuweStatus == Status.StopFout || nieuweStatus == Status.StopGoed)
                 Stop();
         }
 
@@ -160,15 +167,15 @@ namespace PowerpointGenerater.Powerpoint
                 NieuweStatus = nieuweStatus;
                 Fout = fout;
             }
-            public StatusMelding(State nieuweStatus, String foutMelding, String foutOplossing) : this(nieuweStatus, new Foutmelding(foutMelding, foutOplossing))
+            public StatusMelding(State nieuweStatus, string foutMelding, string foutOplossing) : this(nieuweStatus, new Foutmelding(foutMelding, foutOplossing))
             {
             }
         }
         public class Foutmelding
         {
-            public String Melding { get; private set; }
-            public String Oplossing { get; private set; }
-            public Foutmelding(String melding, String oplossing)
+            public string Melding { get; private set; }
+            public string Oplossing { get; private set; }
+            public Foutmelding(string melding, string oplossing)
             {
                 Melding = melding;
                 Oplossing = oplossing;

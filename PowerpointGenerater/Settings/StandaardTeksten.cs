@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using ISettings;
 
 namespace PowerpointGenerater
 {
-    public class StandaardTeksten
+    public class StandaardTeksten : IStandaardTeksten
     {
         public string Volgende { get; set; }
         public string Voorganger { get; set; }

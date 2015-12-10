@@ -1,10 +1,13 @@
-﻿using System;
+﻿using IDatabase;
+using ISettings;
+using PowerpointGenerater;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace PowerpointGenerater.Database
-{
+namespace PowerpointGenerator.Database {
+
     /// <summary>
     /// Maak een ruwe lijst van een tekstuele liturgie
     /// </summary>
@@ -18,16 +21,16 @@ namespace PowerpointGenerater.Database
         /// <summary>
         /// Leest de tekstuele invoer in en maakt er een ruwe liturgie lijst van
         /// </summary>
-        public IEnumerable<ILiturgieOnderdeelRuw> VanTekstregels(String[] regels)
+        public IEnumerable<ILiturgieOnderdeelRuw> VanTekstregels(string[] regels)
         {
             return regels
-              .Where(r => !String.IsNullOrWhiteSpace(r))
+              .Where(r => !string.IsNullOrWhiteSpace(r))
               .Select(r => VanTekstregel(r))
               .Where(r => r != null)
               .ToList();
         }
 
-        private Onderdeel VanTekstregel(String invoer)
+        private Onderdeel VanTekstregel(string invoer)
         {
             var regel = new Onderdeel();
             var invoerTrimmed = invoer.Trim();
@@ -50,22 +53,11 @@ namespace PowerpointGenerater.Database
 
         class Onderdeel : ILiturgieOnderdeelRuw
         {
-            public String Benaming { get; set; }
-            public String Deel { get; set; }
-            public IEnumerable<String> Verzen { get; set; }
+            public string Benaming { get; set; }
+            public string Deel { get; set; }
+            public IEnumerable<string> Verzen { get; set; }
         }
     }
-
-    /// <summary>
-    /// Ruwe liturgie regels, zoals ze ingevoerd zijn
-    /// </summary>
-    public interface ILiturgieOnderdeelRuw
-    {
-        String Benaming { get; }
-        String Deel { get; }
-        IEnumerable<String> Verzen { get; }
-    }
-
 
     /// <summary>
     /// Interpreteer de ruwe liturgie regels tot zoekacties
@@ -73,8 +65,8 @@ namespace PowerpointGenerater.Database
     class InterpreteerLiturgieZoekacie
     {
         private static readonly char[] _benamingSplitScheidingstekens = new char[] { ' ' };
-        private readonly IEnumerable<Mapmask> _masks;
-        public InterpreteerLiturgieZoekacie(IEnumerable<Mapmask> gebruikMasks)
+        private readonly IEnumerable<IMapmask> _masks;
+        public InterpreteerLiturgieZoekacie(IEnumerable<IMapmask> gebruikMasks)
         {
             _masks = gebruikMasks;
         }
@@ -100,7 +92,7 @@ namespace PowerpointGenerater.Database
             var basisPad = "" + Path.DirectorySeparatorChar;
 
             // Bepaal hoe de liturgie regel in delen is opgedeeld
-            if (!String.IsNullOrWhiteSpace(regel.Ruw.Deel))
+            if (!string.IsNullOrWhiteSpace(regel.Ruw.Deel))
                 regel.Type = LiturgieType.EnkelMetDeel;
             // Het is mogelijk een bestand in een map aan te wijzen door spaties te gebruiken. Ook dit oplossen
             var benamingOnderdelen = invoer.Benaming.Split(_benamingSplitScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
@@ -108,7 +100,7 @@ namespace PowerpointGenerater.Database
             {
                 regel.EchteBenaming = benamingOnderdelen[benamingOnderdelen.Length - 1];  // Laatste is echte naam
                 basisPad +=
-                  String.Join("", benamingOnderdelen.Select((o, i) => new { Naam = o, Index = i })
+                  string.Join("", benamingOnderdelen.Select((o, i) => new { Naam = o, Index = i })
                     .Where(o => o.Index != benamingOnderdelen.Length - 1)
                     .Select(o => o.Naam + Path.DirectorySeparatorChar));
             }
@@ -122,7 +114,7 @@ namespace PowerpointGenerater.Database
                 regel.Type = LiturgieType.MeerMetDeel;
                 // de verzen zijn de te zoeken items. De rest is pad
                 basisPad += invoer.Benaming + Path.DirectorySeparatorChar;
-                if (!String.IsNullOrEmpty(invoer.Deel))
+                if (!string.IsNullOrEmpty(invoer.Deel))
                     basisPad += invoer.Deel + Path.DirectorySeparatorChar;
                 //deel de verschillende bestandsnamen op(er zijn verschillende verzen mogelijk uit één map bijvoorbeeld)
                 regel.ZoekactieHints = invoer.Verzen.Select(v => new OnderdeelHint() { Nummer = v, ZoekPad = basisPad + v }).ToList();
@@ -142,7 +134,7 @@ namespace PowerpointGenerater.Database
             // TODO verplaatsen? virtuele benaming is pas relevant in liturgie bord generator
             regel.VirtueleBenaming = regel.EchteBenaming;
             // Check of er een mask op de benaming zit
-            var maskCheck = _masks.FirstOrDefault(m => String.Compare(m.RealName, regel.EchteBenaming, true) == 0);
+            var maskCheck = _masks.FirstOrDefault(m => string.Compare(m.RealName, regel.EchteBenaming, true) == 0);
             if (maskCheck != null)
                 regel.VirtueleBenaming = maskCheck.Name;
             return regel;
@@ -151,60 +143,25 @@ namespace PowerpointGenerater.Database
         class Onderdeel : ILiturgieOnderdeelZoekactie
         {
             public ILiturgieOnderdeelRuw Ruw { get; set; }
-            public String VirtueleBenaming { get; set; }
-            public String EchteBenaming { get; set; }
+            public string VirtueleBenaming { get; set; }
+            public string EchteBenaming { get; set; }
             public LiturgieType Type { get; set; }
             public IEnumerable<ILiturgieOnderdeelZoekactieHint> ZoekactieHints { get; set; }
         }
         class OnderdeelHint : ILiturgieOnderdeelZoekactieHint
         {
-            public String Nummer { get; set; }
-            public String ZoekPad { get; set; }
+            public string Nummer { get; set; }
+            public string ZoekPad { get; set; }
         }
     }
-
-    /// <summary>
-    /// Ruwe liturgie regels, aangevuld met zoekactie hints (filesystem paden)
-    /// </summary>
-    public interface ILiturgieOnderdeelZoekactie
-    {
-        ILiturgieOnderdeelRuw Ruw { get; }
-        String VirtueleBenaming { get; }
-        String EchteBenaming { get; }
-        LiturgieType Type { get; }
-        IEnumerable<ILiturgieOnderdeelZoekactieHint> ZoekactieHints { get; }
-    }
-    public interface ILiturgieOnderdeelZoekactieHint
-    {
-        String Nummer { get; }
-        String ZoekPad { get; }
-    }
-    public enum LiturgieType
-    {
-        /// <summary>
-        /// Enkelvoudige aanduiding, bijvoorbeeld een openingsslide.
-        /// </summary>
-        EnkelZonderDeel,
-        /// <summary>
-        /// Enkelvoudige aanduiding met deel benaming, bijvoorbeeld een database 
-        /// zoals opwekking waar wel nummers zijn maar geen verzen
-        /// </summary>
-        EnkelMetDeel,
-        /// <summary>
-        /// Meervoudige aanduiding met deel benaming, bijvoorbeeld een database
-        /// zoals psalmen waar nummers zijn met individuele verzen
-        /// </summary>
-        MeerMetDeel,
-    }
-
-
+    
     /// <summary>
     /// Zoek naar de opgegeven liturgieen.
     /// </summary>
     class LiturgieDatabase
     {
-        private readonly String _databasePad;
-        public LiturgieDatabase(String databasePad)
+        private readonly string _databasePad;
+        public LiturgieDatabase(string databasePad)
         {
             _databasePad = databasePad;
             if (!_databasePad.EndsWith(Path.DirectorySeparatorChar + ""))
@@ -277,7 +234,7 @@ namespace PowerpointGenerater.Database
             return resultaat;
         }
 
-        private String LeesTekstBestand(String bestandsNaam)
+        private string LeesTekstBestand(string bestandsNaam)
         {
             //open een filestream naar het gekozen bestand
             var strm = new FileStream(bestandsNaam, FileMode.Open, FileAccess.Read);
@@ -292,46 +249,18 @@ namespace PowerpointGenerater.Database
         class ZoekresultaatItem : ILiturgieZoekresultaat
         {
             public LiturgieType Type { get; set; }
-            public String VirtueleBenaming { get; set; }
-            public String EchteBenaming { get; set; }
-            public String DeelBenaming { get; set; }
+            public string VirtueleBenaming { get; set; }
+            public string EchteBenaming { get; set; }
+            public string DeelBenaming { get; set; }
             public IEnumerable<ILiturgieZoekresultaatDeel> Resultaten { get; set; }
         }
         class ZoekresultaatDeelItem : ILiturgieZoekresultaatDeel
         {
-            public String Nummer { get; set; }
-            public String Zoekopdracht { get; set; }
-            public Boolean Gevonden { get; set; }
-            public String Inhoud { get; set; }
+            public string Nummer { get; set; }
+            public string Zoekopdracht { get; set; }
+            public bool Gevonden { get; set; }
+            public string Inhoud { get; set; }
             public InhoudType InhoudType { get; set; }
         }
-    }
-
-    /// <summary>
-    /// Zoekresultaat item(s) samen met de zoekopdracht gegevens
-    /// </summary>
-    public interface ILiturgieZoekresultaat
-    {
-        LiturgieType Type { get; }
-        String VirtueleBenaming { get; }
-        String EchteBenaming { get; }
-        String DeelBenaming { get; }
-        IEnumerable<ILiturgieZoekresultaatDeel> Resultaten { get; }
-    }
-    /// <summary>
-    /// Het gezochte item en of/wat er gevonden is
-    /// </summary>
-    public interface ILiturgieZoekresultaatDeel
-    {
-        String Nummer { get; }
-        String Zoekopdracht { get; }
-        Boolean Gevonden { get; }
-        String Inhoud { get; }
-        InhoudType InhoudType { get; }
-    }
-    public enum InhoudType
-    {
-        Tekst,
-        PptLink,
     }
 }

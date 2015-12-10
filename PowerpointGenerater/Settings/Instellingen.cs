@@ -3,31 +3,26 @@ using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
 using System;
+using ISettings;
 
 namespace PowerpointGenerater
 {
-    public class Instellingen
+    public class Instellingen : IInstellingen
     {
-        public string Databasepad;
-        public string Templateliederen;
-        public string Templatetheme;
-        public int Regelsperslide = 4;
-        private List<Mapmask> lijstmasks = new List<Mapmask>();
-        public StandaardTeksten StandaardTekst { get; set; }
+        public string Databasepad { get; private set; }
+        public string Templateliederen { get; private set; }
+        public string Templatetheme { get; private set; }
+        public int Regelsperslide { get; private set; }
+        private List<IMapmask> lijstmasks = new List<IMapmask>();
+        public IStandaardTeksten StandaardTeksten { get; private set; }
 
         public Instellingen()
-            : this("", "", "", 4)
         {
-
-        }
-
-        public Instellingen(string databasepad, string templateliederen, string templatetheme, int regelsperslide)
-        {
-            this.Databasepad = databasepad;
-            this.Templateliederen = templateliederen;
-            this.Templatetheme = templatetheme;
-            this.Regelsperslide = regelsperslide;
-            this.StandaardTekst = new StandaardTeksten()
+            Databasepad = "";
+            Templateliederen = "";
+            Templatetheme = "";
+            Regelsperslide = 4;
+            StandaardTeksten = new StandaardTeksten()
             {
                 Volgende = "Straks :",
                 Voorganger = "Voorganger :",
@@ -38,9 +33,21 @@ namespace PowerpointGenerater
                 Tekst = "Tekst :",
                 Liturgie = "liturgie"
             };
+
         }
 
-        public bool AddMask(Mapmask mask)
+        public Instellingen(string databasepad, string templateliederen, string templatetheme, int regelsperslide = 6, StandaardTeksten standaardTeksten = null)
+            : this()
+        {
+            Databasepad = databasepad;
+            Templateliederen = templateliederen;
+            Templatetheme = templatetheme;
+            Regelsperslide = regelsperslide;
+            if (standaardTeksten != null)
+                StandaardTeksten = standaardTeksten;
+        }
+
+        public bool AddMask(IMapmask mask)
         {
             if (!lijstmasks.Contains(mask))
             {
@@ -48,11 +55,6 @@ namespace PowerpointGenerater
                 return true;
             }
             return false;
-        }
-
-        public List<Mapmask> GetMasks()
-        {
-            return lijstmasks;
         }
         public void ClearMasks()
         {
@@ -92,42 +94,41 @@ namespace PowerpointGenerater
             }
         }
 
-        public static bool WriteXML(Instellingen instellingen, string path)
+        public IEnumerable<IMapmask> Masks { get { return lijstmasks; } }
+
+        public bool WriteToXMLFile(string path)
         {
             try
             {
-                XmlWriterSettings xws = new XmlWriterSettings();
-                xws.Indent = true;
-
                 //schrijf instellingen weg
-                XmlWriter xw;
-
-                XmlSerializer serializer = new XmlSerializer(typeof(Instellingen));
+                var serializer = new XmlSerializer(typeof(Instellingen));
                 using (TextWriter sw = new StreamWriter(path + "instellingen.xml"))
                 {
-                    serializer.Serialize(sw, instellingen);
+                    serializer.Serialize(sw, this);
+                    sw.Flush();
                 }
 
                 //schrijf Masks weg
-                xw = XmlWriter.Create(path + "masks.xml", xws);
-                xw.WriteStartDocument();
-                xw.WriteStartElement("Masks");
-                foreach (Mapmask mask in instellingen.lijstmasks)
+                using (var xw = XmlWriter.Create(path + "masks.xml", new XmlWriterSettings() { Indent = true }))
                 {
-                    xw.WriteStartElement("Mask");
-                    xw.WriteStartElement("Name");
-                    xw.WriteString(mask.Name);
+                    xw.WriteStartDocument();
+                    xw.WriteStartElement("Masks");
+                    foreach (var mask in Masks)
+                    {
+                        xw.WriteStartElement("Mask");
+                        xw.WriteStartElement("Name");
+                        xw.WriteString(mask.Name);
+                        xw.WriteEndElement();
+                        xw.WriteStartElement("RealName");
+                        xw.WriteString(mask.RealName);
+                        xw.WriteEndElement();
+                        xw.WriteEndElement();
+                    }
                     xw.WriteEndElement();
-                    xw.WriteStartElement("RealName");
-                    xw.WriteString(mask.RealName);
-                    xw.WriteEndElement();
-                    xw.WriteEndElement();
-                }
-                xw.WriteEndElement();
-                xw.WriteEndDocument();
+                    xw.WriteEndDocument();
 
-                xw.Flush();
-                xw.Close();
+                    xw.Flush();
+                }
 
                 return true;
             }
@@ -137,11 +138,10 @@ namespace PowerpointGenerater
             }
         }
 
-        public static Instellingen LoadXML(string path)
+        public static Instellingen LoadFromXMLFile(string path)
         {
-            Instellingen instellingen = new Instellingen();
-            XmlDocument xdoc = new XmlDocument();
-
+            var xdoc = new XmlDocument();
+            var instellingen = (Instellingen)null;
 
 
             //XmlNodeList nodelist = root.GetElementsByTagName("Name");
@@ -158,31 +158,32 @@ namespace PowerpointGenerater
             if (!File.Exists(fileName))
                 throw new FileNotFoundException("Instellingenbestand niet gevonden", fileName);
 
-            XmlSerializer serializer = new XmlSerializer(typeof(Instellingen));
-            XmlReaderSettings settings = new XmlReaderSettings();
+            var serializer = new XmlSerializer(typeof(Instellingen));
+            var settings = new XmlReaderSettings();
             // No settings need modifying here
 
-            using (StreamReader textReader = new StreamReader(fileName))
+            using (var textReader = new StreamReader(fileName))
             {
-                using (XmlReader xmlReader = XmlReader.Create(textReader, settings))
+                using (var xmlReader = XmlReader.Create(textReader, settings))
                 {
-                    instellingen = (Instellingen)serializer.Deserialize(xmlReader);
+                    instellingen = serializer.Deserialize(xmlReader) as Instellingen;
                 }
             }
 
             xdoc.Load(path + "masks.xml");
-            XmlElement root = xdoc.DocumentElement;
+            var root = xdoc.DocumentElement;
 
-            XmlNodeList masklist = root.GetElementsByTagName("Mask");
+            var masklist = root.GetElementsByTagName("Mask");
             foreach (XmlNode mask in masklist)
             {
-                XmlNode nameNode = mask.SelectSingleNode("Name");
-                XmlNode realnameNode = mask.SelectSingleNode("RealName");
-                instellingen.lijstmasks.Add(new Mapmask(nameNode.InnerText, realnameNode.InnerText));
+                var nameNode = mask.SelectSingleNode("Name");
+                var realnameNode = mask.SelectSingleNode("RealName");
+                instellingen.AddMask(new Mapmask(nameNode.InnerText, realnameNode.InnerText));
             }
 
             return instellingen;
         }
+
 
         public override string ToString()
         {
