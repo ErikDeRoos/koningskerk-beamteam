@@ -29,16 +29,10 @@ namespace mppt
         private IInstellingen _instellingen;
         private string _opslaanAls;
 
-        public delegate void Voortgang(int lijstStart, int lijstEind, int bijItem);
-        private Voortgang _setVoortgang;
-        public delegate void StatusWijziging(Status nieuweStatus, string foutmelding = null);
-        private StatusWijziging _setStatus;
+        public Action<int, int, int> Voortgang { get; set; }
+        public Action<Status, string> StatusWijziging { get; set; }
 
-        public PowerpointFunctions(Voortgang voortgangDelegate, StatusWijziging statusDelegate)
-        {
-            _setVoortgang = voortgangDelegate;
-            _setStatus = statusDelegate;
-        }
+        public PowerpointFunctions() { }
 
         public void PreparePresentation(IEnumerable<ILiturgieZoekresultaat> liturgie, string Voorganger, string Collecte1, string Collecte2, string Lezen, string Tekst, IInstellingen gebruikInstellingen, string opslaanAls)
         {
@@ -60,7 +54,8 @@ namespace mppt
         /// <param name="Liturgie">Liturgie die de indeling en inhoud van de gegenereerde presentatie bepaald</param>
         public void GeneratePresentation()
         {
-            _setStatus.Invoke(Status.Gestart);
+            if (StatusWijziging != null)
+                StatusWijziging.Invoke(Status.Gestart, null);
 
             //Creeer een nieuwe lege presentatie volgens een bepaald thema
             _applicatie = new Microsoft.Office.Interop.PowerPoint.Application();
@@ -93,19 +88,22 @@ namespace mppt
                         if (_stop)
                             break;
                     }
-                    _setVoortgang.Invoke(0, _liturgie.Count(), volgendeIndex);
+                    if (Voortgang != null)
+                        Voortgang.Invoke(0, _liturgie.Count(), volgendeIndex);
                     if (_stop)
                         break;
                 }
 
                 //sla de presentatie op
                 _presentatie.SaveAs(_opslaanAls);
-                _setStatus.Invoke(Status.StopGoed);
+                if (StatusWijziging != null)
+                    StatusWijziging.Invoke(Status.StopGoed, null);
             }
             catch (Exception ex)
             {
-                FoutmeldingSchrijver.Log(ex.ToString());
-                _setStatus.Invoke(Status.StopFout, foutmelding: ex.ToString());
+                //FoutmeldingSchrijver.Log(ex.ToString());
+                if (StatusWijziging != null)
+                    StatusWijziging.Invoke(Status.StopFout, ex.ToString());
             }
             SluitAlles();
         }
