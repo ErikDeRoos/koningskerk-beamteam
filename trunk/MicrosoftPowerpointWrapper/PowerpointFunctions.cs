@@ -1,15 +1,16 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Windows.Forms;
 using System.Linq;
 using Microsoft.Office.Interop.PowerPoint;
 using Microsoft.Office.Core;
-using PowerpointGenerater.Database;
+using IDatabase;
+using ISettings;
+using ISlideBuilder;
 
-namespace PowerpointGenerater.Powerpoint
+namespace mppt
 {
-    class PowerpointFunctions : IDisposable
+    class PowerpointFunctions : IBuilder
     {
         private Microsoft.Office.Interop.PowerPoint.Application _applicatie;
         private _Presentation _presentatie;
@@ -17,7 +18,7 @@ namespace PowerpointGenerater.Powerpoint
         private int _slideteller = 1;
         private bool _stop = false;
 
-        private const String NieuweSlideAanduiding = "#";
+        private const string NieuweSlideAanduiding = "#";
 
         private IEnumerable<ILiturgieZoekresultaat> _liturgie = new List<ILiturgieZoekresultaat>();
         private string _voorganger;
@@ -25,12 +26,12 @@ namespace PowerpointGenerater.Powerpoint
         private string _collecte2;
         private string _lezen;
         private string _tekst;
-        private Instellingen _instellingen;
-        private String _opslaanAls;
+        private IInstellingen _instellingen;
+        private string _opslaanAls;
 
         public delegate void Voortgang(int lijstStart, int lijstEind, int bijItem);
         private Voortgang _setVoortgang;
-        public delegate void StatusWijziging(Status nieuweStatus, String foutmelding = null);
+        public delegate void StatusWijziging(Status nieuweStatus, string foutmelding = null);
         private StatusWijziging _setStatus;
 
         public PowerpointFunctions(Voortgang voortgangDelegate, StatusWijziging statusDelegate)
@@ -39,17 +40,17 @@ namespace PowerpointGenerater.Powerpoint
             _setStatus = statusDelegate;
         }
 
-        public void PreparePresentation(IEnumerable<ILiturgieZoekresultaat> liturgie, string Voorganger, string Collecte1, string Collecte2, string Lezen, string Tekst, Instellingen gebruikInstellingen, String opslaanAls)
+        public void PreparePresentation(IEnumerable<ILiturgieZoekresultaat> liturgie, string Voorganger, string Collecte1, string Collecte2, string Lezen, string Tekst, IInstellingen gebruikInstellingen, string opslaanAls)
         {
-            this._liturgie = liturgie;
-            this._voorganger = Voorganger;
-            this._collecte1 = Collecte1;
-            this._collecte2 = Collecte2;
-            this._lezen = Lezen;
-            this._tekst = Tekst;
-            this._instellingen = gebruikInstellingen;
-            this._opslaanAls = opslaanAls;
-            this._slideteller = 1;
+            _liturgie = liturgie;
+            _voorganger = Voorganger;
+            _collecte1 = Collecte1;
+            _collecte2 = Collecte2;
+            _lezen = Lezen;
+            _tekst = Tekst;
+            _instellingen = gebruikInstellingen;
+            _opslaanAls = opslaanAls;
+            _slideteller = 1;
             // Hier GEEN COM calls want dit kan nog in n andere thread zijn
         }
 
@@ -118,7 +119,7 @@ namespace PowerpointGenerater.Powerpoint
         {
             var tekstOmTeRenderen = inhoud.Inhoud;
             //zolang er nog iets is in te voegen in sheets
-            while (!String.IsNullOrWhiteSpace(tekstOmTeRenderen))
+            while (!string.IsNullOrWhiteSpace(tekstOmTeRenderen))
             {
                 //regel de template om het lied op af te beelden
                 var presentatie = OpenPPS(_instellingen.FullTemplateliederen);
@@ -172,31 +173,31 @@ namespace PowerpointGenerater.Powerpoint
                         var text = shape.TextFrame.TextRange.Text;
                         //als de template de tekst bevat "Voorganger: " moet daar de Voorgangersnaam achter komen
                         if (text.Equals("<Voorganger:>"))
-                            shape.TextFrame.TextRange.Text = _instellingen.StandaardTekst.Voorganger + _voorganger;
+                            shape.TextFrame.TextRange.Text = _instellingen.StandaardTeksten.Voorganger + _voorganger;
                         //als de template de tekst bevat "Collecte: " moet daar de collectedoel achter komen
                         else if (text.Equals("<Collecte:>"))
-                            shape.TextFrame.TextRange.Text = _instellingen.StandaardTekst.Collecte + _collecte1;
+                            shape.TextFrame.TextRange.Text = _instellingen.StandaardTeksten.Collecte + _collecte1;
                         //als de template de tekst bevat "1e Collecte: " moet daar de 1e collecte achter komen
                         else if (text.Equals("<1e Collecte:>"))
-                            shape.TextFrame.TextRange.Text = _instellingen.StandaardTekst.Collecte1 + _collecte1;
+                            shape.TextFrame.TextRange.Text = _instellingen.StandaardTeksten.Collecte1 + _collecte1;
                         //als de template de tekst bevat "2e Collecte: " moet daar de 2e collecte achter komen
                         else if (text.Equals("<2e Collecte:>"))
-                            shape.TextFrame.TextRange.Text = _instellingen.StandaardTekst.Collecte2 + _collecte2;
+                            shape.TextFrame.TextRange.Text = _instellingen.StandaardTeksten.Collecte2 + _collecte2;
                         //als de template de tekst bevat "Volgende" moet daar de Liturgieregel van de volgende sheet komen
                         else if (text.Equals("<Volgende>"))
                             shape.TextFrame.TextRange.Text = InvullenVolgende(regel, inhoud, volgende);
                         //als de template de tekst bevat "Volgende" moet daar de te lezen schriftgedeeltes komen
                         else if (text.Equals("<Lezen>"))
-                            shape.TextFrame.TextRange.Text = _instellingen.StandaardTekst.Lezen + _lezen;
+                            shape.TextFrame.TextRange.Text = _instellingen.StandaardTeksten.Lezen + _lezen;
                         else if (text.Equals("<Tekst>"))
-                            shape.TextFrame.TextRange.Text = _instellingen.StandaardTekst.Tekst + _tekst;
+                            shape.TextFrame.TextRange.Text = _instellingen.StandaardTeksten.Tekst + _tekst;
                         else if (text.Equals("<Tekst_Onder>"))
                             shape.TextFrame.TextRange.Text = _tekst;
                     }
                     else if (shape.Type == MsoShapeType.msoTable)
                     {
                         if (shape.Table.Rows[1].Cells[1].Shape.TextFrame.TextRange.Text.Equals("<Liturgie>"))
-                            VulLiturgieTabel(shape.Table, _liturgie, _lezen, _tekst, _instellingen.StandaardTekst.Liturgie);
+                            VulLiturgieTabel(shape.Table, _liturgie, _lezen, _tekst, _instellingen.StandaardTeksten.Liturgie);
                     }
                 }
             }
@@ -206,7 +207,7 @@ namespace PowerpointGenerater.Powerpoint
             presentatie.Close();
         }
 
-        private static void VulLiturgieTabel(Table inTabel, IEnumerable<ILiturgieZoekresultaat> liturgie, String lezen, String tekst, String instellingLiturgie)
+        private static void VulLiturgieTabel(Table inTabel, IEnumerable<ILiturgieZoekresultaat> liturgie, string lezen, string tekst, string instellingLiturgie)
         {
             // Te tonen liturgie in lijst plaatsen zodat we de plek per index weten
             int liturgieIndex = 0;
@@ -244,7 +245,7 @@ namespace PowerpointGenerater.Powerpoint
                         //tekst
                         if (!lezengehad)
                         {
-                            if (!String.IsNullOrWhiteSpace(lezen))
+                            if (!string.IsNullOrWhiteSpace(lezen))
                             {
                                 inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = "L ";
                                 inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text += lezen;
@@ -258,7 +259,7 @@ namespace PowerpointGenerater.Powerpoint
                         }
                         else if (!tekstgehad)
                         {
-                            if (!String.IsNullOrWhiteSpace(tekst))
+                            if (!string.IsNullOrWhiteSpace(tekst))
                             {
                                 inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = "T ";
                                 inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text += tekst;
@@ -281,18 +282,18 @@ namespace PowerpointGenerater.Powerpoint
             }
         }
 
-        private String InvullenVolgende(ILiturgieZoekresultaat regel, ILiturgieZoekresultaatDeel deel, ILiturgieZoekresultaat volgende)
+        private string InvullenVolgende(ILiturgieZoekresultaat regel, ILiturgieZoekresultaatDeel deel, ILiturgieZoekresultaat volgende)
         {
             // Alleen volgende tonen als we op het laatste item zitten en als volgende er is
             var tonen = regel.Resultaten.Last() == deel && volgende != null;
             // Check of de volgende 'blanco' heet, want dan tonen we m niet
-            tonen = tonen && String.Compare(volgende.VirtueleBenaming, "Blanco", true) != 0;
+            tonen = tonen && string.Compare(volgende.VirtueleBenaming, "Blanco", true) != 0;
             if (tonen)
-                return String.Format("{0} {1}", _instellingen.StandaardTekst.Volgende, LiedNaam(volgende));
+                return string.Format("{0} {1}", _instellingen.StandaardTeksten.Volgende, LiedNaam(volgende));
             return string.Empty;
         }
 
-        private SlideVuller InvullenLiedTekst(String tempinhoud)
+        private SlideVuller InvullenLiedTekst(string tempinhoud)
         {
             var returnValue = new SlideVuller();
             var regels = tempinhoud.Split(new[] { "\r\n" }, StringSplitOptions.None);
@@ -338,7 +339,7 @@ namespace PowerpointGenerater.Powerpoint
               .Select(r => (r ?? "").Trim()).ToList();
 
             // plaats de in te voegen regels in het tekstveld (geen enter aan het einde)
-            returnValue.Invullen = String.Join("", insertLines.Select((l, i) => l + (i + 1 == insertLines.Count ? "" : "\r\n")));
+            returnValue.Invullen = string.Join("", insertLines.Select((l, i) => l + (i + 1 == insertLines.Count ? "" : "\r\n")));
 
             var overStart = optimaliseerEindIndex + 1;
             if (overStart >= regels.Length)
@@ -352,32 +353,32 @@ namespace PowerpointGenerater.Powerpoint
                 returnValue.Invullen += "\r\n >>";
 
             // Geef de resterende regels terug
-            returnValue.Over = String.Join("", overLines.Select((l, i) => l + (i + 1 == overLines.Count ? "" : "\r\n")));
+            returnValue.Over = string.Join("", overLines.Select((l, i) => l + (i + 1 == overLines.Count ? "" : "\r\n")));
             return returnValue;
         }
-        private static Boolean SkipRegel(String regel)
+        private static bool SkipRegel(string regel)
         {
-            return String.IsNullOrWhiteSpace(regel) || regel == NieuweSlideAanduiding;
+            return string.IsNullOrWhiteSpace(regel) || regel == NieuweSlideAanduiding;
         }
 
-        private static String InvullenLiturgieRegel(ILiturgieZoekresultaat regel, ILiturgieZoekresultaatDeel vanafDeel)
+        private static string InvullenLiturgieRegel(ILiturgieZoekresultaat regel, ILiturgieZoekresultaatDeel vanafDeel)
         {
             return LiedNaam(regel, vanafDeelHint: vanafDeel);
         }
 
-        private static String LiedNaam(ILiturgieZoekresultaat regel, ILiturgieZoekresultaatDeel vanafDeelHint = null)
+        private static string LiedNaam(ILiturgieZoekresultaat regel, ILiturgieZoekresultaatDeel vanafDeelHint = null)
         {
             if (regel.Type == LiturgieType.EnkelZonderDeel)
                 return regel.VirtueleBenaming;
             else if (regel.Type == LiturgieType.EnkelMetDeel)
-                return String.Format("{0} {1}", regel.VirtueleBenaming, regel.DeelBenaming);
+                return string.Format("{0} {1}", regel.VirtueleBenaming, regel.DeelBenaming);
             var vanafDeel = vanafDeelHint ?? regel.Resultaten.FirstOrDefault();  // Bij een deel hint tonen we alleen nog de huidige en komende versen
             var gebruikDeelRegels = regel.Resultaten.SkipWhile(r => r != vanafDeel);
-            return String.Format("{0} {1}: {2}", regel.VirtueleBenaming, regel.DeelBenaming, LiedVerzen(gebruikDeelRegels));
+            return string.Format("{0} {1}: {2}", regel.VirtueleBenaming, regel.DeelBenaming, LiedVerzen(gebruikDeelRegels));
         }
-        private static String LiedVerzen(IEnumerable<ILiturgieZoekresultaatDeel> vanDelen)
+        private static string LiedVerzen(IEnumerable<ILiturgieZoekresultaatDeel> vanDelen)
         {
-            return String.Join(",", vanDelen.Select(r => " " + r.Nummer)).TrimEnd(new char[] { ',' });
+            return string.Join(",", vanDelen.Select(r => " " + r.Nummer)).TrimEnd(new char[] { ',' });
         }
 
         /// <summary>
@@ -419,7 +420,7 @@ namespace PowerpointGenerater.Powerpoint
         /// </summary>
         /// <param name="path">het pad waar de powerpointpresentatie kan worden gevonden</param>
         /// <returns>de powerpoint presentatie</returns>
-        private _Presentation OpenPPS(String path)
+        private _Presentation OpenPPS(string path)
         {
             //controleer voor het openen van de presentatie op het meegegeven path of de presentatie bestaat
             if (File.Exists(path))
@@ -442,17 +443,10 @@ namespace PowerpointGenerater.Powerpoint
             SluitAlles();
         }
 
-        public enum Status
-        {
-            Gestart,
-            StopFout,
-            StopGoed,
-        }
-
         private class SlideVuller
         {
-            public String Invullen { get; set; }
-            public String Over { get; set; }
+            public string Invullen { get; set; }
+            public string Over { get; set; }
         }
     }
 }
