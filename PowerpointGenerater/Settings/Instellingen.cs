@@ -9,12 +9,13 @@ namespace PowerpointGenerater
 {
     public class Instellingen : IInstellingen
     {
-        public string Databasepad { get; private set; }
-        public string Templateliederen { get; private set; }
-        public string Templatetheme { get; private set; }
-        public int Regelsperslide { get; private set; }
+        public string Databasepad { get; set; }
+        public string Templateliederen { get; set; }
+        public string Templatetheme { get; set; }
+        public int Regelsperslide { get; set; }
         private List<IMapmask> lijstmasks = new List<IMapmask>();
-        public IStandaardTeksten StandaardTeksten { get; private set; }
+        private StandaardTeksten _standaardTeksten;
+        public IStandaardTeksten StandaardTeksten { get { return _standaardTeksten; } }
 
         public Instellingen()
         {
@@ -22,7 +23,7 @@ namespace PowerpointGenerater
             Templateliederen = "";
             Templatetheme = "";
             Regelsperslide = 4;
-            StandaardTeksten = new StandaardTeksten()
+            _standaardTeksten = new StandaardTeksten()
             {
                 Volgende = "Straks :",
                 Voorganger = "Voorganger :",
@@ -44,7 +45,7 @@ namespace PowerpointGenerater
             Templatetheme = templatetheme;
             Regelsperslide = regelsperslide;
             if (standaardTeksten != null)
-                StandaardTeksten = standaardTeksten;
+                _standaardTeksten = standaardTeksten;
         }
 
         public bool AddMask(IMapmask mask)
@@ -140,19 +141,7 @@ namespace PowerpointGenerater
 
         public static Instellingen LoadFromXMLFile(string path)
         {
-            var xdoc = new XmlDocument();
             var instellingen = (Instellingen)null;
-
-
-            //XmlNodeList nodelist = root.GetElementsByTagName("Name");
-            //XmlNodeList nodelist2 = root.GetElementsByTagName("RealName");
-            //if (nodelist.Count == nodelist2.Count)
-            //{
-            //    for (int i = 0; i < nodelist.Count; i++)
-            //    {
-            //        instellingen.lijstmasks.Add(new Mapmask(nodelist[i].InnerText, nodelist2[i].InnerText));
-            //    }
-            //}
 
             string fileName = path + "instellingen.xml";
             if (!File.Exists(fileName))
@@ -169,7 +158,10 @@ namespace PowerpointGenerater
                     instellingen = serializer.Deserialize(xmlReader) as Instellingen;
                 }
             }
+            if (instellingen == null)
+                return instellingen;
 
+            var xdoc = new XmlDocument();
             xdoc.Load(path + "masks.xml");
             var root = xdoc.DocumentElement;
 
