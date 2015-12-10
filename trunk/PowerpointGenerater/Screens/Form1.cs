@@ -14,6 +14,7 @@ namespace PowerpointGenerater
     public partial class Form1 : MainForm
     {
         // unity container voor dependency injection
+        [Dependency]
         public IUnityContainer DI { get; set; }
 
         //huidige bestand
@@ -35,22 +36,15 @@ namespace PowerpointGenerater
         public override void Opstarten(string startBestand = null)
         {
             HelpRequested += new HelpEventHandler(Form1_HelpRequested);
-            string[] temp = Application.ExecutablePath.Split('\\');
-            _programDirectory = "";
-            for (int i = 0; (i + 1) < temp.Count(); i++)
-            {
-                _programDirectory += temp[i];
-                _programDirectory += @"\";
-            }
+            _programDirectory = Path.GetDirectoryName(Application.ExecutablePath) + Path.DirectorySeparatorChar;
             _tempLiturgiePath = _programDirectory + @"temp.liturgie";
 
             KeyDown += new KeyEventHandler(Form1_KeyDown);
 
             if (File.Exists(_programDirectory + "Instellingen.xml") && File.Exists(_programDirectory + "masks.xml"))
-            {
                 _instellingen = Instellingen.LoadFromXMLFile(_programDirectory);
-            }
-            else {
+            if (_instellingen == null)
+            {
                 //default instellingen
                 _instellingen = new Instellingen((_programDirectory + @"Resources\Database"), (_programDirectory + @"Resources\Database\Template Liederen.pptx"), (_programDirectory + @"Resources\Database\Achtergrond.pptx"));
                 _instellingen.AddMask(new Mapmask("Ps", "psalm"));
