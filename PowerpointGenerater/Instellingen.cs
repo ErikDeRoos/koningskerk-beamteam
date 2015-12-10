@@ -16,7 +16,7 @@ namespace PowerpointGenerater
         public StandaardTeksten StandaardTekst { get; set; }
 
         public Instellingen()
-            : this("", "", "",4)
+            : this("", "", "", 4)
         {
 
         }
@@ -64,7 +64,7 @@ namespace PowerpointGenerater
             get
             {
                 if (Databasepad.StartsWith("."))
-                    return System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Databasepad.Remove(0,1));
+                    return System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Databasepad.Remove(0, 1));
 
                 return Databasepad;
             }
@@ -91,7 +91,7 @@ namespace PowerpointGenerater
                 return Templateliederen;
             }
         }
-        
+
         public static bool WriteXML(Instellingen instellingen, string path)
         {
             try
@@ -100,37 +100,38 @@ namespace PowerpointGenerater
                 xws.Indent = true;
 
                 //schrijf instellingen weg
-                XmlWriter xw; 
+                XmlWriter xw;
 
                 XmlSerializer serializer = new XmlSerializer(typeof(Instellingen));
                 using (TextWriter sw = new StreamWriter(path + "instellingen.xml"))
                 {
                     serializer.Serialize(sw, instellingen);
                 }
-               
+
                 //schrijf Masks weg
                 xw = XmlWriter.Create(path + "masks.xml", xws);
                 xw.WriteStartDocument();
-                    xw.WriteStartElement("Masks");
-                    foreach (Mapmask mask in instellingen.lijstmasks)
-                    {
-                        xw.WriteStartElement("Mask");
-                            xw.WriteStartElement("Name");
-                                xw.WriteString(mask.Name);
-                            xw.WriteEndElement();
-                            xw.WriteStartElement("RealName");
-                                xw.WriteString(mask.RealName);
-                            xw.WriteEndElement();
-                        xw.WriteEndElement();
-                    }
+                xw.WriteStartElement("Masks");
+                foreach (Mapmask mask in instellingen.lijstmasks)
+                {
+                    xw.WriteStartElement("Mask");
+                    xw.WriteStartElement("Name");
+                    xw.WriteString(mask.Name);
                     xw.WriteEndElement();
+                    xw.WriteStartElement("RealName");
+                    xw.WriteString(mask.RealName);
+                    xw.WriteEndElement();
+                    xw.WriteEndElement();
+                }
+                xw.WriteEndElement();
                 xw.WriteEndDocument();
 
                 xw.Flush();
                 xw.Close();
 
                 return true;
-            }catch (PathTooLongException)
+            }
+            catch (PathTooLongException)
             {
                 return false;
             }
@@ -141,7 +142,7 @@ namespace PowerpointGenerater
             Instellingen instellingen = new Instellingen();
             XmlDocument xdoc = new XmlDocument();
 
-            
+
 
             //XmlNodeList nodelist = root.GetElementsByTagName("Name");
             //XmlNodeList nodelist2 = root.GetElementsByTagName("RealName");
