@@ -194,6 +194,23 @@ namespace PowerpointGenerater
         #region formulier eventhandlers
         private void button1_Click(object sender, EventArgs e)
         {
+            StartGenereren();
+        }
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (!_instellingen.WriteToXMLFile(_programDirectory))
+                MessageBox.Show("Niet opgeslagen wegens te lang pad");
+        }
+        private void Form1_HelpRequested(object sender, HelpEventArgs hlpevent)
+        {
+            Help.ShowHelp(this, "help.chm", HelpNavigator.TopicId, "20");
+            hlpevent.Handled = true;
+        }
+        #endregion formulier eventhandlers
+        #endregion Eventhandlers
+
+        public void StartGenereren()
+        {
             if (button1.Text == "Generate")
             {
                 //open een save window
@@ -262,10 +279,14 @@ namespace PowerpointGenerater
                 progressBar1.Maximum = ingeladenLiturgie.Count();
 
                 button1.Text = "Stop";
-                _powerpoint.Initialiseer(ingeladenLiturgie, textBox2.Text, textBox3.Text, textBox4.Text, textBox1.Text, textBox5.Text, _instellingen, fileName);
-                var status = _powerpoint.Start();
+                var status = _powerpoint.Initialiseer(ingeladenLiturgie, textBox2.Text, textBox3.Text, textBox4.Text, textBox1.Text, textBox5.Text, _instellingen, fileName);
                 if (status.Fout != null)
                     MessageBox.Show(status.Fout.Melding + "\n\n" + status.Fout.Oplossing, status.Fout.Oplossing);
+                else {
+                    status = _powerpoint.Start();
+                    if (status.Fout != null)
+                        MessageBox.Show(status.Fout.Melding + "\n\n" + status.Fout.Oplossing, status.Fout.Oplossing);
+                }
                 if (status.NieuweStatus != PPGenerator.State.Gestart)
                     PresentatieGereedmeldingCallback();
             }
@@ -275,18 +296,6 @@ namespace PowerpointGenerater
                     MessageBox.Show(status.Fout.Melding + "\n\n" + status.Fout.Oplossing, status.Fout.Oplossing);
             }
         }
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (!_instellingen.WriteToXMLFile(_programDirectory))
-                MessageBox.Show("Niet opgeslagen wegens te lang pad");
-        }
-        private void Form1_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            Help.ShowHelp(this, "help.chm", HelpNavigator.TopicId, "20");
-            hlpevent.Handled = true;
-        }
-        #endregion formulier eventhandlers
-        #endregion Eventhandlers
 
         #region functies
         #region Algemene functies
