@@ -1,5 +1,6 @@
-﻿using Microsoft.Practices.Unity;
-using PowerpointGenerater.AppFlow;
+﻿using ILiturgieDatabase;
+using ISettings;
+using Microsoft.Practices.Unity;
 using PowerpointGenerater.Powerpoint;
 using PowerpointGenerator.Database;
 using System;
@@ -11,11 +12,15 @@ using System.Windows.Forms;
 
 namespace PowerpointGenerater
 {
-    public partial class Form1 : MainForm
+    partial class Form1 : Form
     {
-        // unity container voor dependency injection
+        // unity container voor dependency injection (t is niet een nette manier om de container te weten)
         [Dependency]
         public IUnityContainer DI { get; set; }
+        [Dependency]
+        public ILiturgieLosOp LiturgieOplosser { get; set; }
+        [Dependency]
+        public IInstellingenFactory InstellingenFactory { get; set; }
 
         //huidige bestand
         private string _currentfile = "";
@@ -23,35 +28,21 @@ namespace PowerpointGenerater
         private string _programDirectory = "";
         //locatie van temporary liturgie (restore punt)
         private string _tempLiturgiePath = "";
-        //instellingen
-        private Instellingen _instellingen;
         //generator
         private PPGenerator _powerpoint;
 
-        public Form1()
+        public Form1()  // DI via constructor is t meest duidelijk, werkt helaas niet met forms
         {
             InitializeComponent();
         }
 
-        public override void Opstarten(string startBestand = null)
+        public void Opstarten(string startBestand = null)
         {
             HelpRequested += new HelpEventHandler(Form1_HelpRequested);
             _programDirectory = Path.GetDirectoryName(Application.ExecutablePath) + Path.DirectorySeparatorChar;
             _tempLiturgiePath = _programDirectory + @"temp.liturgie";
 
             KeyDown += new KeyEventHandler(Form1_KeyDown);
-
-            if (File.Exists(_programDirectory + "Instellingen.xml") && File.Exists(_programDirectory + "masks.xml"))
-                _instellingen = Instellingen.LoadFromXMLFile(_programDirectory);
-            if (_instellingen == null)
-            {
-                //default instellingen
-                _instellingen = new Instellingen((_programDirectory + @"Resources\Database"), (_programDirectory + @"Resources\Database\Template Liederen.pptx"), (_programDirectory + @"Resources\Database\Achtergrond.pptx"));
-                _instellingen.AddMask(new Mapmask("Ps", "psalm"));
-                _instellingen.AddMask(new Mapmask("GK", "gezang"));
-                _instellingen.AddMask(new Mapmask("LB", "lied"));
-                _instellingen.AddMask(new Mapmask("Opw", "opwekking"));
-            }
 
             _powerpoint = new PPGenerator(DI, PresentatieVoortgangCallback, PresentatieGereedmeldingCallback);
             progressBar1.Visible = false;
@@ -145,18 +136,17 @@ namespace PowerpointGenerater
         #region opties
         private void templatesToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            var formulier = DI.Resolve<SettingsForm>();
-            formulier.Opstarten(_instellingen);
+            var formulier = new Instellingenform();
+            formulier.Opstarten();
             if (formulier.ShowDialog() == DialogResult.Yes)
             {
-                _instellingen = formulier.Instellingen;
-                if (!_instellingen.WriteToXMLFile(_programDirectory))
+                if (!InstellingenFactory.WriteToXMLFile(formulier.Instellingen))
                     MessageBox.Show("Niet opgeslagen wegens te lang pad");
             }
         }
         private void bekijkDatabaseToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            Process.Start("explorer.exe", "/root, \"" + _instellingen.FullDatabasePath + "\"");
+            Process.Start("explorer.exe", "/root, \"" + InstellingenFactory.LoadFromXMLFile().FullDatabasePath + "\"");
         }
         private void stopPowerpointToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -164,14 +154,17 @@ namespace PowerpointGenerater
         }
         private void invoerenMasksToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var formulier = new MaskInvoer(_instellingen.Masks);
+            var formulier = new MaskInvoer(InstellingenFactory.LoadFromXMLFile().Masks);
             if (formulier.ShowDialog() == DialogResult.OK)
             {
-                _instellingen.ClearMasks();
+                var instellingen = InstellingenFactory.LoadFromXMLFile();
+                instellingen.ClearMasks();
                 foreach (var mask in formulier.Masks)
                 {
-                    _instellingen.AddMask(mask);
+                    instellingen.AddMask(mask);
                 }
+                if (!InstellingenFactory.WriteToXMLFile(instellingen))
+                    MessageBox.Show("Niet opgeslagen wegens te lang pad");
             }
         }
         #endregion opties
@@ -192,8 +185,7 @@ namespace PowerpointGenerater
         }
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (!_instellingen.WriteToXMLFile(_programDirectory))
-                MessageBox.Show("Niet opgeslagen wegens te lang pad");
+            //
         }
         private void Form1_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
@@ -248,23 +240,19 @@ namespace PowerpointGenerater
                 #region creeer lijst van liturgie
                 // Liturgie uit tekstbox omzetten in leesbare items
                 var ruweLiturgie = new InterpreteerLiturgieRuw().VanTekstregels(richTextBox1.Lines);
-                // Ruwe liturgie omzetten naar zoekacties voor in t file systeem
-                var liturgieZoekVoorbereider = new InterpreteerLiturgieZoekacie(_instellingen.Masks).VanOnderdelen(ruweLiturgie);
                 // Zoek op het bestandssysteem zo veel mogelijk al op (behalve ppt, die gaan via COM element)
-                var ingeladenLiturgie = new LiturgieDatabase(_instellingen.FullDatabasePath).Zoek(liturgieZoekVoorbereider);
+                var ingeladenLiturgie = LiturgieOplosser.LosOp(ruweLiturgie);
 
                 //als niet alle liturgie is gevonden geven we een melding of de gebruiker toch door wil gaan met genereren
-                if (!ingeladenLiturgie.All(l => l.Resultaten.All(r => r.Gevonden)))
+                if (!ingeladenLiturgie.All(l => l.Resultaat == LiturgieOplossingResultaat.Opgelost))
                 {
-                    var melding = string.Join(" ",
-                      ingeladenLiturgie.Where(l => l.Resultaten.Any(r => !r.Gevonden))
-                      .SelectMany(l => l.Resultaten.Where(r => !r.Gevonden).Select(r => l.EchteBenaming + " " + l.DeelBenaming + " " + r.Nummer))
+                    var melding = string.Join(",",
+                      ingeladenLiturgie.Where(l => l.Resultaat != LiturgieOplossingResultaat.Opgelost)
+                      .Select(l => l.VanInterpretatie.Benaming + " " + l.VanInterpretatie.Deel)
                     );
                     var errorformulier = new LiturgieNotFoundFormulier(melding);
                     if (errorformulier.ShowDialog() == DialogResult.Cancel)
-                    {
                         return;
-                    }
                 }
                 #endregion creeer lijst van liturgie
                 progressBar1.Visible = true;
@@ -273,7 +261,7 @@ namespace PowerpointGenerater
                 progressBar1.Maximum = ingeladenLiturgie.Count();
 
                 button1.Text = "Stop";
-                var status = _powerpoint.Initialiseer(ingeladenLiturgie, textBox2.Text, textBox3.Text, textBox4.Text, textBox1.Text, textBox5.Text, _instellingen, fileName);
+                var status = _powerpoint.Initialiseer(ingeladenLiturgie.Select(l => l.Regel).ToList(), textBox2.Text, textBox3.Text, textBox4.Text, textBox1.Text, textBox5.Text, InstellingenFactory.LoadFromXMLFile(), fileName);
                 if (status.Fout != null)
                     MessageBox.Show(status.Fout.Melding + "\n\n" + status.Fout.Oplossing, status.Fout.Oplossing);
                 else {

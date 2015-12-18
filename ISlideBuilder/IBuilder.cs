@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using IDatabase;
 using ISettings;
+using ILiturgieDatabase;
 
 namespace ISlideBuilder
 {
@@ -10,7 +10,7 @@ namespace ISlideBuilder
         Action<int, int, int> Voortgang { set; }
         Action<Status, string> StatusWijziging { set; }
 
-        void PreparePresentation(IEnumerable<ILiturgieZoekresultaat> liturgie, string Voorganger, string Collecte1, string Collecte2, string Lezen, string Tekst, IInstellingen gebruikInstellingen, string opslaanAls);
+        void PreparePresentation(IEnumerable<ILiturgieRegel> liturgie, string Voorganger, string Collecte1, string Collecte2, string Lezen, string Tekst, IInstellingen gebruikInstellingen, string opslaanAls);
         void GeneratePresentation();
         void Stop();
     }

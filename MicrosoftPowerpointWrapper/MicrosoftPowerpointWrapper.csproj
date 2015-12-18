@@ -54,9 +54,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\IDatabase\IDatabase.csproj">
-      <Project>{318647d0-b6bb-410e-a547-628049eadb9d}</Project>
-      <Name>IDatabase</Name>
+    <ProjectReference Include="..\ILiturgieDatabase\ILiturgieDatabase.csproj">
+      <Project>{1338d41d-5e66-40f3-845f-170a8dcfb445}</Project>
+      <Name>ILiturgieDatabase</Name>
     </ProjectReference>
     <ProjectReference Include="..\ISettings\ISettings.csproj">
       <Project>{76821eaa-462d-4cad-813d-bcff31edad3a}</Project>

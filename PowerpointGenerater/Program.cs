@@ -1,5 +1,4 @@
 ﻿using Microsoft.Practices.Unity;
-using PowerpointGenerater.AppFlow;
 using System;
 using System.Windows.Forms;
 
@@ -25,7 +24,8 @@ namespace PowerpointGenerater
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            var startupForm = di.Resolve<MainForm>();
+            var startupForm = new Form1();
+            di.BuildUp(startupForm);
             startupForm.Opstarten(args.Length >= 1 ? args[0] : null);
 
             Application.Run(startupForm);
