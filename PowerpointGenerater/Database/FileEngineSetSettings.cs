@@ -2,7 +2,7 @@
 
 namespace PowerpointGenerater.Database
 {
-    class FileEngineSetSettings : ISetSettings
+    public class FileEngineSetSettings : ISetSettings
     {
         public string DisplayName { get; set; }
 
