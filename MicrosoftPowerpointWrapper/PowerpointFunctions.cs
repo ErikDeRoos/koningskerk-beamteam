@@ -244,7 +244,7 @@ namespace mppt
                         {
                             inTabel.Rows[index].Cells[2].Shape.TextFrame.TextRange.Text = toonItem.SubNaamDisplay;
                             if (toonItem.Content.Any(c => c.Nummer.HasValue))
-                                inTabel.Rows[index].Cells[3].Shape.TextFrame.TextRange.Text = ":" + LiedVerzen(toonItem.Content);
+                                inTabel.Rows[index].Cells[3].Shape.TextFrame.TextRange.Text = ":" + LiedVerzen(toonItem.Content, false);
                         }
                         liturgieIndex++;
                     }
