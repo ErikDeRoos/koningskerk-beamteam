@@ -167,8 +167,10 @@ namespace PowerpointGenerator.Database {
                 return LiturgieOplossingResultaat.SubSetFout;
             if (setNaam == FileEngineDefaults.CommonFilesSetName)
                 regel.NaamDisplay = subSet.Name;
-            else
+            else {
+                regel.NaamDisplay = set.Name;
                 regel.SubNaamDisplay = subSet.Name;
+            }
             if (!verzen.Any())
             {
                 // Als de set zonder verzen is hebben we n samengevoegd item
