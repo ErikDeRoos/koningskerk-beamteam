@@ -96,7 +96,7 @@ namespace PowerpointGenerater.Database
 
             var fileName = Path.Combine(_inDir, FileEngineDefaults.SetSettingsName);
             if (!File.Exists(fileName))
-                return new T();
+                ChangeSettings(new T(), false);
             var serializer = new XmlSerializer(typeof(T));
             var settings = new XmlReaderSettings();
             using (var textReader = new StreamReader(fileName))
@@ -117,7 +117,7 @@ namespace PowerpointGenerater.Database
             var serializer = new XmlSerializer(typeof(T));
             using (TextWriter sw = new StreamWriter(fileName))
             {
-                serializer.Serialize(sw, this);
+                serializer.Serialize(sw, newSettings);
                 sw.Flush();
             }
         }

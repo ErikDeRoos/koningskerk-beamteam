@@ -212,11 +212,7 @@ namespace PowerpointGenerater
                 //als niet alle liturgie is gevonden geven we een melding of de gebruiker toch door wil gaan met genereren
                 if (!ingeladenLiturgie.All(l => l.Resultaat == LiturgieOplossingResultaat.Opgelost))
                 {
-                    var melding = string.Join(",",
-                      ingeladenLiturgie.Where(l => l.Resultaat != LiturgieOplossingResultaat.Opgelost)
-                      .Select(l => l.VanInterpretatie.Benaming + " " + l.VanInterpretatie.Deel)
-                    );
-                    var errorformulier = new LiturgieNotFoundFormulier(melding);
+                    var errorformulier = new LiturgieNotFoundFormulier(ingeladenLiturgie.Where(l => l.Resultaat != LiturgieOplossingResultaat.Opgelost));
                     if (errorformulier.ShowDialog() == DialogResult.Cancel)
                         return;
                     else

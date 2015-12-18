@@ -132,6 +132,7 @@ namespace PowerpointGenerator.Database {
                 {
                     setNaam = FileEngineDefaults.CommonFilesSetName;
                     zoekNaam = item.Benaming;
+                    regel.TonenInOverzicht = false;  // TODO tijdelijk default gedrag van het niet tonen van algemene items in het overzicht overgenomen uit de oude situatie
                 }
                 var fout = Aanvullen(_database, regel, setNaam, zoekNaam, item.Verzen.ToList());
                 if (fout.HasValue)
