@@ -88,107 +88,6 @@ namespace PowerpointGenerator.Database {
         }
     }
 
-
-
-
-
-
-    ///// <summary>
-    ///// Interpreteer de ruwe liturgie regels tot zoekacties
-    ///// </summary>
-    //class InterpreteerLiturgieZoekacie
-    //{
-    //    private static readonly char[] _benamingSplitScheidingstekens = new char[] { ' ' };
-    //    private readonly IEnumerable<IMapmask> _masks;
-    //    public InterpreteerLiturgieZoekacie(IEnumerable<IMapmask> gebruikMasks)
-    //    {
-    //        _masks = gebruikMasks;
-    //    }
-
-    //    /// <summary>
-    //    /// Interpreteer de ruwe liturgie regels icm intelligentie zoals masks en hardcoded afkortingen.
-    //    /// </summary>
-    //    public IEnumerable<ILiturgieOnderdeelZoekactie> VanOnderdelen(IEnumerable<ILiturgieInterpretatie> regels)
-    //    {
-    //        return regels
-    //          .Select(r => VanOnderdeel(r))
-    //          .Where(r => r != null)
-    //          .ToList();
-    //    }
-
-    //    private Onderdeel VanOnderdeel(ILiturgieInterpretatie invoer)
-    //    {
-    //        var regel = new Onderdeel();
-    //        regel.Type = LiturgieType.EnkelZonderDeel;
-    //        regel.Ruw = invoer;
-    //        regel.EchteBenaming = invoer.Benaming;
-    //        // Bepaal basis pad. Deze is relatief: bewust nog geen database pad ervoor geplaatst. Dat gebeurd pas bij inlezen.
-    //        var basisPad = "" + Path.DirectorySeparatorChar;
-
-    //        // Bepaal hoe de liturgie regel in delen is opgedeeld
-    //        if (!string.IsNullOrWhiteSpace(regel.Ruw.Deel))
-    //            regel.Type = LiturgieType.EnkelMetDeel;
-    //        // Het is mogelijk een bestand in een map aan te wijzen door spaties te gebruiken. Ook dit oplossen
-    //        var benamingOnderdelen = invoer.Benaming.Split(_benamingSplitScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
-    //        if (benamingOnderdelen.Length > 1)
-    //        {
-    //            regel.EchteBenaming = benamingOnderdelen[benamingOnderdelen.Length - 1];  // Laatste is echte naam
-    //            basisPad +=
-    //              string.Join("", benamingOnderdelen.Select((o, i) => new { Naam = o, Index = i })
-    //                .Where(o => o.Index != benamingOnderdelen.Length - 1)
-    //                .Select(o => o.Naam + Path.DirectorySeparatorChar));
-    //        }
-    //        // liturgie regel met verzen is de uitgebreidste variant
-    //        if (invoer.Verzen.Any())
-    //            regel.Type = LiturgieType.MeerMetDeel;
-
-    //        // Bepaal nu de zoekhint
-    //        if (regel.Type == LiturgieType.MeerMetDeel)
-    //        {
-    //            regel.Type = LiturgieType.MeerMetDeel;
-    //            // de verzen zijn de te zoeken items. De rest is pad
-    //            basisPad += invoer.Benaming + Path.DirectorySeparatorChar;
-    //            if (!string.IsNullOrEmpty(invoer.Deel))
-    //                basisPad += invoer.Deel + Path.DirectorySeparatorChar;
-    //            //deel de verschillende bestandsnamen op(er zijn verschillende verzen mogelijk uit één map bijvoorbeeld)
-    //            regel.ZoekactieHints = invoer.Verzen.Select(v => new OnderdeelHint() { Nummer = v, ZoekPad = basisPad + v }).ToList();
-    //        }
-    //        else if (regel.Type == LiturgieType.EnkelMetDeel)
-    //        {
-    //            // Benaming deel is het gezochte item, rest is pad
-    //            regel.ZoekactieHints = new[] { new OnderdeelHint() { ZoekPad = basisPad + invoer.Benaming + Path.DirectorySeparatorChar + invoer.Deel } };
-    //        }
-    //        else {
-    //            // Benaming is gezochte item
-    //            regel.ZoekactieHints = new[] { new OnderdeelHint() { ZoekPad = basisPad + invoer.Benaming } };
-    //        }
-
-    //        // Virtuele benaming is de 'mooie' benaming die op het liturgie bord /volgende verschijnt. Maar
-    //        // hij wordt 'normaal' ingevoerd. Deze virtuele naam is een 'mask' en daar dan ook te vinden
-    //        // TODO verplaatsen? virtuele benaming is pas relevant in liturgie bord generator
-    //        regel.VirtueleBenaming = regel.EchteBenaming;
-    //        // Check of er een mask op de benaming zit
-    //        var maskCheck = _masks.FirstOrDefault(m => string.Compare(m.RealName, regel.EchteBenaming, true) == 0);
-    //        if (maskCheck != null)
-    //            regel.VirtueleBenaming = maskCheck.Name;
-    //        return regel;
-    //    }
-
-    //    class Onderdeel : ILiturgieOnderdeelZoekactie
-    //    {
-    //        public ILiturgieInterpretatie Ruw { get; set; }
-    //        public string VirtueleBenaming { get; set; }
-    //        public string EchteBenaming { get; set; }
-    //        public LiturgieType Type { get; set; }
-    //        public IEnumerable<ILiturgieOnderdeelZoekactieHint> ZoekactieHints { get; set; }
-    //    }
-    //    class OnderdeelHint : ILiturgieOnderdeelZoekactieHint
-    //    {
-    //        public string Nummer { get; set; }
-    //        public string ZoekPad { get; set; }
-    //    }
-    //}
-    
     
     static class LiturgieDatabaseSettings
     {
@@ -236,7 +135,7 @@ namespace PowerpointGenerator.Database {
                 }
                 var fout = Aanvullen(_database, regel, setNaam, zoekNaam, item.Verzen.ToList());
                 if (fout.HasValue)
-                    new Oplossing(fout.Value, item);
+                    return new Oplossing(fout.Value, item);
             }
 
             // kijk of de opties nog iets zeggen over alternatieve naamgeving
@@ -265,7 +164,10 @@ namespace PowerpointGenerator.Database {
             var subSet = set.Where(r => string.Compare(r.Name, zoekNaam, true) == 0).FirstOrDefault();
             if (subSet == null)
                 return LiturgieOplossingResultaat.SubSetFout;
-            regel.SubNaamDisplay = subSet.Name;
+            if (setNaam == FileEngineDefaults.CommonFilesSetName)
+                regel.NaamDisplay = subSet.Name;
+            else
+                regel.SubNaamDisplay = subSet.Name;
             if (!verzen.Any())
             {
                 // Als de set zonder verzen is hebben we n samengevoegd item
@@ -306,7 +208,7 @@ namespace PowerpointGenerator.Database {
             }
 
             // bepaal de naamgeving
-            regel.NaamDisplay = set.Settings.DisplayName;
+            regel.NaamDisplay = !string.IsNullOrWhiteSpace(set.Settings.DisplayName) ? set.Settings.DisplayName : regel.NaamDisplay;
             regel.OverzichtDisplay = regel.NaamDisplay;
 
             return null;
