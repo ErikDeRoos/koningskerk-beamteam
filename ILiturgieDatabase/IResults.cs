@@ -47,13 +47,20 @@ namespace ILiturgieDatabase {
     public interface ILiturgieRegel
     {
         /// <summary>
-        /// Naam zoals deze getoond moet worden boven dia en als volgende (zonder verzen)
+        /// Naam zoals deze getoond moet worden boven dia en als volgende (zonder sub naam, zonder verzen)
         /// </summary>
+        /// <example>'psalm' in 'psalm 100: 1, 2'</example>
         string NaamDisplay { get; }
         /// <summary>
-        /// Naam zoals deze getoond moet worden in liturgie (zonder verzen)
+        /// Naam zoals deze getoond moet worden in liturgie (zonder sub naam, zonder verzen)
         /// </summary>
+        /// <example>'psalm' in 'psalm 100: 1, 2'</example>
         string OverzichtDisplay { get; }
+        /// <summary>
+        /// De sub naam 
+        /// </summary>
+        /// <example>'100' in 'psalm 100: 1, 2'</example>
+        string SubNaamDisplay { get; }
         /// <summary>
         /// Of deze regel in het liturgie overzicht moet komen
         /// </summary>

@@ -12,7 +12,7 @@ namespace PowerpointGenerator.Database {
     // TODO Stap 1: database via XML setting files per dir maken (editor? nee)
     // TODO Stap 2: intelligentie voor on-the-fly uitzoeken database (vooral als hulp voor x tot y vraagstukken en voorbereiding voor assistentie)
     // TODO Stap 3: assistentie bij invullen liturgie
-    // TODO 'deze instellingen worden pas van effect als u het programma opnieuw opstart'
+    // TODO mask weer ergens toepassen
 
 
 
@@ -265,6 +265,7 @@ namespace PowerpointGenerator.Database {
             var subSet = set.Where(r => string.Compare(r.Name, zoekNaam, true) == 0).FirstOrDefault();
             if (subSet == null)
                 return LiturgieOplossingResultaat.SubSetFout;
+            regel.SubNaamDisplay = subSet.Name;
             if (!verzen.Any())
             {
                 // Als de set zonder verzen is hebben we n samengevoegd item
@@ -399,6 +400,7 @@ namespace PowerpointGenerator.Database {
         {
             public string NaamDisplay { get; set; }
             public string OverzichtDisplay { get; set; }
+            public string SubNaamDisplay { get; set; }
             public IEnumerable<ILiturgieContent> Content { get; set; }
             public bool TonenInOverzicht { get; set; }
             public bool TonenInVolgende { get; set; }
