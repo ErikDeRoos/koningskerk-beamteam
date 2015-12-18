@@ -1,23 +1,30 @@
-﻿using ISlideBuilder;
+﻿using IDatabase;
+using ILiturgieDatabase;
+using ISettings;
+using ISlideBuilder;
 using Microsoft.Practices.Unity;
+using PowerpointGenerater.Database;
+using PowerpointGenerater.Settings;
+using PowerpointGenerator.Database;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace PowerpointGenerater.AppFlow
+namespace PowerpointGenerater
 {
     class DefaultContainer : UnityContainer
     {
         public void RegisterAll()
         {
             this.RegisterInstance<IUnityContainer>(this);  // de main unity container
-            this.RegisterType<MainForm, Form1>();  // opstart scherm
-            this.RegisterType<SettingsForm, Instellingenform>();  // settings scherm
-            RegisterType<IBuilder>("MicrosoftPowerpointWrapper.dll");  // powerpoint functionaliteit
+            RegisterTypeWhenResolvableInAssembly<IBuilder>("MicrosoftPowerpointWrapper.dll");  // powerpoint functionaliteit
+            this.RegisterInstance<IInstellingenFactory>(new SettingsFactory(System.IO.Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath), "instellingen.xml", "masks.xml"));
+            this.RegisterType(typeof(IEngine<>), typeof(FileEngine<>));
+            this.RegisterType<ILiturgieLosOp, LiturgieDatabase>();
         }
 
-        private void RegisterType<T>(string takeFirstTypeFromThisAssembly)
+        private void RegisterTypeWhenResolvableInAssembly<T>(string takeFirstTypeFromThisAssembly)
         {
             Type resolveBuilderType = null;
             try

@@ -114,10 +114,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AppFlow\DefaultContainer.cs" />
-    <Compile Include="AppFlow\FormFunctions.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="DefaultContainer.cs" />
+    <Compile Include="Database\FileEngine.cs" />
+    <Compile Include="Database\FileEngineSetSettings.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -195,6 +194,7 @@
     <Compile Include="Screens\Instellingenform.Designer.cs">
       <DependentUpon>Instellingenform.cs</DependentUpon>
     </Compile>
+    <Compile Include="Settings\SettingsFactory.cs" />
     <Compile Include="Settings\StandaardTeksten.cs" />
     <Compile Include="Database\Uitlezen_Liturgie.cs" />
   </ItemGroup>
@@ -219,6 +219,10 @@
     <ProjectReference Include="..\IDatabase\IDatabase.csproj">
       <Project>{318647d0-b6bb-410e-a547-628049eadb9d}</Project>
       <Name>IDatabase</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ILiturgieDatabase\ILiturgieDatabase.csproj">
+      <Project>{1338d41d-5e66-40f3-845f-170a8dcfb445}</Project>
+      <Name>ILiturgieDatabase</Name>
     </ProjectReference>
     <ProjectReference Include="..\ISettings\ISettings.csproj">
       <Project>{76821eaa-462d-4cad-813d-bcff31edad3a}</Project>

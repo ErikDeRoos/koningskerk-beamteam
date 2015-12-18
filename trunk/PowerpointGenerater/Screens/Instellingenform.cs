@@ -1,19 +1,26 @@
 ﻿using ISettings;
-using PowerpointGenerater.AppFlow;
+using Microsoft.Practices.Unity;
 using System;
 using System.Windows.Forms;
 
 namespace PowerpointGenerater
 {
-    public partial class Instellingenform : SettingsForm
+    partial class Instellingenform : Form
     {
+        [Dependency]
+        public IInstellingenFactory InstellingenFactory { get; set; }
+
+        public IInstellingen Instellingen { get; private set; }
+
         public Instellingenform()
         {
             InitializeComponent();
         }
 
-        public override void Opstarten(IInstellingen vanInstellingen)
+        public void Opstarten()
         {
+            var vanInstellingen = InstellingenFactory.LoadFromXMLFile();
+
             textBox1.Text = vanInstellingen.Templateliederen;
             textBox2.Text = vanInstellingen.Templatetheme;
             textBox3.Text = vanInstellingen.Databasepad;

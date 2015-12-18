@@ -1,4 +1,5 @@
-﻿using IDatabase;
+﻿using ILiturgieDatabase;
+using ISettings;
 using ISlideBuilder;
 using Microsoft.Practices.Unity;
 using System;
@@ -15,13 +16,13 @@ namespace PowerpointGenerater.Powerpoint
     class PPGenerator : IDisposable
     {
         private State _huidigeStatus;
-        private IEnumerable<ILiturgieZoekresultaat> _liturgie;
+        private IEnumerable<ILiturgieRegel> _liturgie;
         private string _voorganger;
         private string _collecte1;
         private string _collecte2;
         private string _lezen;
         private string _tekst;
-        private Instellingen _instellingen;
+        private IInstellingen _instellingen;
         private string _opslaanAls;
         private IUnityContainer _di;
 
@@ -44,8 +45,8 @@ namespace PowerpointGenerater.Powerpoint
             _setGereedmelding = gereedmeldingDelegate;
         }
 
-        public StatusMelding Initialiseer(IEnumerable<ILiturgieZoekresultaat> liturgie, string Voorganger, string Collecte1, string Collecte2, string Lezen,
-          string Tekst, Instellingen instellingen, string opslaanAls)
+        public StatusMelding Initialiseer(IEnumerable<ILiturgieRegel> liturgie, string Voorganger, string Collecte1, string Collecte2, string Lezen,
+          string Tekst, IInstellingen instellingen, string opslaanAls)
         {
             lock (_locker)
             {
