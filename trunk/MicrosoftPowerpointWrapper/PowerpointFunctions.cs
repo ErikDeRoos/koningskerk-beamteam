@@ -7,6 +7,7 @@ using Microsoft.Office.Core;
 using ILiturgieDatabase;
 using ISettings;
 using ISlideBuilder;
+using System.Text;
 
 namespace mppt
 {
@@ -20,7 +21,7 @@ namespace mppt
 
         private const string NieuweSlideAanduiding = "#";
 
-        private IEnumerable<ILiturgieZoekresultaat> _liturgie = new List<ILiturgieZoekresultaat>();
+        private IEnumerable<ILiturgieRegel> _liturgie = new List<ILiturgieRegel>();
         private string _voorganger;
         private string _collecte1;
         private string _collecte2;
@@ -34,7 +35,7 @@ namespace mppt
 
         public PowerpointFunctions() { }
 
-        public void PreparePresentation(IEnumerable<ILiturgieZoekresultaat> liturgie, string Voorganger, string Collecte1, string Collecte2, string Lezen, string Tekst, IInstellingen gebruikInstellingen, string opslaanAls)
+        public void PreparePresentation(IEnumerable<ILiturgieRegel> liturgie, string Voorganger, string Collecte1, string Collecte2, string Lezen, string Tekst, IInstellingen gebruikInstellingen, string opslaanAls)
         {
             _liturgie = liturgie;
             _voorganger = Voorganger;
@@ -69,17 +70,15 @@ namespace mppt
 
             try
             {
-                // Lijst maken zodat volgorde bekend is
-                var lijst = _liturgie.ToList();
-
-                //voor elke regel in de liturgie moeten sheets worden gemaakt
-                foreach (var regel in lijst)
+                // Voor elke regel in de liturgie moeten sheets worden gemaakt (als dat mag)
+                // Gebruik een list zodat we de plek weten voor de progress
+                var hardeLijst = _liturgie.Where(l => l.VerwerkenAlsSlide).ToList();
+                foreach (var regel in hardeLijst)
                 {
-                    var huidigeItemIndex = lijst.IndexOf(regel);
-                    var volgendeIndex = huidigeItemIndex + 1;
-                    var volgende = volgendeIndex < lijst.Count ? lijst[volgendeIndex] : null;
+                    var volgende = Volgende(_liturgie, regel);
 
-                    foreach (var inhoud in regel.Resultaten)
+                    // Per onderdeel in de regel moet een sheet komen
+                    foreach (var inhoud in regel.Content)
                     {
                         if (inhoud.InhoudType == InhoudType.Tekst)
                             InvullenTekst(regel, inhoud, volgende);
@@ -89,7 +88,7 @@ namespace mppt
                             break;
                     }
                     if (Voortgang != null)
-                        Voortgang.Invoke(0, _liturgie.Count(), volgendeIndex);
+                        Voortgang.Invoke(0, _liturgie.Count(), hardeLijst.IndexOf(regel) + 1);
                     if (_stop)
                         break;
                 }
@@ -108,16 +107,37 @@ namespace mppt
             SluitAlles();
         }
 
+        /// <summary>
+        /// Uitzoeken wat de volgende is
+        /// </summary>
+        private static ILiturgieRegel Volgende(IEnumerable<ILiturgieRegel> volledigeLiturgie, ILiturgieRegel huidig)
+        {
+            var lijst = volledigeLiturgie.ToList();
+            var huidigeItemIndex = lijst.IndexOf(huidig);
+            return lijst.Skip(huidigeItemIndex + 1).FirstOrDefault();
+        }
+
+
         public void Stop()
         {
             _stop = true;
         }
 
-        private void InvullenTekst(ILiturgieZoekresultaat regel, ILiturgieZoekresultaatDeel inhoud, ILiturgieZoekresultaat volgende)
+        private void InvullenTekst(ILiturgieRegel regel, ILiturgieContent inhoud, ILiturgieRegel volgende)
         {
             var tekstOmTeRenderen = inhoud.Inhoud;
-            //zolang er nog iets is in te voegen in sheets
+            var tekstOmTeRenderenLijst = new List<string>();
+            // knip de te renderen tekst in stukken (zodat we van tevoren het aantal weten)
             while (!string.IsNullOrWhiteSpace(tekstOmTeRenderen))
+            {
+                // plaats zo veel mogelijk tekst op de slide totdat het niet meer past, krijg de restjes terug
+                var uitzoeken = InvullenLiedTekst(tekstOmTeRenderen);
+                tekstOmTeRenderenLijst.Add(uitzoeken.Invullen);
+                tekstOmTeRenderen = uitzoeken.Over;
+            }
+
+            //zolang er nog iets is in te voegen in sheets
+            foreach(var tekst in tekstOmTeRenderenLijst)
             {
                 //regel de template om het lied op af te beelden
                 var presentatie = OpenPPS(_instellingen.FullTemplateliederen);
@@ -136,14 +156,11 @@ namespace mppt
                                 shape.TextFrame.TextRange.Text = InvullenLiturgieRegel(regel, inhoud);
                             //als de template de tekst bevat "Inhoud" moet daar de inhoud van het vers komen
                             else if (text.Equals("<Inhoud>"))
-                            {
-                                // plaats zo veel mogelijk tekst op de slide totdat het niet meer past, krijg de restjes terug
-                                var uitzoeken = InvullenLiedTekst(tekstOmTeRenderen);
-                                shape.TextFrame.TextRange.Text = uitzoeken.Invullen;
-                                tekstOmTeRenderen = uitzoeken.Over;
-                            }
+                                shape.TextFrame.TextRange.Text = tekst;
                             //als de template de tekst bevat "Volgende" moet daar de Liturgieregel van de volgende sheet komen
-                            else if (text.Equals("<Volgende>"))
+                            //we moeten dan wel al op de laatste slide zitten ('InvullenVolgende' is wel al intelligent maar in het geval van 1
+                            //lange tekst over meerdere dia's kan 'InvullenVolgende' niet de juiste keuze maken)
+                            else if (text.Equals("<Volgende>") && tekstOmTeRenderenLijst.Last() == tekst)
                                 shape.TextFrame.TextRange.Text = InvullenVolgende(regel, inhoud, volgende);
                         }
                     }
@@ -155,7 +172,7 @@ namespace mppt
             }
         }
 
-        private void InvullenSlide(ILiturgieZoekresultaat regel, ILiturgieZoekresultaatDeel inhoud, ILiturgieZoekresultaat volgende)
+        private void InvullenSlide(ILiturgieRegel regel, ILiturgieContent inhoud, ILiturgieRegel volgende)
         {
             //open de presentatie met de sheets erin
             var presentatie = OpenPPS(inhoud.Inhoud);
@@ -205,11 +222,11 @@ namespace mppt
             presentatie.Close();
         }
 
-        private static void VulLiturgieTabel(Table inTabel, IEnumerable<ILiturgieZoekresultaat> liturgie, string lezen, string tekst, string instellingLiturgie)
+        private static void VulLiturgieTabel(Table inTabel, IEnumerable<ILiturgieRegel> liturgie, string lezen, string tekst, string instellingLiturgie)
         {
             // Te tonen liturgie in lijst plaatsen zodat we de plek per index weten
             int liturgieIndex = 0;
-            var teTonenLiturgie = liturgie.Where(l => l.Type != LiturgieType.EnkelZonderDeel).ToList();
+            var teTonenLiturgie = liturgie.Where(l => l.TonenInOverzicht).ToList();
 
             var lezengehad = false;
             var tekstgehad = false;
@@ -222,12 +239,12 @@ namespace mppt
                     if (liturgiegevonden)
                     {
                         var toonItem = teTonenLiturgie[liturgieIndex];
-                        inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = toonItem.VirtueleBenaming;
-                        if (toonItem.Type != LiturgieType.EnkelZonderDeel)
+                        inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = toonItem.OverzichtDisplay;
+                        if (!string.IsNullOrWhiteSpace(toonItem.SubNaamDisplay))
                         {
-                            inTabel.Rows[index].Cells[2].Shape.TextFrame.TextRange.Text = toonItem.DeelBenaming;
-                            if (toonItem.Type == LiturgieType.MeerMetDeel)
-                                inTabel.Rows[index].Cells[3].Shape.TextFrame.TextRange.Text = ":" + LiedVerzen(toonItem.Resultaten);
+                            inTabel.Rows[index].Cells[2].Shape.TextFrame.TextRange.Text = toonItem.SubNaamDisplay;
+                            if (toonItem.Content.Any(c => c.Nummer.HasValue))
+                                inTabel.Rows[index].Cells[3].Shape.TextFrame.TextRange.Text = ":" + LiedVerzen(toonItem.Content);
                         }
                         liturgieIndex++;
                     }
@@ -280,13 +297,14 @@ namespace mppt
             }
         }
 
-        private string InvullenVolgende(ILiturgieZoekresultaat regel, ILiturgieZoekresultaatDeel deel, ILiturgieZoekresultaat volgende)
+        /// Een 'volgende' tekst is alleen relevant om te tonen op de laatste pagina binnen een item voordat 
+        /// een nieuw item komt.
+        /// Je kunt er echter ook voor kiezen dat een volgende item gewoon niet aangekondigd wordt. Dat gaat
+        /// via 'TonenInVolgende'.
+        private string InvullenVolgende(ILiturgieRegel regel, ILiturgieContent deel, ILiturgieRegel volgende)
         {
             // Alleen volgende tonen als we op het laatste item zitten en als volgende er is
-            var tonen = regel.Resultaten.Last() == deel && volgende != null;
-            // Check of de volgende 'blanco' heet, want dan tonen we m niet
-            tonen = tonen && string.Compare(volgende.VirtueleBenaming, "Blanco", true) != 0;
-            if (tonen)
+            if (regel.Content.Last() == deel && volgende != null && volgende.TonenInVolgende)
                 return string.Format("{0} {1}", _instellingen.StandaardTeksten.Volgende, LiedNaam(volgende));
             return string.Empty;
         }
@@ -359,24 +377,55 @@ namespace mppt
             return string.IsNullOrWhiteSpace(regel) || regel == NieuweSlideAanduiding;
         }
 
-        private static string InvullenLiturgieRegel(ILiturgieZoekresultaat regel, ILiturgieZoekresultaatDeel vanafDeel)
+        private static string InvullenLiturgieRegel(ILiturgieRegel regel, ILiturgieContent vanafDeel)
         {
             return LiedNaam(regel, vanafDeelHint: vanafDeel);
         }
 
-        private static string LiedNaam(ILiturgieZoekresultaat regel, ILiturgieZoekresultaatDeel vanafDeelHint = null)
+        private static string LiedNaam(ILiturgieRegel regel, ILiturgieContent vanafDeelHint = null)
         {
-            if (regel.Type == LiturgieType.EnkelZonderDeel)
-                return regel.VirtueleBenaming;
-            else if (regel.Type == LiturgieType.EnkelMetDeel)
-                return string.Format("{0} {1}", regel.VirtueleBenaming, regel.DeelBenaming);
-            var vanafDeel = vanafDeelHint ?? regel.Resultaten.FirstOrDefault();  // Bij een deel hint tonen we alleen nog de huidige en komende versen
-            var gebruikDeelRegels = regel.Resultaten.SkipWhile(r => r != vanafDeel);
-            return string.Format("{0} {1}: {2}", regel.VirtueleBenaming, regel.DeelBenaming, LiedVerzen(gebruikDeelRegels));
+            if (String.IsNullOrWhiteSpace(regel.SubNaamDisplay))
+                return regel.NaamDisplay;
+            else if (!regel.Content.Any(r => r.Nummer.HasValue))
+                return string.Format("{0} {1}", regel.NaamDisplay, regel.SubNaamDisplay);
+            var vanafDeel = vanafDeelHint ?? regel.Content.FirstOrDefault();  // Bij een deel hint tonen we alleen nog de huidige en komende versen
+            var gebruikDeelRegels = regel.Content.SkipWhile(r => r != vanafDeel);
+            return string.Format("{0} {1}: {2}", regel.NaamDisplay, regel.SubNaamDisplay, LiedVerzen(gebruikDeelRegels, vanafDeelHint != null));
         }
-        private static string LiedVerzen(IEnumerable<ILiturgieZoekresultaatDeel> vanDelen)
+        /// <summary>
+        /// Maak een mooie samenvatting van de opgegeven nummers
+        /// </summary>
+        /// Probeer de nummers samen te vatten door een bereik te tonen.
+        /// Waar niet mogelijk toon daar gewoon komma gescheiden nummers.
+        /// Als het in beeld is dan wordt de eerste in ieder geval los getoond.
+        /// <remarks>
+        /// </remarks>
+        private static string LiedVerzen(IEnumerable<ILiturgieContent> vanDelen, bool inBeeld)
         {
-            return string.Join(",", vanDelen.Select(r => " " + r.Nummer)).TrimEnd(new char[] { ',' });
+            var over = vanDelen.Where(v => v.Nummer.HasValue).Select(v => v.Nummer.Value).ToList();
+            if (!over.Any())
+                return "";
+            var builder = new StringBuilder(" ");
+            if (inBeeld)
+            {
+                builder.Append(over.First()).Append(", ");
+                over.RemoveAt(0);
+            }
+            while (over.Any())
+            {
+                var nieuweReeks = new List<int>() { over.First() };
+                over.RemoveAt(0);
+                while (over.Any() && over[0] == nieuweReeks.Last() + 1)
+                {
+                    nieuweReeks.Add(over[0]);
+                    over.RemoveAt(0);
+                }
+                if (nieuweReeks.Count < 3)
+                    builder.Append(string.Join(", ", nieuweReeks));
+                else
+                    builder.AppendFormat("{0}-{1}, ", nieuweReeks.First(), nieuweReeks.Last());
+            }
+            return builder.ToString().TrimEnd(new char[] { ',' , ' ' });
         }
 
         /// <summary>
