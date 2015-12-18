@@ -97,28 +97,40 @@ namespace PowerpointGenerater.Database
             var fileName = Path.Combine(_inDir, FileEngineDefaults.SetSettingsName);
             if (!File.Exists(fileName))
                 ChangeSettings(new T(), false);
-            var serializer = new XmlSerializer(typeof(T));
-            var settings = new XmlReaderSettings();
-            using (var textReader = new StreamReader(fileName))
-            {
-                using (var xmlReader = XmlReader.Create(textReader, settings))
+            try {
+                var serializer = new XmlSerializer(typeof(T));
+                var settings = new XmlReaderSettings();
+                using (var textReader = new StreamReader(fileName))
                 {
-                    return (serializer.Deserialize(xmlReader) as T) ?? new T();
+                    using (var xmlReader = XmlReader.Create(textReader, settings))
+                    {
+                        return (serializer.Deserialize(xmlReader) as T) ?? new T();
+                    }
                 }
+            }
+            catch (InvalidOperationException)  // XML niet in juiste format
+            {
+                var nieuw = new T();
+                ChangeSettings(nieuw, false);
+                return nieuw;
             }
         }
 
         private void ChangeSettings(T newSettings, bool cached)
         {
-            if (cached)
-                _settingsCached = newSettings;
-
-            var fileName = Path.Combine(_inDir, FileEngineDefaults.SetSettingsName);
-            var serializer = new XmlSerializer(typeof(T));
-            using (TextWriter sw = new StreamWriter(fileName))
+            try {
+                var fileName = Path.Combine(_inDir, FileEngineDefaults.SetSettingsName);
+                var serializer = new XmlSerializer(typeof(T));
+                using (TextWriter sw = new StreamWriter(fileName))
+                {
+                    serializer.Serialize(sw, newSettings);
+                    sw.Flush();
+                }
+            }
+            finally
             {
-                serializer.Serialize(sw, newSettings);
-                sw.Flush();
+                if (cached)
+                    _settingsCached = newSettings;
             }
         }
     }
