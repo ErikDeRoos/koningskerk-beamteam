@@ -137,8 +137,9 @@ namespace PowerpointGenerater
         private void templatesToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             var formulier = new Instellingenform();
+            DI.BuildUp(formulier);
             formulier.Opstarten();
-            if (formulier.ShowDialog() == DialogResult.Yes)
+            if (formulier.ShowDialog() == DialogResult.Yes && formulier.Instellingen != null)
             {
                 if (!InstellingenFactory.WriteToXMLFile(formulier.Instellingen))
                     MessageBox.Show("Niet opgeslagen wegens te lang pad");
@@ -199,7 +200,31 @@ namespace PowerpointGenerater
         {
             if (button1.Text == "Generate")
             {
-                //open een save window
+                //sla een back up voor als er iets fout gaat
+                Opslaan_Op_Locatie(GetWorkingFile(), _tempLiturgiePath);
+                
+                #region creeer lijst van liturgie
+                // Liturgie uit tekstbox omzetten in leesbare items
+                var ruweLiturgie = new InterpreteerLiturgieRuw().VanTekstregels(richTextBox1.Lines);
+                // Zoek op het bestandssysteem zo veel mogelijk al op (behalve ppt, die gaan via COM element)
+                var ingeladenLiturgie = LiturgieOplosser.LosOp(ruweLiturgie);
+
+                //als niet alle liturgie is gevonden geven we een melding of de gebruiker toch door wil gaan met genereren
+                if (!ingeladenLiturgie.All(l => l.Resultaat == LiturgieOplossingResultaat.Opgelost))
+                {
+                    var melding = string.Join(",",
+                      ingeladenLiturgie.Where(l => l.Resultaat != LiturgieOplossingResultaat.Opgelost)
+                      .Select(l => l.VanInterpretatie.Benaming + " " + l.VanInterpretatie.Deel)
+                    );
+                    var errorformulier = new LiturgieNotFoundFormulier(melding);
+                    if (errorformulier.ShowDialog() == DialogResult.Cancel)
+                        return;
+                    else
+                        ingeladenLiturgie = ingeladenLiturgie.Where(l => l.Resultaat == LiturgieOplossingResultaat.Opgelost).ToList();
+                }
+                #endregion creeer lijst van liturgie
+
+                #region open een save window
                 var saveFileDialog1 = new SaveFileDialog();
                 saveFileDialog1.Filter = "Powerpoint bestand (*.ppt)|*.ppt|Powerpoint bestanden (*.pptx)|*.pptx";
                 saveFileDialog1.Title = "Sla de presentatie op";
@@ -234,32 +259,15 @@ namespace PowerpointGenerater
                     MessageBox.Show("Kan niet schrijven naar de opgegeven bestandsnaam.\n\nControleer of het pad toegankelijk is.", "Bestand niet toegankelijk", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
+                #endregion open een save window
 
-                //sla een back up voor als er iets fout gaat
-                Opslaan_Op_Locatie(GetWorkingFile(), _tempLiturgiePath);
-                #region creeer lijst van liturgie
-                // Liturgie uit tekstbox omzetten in leesbare items
-                var ruweLiturgie = new InterpreteerLiturgieRuw().VanTekstregels(richTextBox1.Lines);
-                // Zoek op het bestandssysteem zo veel mogelijk al op (behalve ppt, die gaan via COM element)
-                var ingeladenLiturgie = LiturgieOplosser.LosOp(ruweLiturgie);
-
-                //als niet alle liturgie is gevonden geven we een melding of de gebruiker toch door wil gaan met genereren
-                if (!ingeladenLiturgie.All(l => l.Resultaat == LiturgieOplossingResultaat.Opgelost))
-                {
-                    var melding = string.Join(",",
-                      ingeladenLiturgie.Where(l => l.Resultaat != LiturgieOplossingResultaat.Opgelost)
-                      .Select(l => l.VanInterpretatie.Benaming + " " + l.VanInterpretatie.Deel)
-                    );
-                    var errorformulier = new LiturgieNotFoundFormulier(melding);
-                    if (errorformulier.ShowDialog() == DialogResult.Cancel)
-                        return;
-                }
-                #endregion creeer lijst van liturgie
+                // start de progress tracking
                 progressBar1.Visible = true;
                 progressBar1.Value = 0;
                 progressBar1.Minimum = 0;
                 progressBar1.Maximum = ingeladenLiturgie.Count();
 
+                // via deze knop weten we de status van t proces (hacky)
                 button1.Text = "Stop";
                 var status = _powerpoint.Initialiseer(ingeladenLiturgie.Select(l => l.Regel).ToList(), textBox2.Text, textBox3.Text, textBox4.Text, textBox1.Text, textBox5.Text, InstellingenFactory.LoadFromXMLFile(), fileName);
                 if (status.Fout != null)

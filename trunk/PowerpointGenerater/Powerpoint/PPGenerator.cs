@@ -77,7 +77,11 @@ namespace PowerpointGenerater.Powerpoint
             {
                 if (_huidigeStatus != State.Geinitialiseerd)
                     return new StatusMelding(_huidigeStatus, "Kan powerpoint niet starten", "Start het programma opnieuw op");
-                _powerpoint = _di.Resolve<IBuilder>();
+                try
+                {
+                    _powerpoint = _di.Resolve<IBuilder>();
+                }
+                catch (ResolutionFailedException) { }
                 if (_powerpoint == null)
                     return new StatusMelding(_huidigeStatus, "Kan powerpoint niet starten", "Powerpoint koppeling kon niet geladen worden");
                 _powerpoint.StatusWijziging = PresentatieStatusWijzigingCallback;

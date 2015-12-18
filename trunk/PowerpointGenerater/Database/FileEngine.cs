@@ -14,6 +14,11 @@ namespace PowerpointGenerater.Database
         public const string BundleTypeDir = "<dir>";
         public const string CommonFilesSetName = "Common";
         public const string SetSettingsName = "instellingen.xml";
+
+        public static string ClosestPathName(string fromPath)
+        {
+            return fromPath.Split(new[] { Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar }).Last();
+        }
     }
 
 
@@ -27,6 +32,7 @@ namespace PowerpointGenerater.Database
         public FileEngine(IInstellingenFactory instellingenFactory)
         {
             _instellingenFactory = instellingenFactory;
+            Cached = true;
         }
 
         private static IEnumerable<FileSet<T>> GetDirs(string startDir, bool askCached)
@@ -60,7 +66,7 @@ namespace PowerpointGenerater.Database
             _inDir = inDir;
             _cached = cached;
 
-            Name = Path.GetDirectoryName(_inDir);
+            Name = FileEngineDefaults.ClosestPathName(_inDir);
         }
 
         private static IEnumerable<IDbItem> GetItems(string atDir, bool itemsHaveSubContent, bool askCached)
@@ -130,7 +136,7 @@ namespace PowerpointGenerater.Database
             _inDir = dirPath;
             _cached = cached;
 
-            Name = Path.GetDirectoryName(dirPath);
+            Name = FileEngineDefaults.ClosestPathName(dirPath);
             Content = new DirContent(_inDir, cached);
         }
 
@@ -180,8 +186,9 @@ namespace PowerpointGenerater.Database
             _filePath = filePath;
 
             Name = Path.GetFileNameWithoutExtension(filePath);
+            Content = new FileContent(filePath);
         }
-        class DirContent : IDbItemContent
+        class FileContent : IDbItemContent
         {
             private string _filePath;
 
@@ -189,7 +196,7 @@ namespace PowerpointGenerater.Database
             public Stream Content { get { return ReadFile(_filePath); } }
             public string PersistentLink { get { return _filePath; } }
 
-            public DirContent(string filePath)
+            public FileContent(string filePath)
             {
                 _filePath = filePath;
 
