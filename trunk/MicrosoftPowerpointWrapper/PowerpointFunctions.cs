@@ -239,12 +239,12 @@ namespace mppt
                     if (liturgiegevonden)
                     {
                         var toonItem = teTonenLiturgie[liturgieIndex];
-                        inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = toonItem.OverzichtDisplay;
-                        if (!string.IsNullOrWhiteSpace(toonItem.SubNaamDisplay))
+                        inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = toonItem.Display.NaamOverzicht;
+                        if (!string.IsNullOrWhiteSpace(toonItem.Display.SubNaam))
                         {
-                            inTabel.Rows[index].Cells[2].Shape.TextFrame.TextRange.Text = toonItem.SubNaamDisplay;
+                            inTabel.Rows[index].Cells[2].Shape.TextFrame.TextRange.Text = toonItem.Display.SubNaam;
                             if (toonItem.Content.Any(c => c.Nummer.HasValue))
-                                inTabel.Rows[index].Cells[3].Shape.TextFrame.TextRange.Text = ":" + LiedVerzen(toonItem.Content, false);
+                                inTabel.Rows[index].Cells[3].Shape.TextFrame.TextRange.Text = ":" + LiedVerzen(toonItem.Display, toonItem.Content, false);
                         }
                         liturgieIndex++;
                     }
@@ -384,13 +384,13 @@ namespace mppt
 
         private static string LiedNaam(ILiturgieRegel regel, ILiturgieContent vanafDeelHint = null)
         {
-            if (String.IsNullOrWhiteSpace(regel.SubNaamDisplay))
-                return regel.NaamDisplay;
+            if (String.IsNullOrWhiteSpace(regel.Display.SubNaam))
+                return regel.Display.Naam;
             else if (!regel.Content.Any(r => r.Nummer.HasValue))
-                return string.Format("{0} {1}", regel.NaamDisplay, regel.SubNaamDisplay);
+                return string.Format("{0} {1}", regel.Display.Naam, regel.Display.SubNaam);
             var vanafDeel = vanafDeelHint ?? regel.Content.FirstOrDefault();  // Bij een deel hint tonen we alleen nog de huidige en komende versen
             var gebruikDeelRegels = regel.Content.SkipWhile(r => r != vanafDeel);
-            return string.Format("{0} {1}: {2}", regel.NaamDisplay, regel.SubNaamDisplay, LiedVerzen(gebruikDeelRegels, vanafDeelHint != null));
+            return string.Format("{0} {1}: {2}", regel.Display.Naam, regel.Display.SubNaam, LiedVerzen(regel.Display, gebruikDeelRegels, vanafDeelHint != null));
         }
         /// <summary>
         /// Maak een mooie samenvatting van de opgegeven nummers
@@ -400,8 +400,10 @@ namespace mppt
         /// Als het in beeld is dan wordt de eerste in ieder geval los getoond.
         /// <remarks>
         /// </remarks>
-        private static string LiedVerzen(IEnumerable<ILiturgieContent> vanDelen, bool inBeeld)
+        private static string LiedVerzen(ILiturgieDisplay regelDisplay, IEnumerable<ILiturgieContent> vanDelen, bool inBeeld)
         {
+            if (!regelDisplay.VersenAfleiden)
+                return regelDisplay.VersenDefault;
             var over = vanDelen.Where(v => v.Nummer.HasValue).Select(v => v.Nummer.Value).ToList();
             if (!over.Any())
                 return "";

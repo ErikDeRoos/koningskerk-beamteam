@@ -207,7 +207,8 @@ namespace PowerpointGenerater
                 // Liturgie uit tekstbox omzetten in leesbare items
                 var ruweLiturgie = new InterpreteerLiturgieRuw().VanTekstregels(richTextBox1.Lines);
                 // Zoek op het bestandssysteem zo veel mogelijk al op (behalve ppt, die gaan via COM element)
-                var ingeladenLiturgie = LiturgieOplosser.LosOp(ruweLiturgie);
+                var masks = MapMasksToLiturgie.Map(InstellingenFactory.LoadFromXMLFile().Masks);
+                var ingeladenLiturgie = LiturgieOplosser.LosOp(ruweLiturgie, masks);
 
                 //als niet alle liturgie is gevonden geven we een melding of de gebruiker toch door wil gaan met genereren
                 if (!ingeladenLiturgie.All(l => l.Resultaat == LiturgieOplossingResultaat.Opgelost))
@@ -442,15 +443,20 @@ namespace PowerpointGenerater
             {
                 button1.Text = "Generate";
                 progressBar1.Visible = false;
-                if (!string.IsNullOrEmpty(opgeslagenAlsBestand))
+                if (string.IsNullOrEmpty(foutmelding))
                 {
-                    if (File.Exists(_tempLiturgiePath))
-                        File.Delete(_tempLiturgiePath);
-                    var startInfo = new ProcessStartInfo();
-                    startInfo.FileName = @"POWERPNT.exe";
-                    startInfo.Arguments = opgeslagenAlsBestand;
-                    Process.Start(startInfo);
+                    if (!string.IsNullOrEmpty(opgeslagenAlsBestand))
+                    {
+                        if (File.Exists(_tempLiturgiePath))
+                            File.Delete(_tempLiturgiePath);
+                        var startInfo = new ProcessStartInfo();
+                        startInfo.FileName = @"POWERPNT.exe";
+                        startInfo.Arguments = opgeslagenAlsBestand;
+                        Process.Start(startInfo);
+                    }
                 }
+                else
+                    MessageBox.Show(foutmelding, "Fout", MessageBoxButtons.OK, MessageBoxIcon.Error);
             });
             Invoke(actie);
         }

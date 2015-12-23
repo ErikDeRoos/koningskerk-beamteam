@@ -90,14 +90,23 @@ namespace PowerpointGenerater.Powerpoint
                 _powerpoint.PreparePresentation(_liturgie, _voorganger, _collecte1, _collecte2, _lezen, _tekst, _instellingen, _opslaanAls);
                 _generatorThread = new Thread(new ThreadStart(StartThread));
                 _generatorThread.SetApartmentState(ApartmentState.STA);
-                _generatorThread.Start();
                 _huidigeStatus = State.Gestart;
+                _generatorThread.Start();
                 return new StatusMelding(_huidigeStatus);
             }
         }
         private void StartThread()
         {
-            _powerpoint.GeneratePresentation();
+            try {
+                _powerpoint.GeneratePresentation();
+            }
+            catch (System.Runtime.InteropServices.COMException)
+            {
+                lock (_locker)
+                {
+                    _setGereedmelding.Invoke(null, foutmelding: "Kon powerpoint niet opstarten");
+                }
+            }
         }
 
         public StatusMelding Stop()

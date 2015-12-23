@@ -9,9 +9,15 @@ namespace ILiturgieDatabase {
     public interface ILiturgieLosOp
     {
         ILiturgieOplossing LosOp(ILiturgieInterpretatie item);
-        IEnumerable<ILiturgieOplossing> LosOp(IEnumerable<ILiturgieInterpretatie> items);
+        ILiturgieOplossing LosOp(ILiturgieInterpretatie item, IEnumerable<ILiturgieMapmaskArg> masks);
+        IEnumerable<ILiturgieOplossing> LosOp(IEnumerable<ILiturgieInterpretatie> items, IEnumerable<ILiturgieMapmaskArg> masks);
     }
 
+    public interface ILiturgieMapmaskArg
+    {
+        string Name { get; }
+        string RealName { get; }
+    }
 
 
     /// <summary>
@@ -22,10 +28,13 @@ namespace ILiturgieDatabase {
         string Benaming { get; }
         string Deel { get; }
         IEnumerable<string> Verzen { get; }
+        string VerzenZoalsIngevoerd { get; }
         IEnumerable<string> Opties { get; }
     }
-
-
+     
+    /// <summary>
+    /// Resultaatset van omzetten interpretatie naar resultaat
+    /// </summary>
     public interface ILiturgieOplossing
     {
         ILiturgieInterpretatie VanInterpretatie { get; }
@@ -43,24 +52,15 @@ namespace ILiturgieDatabase {
         VersOnleesbaar = 5,  // Vers data type probleem
     }
 
-
+    /// <summary>
+    /// Liturgie oplossing
+    /// </summary>
     public interface ILiturgieRegel
     {
         /// <summary>
-        /// Naam zoals deze getoond moet worden boven dia en als volgende (zonder sub naam, zonder verzen)
+        /// Tekstuele presentatie
         /// </summary>
-        /// <example>'psalm' in 'psalm 100: 1, 2'</example>
-        string NaamDisplay { get; }
-        /// <summary>
-        /// Naam zoals deze getoond moet worden in liturgie (zonder sub naam, zonder verzen)
-        /// </summary>
-        /// <example>'psalm' in 'psalm 100: 1, 2'</example>
-        string OverzichtDisplay { get; }
-        /// <summary>
-        /// De sub naam 
-        /// </summary>
-        /// <example>'100' in 'psalm 100: 1, 2'</example>
-        string SubNaamDisplay { get; }
+        ILiturgieDisplay Display { get; }
         /// <summary>
         /// Of deze regel in het liturgie overzicht moet komen
         /// </summary>
@@ -79,6 +79,34 @@ namespace ILiturgieDatabase {
         /// </summary>
         IEnumerable<ILiturgieContent> Content { get; }
     }
+
+    public interface ILiturgieDisplay
+    {
+        /// <summary>
+        /// Naam zoals deze getoond moet worden boven dia en als volgende (zonder sub naam, zonder verzen)
+        /// </summary>
+        /// <example>'psalm' in 'psalm 100: 1, 2'</example>
+        string Naam { get; }
+        /// <summary>
+        /// Naam zoals deze getoond moet worden in liturgie (zonder sub naam, zonder verzen)
+        /// </summary>
+        /// <example>'psalm' in 'psalm 100: 1, 2'</example>
+        string NaamOverzicht { get; }
+        /// <summary>
+        /// De sub naam 
+        /// </summary>
+        /// <example>'100' in 'psalm 100: 1, 2'</example>
+        string SubNaam { get; }
+        /// <summary>
+        /// Als de versbeschrijving afgeleid moet worden van de liturgie content
+        /// </summary>
+        bool VersenAfleiden { get; }
+        /// <summary>
+        /// Basis verzen, als afleiden niet lukt / kan
+        /// </summary>
+        string VersenDefault { get; }
+    }
+
 
     public interface ILiturgieContent
     {
@@ -101,62 +129,4 @@ namespace ILiturgieDatabase {
         Tekst,
         PptLink,
     }
-
-
-    ///// <summary>
-    ///// Ruwe liturgie regels, aangevuld met zoekactie hints
-    ///// </summary>
-    //public interface ILiturgieOnderdeelZoekactie
-    //{
-    //    ILiturgieInterpretatie Ruw { get; }
-    //    string VirtueleBenaming { get; }
-    //    string EchteBenaming { get; }
-    //    LiturgieType Type { get; }
-    //    IEnumerable<ILiturgieOnderdeelZoekactieHint> ZoekactieHints { get; }
-    //}
-    //public interface ILiturgieOnderdeelZoekactieHint
-    //{
-    //    string Nummer { get; }
-    //    string ZoekPad { get; }
-    //}
-    //public enum LiturgieType
-    //{
-    //    /// <summary>
-    //    /// Enkelvoudige aanduiding, bijvoorbeeld een openingsslide.
-    //    /// </summary>
-    //    EnkelZonderDeel,
-    //    /// <summary>
-    //    /// Enkelvoudige aanduiding met deel benaming, bijvoorbeeld een database 
-    //    /// zoals opwekking waar wel nummers zijn maar geen verzen
-    //    /// </summary>
-    //    EnkelMetDeel,
-    //    /// <summary>
-    //    /// Meervoudige aanduiding met deel benaming, bijvoorbeeld een database
-    //    /// zoals psalmen waar nummers zijn met individuele verzen
-    //    /// </summary>
-    //    MeerMetDeel,
-    //}
-
-    ///// <summary>
-    ///// Zoekresultaat item(s) samen met de zoekopdracht gegevens
-    ///// </summary>
-    //public interface ILiturgieZoekresultaat
-    //{
-    //    LiturgieType Type { get; }
-    //    string VirtueleBenaming { get; }
-    //    string EchteBenaming { get; }
-    //    string DeelBenaming { get; }
-    //    IEnumerable<ILiturgieZoekresultaatDeel> Resultaten { get; }
-    //}
-    ///// <summary>
-    ///// Het gezochte item en of/wat er gevonden is
-    ///// </summary>
-    //public interface ILiturgieZoekresultaatDeel
-    //{
-    //    string Nummer { get; }
-    //    string Zoekopdracht { get; }
-    //    bool Gevonden { get; }
-    //    string Inhoud { get; }
-    //    InhoudType InhoudType { get; }
-    //}
 }

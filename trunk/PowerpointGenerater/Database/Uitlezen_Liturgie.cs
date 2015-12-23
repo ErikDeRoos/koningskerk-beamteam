@@ -9,14 +9,8 @@ using System.Linq;
 
 namespace PowerpointGenerator.Database {
 
-    // TODO Stap 1: database via XML setting files per dir maken (editor? nee)
-    // TODO Stap 2: intelligentie voor on-the-fly uitzoeken database (vooral als hulp voor x tot y vraagstukken en voorbereiding voor assistentie)
-    // TODO Stap 3: assistentie bij invullen liturgie
+    // TODO Stap 1: assistentie bij invullen liturgie
     // TODO mask weer ergens toepassen
-
-
-
-
 
 
 
@@ -50,7 +44,8 @@ namespace PowerpointGenerator.Database {
                 regel.Deel = voorPreBenamingStukken[voorPreBenamingStukken.Length - 1];  // Is altijd laatste deel
             regel.Benaming = preBenamingTrimmed.Substring(0, preBenamingTrimmed.Length - (regel.Deel ?? "").Length).Trim();
             // Verzen als '1,2' in 'psalm 110:1,2'
-            regel.Verzen = (voorBenamingStukken.Length > 1 ? voorBenamingStukken[1] : "")
+            regel.VerzenZoalsIngevoerd = voorBenamingStukken.Length > 1 ? voorBenamingStukken[1] : null;
+            regel.Verzen = (regel.VerzenZoalsIngevoerd ?? "")
               .Split(_versScheidingstekens, StringSplitOptions.RemoveEmptyEntries)
               .Select(v => v.Trim())
               .ToList();
@@ -85,6 +80,7 @@ namespace PowerpointGenerator.Database {
 
             public IEnumerable<string> Opties { get; set; }
             public IEnumerable<string> Verzen { get; set; }
+            public string VerzenZoalsIngevoerd { get; set; }
         }
     }
 
@@ -115,7 +111,12 @@ namespace PowerpointGenerator.Database {
 
         public ILiturgieOplossing LosOp(ILiturgieInterpretatie item)
         {
+            return LosOp(item, null);
+        }
+        public ILiturgieOplossing LosOp(ILiturgieInterpretatie item, IEnumerable<ILiturgieMapmaskArg> masks)
+        {
             var regel = new Regel();
+            regel.DisplayEdit = new RegelDisplay();
 
             // verwerk de opties
             var trimmedOpties = item.Opties.Select(o => o.Trim()).ToList();
@@ -123,9 +124,19 @@ namespace PowerpointGenerator.Database {
             regel.TonenInVolgende = !trimmedOpties.Any(o => o.StartsWith(LiturgieDatabaseSettings.OptieNietTonenInVolgende, StringComparison.CurrentCultureIgnoreCase));
             regel.TonenInOverzicht = !trimmedOpties.Any(o => o.StartsWith(LiturgieDatabaseSettings.OptieNietTonenInOverzicht, StringComparison.CurrentCultureIgnoreCase));
 
+            // regel visualisatie default
+            regel.DisplayEdit.Naam = item.Benaming;
+            regel.DisplayEdit.SubNaam = item.Deel;
+            regel.DisplayEdit.VersenDefault = item.VerzenZoalsIngevoerd;
+            // Check of er een mask is (mooiere naam)
+            var maskCheck = masks != null ? masks.FirstOrDefault(m => string.Compare(m.RealName, item.Benaming, true) == 0) : null;
+            if (maskCheck != null)
+                regel.DisplayEdit.Naam = maskCheck.Name;
+
             // zoek de regels in de database en pak ook de naamgeving daar uit over
             if (regel.VerwerkenAlsSlide)
             {
+                regel.DisplayEdit.VersenAfleiden = true;
                 var setNaam = item.Benaming;
                 var zoekNaam = item.Deel;
                 if (string.IsNullOrEmpty(item.Deel))
@@ -134,18 +145,25 @@ namespace PowerpointGenerator.Database {
                     zoekNaam = item.Benaming;
                     regel.TonenInOverzicht = false;  // TODO tijdelijk default gedrag van het niet tonen van algemene items in het overzicht overgenomen uit de oude situatie
                 }
+                
                 var fout = Aanvullen(_database, regel, setNaam, zoekNaam, item.Verzen.ToList());
                 if (fout.HasValue)
                     return new Oplossing(fout.Value, item);
+            } else
+            {
+                regel.DisplayEdit.VersenAfleiden = false;
             }
 
+            // regel visualisatie na bewerking
+            if (string.IsNullOrEmpty(regel.DisplayEdit.NaamOverzicht))
+                regel.DisplayEdit.NaamOverzicht = regel.DisplayEdit.Naam;
             // kijk of de opties nog iets zeggen over alternatieve naamgeving
             var optieMetAltNaamOverzicht = GetOptieParam(trimmedOpties, LiturgieDatabaseSettings.OptieAlternatieveNaamOverzicht);
             if (!string.IsNullOrWhiteSpace(optieMetAltNaamOverzicht))
-                regel.OverzichtDisplay = optieMetAltNaamOverzicht;
+                regel.DisplayEdit.NaamOverzicht = optieMetAltNaamOverzicht;
             var optieMetAltNaamVolgende = GetOptieParam(trimmedOpties, LiturgieDatabaseSettings.OptieAlternatieveNaam);
             if (!string.IsNullOrWhiteSpace(optieMetAltNaamVolgende))
-                regel.NaamDisplay = optieMetAltNaamOverzicht;
+                regel.DisplayEdit.Naam = optieMetAltNaamOverzicht;
 
             // geef de oplossing terug
             return new Oplossing(LiturgieOplossingResultaat.Opgelost, item, regel);
@@ -166,10 +184,10 @@ namespace PowerpointGenerator.Database {
             if (subSet == null)
                 return LiturgieOplossingResultaat.SubSetFout;
             if (setNaam == FileEngineDefaults.CommonFilesSetName)
-                regel.NaamDisplay = subSet.Name;
+                regel.DisplayEdit.Naam = subSet.Name;
             else {
-                regel.NaamDisplay = set.Name;
-                regel.SubNaamDisplay = subSet.Name;
+                regel.DisplayEdit.Naam = set.Name;
+                regel.DisplayEdit.SubNaam = subSet.Name;
             }
             if (!verzen.Any())
             {
@@ -211,8 +229,7 @@ namespace PowerpointGenerator.Database {
             }
 
             // bepaal de naamgeving
-            regel.NaamDisplay = !string.IsNullOrWhiteSpace(set.Settings.DisplayName) ? set.Settings.DisplayName : regel.NaamDisplay;
-            regel.OverzichtDisplay = regel.NaamDisplay;
+            regel.DisplayEdit.Naam = !string.IsNullOrWhiteSpace(set.Settings.DisplayName) ? set.Settings.DisplayName : regel.DisplayEdit.Naam;
 
             return null;
         }
@@ -281,9 +298,9 @@ namespace PowerpointGenerator.Database {
         }
 
 
-        public IEnumerable<ILiturgieOplossing> LosOp(IEnumerable<ILiturgieInterpretatie> items)
+        public IEnumerable<ILiturgieOplossing> LosOp(IEnumerable<ILiturgieInterpretatie> items, IEnumerable<ILiturgieMapmaskArg> masks)
         {
-            return items.Select(LosOp).ToList();
+            return items.Select(i => LosOp(i, masks)).ToList();
         }
 
 
@@ -303,14 +320,22 @@ namespace PowerpointGenerator.Database {
         }
         private class Regel : ILiturgieRegel
         {
-            public string NaamDisplay { get; set; }
-            public string OverzichtDisplay { get; set; }
-            public string SubNaamDisplay { get; set; }
+            public ILiturgieDisplay Display { get { return DisplayEdit; } }
+            public RegelDisplay DisplayEdit;
             public IEnumerable<ILiturgieContent> Content { get; set; }
             public bool TonenInOverzicht { get; set; }
             public bool TonenInVolgende { get; set; }
             public bool VerwerkenAlsSlide { get; set; }
         }
+        private class RegelDisplay : ILiturgieDisplay
+        {
+            public string Naam { get; set; }
+            public string NaamOverzicht { get; set; }
+            public string SubNaam { get; set; }
+            public bool VersenAfleiden { get; set; }
+            public string VersenDefault { get; set; }
+        }
+
         private class Content : ILiturgieContent
         {
             public string Inhoud { get; set; }
@@ -320,4 +345,20 @@ namespace PowerpointGenerator.Database {
             public int? Nummer { get; set; }
         }
     }
+
+    static class MapMasksToLiturgie
+    {
+        public static IEnumerable<ILiturgieMapmaskArg> Map(IEnumerable<IMapmask> masks)
+        {
+            return masks.Select(m => new MaskMap() { Name = m.Name, RealName = m.RealName, }).ToList();
+        }
+
+        private class MaskMap : ILiturgieMapmaskArg
+        {
+            public string Name { get; set; }
+
+            public string RealName { get; set; }
+        }
+    }
+
 }
