@@ -158,10 +158,15 @@ namespace mppt
                             else if (text.Equals("<Inhoud>"))
                                 shape.TextFrame.TextRange.Text = tekst;
                             //als de template de tekst bevat "Volgende" moet daar de Liturgieregel van de volgende sheet komen
-                            //we moeten dan wel al op de laatste slide zitten ('InvullenVolgende' is wel al intelligent maar in het geval van 1
-                            //lange tekst over meerdere dia's kan 'InvullenVolgende' niet de juiste keuze maken)
-                            else if (text.Equals("<Volgende>") && tekstOmTeRenderenLijst.Last() == tekst)
-                                shape.TextFrame.TextRange.Text = InvullenVolgende(regel, inhoud, volgende);
+                            else if (text.Equals("<Volgende>"))
+                            {
+                                //we moeten dan wel al op de laatste slide zitten ('InvullenVolgende' is wel al intelligent maar in het geval van 1
+                                //lange tekst over meerdere dia's kan 'InvullenVolgende' niet de juiste keuze maken)
+                                if (tekstOmTeRenderenLijst.Last() == tekst)
+                                    shape.TextFrame.TextRange.Text = InvullenVolgende(regel, inhoud, volgende);
+                                else
+                                    shape.TextFrame.TextRange.Text = string.Empty;
+                            }
                         }
                     }
                 }
@@ -243,8 +248,8 @@ namespace mppt
                         if (!string.IsNullOrWhiteSpace(toonItem.Display.SubNaam))
                         {
                             inTabel.Rows[index].Cells[2].Shape.TextFrame.TextRange.Text = toonItem.Display.SubNaam;
-                            if (toonItem.Content.Any(c => c.Nummer.HasValue))
-                                inTabel.Rows[index].Cells[3].Shape.TextFrame.TextRange.Text = ":" + LiedVerzen(toonItem.Display, toonItem.Content, false);
+                            if (!String.IsNullOrWhiteSpace(toonItem.Display.VersenDefault))
+                                inTabel.Rows[index].Cells[3].Shape.TextFrame.TextRange.Text = ":" + LiedVerzen(toonItem.Display, false, vanDelen: toonItem.Content);
                         }
                         liturgieIndex++;
                     }
@@ -384,13 +389,16 @@ namespace mppt
 
         private static string LiedNaam(ILiturgieRegel regel, ILiturgieContent vanafDeelHint = null)
         {
-            if (String.IsNullOrWhiteSpace(regel.Display.SubNaam))
+            if (string.IsNullOrWhiteSpace(regel.Display.SubNaam))
                 return regel.Display.Naam;
-            else if (!regel.Content.Any(r => r.Nummer.HasValue))
+            else if (string.IsNullOrWhiteSpace(regel.Display.VersenDefault))
                 return string.Format("{0} {1}", regel.Display.Naam, regel.Display.SubNaam);
-            var vanafDeel = vanafDeelHint ?? regel.Content.FirstOrDefault();  // Bij een deel hint tonen we alleen nog de huidige en komende versen
-            var gebruikDeelRegels = regel.Content.SkipWhile(r => r != vanafDeel);
-            return string.Format("{0} {1}: {2}", regel.Display.Naam, regel.Display.SubNaam, LiedVerzen(regel.Display, gebruikDeelRegels, vanafDeelHint != null));
+            IEnumerable<ILiturgieContent> gebruikDeelRegels = null;
+            if (regel.Display.VersenAfleiden) { 
+                var vanafDeel = vanafDeelHint ?? regel.Content.FirstOrDefault();  // Bij een deel hint tonen we alleen nog de huidige en komende versen
+                gebruikDeelRegels = regel.Content.SkipWhile(r => r != vanafDeel);
+            }
+            return string.Format("{0} {1}: {2}", regel.Display.Naam, regel.Display.SubNaam, LiedVerzen(regel.Display, vanafDeelHint != null, vanDelen: gebruikDeelRegels));
         }
         /// <summary>
         /// Maak een mooie samenvatting van de opgegeven nummers
@@ -400,7 +408,7 @@ namespace mppt
         /// Als het in beeld is dan wordt de eerste in ieder geval los getoond.
         /// <remarks>
         /// </remarks>
-        private static string LiedVerzen(ILiturgieDisplay regelDisplay, IEnumerable<ILiturgieContent> vanDelen, bool inBeeld)
+        private static string LiedVerzen(ILiturgieDisplay regelDisplay, bool inBeeld, IEnumerable<ILiturgieContent> vanDelen = null)
         {
             if (!regelDisplay.VersenAfleiden)
                 return regelDisplay.VersenDefault;

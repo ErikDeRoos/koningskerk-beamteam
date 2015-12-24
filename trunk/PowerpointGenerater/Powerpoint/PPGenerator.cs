@@ -127,7 +127,7 @@ namespace PowerpointGenerater.Powerpoint
             lock (_locker)
             {
                 _powerpoint.Stop();
-                while (_generatorThread.IsAlive)
+                for (int teller = 0; teller < 1000 && _generatorThread.IsAlive; teller++)
                     Thread.Sleep(5);
                 _generatorThread = null;
                 _powerpoint.Dispose();

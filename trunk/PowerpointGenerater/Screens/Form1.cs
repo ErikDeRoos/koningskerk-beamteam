@@ -452,6 +452,7 @@ namespace PowerpointGenerater
                         var startInfo = new ProcessStartInfo();
                         startInfo.FileName = @"POWERPNT.exe";
                         startInfo.Arguments = opgeslagenAlsBestand;
+                        startInfo.ErrorDialog = true;
                         Process.Start(startInfo);
                     }
                 }
@@ -564,6 +565,7 @@ namespace PowerpointGenerater
             return output;
         }
         #endregion Load/Save workingfile
+
         #endregion functies
     }
 }
