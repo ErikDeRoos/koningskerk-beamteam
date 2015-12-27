@@ -32,11 +32,15 @@ namespace PowerpointGenerater.Database
             return _archive;
         }
 
+        /// <remarks>cache is geregeld door FileEngine die deze aanroep doet</remarks>
         public IEnumerable<IDbItem> GetItems()
         {
             var archive = GetZip();
             if (_itemsHaveSubContent)
-                return archive.Entries.AsDirectoryStructure().Directories.Select(d => new FileZipBundledItem(d, _cached)).ToList();
+            {
+                var dirStructure = archive.Entries.AsDirectoryStructure();
+                return dirStructure.Directories.Select(d => new FileZipBundledItem(d, _cached)).ToList();
+            }
             return archive.Entries.Select(e => new FileZipItem(e)).ToList();
         }
 

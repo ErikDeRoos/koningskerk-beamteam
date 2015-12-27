@@ -16,9 +16,11 @@ namespace PowerpointGenerater.Database
         public const string SetSettingsName = "instellingen.xml";
         public const string SetArchiveName = "inhoud.zip";
 
+        private static readonly char[] pathSeparators = new char[] { Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar };
+
         public static string ClosestPathName(string fromPath)
         {
-            return fromPath.Split(new[] { Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar }).Last();
+            return fromPath.Split(pathSeparators).Last();
         }
     }
 
