@@ -18,6 +18,7 @@ namespace PowerpointGenerater.Database
             _itemsHaveSubContent = itemsHaveSubContent;
             _cached = askCached;
         }
+        /// <remarks>cache is geregeld door FileEngine die deze aanroep doet</remarks>
         public IEnumerable<IDbItem> GetItems()
         {
             if (_itemsHaveSubContent)
