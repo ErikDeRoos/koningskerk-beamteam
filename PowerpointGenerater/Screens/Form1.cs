@@ -451,7 +451,7 @@ namespace PowerpointGenerater
                             File.Delete(_tempLiturgiePath);
                         var startInfo = new ProcessStartInfo();
                         startInfo.FileName = @"POWERPNT.exe";
-                        startInfo.Arguments = opgeslagenAlsBestand;
+                        startInfo.Arguments = string.Format("\"{0}\"", opgeslagenAlsBestand);
                         startInfo.ErrorDialog = true;
                         Process.Start(startInfo);
                     }

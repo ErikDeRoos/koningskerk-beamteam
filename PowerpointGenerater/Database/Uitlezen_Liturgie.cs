@@ -282,13 +282,13 @@ namespace PowerpointGenerator.Database {
                 if (safeNummer.Contains(LiturgieDatabaseSettings.VersSamenvoeging))
                 {
                     var split = safeNummer.Split(new string[] { LiturgieDatabaseSettings.VersSamenvoeging }, StringSplitOptions.RemoveEmptyEntries);
-                    if (split.Length != 2)
+                    if (split.Length == 2)
                     {
                         int vanNummer;
-                        int totNummer;
-                        if (int.TryParse(split[0].Trim(), out vanNummer) && int.TryParse(split[1].Trim(), out totNummer))
+                        int totEnMetNummer;
+                        if (int.TryParse(split[0].Trim(), out vanNummer) && int.TryParse(split[1].Trim(), out totEnMetNummer))
                         {
-                            foreach (var teller in Enumerable.Range(vanNummer, totNummer - vanNummer))
+                            foreach (var teller in Enumerable.Range(vanNummer, (totEnMetNummer - vanNummer) + 1))
                                 yield return teller;
                         }
                     }
