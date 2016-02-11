@@ -14,21 +14,31 @@ namespace PowerpointGenerater.Database
         public const string BundleTypeDir = "<dir>";
         public const string CommonFilesSetName = "Common";
         public const string SetSettingsName = "instellingen.xml";
+        public const string SetArchiveName = "inhoud.zip";
+
+        private static readonly char[] pathSeparators = new char[] { Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar };
 
         public static string ClosestPathName(string fromPath)
         {
-            return fromPath.Split(new[] { Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar }).Last();
+            return fromPath.Split(pathSeparators).Last();
         }
     }
 
 
+    /// <summary>
+    /// File-system gebaseerde database. Lazy loading. Caching default aan. Read-only.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class FileEngine<T> : IEngine<T> where T : class, ISetSettings, new()
     {
         public bool Cached { get; set; }
         private IEnumerable<IDbSet<T>> _dirCache;
         private IInstellingenFactory _instellingenFactory;
 
-        /// <param name="cached">True = cache structure (paths, filetrees and settings). Content is never cached.</param>
+        /// <param name="cached">
+        /// True = cache structure (paths, filetrees and settings), 
+        /// content is never cached but combination of on-access loading and lazy loading instead.
+        /// </param>
         public FileEngine(IInstellingenFactory instellingenFactory)
         {
             _instellingenFactory = instellingenFactory;
@@ -57,6 +67,7 @@ namespace PowerpointGenerater.Database
         private bool _cached;
         private IEnumerable<IDbItem> _itemCache;
         private T _settingsCached;
+        private IFinder _finderCached;
 
         public string Name { get; private set; }
         public T Settings { get { return GetSettings(_cached); } set { ChangeSettings(value, _cached); } }
@@ -69,19 +80,26 @@ namespace PowerpointGenerater.Database
             Name = FileEngineDefaults.ClosestPathName(_inDir);
         }
 
-        private static IEnumerable<IDbItem> GetItems(string atDir, bool itemsHaveSubContent, bool askCached)
+        private IFinder GetFinder()
         {
-            if (itemsHaveSubContent)
-                return Directory.GetDirectories(atDir).Select(d => new FileBundledItem(d, askCached)).ToList();
-            return Directory.GetFiles(atDir).Select(d => new FileItem(d)).ToList();
+            if (_cached && _finderCached != null)
+                return _finderCached;
+            var finder = (IFinder)null;
+            if (Settings.UseContainer)
+                finder = new FileZipFinder(_inDir, FileEngineDefaults.SetArchiveName, Settings.ItemsHaveSubContent, _cached);
+            else
+                finder = new FileFinder(_inDir, Settings.ItemsHaveSubContent, _cached);
+            if (_cached)
+                _finderCached = finder;
+            return finder;
         }
 
         public IEnumerable<IDbItem> Where(Func<IDbItem, bool> query)
         {
             if (!_cached)
-                return GetItems(_inDir, Settings.ItemsHaveSubContent, _cached);
+                return GetFinder().GetItems();
             if (_itemCache == null)
-                _itemCache = GetItems(_inDir, Settings.ItemsHaveSubContent, _cached);
+                _itemCache = GetFinder().GetItems();
             return _itemCache.Where(query);
         }
 
@@ -135,95 +153,8 @@ namespace PowerpointGenerater.Database
         }
     }
 
-    public class FileBundledItem : IDbItem
+    interface IFinder
     {
-        private string _inDir;
-        private bool _cached;
-
-        public string Name { get; private set; }
-        public IDbItemContent Content { get; private set; }
-
-        internal FileBundledItem(string dirPath, bool cached)
-        {
-            _inDir = dirPath;
-            _cached = cached;
-
-            Name = FileEngineDefaults.ClosestPathName(dirPath);
-            Content = new DirContent(_inDir, cached);
-        }
-
-        class DirContent : IDbItemContent
-        {
-            private string _inDir;
-            private bool _cached;
-            private IEnumerable<IDbItem> _itemCache;
-
-            public string Type { get { return FileEngineDefaults.BundleTypeDir; } }
-
-            public Stream Content { get { return new MemoryStream(); } }
-
-            public string PersistentLink { get { return String.Empty; } }
-
-            public DirContent(string dirPath, bool cached)
-            {
-                _inDir = dirPath;
-                _cached = cached;
-            }
-
-            private static IEnumerable<IDbItem> GetItems(string atDir)
-            {
-                return Directory.GetFiles(atDir).Select(d => new FileItem(d)).ToList();
-            }
-
-            public IEnumerable<IDbItem> TryAccessSubs()
-            {
-                if (!_cached)
-                    return GetItems(_inDir);
-                if (_itemCache == null)
-                    _itemCache = GetItems(_inDir);
-                return _itemCache;
-            }
-        }
-    }
-
-    class FileItem : IDbItem
-    {
-        private string _filePath;
-
-        public string Name { get; private set; }
-        public IDbItemContent Content { get; private set; }
-
-        public FileItem(string filePath)
-        {
-            _filePath = filePath;
-
-            Name = Path.GetFileNameWithoutExtension(filePath);
-            Content = new FileContent(filePath);
-        }
-        class FileContent : IDbItemContent
-        {
-            private string _filePath;
-
-            public string Type { get; private set; }
-            public Stream Content { get { return ReadFile(_filePath); } }
-            public string PersistentLink { get { return _filePath; } }
-
-            public FileContent(string filePath)
-            {
-                _filePath = filePath;
-
-                Type = Path.GetExtension(_filePath).Substring(1);  // remove dot
-            }
-
-            public static Stream ReadFile(string filePath)
-            {
-                return new FileStream(filePath, FileMode.Open);
-            }
-
-            public IEnumerable<IDbItem> TryAccessSubs()
-            {
-                return new List<IDbItem>();
-            }
-        }
+        IEnumerable<IDbItem> GetItems();
     }
 }

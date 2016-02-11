@@ -248,7 +248,7 @@ namespace mppt
                         if (!string.IsNullOrWhiteSpace(toonItem.Display.SubNaam))
                         {
                             inTabel.Rows[index].Cells[2].Shape.TextFrame.TextRange.Text = toonItem.Display.SubNaam;
-                            if (!String.IsNullOrWhiteSpace(toonItem.Display.VersenDefault))
+                            if (!string.IsNullOrWhiteSpace(toonItem.Display.VersenDefault))
                                 inTabel.Rows[index].Cells[3].Shape.TextFrame.TextRange.Text = ":" + LiedVerzen(toonItem.Display, false, vanDelen: toonItem.Content);
                         }
                         liturgieIndex++;
@@ -391,10 +391,10 @@ namespace mppt
         {
             if (string.IsNullOrWhiteSpace(regel.Display.SubNaam))
                 return regel.Display.Naam;
-            else if (string.IsNullOrWhiteSpace(regel.Display.VersenDefault))
+            else if ((regel.Content == null || regel.Content.Count() <= 1 || vanafDeelHint == null) && string.IsNullOrWhiteSpace(regel.Display.VersenDefault))
                 return string.Format("{0} {1}", regel.Display.Naam, regel.Display.SubNaam);
             IEnumerable<ILiturgieContent> gebruikDeelRegels = null;
-            if (regel.Display.VersenAfleiden) { 
+            if (regel.Display.VersenAfleiden && regel.Content != null) { 
                 var vanafDeel = vanafDeelHint ?? regel.Content.FirstOrDefault();  // Bij een deel hint tonen we alleen nog de huidige en komende versen
                 gebruikDeelRegels = regel.Content.SkipWhile(r => r != vanafDeel);
             }
@@ -410,8 +410,8 @@ namespace mppt
         /// </remarks>
         private static string LiedVerzen(ILiturgieDisplay regelDisplay, bool inBeeld, IEnumerable<ILiturgieContent> vanDelen = null)
         {
-            if (!regelDisplay.VersenAfleiden)
-                return regelDisplay.VersenDefault;
+            if (!regelDisplay.VersenAfleiden || vanDelen == null)
+                return regelDisplay.VersenDefault ?? string.Empty;
             var over = vanDelen.Where(v => v.Nummer.HasValue).Select(v => v.Nummer.Value).ToList();
             if (!over.Any())
                 return "";

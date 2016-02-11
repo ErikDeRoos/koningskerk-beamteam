@@ -33,7 +33,7 @@ namespace PowerpointGenerator.Database {
             var voorOpties = invoerTrimmed.Split(_optieStart, StringSplitOptions.RemoveEmptyEntries);
             if (voorOpties.Length == 0)
                 return null;
-            var opties = voorOpties.Length > 1 ? voorOpties[1].Split(_optieEinde, StringSplitOptions.RemoveEmptyEntries)[0].Trim() : String.Empty;
+            var opties = voorOpties.Length > 1 ? voorOpties[1].Split(_optieEinde, StringSplitOptions.RemoveEmptyEntries)[0].Trim() : string.Empty;
             var voorBenamingStukken = voorOpties[0].Trim().Split(_benamingScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
             if (voorBenamingStukken.Length == 0)
                 return null;
@@ -282,13 +282,13 @@ namespace PowerpointGenerator.Database {
                 if (safeNummer.Contains(LiturgieDatabaseSettings.VersSamenvoeging))
                 {
                     var split = safeNummer.Split(new string[] { LiturgieDatabaseSettings.VersSamenvoeging }, StringSplitOptions.RemoveEmptyEntries);
-                    if (split.Length != 2)
+                    if (split.Length == 2)
                     {
                         int vanNummer;
-                        int totNummer;
-                        if (int.TryParse(split[0].Trim(), out vanNummer) && int.TryParse(split[1].Trim(), out totNummer))
+                        int totEnMetNummer;
+                        if (int.TryParse(split[0].Trim(), out vanNummer) && int.TryParse(split[1].Trim(), out totEnMetNummer))
                         {
-                            foreach (var teller in Enumerable.Range(vanNummer, totNummer - vanNummer))
+                            foreach (var teller in Enumerable.Range(vanNummer, (totEnMetNummer - vanNummer) + 1))
                                 yield return teller;
                         }
                     }

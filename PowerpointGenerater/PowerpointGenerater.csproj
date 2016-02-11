@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PowerpointGenerater</RootNamespace>
     <AssemblyName>PowerpointGenerater</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -101,6 +101,7 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -114,6 +115,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Database\ArchiveExtender.cs" />
+    <Compile Include="Database\FileFinder.cs" />
+    <Compile Include="Database\FileZipFinder.cs" />
     <Compile Include="DefaultContainer.cs" />
     <Compile Include="Database\FileEngine.cs" />
     <Compile Include="Database\FileEngineSetSettings.cs" />
