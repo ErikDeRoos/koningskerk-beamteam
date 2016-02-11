@@ -1,44 +1,54 @@
-﻿using System;
+﻿using ISettings;
+using Microsoft.Practices.Unity;
+using System;
 using System.Windows.Forms;
 
 namespace PowerpointGenerater
 {
-    public partial class Instellingenform : Form
+    partial class Instellingenform : Form
     {
-        Form1 hoofdformulier;
-        public Instellingenform(Form1 formulier)
+        [Dependency]
+        public IInstellingenFactory InstellingenFactory { get; set; }
+
+        public IInstellingen Instellingen { get; private set; }
+
+        public Instellingenform()
         {
             InitializeComponent();
-            textBox1.Text = formulier.instellingen.Templateliederen;
-            textBox2.Text = formulier.instellingen.Templatetheme;
-            textBox3.Text = formulier.instellingen.Databasepad;
-            textBox4.Text = formulier.instellingen.Regelsperslide.ToString();
+        }
 
-            tbVolgende.Text = formulier.instellingen.StandaardTekst.Volgende;
-            tbVoorganger.Text = formulier.instellingen.StandaardTekst.Voorganger;
-            tbCollecte.Text = formulier.instellingen.StandaardTekst.Collecte;
-            tbCollecte1.Text = formulier.instellingen.StandaardTekst.Collecte1;
-            tbCollecte2.Text = formulier.instellingen.StandaardTekst.Collecte1;
-            tbLezen.Text = formulier.instellingen.StandaardTekst.Lezen;
-            tbTekst.Text = formulier.instellingen.StandaardTekst.Tekst;
-            tbLiturgie.Text = formulier.instellingen.StandaardTekst.Liturgie;
+        public void Opstarten()
+        {
+            var vanInstellingen = InstellingenFactory.LoadFromXMLFile();
 
-            hoofdformulier = formulier;
+            textBox1.Text = vanInstellingen.Templateliederen;
+            textBox2.Text = vanInstellingen.Templatetheme;
+            textBox3.Text = vanInstellingen.Databasepad;
+            textBox4.Text = vanInstellingen.Regelsperslide.ToString();
+
+            tbVolgende.Text = vanInstellingen.StandaardTeksten.Volgende;
+            tbVoorganger.Text = vanInstellingen.StandaardTeksten.Voorganger;
+            tbCollecte.Text = vanInstellingen.StandaardTeksten.Collecte;
+            tbCollecte1.Text = vanInstellingen.StandaardTeksten.Collecte1;
+            tbCollecte2.Text = vanInstellingen.StandaardTeksten.Collecte1;
+            tbLezen.Text = vanInstellingen.StandaardTeksten.Lezen;
+            tbTekst.Text = vanInstellingen.StandaardTeksten.Tekst;
+            tbLiturgie.Text = vanInstellingen.StandaardTeksten.Liturgie;
         }
 
         #region Eventhandlers
         private void button1_Click(object sender, EventArgs e)
         {
             //kies een bestand en sla het pad op
-            String temp = KiesFile();
-            if(!temp.Equals(""))
+            string temp = KiesFile();
+            if (!temp.Equals(""))
                 textBox1.Text = temp;
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
             //kies een bestand en sla het pad op
-            String temp = KiesFile();
+            string temp = KiesFile();
             if (!temp.Equals(""))
                 textBox2.Text = temp;
         }
@@ -69,7 +79,7 @@ namespace PowerpointGenerater
         /// Uitkiezen van een file aan de hand van openfiledialog
         /// </summary>
         /// <returns> return gekozen bestandspad</returns>
-        private String KiesFile()
+        private string KiesFile()
         {
             string applicationPath = AppDomain.CurrentDomain.BaseDirectory;
 
@@ -91,6 +101,23 @@ namespace PowerpointGenerater
         }
         #endregion Functions
 
-        
+        private void button2_Click(object sender, EventArgs e)
+        {
+            int regelsPerSlide = 0;
+            if (!System.Int32.TryParse(textBox4.Text, out regelsPerSlide))
+                regelsPerSlide = 6;
+            Instellingen = new Instellingen(textBox3.Text, textBox3.Text, textBox2.Text, regelsPerSlide,
+                new StandaardTeksten() { 
+                    Volgende = tbVolgende.Text,
+                    Voorganger = tbVoorganger.Text,
+                    Collecte = tbCollecte.Text,
+                    Collecte1 = tbCollecte1.Text,
+                    Collecte2 = tbCollecte2.Text,
+                    Lezen = tbLezen.Text,
+                    Tekst = tbTekst.Text,
+                    Liturgie = tbLiturgie.Text,
+                }
+            );
+        }
     }
 }
