@@ -1,200 +1,311 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
-namespace PowerpointGenerater
-{
-    class Uitlezen_Liturgie
-    {
-        //bevat strings met tekst voor liederen
-        //of bevat pad naar sheets die rechtstreeks ingevoegd mogen gaan worden
-        public List<String> inhoud = new List<String>();
-        //bevat strings met tekst voor bestandsnamen(Titel bij liederen)
-        public List<String> bestandsnamen = new List<String>();
-        
-        public String mappath = "";
-        
-        //controle of alle ingevoerde liturgie gevonden kon worden
-        public bool AllLiturgieFound = true;
-        //indicatie of de liturgie op het liturgiebord moet komen
-        public bool Liturgiebord = false;
-        
-        /// <summary>
-        /// Parse de tekst die word ingevoerd naar paths waarop gezocht kan worden
-        /// </summary>
-        /// <param name="Input">de tekst die is ingevoerd</param>
-        /// <param name="DatabasePath">de locatie van de database</param>
-        /// <returns></returns>
-        public List<String> ParseInputToPaths(String Input, String DatabasePath, List<Mapmask> masks)
-        {
-            //hoe de string opgedeeld moet worden om er een maplocatie uit te kunnen krijgen
-            char[] separators = { ' ', ':' };
-            //deel de liturgieregel op
-            //string[] Liturgieonderdelen = Input.Split(separators);
-            List<string> Liturgieonderdelen = new List<string>();
-            //deel de liturgieregel op en filter lege liturgieonderdelen weg
-            foreach (string s in Input.Split(separators))
-            {
-                //als het liturgieonderdeel gevuld is heeft deze toegevoegde waarde voor het resultaat
-                if (!s.Equals(""))
-                {
-                    Liturgieonderdelen.Add(s);
-                }
-            }
-            //maak een nieuwe lijst aan om de verschillende paden in op te slaan
-            List<String> paths = new List<String>();
-            //een tijdelijk mappad waar de verschillende bestanden gevonden moeten kunnen gaan worden
-            String mappath = DatabasePath;
-            //correctie
-            mappath = mappath.Split(';')[0];
-            //Bestandsnaam
-            String bestandsnaam = "";
+namespace PowerpointGenerater {
+  /// <summary>
+  /// Maak een ruwe lijst van een tekstuele liturgie
+  /// </summary>
+  /// <remarks>Gebruikt standaard scheidingstekens</remarks>
+  class InterpreteerLiturgieRuw {
+    private static readonly char[] _benamingScheidingstekens = new char[] { ':' };
+    private static readonly char[] _benamingDeelScheidingstekens = new char[] { ' ' };
+    private static readonly char[] _versScheidingstekens = new char[] { ',' };
 
-            //zolang er nog onderdelen zijn voor het pad
-            for (int i = 0; i < Liturgieonderdelen.Count; i++)
-            {
-                //om op de juiste mappen uit te komen zijn verschillende afwijkingen qua schrijfwijze mogelijk
-                if (Liturgieonderdelen[i].Equals("Ps") || Liturgieonderdelen[i].Equals("PS") || Liturgieonderdelen[i].Equals("ps"))
-                {
-                    Liturgieonderdelen[i] = "psalm";
-                }
-                else if (Liturgieonderdelen[i].Equals("Gz") || Liturgieonderdelen[i].Equals("GZ") || Liturgieonderdelen[i].Equals("gz"))
-                {
-                    Liturgieonderdelen[i] = "gezang";
-                }
-                else if (Liturgieonderdelen[i].Equals("Lied"))
-                {
-                    Liturgieonderdelen[i] = "lied";
-                }
-                //als het het laatste onderdeel bevat van het pad zijn dit de bestandsnamen
-                if (!((i + 1) < Liturgieonderdelen.Count))
-                {
-                    //deel de verschillende bestandsnamen op(er zijn verschillende verzen mogelijk uit één map bijvoorbeeld)
-                    string[] tempfiles = Liturgieonderdelen[i].Split(',');
-                    //voeg voor ieder bestandsnaam een nieuw pad in
-                    foreach (String s in tempfiles)
-                    {
-                        //als het bestandsnaam leeg is kunnen we deze uitfilteren
-                        if (!s.Equals(""))
-                        {
-                            //voeg een pad naar liturgie toe
-                            paths.Add(mappath + @"\" + s);
-
-                            bool maskgevonden = false;
-                            foreach (Mapmask mask in masks)
-                            {
-                                if (mask.RealName == s)
-                                {
-                                    //voeg de bestandsnamen toe aan de lijst van bestandsnamen voor onderscheid met mask
-                                    bestandsnamen.Add(mask.Name);
-                                    maskgevonden = true;
-                                }
-                            }
-                            if(!maskgevonden)
-                            {
-                                //voeg de bestandsnamen toe aan de lijst van bestandsnamen voor onderscheid
-                                bestandsnamen.Add(s);
-                            }
-                        }
-                    }
-                }
-                //in alle andere gevallen gaat het nog om mappen en kunnen we hem linea recta invoegen in het pad
-                else
-                {
-                    mappath += @"\";
-                    mappath += Liturgieonderdelen[i];
-
-                    bool maskgevonden = false;
-                    foreach (Mapmask mask in masks)
-                    {
-                        if (mask.RealName == Liturgieonderdelen[i])
-                        {
-                            bestandsnaam += mask.Name;
-                            maskgevonden = true;
-                        }
-                    }
-                    if(!maskgevonden)
-                        bestandsnaam += Liturgieonderdelen[i];
-                    if (Liturgieonderdelen.Count > 2)
-                    {
-                        this.mappath = bestandsnaam + ": ";
-                    }
-                    else
-                    {
-                        this.mappath = bestandsnaam + "  ";                      
-                    }
-                    bestandsnaam += " ";
-                    //het zijn liederen dus die moeten op het liturgiebord
-                    Liturgiebord = true;
-                }
-            }
-            return paths;
-        }
-        /// <summary>
-        /// Zoeken naar liturgie op de opgegeven paden (.txt)
-        /// </summary>
-        /// <param name="Liturgiepad">de paden waar de liturgieën moet staan</param>
-        public void LeesLiturgie(List<String> Liturgiepad)
-        {
-            //voor elk liturgiepad halen we de bijbehorende tekst
-            foreach (String Liturgie in Liturgiepad)
-            {
-                //probeer eerst powerpoint bestanden
-                String path = Liturgie;                
-                path += ".pptx";
-
-                //als de sheets niet bestaan
-                if (!File.Exists(path))
-                {
-                    path = Liturgie;
-                    path += ".ppt";
-                    if (!File.Exists(path))
-                    {
-                        path = Liturgie;
-                        path += ".txt";
-
-                        if (!File.Exists(path))
-                        {
-                            //niet alle liturgie kan worden gevonden
-                            AllLiturgieFound = false;
-                            //verwijder de bestandsnaam uit de lijst, omdat het bestand immers niet bestaat
-                            bestandsnamen.Remove(Liturgie);
-                        }
-                        else
-                        {
-                            //probeer om tekst te lezen van bestand
-                            try
-                            {
-                                //open een filestream naar het gekozen bestand
-                                FileStream strm = new FileStream(path, FileMode.Open, FileAccess.Read);
-
-                                //gebruik streamreader om te lezen van de filestream
-                                using (StreamReader rdr = new StreamReader(strm))
-                                {
-                                    //return de liturgie
-                                    inhoud.Add(rdr.ReadToEnd());
-
-                                }
-                            }
-                            //vang errors af en geef een melding dat er iets is fout gegaan
-                            catch (Exception)
-                            {
-                                System.Windows.Forms.MessageBox.Show("Fout tijdens openen bestand", "Bestand error",
-                                                 System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Exclamation);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        inhoud.Add(path);
-                    }
-                }
-                //anders zijn het sheets die rechtstreeks ingevoegd mogen gaan worden
-                else
-                {
-                    inhoud.Add(path);
-                }                               
-            }
-        }
+    /// <summary>
+    /// Leest de tekstuele invoer in en maakt er een ruwe liturgie lijst van
+    /// </summary>
+    public IEnumerable<ILiturgieOnderdeelRuw> VanTekstregels(String[] regels) {
+      return regels
+        .Where(r => !String.IsNullOrWhiteSpace(r))
+        .Select(r => VanTekstregel(r))
+        .Where(r => r != null)
+        .ToList();
     }
+
+    private Onderdeel VanTekstregel(String invoer) {
+      var regel = new Onderdeel();
+      var invoerTrimmed = invoer.Trim();
+      var voorBenamingStukken = invoerTrimmed.Split(_benamingScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
+      if (voorBenamingStukken.Length == 0)
+        return null;
+      var preBenamingTrimmed = voorBenamingStukken[0].Trim();
+      // Een benaming kan uit delen bestaan, bijvoorbeeld 'psalm 110' in 'psalm 110:1,2' of 'opwekking 598' in 'opwekking 598'
+      var voorPreBenamingStukken = preBenamingTrimmed.Split(_benamingDeelScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
+      if (voorPreBenamingStukken.Length > 1)
+        regel.Deel = voorPreBenamingStukken[voorPreBenamingStukken.Length - 1];  // Is altijd laatste deel
+      regel.Benaming = preBenamingTrimmed.Substring(0, preBenamingTrimmed.Length - (regel.Deel ?? "").Length).Trim();
+      // Verzen als '1,2' in 'psalm 110:1,2'
+      regel.Verzen = (voorBenamingStukken.Length > 1 ? voorBenamingStukken[1] : "")
+        .Split(_versScheidingstekens, StringSplitOptions.RemoveEmptyEntries)
+        .ToList();
+      return regel;
+    }
+
+    class Onderdeel : ILiturgieOnderdeelRuw {
+      public String Benaming { get; set; }
+      public String Deel { get; set; }
+      public IEnumerable<String> Verzen { get; set; }
+    }
+  }
+
+  /// <summary>
+  /// Ruwe liturgie regels, zoals ze ingevoerd zijn
+  /// </summary>
+  public interface ILiturgieOnderdeelRuw {
+    String Benaming { get; }
+    String Deel { get; }
+    IEnumerable<String> Verzen { get; }
+  }
+
+
+  /// <summary>
+  /// Interpreteer de ruwe liturgie regels tot zoekacties
+  /// </summary>
+  class InterpreteerLiturgieZoekacie {
+    private static readonly char[] _benamingSplitScheidingstekens = new char[] { ' ' };
+    private readonly IEnumerable<Mapmask> _masks;
+    public InterpreteerLiturgieZoekacie(IEnumerable<Mapmask> gebruikMasks) {
+      _masks = gebruikMasks;
+    }
+
+    /// <summary>
+    /// Interpreteer de ruwe liturgie regels icm intelligentie zoals masks en hardcoded afkortingen.
+    /// </summary>
+    public IEnumerable<ILiturgieOnderdeelZoekactie> VanOnderdelen(IEnumerable<ILiturgieOnderdeelRuw> regels) {
+      return regels
+        .Select(r => VanOnderdeel(r))
+        .Where(r => r != null)
+        .ToList();
+    }
+
+    private Onderdeel VanOnderdeel(ILiturgieOnderdeelRuw invoer) {
+      var regel = new Onderdeel();
+      regel.Type = LiturgieType.EnkelZonderDeel;
+      regel.Ruw = invoer;
+      regel.EchteBenaming = invoer.Benaming;
+      // Bepaal basis pad. Deze is relatief: bewust nog geen database pad ervoor geplaatst. Dat gebeurd pas bij inlezen.
+      var basisPad = "" + Path.DirectorySeparatorChar; 
+
+      // Hardcoded afkortingen oplossen
+      switch (invoer.Benaming.ToLower()) {
+        case "ps":
+          regel.EchteBenaming = "psalm";
+          break;
+        case "gz":
+          regel.EchteBenaming = "gezang";
+          break;
+        case "lied":
+          regel.EchteBenaming = "lied";  // Lowercase
+          break;
+      }
+      if (!String.IsNullOrWhiteSpace(regel.Ruw.Deel))
+        regel.Type = LiturgieType.EnkelMetDeel;
+      // Het is mogelijk een bestand in een map aan te wijzen door spaties te gebruiken. Ook dit oplossen
+      var benamingOnderdelen = invoer.Benaming.Split(_benamingSplitScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
+      if (benamingOnderdelen.Length > 1) {
+        regel.EchteBenaming = benamingOnderdelen[benamingOnderdelen.Length - 1];  // Laatste is echte naam
+        basisPad +=
+          String.Join("", benamingOnderdelen.Select((o, i) => new { Naam = o, Index = i})
+            .Where(o => o.Index != benamingOnderdelen.Length -1)
+            .Select(o => o.Naam + Path.DirectorySeparatorChar));
+      }
+      if (invoer.Verzen.Any())
+        regel.Type = LiturgieType.MeerMetDeel;
+
+      // Bepaal nu de zoekhint
+      if (regel.Type == LiturgieType.MeerMetDeel) {
+        regel.Type = LiturgieType.MeerMetDeel;
+        // de verzen zijn de te zoeken items. De rest is pad
+        basisPad += invoer.Benaming + Path.DirectorySeparatorChar; 
+        if (!String.IsNullOrEmpty(invoer.Deel))
+          basisPad += invoer.Deel + Path.DirectorySeparatorChar; 
+        //deel de verschillende bestandsnamen op(er zijn verschillende verzen mogelijk uit één map bijvoorbeeld)
+        regel.ZoekactieHints = invoer.Verzen.Select(v => new OnderdeelHint() { Nummer = v, ZoekPad = basisPad + v.Trim() }).ToList();
+      }
+      else if (regel.Type == LiturgieType.EnkelMetDeel) {
+        // Benaming deel is het gezochte item, rest is pad
+        regel.ZoekactieHints = new[] { new OnderdeelHint() { ZoekPad = basisPad + invoer.Benaming + Path.DirectorySeparatorChar + invoer.Deel } };
+      }
+      else {
+        // Benaming is gezochte item
+        regel.ZoekactieHints = new[] { new OnderdeelHint() { ZoekPad = basisPad + invoer.Benaming } };
+      }
+
+      // Virtuele benaming is de 'mooie' benaming die op het liturgie bord verschijnt. Maar hij
+      // wordt 'normaal' ingevoerd. Deze virtuele naam is een 'mask' en daar dan ook te vinden
+      // TODO verplaatsen? virtuele benaming is pas relevant in liturgie bord generator
+      regel.VirtueleBenaming = regel.EchteBenaming;
+      // Check of er een mask op de benaming zit
+      var maskCheck = _masks.FirstOrDefault(m => String.Compare(m.RealName, regel.EchteBenaming, true) == 0);
+      if (maskCheck != null)
+        regel.VirtueleBenaming = maskCheck.Name;
+      return regel;
+    }
+
+    class Onderdeel : ILiturgieOnderdeelZoekactie {
+      public ILiturgieOnderdeelRuw Ruw { get; set; }
+      public String VirtueleBenaming { get; set; }
+      public String EchteBenaming { get; set; }
+      public LiturgieType Type { get; set; }
+      public IEnumerable<ILiturgieOnderdeelZoekactieHint> ZoekactieHints { get; set; }
+    }
+    class OnderdeelHint : ILiturgieOnderdeelZoekactieHint {
+      public String Nummer { get; set; }
+      public String ZoekPad { get; set; }
+    }
+  }
+
+  /// <summary>
+  /// Ruwe liturgie regels, aangevuld met zoekactie hints (filesystem paden)
+  /// </summary>
+  public interface ILiturgieOnderdeelZoekactie {
+    ILiturgieOnderdeelRuw Ruw { get; }
+    String VirtueleBenaming { get; }
+    String EchteBenaming { get; }
+    LiturgieType Type { get; }
+    IEnumerable<ILiturgieOnderdeelZoekactieHint> ZoekactieHints { get; }
+  }
+  public interface ILiturgieOnderdeelZoekactieHint {
+    String Nummer { get; }
+    String ZoekPad { get; }
+  }
+  public enum LiturgieType {
+    /// <summary>
+    /// Enkelvoudige aanduiding, bijvoorbeeld een openingsslide.
+    /// </summary>
+    EnkelZonderDeel,
+    /// <summary>
+    /// Enkelvoudige aanduiding met deel benaming, bijvoorbeeld een database 
+    /// zoals opwekking waar wel nummers zijn maar geen verzen
+    /// </summary>
+    EnkelMetDeel,
+    /// <summary>
+    /// Meervoudige aanduiding met deel benaming, bijvoorbeeld een database
+    /// zoals psalmen waar nummers zijn met individuele verzen
+    /// </summary>
+    MeerMetDeel,
+  }
+
+
+  /// <summary>
+  /// Zoek naar de opgegeven liturgieen.
+  /// </summary>
+  class LiturgieDatabase {
+    private readonly String _databasePad;
+    public LiturgieDatabase(String databasePad) {
+      _databasePad = databasePad;
+      if (!_databasePad.EndsWith(Path.DirectorySeparatorChar + ""))
+        _databasePad += Path.DirectorySeparatorChar;
+    }
+
+    /// <summary>
+    /// Zoek, in dit geval in het bestandssysteem, naar de opgegeven liturgieen.
+    /// We zoeken uit hoe de liturgie opgeslagen is (tekst, powerpoint) en geven terug
+    /// wat we op kunnen halen.
+    public IEnumerable<ILiturgieZoekresultaat> Zoek(IEnumerable<ILiturgieOnderdeelZoekactie> zoekopdracht) {
+      return zoekopdracht
+        .Select(z => Zoek(z))
+        .ToList();
+    }
+
+    private ILiturgieZoekresultaat Zoek(ILiturgieOnderdeelZoekactie zoekopdracht) {
+      var resultaat = new ZoekresultaatItem();
+      resultaat.Type = zoekopdracht.Type;
+      resultaat.Resultaten = zoekopdracht.ZoekactieHints.Select(zh => ZoekDeel(zh)).ToList();
+      resultaat.EchteBenaming = zoekopdracht.EchteBenaming;
+      resultaat.DeelBenaming = zoekopdracht.Ruw.Deel;
+      resultaat.VirtueleBenaming = zoekopdracht.VirtueleBenaming;
+      return resultaat;
+    }
+
+    private ILiturgieZoekresultaatDeel ZoekDeel(ILiturgieOnderdeelZoekactieHint deelHint) {
+      var resultaat = new ZoekresultaatDeelItem();
+      resultaat.Zoekopdracht = deelHint.ZoekPad;
+      resultaat.Nummer = deelHint.Nummer;
+      resultaat.Gevonden = false;
+      var bestandsPadExtensieloos = _databasePad + deelHint.ZoekPad;
+
+      //probeer eerst powerpoint bestanden
+      var path = bestandsPadExtensieloos + ".pptx";
+      if (File.Exists(path)) {
+        resultaat.Gevonden = true;
+        resultaat.InhoudType = InhoudType.PptLink;
+        resultaat.Inhoud = path;
+        return resultaat;
+      }
+      path = bestandsPadExtensieloos + ".ppt";
+      if (File.Exists(path)) {
+        resultaat.Gevonden = true;
+        resultaat.InhoudType = InhoudType.PptLink;
+        resultaat.Inhoud = path;
+        return resultaat;
+      }
+      path = bestandsPadExtensieloos + ".txt";
+      if (File.Exists(path)) {
+        resultaat.Gevonden = true;
+        //probeer om tekst te lezen van bestand
+        try {
+          resultaat.Inhoud = LeesTekstBestand(path);
+        }
+        catch {
+          resultaat.Gevonden = false;
+        }
+        resultaat.InhoudType = InhoudType.Tekst;
+        return resultaat;
+      }
+      return resultaat;
+    }
+
+    private String LeesTekstBestand(String bestandsNaam) {
+      //open een filestream naar het gekozen bestand
+      var strm = new FileStream(bestandsNaam, FileMode.Open, FileAccess.Read);
+      //gebruik streamreader om te lezen van de filestream
+      using (var rdr = new StreamReader(strm)) {
+        //return de liturgie
+        return rdr.ReadToEnd();
+      }
+    }
+
+    class ZoekresultaatItem : ILiturgieZoekresultaat {
+      public LiturgieType Type { get; set;  }
+      public String VirtueleBenaming { get; set; }
+      public String EchteBenaming { get; set; }
+      public String DeelBenaming { get; set; }
+      public IEnumerable<ILiturgieZoekresultaatDeel> Resultaten { get; set; }
+    }
+    class ZoekresultaatDeelItem : ILiturgieZoekresultaatDeel {
+      public String Nummer { get; set; }
+      public String Zoekopdracht { get; set; }
+      public Boolean Gevonden { get; set; }
+      public String Inhoud { get; set; }
+      public InhoudType InhoudType { get; set; }
+    }
+  }
+
+  /// <summary>
+  /// Zoekresultaat item(s) samen met de zoekopdracht gegevens
+  /// </summary>
+  public interface ILiturgieZoekresultaat {
+    LiturgieType Type { get; }
+    String VirtueleBenaming { get; }
+    String EchteBenaming { get; }
+    String DeelBenaming { get; }
+    IEnumerable<ILiturgieZoekresultaatDeel> Resultaten { get; }
+  }
+  /// <summary>
+  /// Het gezochte item en of/wat er gevonden is
+  /// </summary>
+  public interface ILiturgieZoekresultaatDeel {
+    String Nummer { get; }
+    String Zoekopdracht { get; }
+    Boolean Gevonden { get; }
+    String Inhoud { get; }
+    InhoudType InhoudType { get; }
+  }
+  public enum InhoudType {
+    Tekst,
+    PptLink,
+  }
 }
