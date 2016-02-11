@@ -33,7 +33,7 @@ namespace PowerpointGenerator.Database {
             var voorOpties = invoerTrimmed.Split(_optieStart, StringSplitOptions.RemoveEmptyEntries);
             if (voorOpties.Length == 0)
                 return null;
-            var opties = voorOpties.Length > 1 ? voorOpties[1].Split(_optieEinde, StringSplitOptions.RemoveEmptyEntries)[0].Trim() : String.Empty;
+            var opties = voorOpties.Length > 1 ? voorOpties[1].Split(_optieEinde, StringSplitOptions.RemoveEmptyEntries)[0].Trim() : string.Empty;
             var voorBenamingStukken = voorOpties[0].Trim().Split(_benamingScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
             if (voorBenamingStukken.Length == 0)
                 return null;
