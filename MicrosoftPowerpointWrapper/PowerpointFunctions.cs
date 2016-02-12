@@ -430,7 +430,9 @@ namespace mppt
                     nieuweReeks.Add(over[0]);
                     over.RemoveAt(0);
                 }
-                if (nieuweReeks.Count < 3)
+                if (nieuweReeks.Count == 1)
+                    builder.Append(nieuweReeks[0]).Append(", ");
+                else if (nieuweReeks.Count == 2)
                     builder.Append(string.Join(", ", nieuweReeks));
                 else
                     builder.AppendFormat("{0} - {1}, ", nieuweReeks.First(), nieuweReeks.Last());
