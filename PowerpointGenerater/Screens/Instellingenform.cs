@@ -1,6 +1,7 @@
 ﻿using ISettings;
 using Microsoft.Practices.Unity;
 using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 
 namespace PowerpointGenerater
@@ -11,6 +12,7 @@ namespace PowerpointGenerater
         public IInstellingenFactory InstellingenFactory { get; set; }
 
         public IInstellingen Instellingen { get; private set; }
+        private IEnumerable<IMapmask> _masks; 
 
         public Instellingenform()
         {
@@ -34,6 +36,8 @@ namespace PowerpointGenerater
             tbLezen.Text = vanInstellingen.StandaardTeksten.Lezen;
             tbTekst.Text = vanInstellingen.StandaardTeksten.Tekst;
             tbLiturgie.Text = vanInstellingen.StandaardTeksten.Liturgie;
+
+            _masks = vanInstellingen.Masks;
         }
 
         #region Eventhandlers
@@ -106,7 +110,7 @@ namespace PowerpointGenerater
             int regelsPerSlide = 0;
             if (!System.Int32.TryParse(textBox4.Text, out regelsPerSlide))
                 regelsPerSlide = 6;
-            Instellingen = new Instellingen(textBox3.Text, textBox3.Text, textBox2.Text, regelsPerSlide,
+            Instellingen = new Instellingen(textBox3.Text, textBox1.Text, textBox2.Text, regelsPerSlide,
                 new StandaardTeksten() { 
                     Volgende = tbVolgende.Text,
                     Voorganger = tbVoorganger.Text,
@@ -116,7 +120,8 @@ namespace PowerpointGenerater
                     Lezen = tbLezen.Text,
                     Tekst = tbTekst.Text,
                     Liturgie = tbLiturgie.Text,
-                }
+                },
+                _masks
             );
         }
     }

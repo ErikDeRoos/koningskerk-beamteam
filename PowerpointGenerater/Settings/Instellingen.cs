@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System;
 using ISettings;
+using Microsoft.Practices.ObjectBuilder2;
 
 namespace PowerpointGenerater
 {
@@ -35,7 +36,7 @@ namespace PowerpointGenerater
 
         }
 
-        public Instellingen(string databasepad, string templateliederen, string templatetheme, int regelsperslide = 6, StandaardTeksten standaardTeksten = null)
+        public Instellingen(string databasepad, string templateliederen, string templatetheme, int regelsperslide = 6, StandaardTeksten standaardTeksten = null, IEnumerable<IMapmask> masks = null)
             : this()
         {
             Databasepad = databasepad;
@@ -44,6 +45,7 @@ namespace PowerpointGenerater
             Regelsperslide = regelsperslide;
             if (standaardTeksten != null)
                 _standaardTeksten = standaardTeksten;
+            masks?.ForEach(m => AddMask(m));
         }
 
         public bool AddMask(IMapmask mask)
