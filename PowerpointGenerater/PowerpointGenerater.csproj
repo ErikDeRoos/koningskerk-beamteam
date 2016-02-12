@@ -118,6 +118,7 @@
     <Compile Include="Database\ArchiveExtender.cs" />
     <Compile Include="Database\FileFinder.cs" />
     <Compile Include="Database\FileZipFinder.cs" />
+    <Compile Include="Database\IZipArchiveDirectory.cs" />
     <Compile Include="DefaultContainer.cs" />
     <Compile Include="Database\FileEngine.cs" />
     <Compile Include="Database\FileEngineSetSettings.cs" />
@@ -177,7 +178,6 @@
       <DependentUpon>Instellingenform.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
-    <None Include="Resources\Visitekaartje.bmp" />
     <Content Include="Help.chm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -242,6 +242,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="Screens\visitekaartje.JPG" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

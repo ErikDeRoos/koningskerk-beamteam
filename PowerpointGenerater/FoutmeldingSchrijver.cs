@@ -3,7 +3,7 @@ using System.IO;
 
 namespace PowerpointGenerater
 {
-    class FoutmeldingSchrijver
+    internal class FoutmeldingSchrijver
     {
         public static void Log(Exception melding)
         {
@@ -13,7 +13,7 @@ namespace PowerpointGenerater
         {
             using (var sw = new StreamWriter("ppgenerator.log", true))
             {
-                sw.WriteLine(string.Format("[{0}] Foutmelding door [{1}] op systeem [{2}]", DateTime.Now, Environment.UserName, Environment.MachineName));
+                sw.WriteLine("[{0}] Foutmelding door [{1}] op systeem [{2}]", DateTime.Now, Environment.UserName, Environment.MachineName);
                 sw.WriteLine(melding);
             }
         }

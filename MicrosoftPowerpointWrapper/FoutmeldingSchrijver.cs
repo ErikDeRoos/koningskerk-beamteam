@@ -13,7 +13,7 @@ namespace mppt
         {
             using (var sw = new StreamWriter("ppgenerator.log", true))
             {
-                sw.WriteLine(string.Format("[{0}] Foutmelding door [{1}] op systeem [{2}]", DateTime.Now, Environment.UserName, Environment.MachineName));
+                sw.WriteLine($"[{DateTime.Now}] Foutmelding door [{Environment.UserName}] op systeem [{Environment.MachineName}]");
                 sw.WriteLine(melding);
             }
         }

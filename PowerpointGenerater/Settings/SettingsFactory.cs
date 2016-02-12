@@ -7,9 +7,9 @@ namespace PowerpointGenerater.Settings
 {
     class SettingsFactory : IInstellingenFactory
     {
-        private string _baseDir;
-        private string _instellingenFileName;
-        private string _masksFileName;
+        private readonly string _baseDir;
+        private readonly string _instellingenFileName;
+        private readonly string _masksFileName;
 
         public SettingsFactory(string baseDir, string instellingenFileName, string masksFileName)
         {
@@ -17,7 +17,7 @@ namespace PowerpointGenerater.Settings
             _instellingenFileName = instellingenFileName;
             _masksFileName = masksFileName;
         }
-        private static bool WriteToXMLFile(string instellingenFile, string maskFile, Instellingen instellingen)
+        private static bool WriteToXmlFile(string instellingenFile, string maskFile, Instellingen instellingen)
         {
             try
             {
@@ -59,9 +59,9 @@ namespace PowerpointGenerater.Settings
             }
         }
 
-        public bool WriteToXMLFile(IInstellingen instellingen)
+        public bool WriteToXmlFile(IInstellingen instellingen)
         {
-            return WriteToXMLFile(Path.Combine(_baseDir, _instellingenFileName), Path.Combine(_baseDir, _masksFileName), (instellingen as Instellingen) ?? GetDefault(_baseDir));
+            return WriteToXmlFile(Path.Combine(_baseDir, _instellingenFileName), Path.Combine(_baseDir, _masksFileName), (instellingen as Instellingen) ?? GetDefault(_baseDir));
         }
 
         private static Instellingen GetDefault(string baseDir)
@@ -74,9 +74,9 @@ namespace PowerpointGenerater.Settings
         }
 
 
-        private static Instellingen LoadFromXMLFile(string instellingenFile, string maskFile)
+        private static Instellingen LoadFromXmlFile(string instellingenFile, string maskFile)
         {
-            var instellingen = (Instellingen)null;
+            Instellingen instellingen;
 
             if (!File.Exists(instellingenFile))
                 return null;
@@ -92,7 +92,7 @@ namespace PowerpointGenerater.Settings
                 }
             }
             if (instellingen == null)
-                return instellingen;
+                return null;
 
             if (!File.Exists(maskFile))
                 return instellingen;
@@ -101,20 +101,22 @@ namespace PowerpointGenerater.Settings
             xdoc.Load(maskFile);
             var root = xdoc.DocumentElement;
 
+            if (root == null) return instellingen;
             var masklist = root.GetElementsByTagName("Mask");
             foreach (XmlNode mask in masklist)
             {
                 var nameNode = mask.SelectSingleNode("Name");
                 var realnameNode = mask.SelectSingleNode("RealName");
-                instellingen.AddMask(new Mapmask(nameNode.InnerText, realnameNode.InnerText));
+                if (nameNode != null && realnameNode != null)
+                    instellingen.AddMask(new Mapmask(nameNode.InnerText, realnameNode.InnerText));
             }
 
             return instellingen;
         }
 
-        public IInstellingen LoadFromXMLFile()
+        public IInstellingen LoadFromXmlFile()
         {
-            return LoadFromXMLFile(Path.Combine(_baseDir, _instellingenFileName), Path.Combine(_baseDir, _masksFileName)) ?? GetDefault(_baseDir);
+            return LoadFromXmlFile(Path.Combine(_baseDir, _instellingenFileName), Path.Combine(_baseDir, _masksFileName)) ?? GetDefault(_baseDir);
         }
     }
 }

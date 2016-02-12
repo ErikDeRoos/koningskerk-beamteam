@@ -3,6 +3,7 @@ using Microsoft.Practices.Unity;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using static System.Int32;
 
 namespace PowerpointGenerater
 {
@@ -21,7 +22,7 @@ namespace PowerpointGenerater
 
         public void Opstarten()
         {
-            var vanInstellingen = InstellingenFactory.LoadFromXMLFile();
+            var vanInstellingen = InstellingenFactory.LoadFromXmlFile();
 
             textBox1.Text = vanInstellingen.Templateliederen;
             textBox2.Text = vanInstellingen.Templatetheme;
@@ -44,7 +45,7 @@ namespace PowerpointGenerater
         private void button1_Click(object sender, EventArgs e)
         {
             //kies een bestand en sla het pad op
-            string temp = KiesFile();
+            var temp = KiesFile();
             if (!temp.Equals(""))
                 textBox1.Text = temp;
         }
@@ -52,25 +53,27 @@ namespace PowerpointGenerater
         private void button4_Click(object sender, EventArgs e)
         {
             //kies een bestand en sla het pad op
-            string temp = KiesFile();
+            var temp = KiesFile();
             if (!temp.Equals(""))
                 textBox2.Text = temp;
         }
 
         private void button5_Click(object sender, EventArgs e)
         {
-            string applicationPath = AppDomain.CurrentDomain.BaseDirectory;
+            var applicationPath = AppDomain.CurrentDomain.BaseDirectory;
 
             //open een open window met bepaalde instellingen
-            FolderBrowserDialog openFolderDialog1 = new FolderBrowserDialog();
-            openFolderDialog1.Description = "Kies map van de Database";
-            openFolderDialog1.SelectedPath = applicationPath;
+            var openFolderDialog1 = new FolderBrowserDialog
+            {
+                Description = "Kies map van de Database",
+                SelectedPath = applicationPath
+            };
 
             //return als er word geannuleerd
-            if (openFolderDialog1.ShowDialog() == System.Windows.Forms.DialogResult.Cancel)
+            if (openFolderDialog1.ShowDialog() == DialogResult.Cancel)
                 return;
 
-            string dbPath = openFolderDialog1.SelectedPath;
+            var dbPath = openFolderDialog1.SelectedPath;
             if (dbPath.StartsWith(applicationPath))
                 dbPath = dbPath.Replace(applicationPath, ".");
 
@@ -83,21 +86,23 @@ namespace PowerpointGenerater
         /// Uitkiezen van een file aan de hand van openfiledialog
         /// </summary>
         /// <returns> return gekozen bestandspad</returns>
-        private string KiesFile()
+        private static string KiesFile()
         {
-            string applicationPath = AppDomain.CurrentDomain.BaseDirectory;
+            var applicationPath = AppDomain.CurrentDomain.BaseDirectory;
 
             //open een open window met bepaalde instellingen
-            OpenFileDialog openFileDialog1 = new OpenFileDialog();
-            openFileDialog1.Filter = "Template bestanden|*.pptx;*.potx";
-            openFileDialog1.Title = "Kies bestand";
-            openFileDialog1.InitialDirectory = applicationPath;
+            var openFileDialog1 = new OpenFileDialog
+            {
+                Filter = "Template bestanden|*.pptx;*.potx",
+                Title = "Kies bestand",
+                InitialDirectory = applicationPath
+            };
 
             //return als er word geannuleerd
-            if (openFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.Cancel)
+            if (openFileDialog1.ShowDialog() == DialogResult.Cancel)
                 return "";
             //return bestandspad
-            string selectedPath = openFileDialog1.FileName;
+            var selectedPath = openFileDialog1.FileName;
             if (selectedPath.StartsWith(applicationPath))
                 selectedPath = selectedPath.Replace(applicationPath, ".");
 
@@ -107,11 +112,12 @@ namespace PowerpointGenerater
 
         private void button2_Click(object sender, EventArgs e)
         {
-            int regelsPerSlide = 0;
-            if (!System.Int32.TryParse(textBox4.Text, out regelsPerSlide))
+            int regelsPerSlide;
+            if (!TryParse(textBox4.Text, out regelsPerSlide))
                 regelsPerSlide = 6;
             Instellingen = new Instellingen(textBox3.Text, textBox1.Text, textBox2.Text, regelsPerSlide,
-                new StandaardTeksten() { 
+                new StandaardTeksten
+                { 
                     Volgende = tbVolgende.Text,
                     Voorganger = tbVoorganger.Text,
                     Collecte = tbCollecte.Text,

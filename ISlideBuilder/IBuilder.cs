@@ -10,7 +10,7 @@ namespace ISlideBuilder
         Action<int, int, int> Voortgang { set; }
         Action<Status, string> StatusWijziging { set; }
 
-        void PreparePresentation(IEnumerable<ILiturgieRegel> liturgie, string Voorganger, string Collecte1, string Collecte2, string Lezen, string Tekst, IInstellingen gebruikInstellingen, string opslaanAls);
+        void PreparePresentation(IEnumerable<ILiturgieRegel> liturgie, string voorganger, string collecte1, string collecte2, string lezen, string tekst, IInstellingen gebruikInstellingen, string opslaanAls);
         void GeneratePresentation();
         void Stop();
     }

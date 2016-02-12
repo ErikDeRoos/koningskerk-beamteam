@@ -9,10 +9,10 @@ namespace PowerpointGenerater.Database
 {
     public class FileZipFinder : IFinder, IDisposable
     {
-        private string _atDir;
-        private string _setName;
-        private bool _itemsHaveSubContent;
-        private bool _cached;
+        private readonly string _atDir;
+        private readonly string _setName;
+        private readonly bool _itemsHaveSubContent;
+        private readonly bool _cached;
         private Stream _archiveStream;
         private ZipArchive _archive;
         public FileZipFinder(string atDir, string setName, bool itemsHaveSubContent, bool askCached)
@@ -27,9 +27,7 @@ namespace PowerpointGenerater.Database
         {
             if (_archiveStream == null)
                 _archiveStream = new FileStream(Path.Combine(_atDir, _setName), FileMode.Open, FileAccess.Read);
-            if (_archive == null)
-                _archive = new ZipArchive(_archiveStream, ZipArchiveMode.Read);
-            return _archive;
+            return _archive ?? (_archive = new ZipArchive(_archiveStream, ZipArchiveMode.Read));
         }
 
         /// <remarks>cache is geregeld door FileEngine die deze aanroep doet</remarks>
@@ -46,39 +44,34 @@ namespace PowerpointGenerater.Database
 
         public void Dispose()
         {
-            if (_archiveStream != null)
-                _archiveStream.Dispose();
+            _archiveStream?.Dispose();
         }
     }
 
     public class FileZipBundledItem : IDbItem
     {
-        private IZipArchiveDirectory _inDir;
-        private bool _cached;
-
-        public string Name { get; private set; }
-        public IDbItemContent Content { get; private set; }
+        public string Name { get; }
+        public IDbItemContent Content { get; }
 
         internal FileZipBundledItem(IZipArchiveDirectory archiveDir, bool cached)
         {
-            _inDir = archiveDir;
-            _cached = cached;
+            var inDir = archiveDir;
 
-            Name = _inDir.Name;
-            Content = new DirContent(_inDir.Entries, cached);
+            Name = inDir.Name;
+            Content = new DirContent(inDir.Entries, cached);
         }
 
         class DirContent : IDbItemContent
         {
-            private IEnumerable<ZipArchiveEntry> _entries;
-            private bool _cached;
+            private readonly IEnumerable<ZipArchiveEntry> _entries;
+            private readonly bool _cached;
             private IEnumerable<IDbItem> _itemCache;
 
-            public string Type { get { return FileEngineDefaults.BundleTypeDir; } }
+            public string Type => FileEngineDefaults.BundleTypeDir;
 
-            public Stream Content { get { return new MemoryStream(); } }
+            public Stream Content => new MemoryStream();
 
-            public string PersistentLink { get { return string.Empty; } }
+            public string PersistentLink => string.Empty;
 
             public DirContent(IEnumerable<ZipArchiveEntry> fileEntries, bool cached)
             {
@@ -95,45 +88,37 @@ namespace PowerpointGenerater.Database
             {
                 if (!_cached)
                     return GetItems(_entries);
-                if (_itemCache == null)
-                    _itemCache = GetItems(_entries);
-                return _itemCache;
+                return _itemCache ?? (_itemCache = GetItems(_entries));
             }
         }
     }
 
     class FileZipItem : IDbItem
     {
-        private ZipArchiveEntry _entry;
-
-        public string Name { get; private set; }
-        public IDbItemContent Content { get; private set; }
+        public string Name { get; }
+        public IDbItemContent Content { get; }
 
         public FileZipItem(ZipArchiveEntry entry)
         {
-            _entry = entry;
+            var entry1 = entry;
 
-            Name = Path.GetFileNameWithoutExtension(_entry.Name);
-            Content = new FileContent(_entry);
+            Name = Path.GetFileNameWithoutExtension(entry1.Name);
+            Content = new FileContent(entry1);
         }
-        class FileContent : IDbItemContent
-        {
-            private ZipArchiveEntry _entry;
 
-            public string Type { get; private set; }
-            public Stream Content { get { return _entry.Open(); } }
-            public string PersistentLink { get { return _entry.FullName; } }
+        private class FileContent : IDbItemContent
+        {
+            private readonly ZipArchiveEntry _entry;
+
+            public string Type { get; }
+            public Stream Content => _entry.Open();
+            public string PersistentLink => _entry.FullName;
 
             public FileContent(ZipArchiveEntry entry)
             {
                 _entry = entry;
 
-                Type = Path.GetExtension(entry.Name).Substring(1);  // remove dot
-            }
-
-            public static Stream ReadFile(string filePath)
-            {
-                return new FileStream(filePath, FileMode.Open);
+                Type = entry != null && entry.Name != null ? Path.GetExtension(entry.Name).Substring(1) : string.Empty;  // remove dot
             }
 
             public IEnumerable<IDbItem> TryAccessSubs()

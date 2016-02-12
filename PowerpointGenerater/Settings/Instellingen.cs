@@ -11,9 +11,9 @@ namespace PowerpointGenerater
         public string Templateliederen { get; set; }
         public string Templatetheme { get; set; }
         public int Regelsperslide { get; set; }
-        private List<IMapmask> lijstmasks = new List<IMapmask>();
-        private StandaardTeksten _standaardTeksten;
-        public IStandaardTeksten StandaardTeksten { get { return _standaardTeksten; } }
+        private readonly List<IMapmask> _lijstmasks = new List<IMapmask>();
+        private readonly StandaardTeksten _standaardTeksten;
+        public IStandaardTeksten StandaardTeksten => _standaardTeksten;
 
         public Instellingen()
         {
@@ -50,57 +50,28 @@ namespace PowerpointGenerater
 
         public bool AddMask(IMapmask mask)
         {
-            if (!lijstmasks.Contains(mask))
-            {
-                lijstmasks.Add(mask);
-                return true;
-            }
-            return false;
+            if (_lijstmasks.Contains(mask)) return false;
+            _lijstmasks.Add(mask);
+            return true;
         }
         public void ClearMasks()
         {
-            lijstmasks.Clear();
+            _lijstmasks.Clear();
         }
 
-        public string FullDatabasePath
-        {
-            get
-            {
-                if (Databasepad.StartsWith("."))
-                    return System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Databasepad.Remove(0, 1));
+        public string FullDatabasePath => Databasepad.StartsWith(".") ? System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Databasepad.Remove(0, 1)) : Databasepad;
 
-                return Databasepad;
-            }
-        }
+        public string FullTemplatetheme => Templatetheme.StartsWith(".") ? System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Templatetheme.Remove(0, 1)) : Templatetheme;
 
-        public string FullTemplatetheme
-        {
-            get
-            {
-                if (Templatetheme.StartsWith("."))
-                    return System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Templatetheme.Remove(0, 1));
+        public string FullTemplateliederen => Templateliederen.StartsWith(".") ? System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Templateliederen.Remove(0, 1)) : Templateliederen;
 
-                return Templatetheme;
-            }
-        }
-
-        public string FullTemplateliederen
-        {
-            get
-            {
-                if (Templateliederen.StartsWith("."))
-                    return System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Templateliederen.Remove(0, 1));
-
-                return Templateliederen;
-            }
-        }
-
-        public IEnumerable<IMapmask> Masks { get { return lijstmasks; } }
+        public IEnumerable<IMapmask> Masks => _lijstmasks;
 
 
         public override string ToString()
         {
-            return string.Format("databasepad: {0}\n templateliederen: {1}\n templatetheme: {2}\n regels per slide: {3}\n", FullDatabasePath, FullTemplateliederen, FullTemplatetheme, Regelsperslide);
+            return
+                $"databasepad: {FullDatabasePath}\n templateliederen: {FullTemplateliederen}\n templatetheme: {FullTemplatetheme}\n regels per slide: {Regelsperslide}\n";
         }
     }
 }

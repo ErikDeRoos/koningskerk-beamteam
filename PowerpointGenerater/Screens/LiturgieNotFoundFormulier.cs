@@ -11,7 +11,7 @@ namespace PowerpointGenerater
         {
             InitializeComponent();
             textBox1.Lines = fouten
-                .Select(l => string.Format("{0} {1}: {2}", l.VanInterpretatie.Benaming, l.VanInterpretatie.Deel, l.Resultaat))
+                .Select(l => $"{l.VanInterpretatie.Benaming} {l.VanInterpretatie.Deel}: {l.Resultaat}")
                 .ToArray();
         }
     }

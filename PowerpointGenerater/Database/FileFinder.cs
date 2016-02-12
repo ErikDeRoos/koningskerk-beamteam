@@ -9,9 +9,9 @@ namespace PowerpointGenerater.Database
 
     public class FileFinder : IFinder
     {
-        private string _atDir;
-        private bool _itemsHaveSubContent;
-        private bool _cached;
+        private readonly string _atDir;
+        private readonly bool _itemsHaveSubContent;
+        private readonly bool _cached;
         public FileFinder(string atDir, bool itemsHaveSubContent, bool askCached)
         {
             _atDir = atDir;
@@ -29,32 +29,26 @@ namespace PowerpointGenerater.Database
 
     public class FileBundledItem : IDbItem
     {
-        private string _inDir;
-        private bool _cached;
-
-        public string Name { get; private set; }
-        public IDbItemContent Content { get; private set; }
+        public string Name { get; }
+        public IDbItemContent Content { get; }
 
         internal FileBundledItem(string dirPath, bool cached)
         {
-            _inDir = dirPath;
-            _cached = cached;
-
             Name = FileEngineDefaults.ClosestPathName(dirPath);
-            Content = new DirContent(_inDir, cached);
+            Content = new DirContent(dirPath, cached);
         }
 
-        class DirContent : IDbItemContent
+        private class DirContent : IDbItemContent
         {
-            private string _inDir;
-            private bool _cached;
+            private readonly string _inDir;
+            private readonly bool _cached;
             private IEnumerable<IDbItem> _itemCache;
 
-            public string Type { get { return FileEngineDefaults.BundleTypeDir; } }
+            public string Type => FileEngineDefaults.BundleTypeDir;
 
-            public Stream Content { get { return new MemoryStream(); } }
+            public Stream Content => new MemoryStream();
 
-            public string PersistentLink { get { return string.Empty; } }
+            public string PersistentLink => string.Empty;
 
             public DirContent(string dirPath, bool cached)
             {
@@ -71,43 +65,37 @@ namespace PowerpointGenerater.Database
             {
                 if (!_cached)
                     return GetItems(_inDir);
-                if (_itemCache == null)
-                    _itemCache = GetItems(_inDir);
-                return _itemCache;
+                return _itemCache ?? (_itemCache = GetItems(_inDir));
             }
         }
     }
 
     class FileItem : IDbItem
     {
-        private string _filePath;
-
-        public string Name { get; private set; }
-        public IDbItemContent Content { get; private set; }
+        public string Name { get; }
+        public IDbItemContent Content { get; }
 
         public FileItem(string filePath)
         {
-            _filePath = filePath;
-
             Name = Path.GetFileNameWithoutExtension(filePath);
             Content = new FileContent(filePath);
         }
         class FileContent : IDbItemContent
         {
-            private string _filePath;
+            private readonly string _filePath;
 
-            public string Type { get; private set; }
-            public Stream Content { get { return ReadFile(_filePath); } }
-            public string PersistentLink { get { return _filePath; } }
+            public string Type { get; }
+            public Stream Content => ReadFile(_filePath);
+            public string PersistentLink => _filePath;
 
             public FileContent(string filePath)
             {
                 _filePath = filePath;
 
-                Type = Path.GetExtension(_filePath).Substring(1);  // remove dot
+                Type = _filePath != null ? Path.GetExtension(_filePath).Substring(1) : string.Empty;
             }
 
-            public static Stream ReadFile(string filePath)
+            private static Stream ReadFile(string filePath)
             {
                 return new FileStream(filePath, FileMode.Open);
             }
