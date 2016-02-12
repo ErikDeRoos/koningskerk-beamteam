@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using static System.String;
 
 namespace PowerpointGenerator.Database {
 
@@ -19,38 +20,38 @@ namespace PowerpointGenerator.Database {
     /// </summary>
     class InterpreteerLiturgieRuw : ILiturgieInterpreteer
     {
-        private static readonly char[] _benamingScheidingstekens = new char[] { ':' };
-        private static readonly char[] _benamingDeelScheidingstekens = new char[] { ' ' };
-        private static readonly char[] _versScheidingstekens = new char[] { ',' };
-        private static readonly char[] _optieStart = new char[] { '(' };
-        private static readonly char[] _optieEinde = new char[] { ')' };
-        private static readonly char[] _optieScheidingstekens = new char[] { ',' };
+        private static readonly char[] BenamingScheidingstekens = { ':' };
+        private static readonly char[] BenamingDeelScheidingstekens = { ' ' };
+        private static readonly char[] VersScheidingstekens = { ',' };
+        private static readonly char[] OptieStart = { '(' };
+        private static readonly char[] OptieEinde = { ')' };
+        private static readonly char[] OptieScheidingstekens = { ',' };
 
         private static Interpretatie SplitTekstregel(string invoer)
         {
             var regel = new Interpretatie();
             var invoerTrimmed = invoer.Trim();
-            var voorOpties = invoerTrimmed.Split(_optieStart, StringSplitOptions.RemoveEmptyEntries);
+            var voorOpties = invoerTrimmed.Split(OptieStart, StringSplitOptions.RemoveEmptyEntries);
             if (voorOpties.Length == 0)
                 return null;
-            var opties = voorOpties.Length > 1 ? voorOpties[1].Split(_optieEinde, StringSplitOptions.RemoveEmptyEntries)[0].Trim() : string.Empty;
-            var voorBenamingStukken = voorOpties[0].Trim().Split(_benamingScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
+            var opties = voorOpties.Length > 1 ? voorOpties[1].Split(OptieEinde, StringSplitOptions.RemoveEmptyEntries)[0].Trim() : Empty;
+            var voorBenamingStukken = voorOpties[0].Trim().Split(BenamingScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
             if (voorBenamingStukken.Length == 0)
                 return null;
             var preBenamingTrimmed = voorBenamingStukken[0].Trim();
             // Een benaming kan uit delen bestaan, bijvoorbeeld 'psalm 110' in 'psalm 110:1,2' of 'opwekking 598' in 'opwekking 598'
-            var voorPreBenamingStukken = preBenamingTrimmed.Split(_benamingDeelScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
+            var voorPreBenamingStukken = preBenamingTrimmed.Split(BenamingDeelScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
             if (voorPreBenamingStukken.Length > 1)
                 regel.Deel = voorPreBenamingStukken[voorPreBenamingStukken.Length - 1];  // Is altijd laatste deel
             regel.Benaming = preBenamingTrimmed.Substring(0, preBenamingTrimmed.Length - (regel.Deel ?? "").Length).Trim();
             // Verzen als '1,2' in 'psalm 110:1,2'
             regel.VerzenZoalsIngevoerd = voorBenamingStukken.Length > 1 ? voorBenamingStukken[1] : null;
             regel.Verzen = (regel.VerzenZoalsIngevoerd ?? "")
-              .Split(_versScheidingstekens, StringSplitOptions.RemoveEmptyEntries)
+              .Split(VersScheidingstekens, StringSplitOptions.RemoveEmptyEntries)
               .Select(v => v.Trim())
               .ToList();
-            regel.Opties = (!string.IsNullOrEmpty(opties) ? opties : "")
-              .Split(_optieScheidingstekens, StringSplitOptions.RemoveEmptyEntries)
+            regel.Opties = (!IsNullOrEmpty(opties) ? opties : "")
+              .Split(OptieScheidingstekens, StringSplitOptions.RemoveEmptyEntries)
               .Select(v => v.Trim())
               .ToList();
             return regel;
@@ -67,8 +68,8 @@ namespace PowerpointGenerator.Database {
         public IEnumerable<ILiturgieInterpretatie> VanTekstregels(string[] regels)
         {
             return regels
-              .Where(r => !string.IsNullOrWhiteSpace(r))
-              .Select(r => VanTekstregel(r))
+              .Where(r => !IsNullOrWhiteSpace(r))
+              .Select(VanTekstregel)
               .Where(r => r != null)
               .ToList();
         }
@@ -115,8 +116,7 @@ namespace PowerpointGenerator.Database {
         }
         public ILiturgieOplossing LosOp(ILiturgieInterpretatie item, IEnumerable<ILiturgieMapmaskArg> masks)
         {
-            var regel = new Regel();
-            regel.DisplayEdit = new RegelDisplay();
+            var regel = new Regel {DisplayEdit = new RegelDisplay()};
 
             // verwerk de opties
             var trimmedOpties = item.Opties.Select(o => o.Trim()).ToList();
@@ -129,7 +129,7 @@ namespace PowerpointGenerator.Database {
             regel.DisplayEdit.SubNaam = item.Deel;
             regel.DisplayEdit.VersenDefault = item.VerzenZoalsIngevoerd;
             // Check of er een mask is (mooiere naam)
-            var maskCheck = masks != null ? masks.FirstOrDefault(m => string.Compare(m.RealName, item.Benaming, true) == 0) : null;
+            var maskCheck = masks?.FirstOrDefault(m => Compare(m.RealName, item.Benaming, true) == 0);
             if (maskCheck != null)
                 regel.DisplayEdit.Naam = maskCheck.Name;
 
@@ -139,7 +139,7 @@ namespace PowerpointGenerator.Database {
                 regel.DisplayEdit.VersenAfleiden = true;
                 var setNaam = item.Benaming;
                 var zoekNaam = item.Deel;
-                if (string.IsNullOrEmpty(item.Deel))
+                if (IsNullOrEmpty(item.Deel))
                 {
                     setNaam = FileEngineDefaults.CommonFilesSetName;
                     zoekNaam = item.Benaming;
@@ -155,14 +155,14 @@ namespace PowerpointGenerator.Database {
             }
 
             // regel visualisatie na bewerking
-            if (string.IsNullOrEmpty(regel.DisplayEdit.NaamOverzicht))
+            if (IsNullOrEmpty(regel.DisplayEdit.NaamOverzicht))
                 regel.DisplayEdit.NaamOverzicht = regel.DisplayEdit.Naam;
             // kijk of de opties nog iets zeggen over alternatieve naamgeving
             var optieMetAltNaamOverzicht = GetOptieParam(trimmedOpties, LiturgieDatabaseSettings.OptieAlternatieveNaamOverzicht);
-            if (!string.IsNullOrWhiteSpace(optieMetAltNaamOverzicht))
+            if (!IsNullOrWhiteSpace(optieMetAltNaamOverzicht))
                 regel.DisplayEdit.NaamOverzicht = optieMetAltNaamOverzicht;
             var optieMetAltNaamVolgende = GetOptieParam(trimmedOpties, LiturgieDatabaseSettings.OptieAlternatieveNaam);
-            if (!string.IsNullOrWhiteSpace(optieMetAltNaamVolgende))
+            if (!IsNullOrWhiteSpace(optieMetAltNaamVolgende))
                 regel.DisplayEdit.Naam = optieMetAltNaamOverzicht;
 
             // geef de oplossing terug
@@ -171,16 +171,17 @@ namespace PowerpointGenerator.Database {
 
         private static LiturgieOplossingResultaat? Aanvullen(IEngine<FileEngineSetSettings> db, Regel regel, string setNaam, string zoekNaam, IEnumerable<string> verzen)
         {
+            var verzenList = verzen.ToList();
             // zoek de set via op-schijf naam of de aangepaste naam
-            var set = db.Where(s => string.Compare(s.Name, setNaam, true) == 0 || string.Compare(s.Settings.DisplayName, setNaam, true) == 0).FirstOrDefault();
+            var set = db.Where(s => Compare(s.Name, setNaam, StringComparison.OrdinalIgnoreCase) == 0 || Compare(s.Settings.DisplayName, setNaam, StringComparison.OrdinalIgnoreCase) == 0).FirstOrDefault();
             if (set == null)
                 return LiturgieOplossingResultaat.SetFout;
             // Je kunt geen verzen opgeven als we ze niet los hebben.
             // (Andere kant op kan wel: geen verzen opgeven terwijl ze er wel zijn (wat 'alle verzen' betekend))
-            if (verzen.Any() && !set.Settings.ItemsHaveSubContent)
+            if (verzenList.Any() && !set.Settings.ItemsHaveSubContent)
                 return LiturgieOplossingResultaat.VersOnderverdelingMismatch;
             // Kijk of we het specifieke item in de set kunnen vinden (alleen via de op-schijf naam)
-            var subSet = set.Where(r => string.Compare(r.Name, zoekNaam, true) == 0).FirstOrDefault();
+            var subSet = set.Where(r => Compare(r.Name, zoekNaam, StringComparison.OrdinalIgnoreCase) == 0).FirstOrDefault();
             if (subSet == null)
                 return LiturgieOplossingResultaat.SubSetFout;
             if (setNaam == FileEngineDefaults.CommonFilesSetName)
@@ -189,7 +190,7 @@ namespace PowerpointGenerator.Database {
                 regel.DisplayEdit.Naam = set.Name;
                 regel.DisplayEdit.SubNaam = subSet.Name;
             }
-            if (!verzen.Any())
+            if (!verzenList.Any())
             {
                 // Als de set zonder verzen is hebben we n samengevoegd item
                 if (!set.Settings.ItemsHaveSubContent)
@@ -197,7 +198,7 @@ namespace PowerpointGenerator.Database {
                     var content = KrijgDirecteContent(subSet.Content, null);
                     if (content == null)
                         return LiturgieOplossingResultaat.VersOnleesbaar;
-                    regel.Content = new List<ILiturgieContent>() { content };
+                    regel.Content = new List<ILiturgieContent> { content };
                 }
                 // Een item met alle verzen
                 else
@@ -213,7 +214,7 @@ namespace PowerpointGenerator.Database {
             {
                 // Specifieke verzen
                 var content = subSet.Content.TryAccessSubs();
-                var preSelect = InterpreteerNummers(verzen)  // We houden de volgorde van het opgeven aan omdat die afwijkend kan zijn
+                var preSelect = InterpreteerNummers(verzenList)  // We houden de volgorde van het opgeven aan omdat die afwijkend kan zijn
                     .Select(n => n.ToString())
                     .Select(n => new { Naam = n, SubSet = content.FirstOrDefault(c => c.Name == n), })
                     .ToList();
@@ -229,7 +230,7 @@ namespace PowerpointGenerator.Database {
             }
 
             // bepaal de naamgeving
-            regel.DisplayEdit.Naam = !string.IsNullOrWhiteSpace(set.Settings.DisplayName) ? set.Settings.DisplayName : regel.DisplayEdit.Naam;
+            regel.DisplayEdit.Naam = !IsNullOrWhiteSpace(set.Settings.DisplayName) ? set.Settings.DisplayName : regel.DisplayEdit.Naam;
 
             return null;
         }
@@ -240,21 +241,21 @@ namespace PowerpointGenerator.Database {
             int parseNummer;
             if (int.TryParse(possibleNummer ?? "", out parseNummer))
                 nummer = parseNummer;
-            if (metItem.Type == "txt")
+            switch (metItem.Type)
             {
-                using (var fs = metItem.Content)
-                {
-                    using (var rdr = new StreamReader(fs))
+                case "txt":
+                    using (var fs = metItem.Content)
                     {
-                        // geef de inhoud als tekst terug
-                        return new Content() { Inhoud = rdr.ReadToEnd(), InhoudType = InhoudType.Tekst, Nummer = nummer };
+                        using (var rdr = new StreamReader(fs))
+                        {
+                            // geef de inhoud als tekst terug
+                            return new Content { Inhoud = rdr.ReadToEnd(), InhoudType = InhoudType.Tekst, Nummer = nummer };
+                        }
                     }
-                }
-            }
-            else if (metItem.Type == "ppt" || metItem.Type == "pptx")
-            {
-                // geef de inhoud als link terug
-                return new Content() { Inhoud = metItem.PersistentLink, InhoudType = InhoudType.PptLink, Nummer = nummer };
+                case "ppt":
+                case "pptx":
+                    // geef de inhoud als link terug
+                    return new Content { Inhoud = metItem.PersistentLink, InhoudType = InhoudType.PptLink, Nummer = nummer };
             }
             // Geef een leeg item terug als we het niet konden verwerken
             return null;
@@ -264,9 +265,7 @@ namespace PowerpointGenerator.Database {
         private static string GetOptieParam(IEnumerable<string> opties, string optie)
         {
             var optieMetParam = opties.FirstOrDefault(o => o.StartsWith(optie, StringComparison.CurrentCultureIgnoreCase));
-            if (optieMetParam == null)
-                return null;
-            return optieMetParam.Substring(optie.Length).Trim();
+            return optieMetParam?.Substring(optie.Length).Trim();
         }
 
         private static IEnumerable<int> InterpreteerNummers(IEnumerable<string> nummers)
@@ -281,14 +280,14 @@ namespace PowerpointGenerator.Database {
                 }
                 if (safeNummer.Contains(LiturgieDatabaseSettings.VersSamenvoeging))
                 {
-                    var split = safeNummer.Split(new string[] { LiturgieDatabaseSettings.VersSamenvoeging }, StringSplitOptions.RemoveEmptyEntries);
+                    var split = safeNummer.Split(new[] { LiturgieDatabaseSettings.VersSamenvoeging }, StringSplitOptions.RemoveEmptyEntries);
                     if (split.Length == 2)
                     {
                         int vanNummer;
                         int totEnMetNummer;
                         if (int.TryParse(split[0].Trim(), out vanNummer) && int.TryParse(split[1].Trim(), out totEnMetNummer))
                         {
-                            foreach (var teller in Enumerable.Range(vanNummer, (totEnMetNummer - vanNummer) + 1))
+                            foreach (var teller in Enumerable.Range(vanNummer, totEnMetNummer - vanNummer + 1))
                                 yield return teller;
                         }
                     }
@@ -307,9 +306,9 @@ namespace PowerpointGenerator.Database {
 
         private class Oplossing : ILiturgieOplossing
         {
-            public LiturgieOplossingResultaat Resultaat { get; set; }
-            public ILiturgieInterpretatie VanInterpretatie { get; set; }
-            public ILiturgieRegel Regel { get; set; }
+            public LiturgieOplossingResultaat Resultaat { get; }
+            public ILiturgieInterpretatie VanInterpretatie { get; }
+            public ILiturgieRegel Regel { get; }
 
             public Oplossing(LiturgieOplossingResultaat resultaat, ILiturgieInterpretatie interpretatie, ILiturgieRegel regel = null)
             {
@@ -320,9 +319,11 @@ namespace PowerpointGenerator.Database {
         }
         private class Regel : ILiturgieRegel
         {
-            public ILiturgieDisplay Display { get { return DisplayEdit; } }
+            public ILiturgieDisplay Display => DisplayEdit;
             public RegelDisplay DisplayEdit;
+
             public IEnumerable<ILiturgieContent> Content { get; set; }
+
             public bool TonenInOverzicht { get; set; }
             public bool TonenInVolgende { get; set; }
             public bool VerwerkenAlsSlide { get; set; }
@@ -350,7 +351,7 @@ namespace PowerpointGenerator.Database {
     {
         public static IEnumerable<ILiturgieMapmaskArg> Map(IEnumerable<IMapmask> masks)
         {
-            return masks.Select(m => new MaskMap() { Name = m.Name, RealName = m.RealName, }).ToList();
+            return masks.Select(m => new MaskMap { Name = m.Name, RealName = m.RealName }).ToList();
         }
 
         private class MaskMap : ILiturgieMapmaskArg

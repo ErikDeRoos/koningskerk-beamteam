@@ -10,13 +10,13 @@ namespace PowerpointGenerater
     //TODO: het mogelijk maken om in het programma te kunnen werken met bijvoorbeeld “rechtmuisknop, plakken”
 
 
-    static class Program
+    public static class Program
     {
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             var di = new DefaultContainer();
             di.RegisterAll();

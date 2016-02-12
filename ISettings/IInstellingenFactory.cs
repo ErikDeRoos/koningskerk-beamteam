@@ -3,7 +3,7 @@ namespace ISettings
 {
     public interface IInstellingenFactory
     {
-        bool WriteToXMLFile(IInstellingen instellingen);
-        IInstellingen LoadFromXMLFile();
+        bool WriteToXmlFile(IInstellingen instellingen);
+        IInstellingen LoadFromXmlFile();
     }
 }

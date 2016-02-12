@@ -7,9 +7,9 @@ using ISettings;
 
 namespace PowerpointGenerater {
   public partial class MaskInvoer : Form {
-    private BindingList<IMapmask> _maskLijst;
-    public IEnumerable<IMapmask> Masks { get { return _maskLijst.ToList(); } }
-    private Mapmask _huidigeMask;
+    private readonly BindingList<IMapmask> _maskLijst;
+    public IEnumerable<IMapmask> Masks => _maskLijst.ToList();
+      private Mapmask _huidigeMask;
 
     public MaskInvoer(IEnumerable<IMapmask> masks) {
       InitializeComponent();

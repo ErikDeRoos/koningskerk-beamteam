@@ -52,7 +52,7 @@ namespace PowerpointGenerater.Database
 
         public IEnumerable<IDbSet<T>> Where(Func<IDbSet<T>, bool> query)
         {
-            var startDir = _instellingenFactory.LoadFromXMLFile().FullDatabasePath;  // on-the-fly instellingen benaderen
+            var startDir = _instellingenFactory.LoadFromXmlFile().FullDatabasePath;  // on-the-fly instellingen benaderen
             if (!Cached)
                 return GetDirs(startDir, Cached);
             if (_dirCache == null)

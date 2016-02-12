@@ -13,7 +13,7 @@ namespace PowerpointGenerater.Powerpoint
     /// Powerpoint roepen we aan via een wrapper zodat we de resources goed
     /// kunnen beheren. Dat is namelijk een must voor een goed gebruik van
     /// interop klassen.
-    class PPGenerator : IDisposable
+    internal class PpGenerator : IDisposable
     {
         private State _huidigeStatus;
         private IEnumerable<ILiturgieRegel> _liturgie;
@@ -24,20 +24,20 @@ namespace PowerpointGenerater.Powerpoint
         private string _tekst;
         private IInstellingen _instellingen;
         private string _opslaanAls;
-        private IUnityContainer _di;
+        private readonly IUnityContainer _di;
 
         private IBuilder _powerpoint;
         private Thread _generatorThread;
         private Thread _stopThread;
-        private Object _locker = new Object();
+        private readonly object _locker = new object();
 
         public delegate void Voortgang(int lijstStart, int lijstEind, int bijItem);
-        private Voortgang _setVoortgang;
+        private readonly Voortgang _setVoortgang;
         public delegate void GereedMelding(string opgeslagenAlsBestand = null, string foutmelding = null);
-        private GereedMelding _setGereedmelding;
+        private readonly GereedMelding _setGereedmelding;
         private string _gereedMetFout;
 
-        public PPGenerator(IUnityContainer di, Voortgang voortgangDelegate, GereedMelding gereedmeldingDelegate)
+        public PpGenerator(IUnityContainer di, Voortgang voortgangDelegate, GereedMelding gereedmeldingDelegate)
         {
             _di = di;
             _huidigeStatus = State.Onbekend;
@@ -45,25 +45,25 @@ namespace PowerpointGenerater.Powerpoint
             _setGereedmelding = gereedmeldingDelegate;
         }
 
-        public StatusMelding Initialiseer(IEnumerable<ILiturgieRegel> liturgie, string Voorganger, string Collecte1, string Collecte2, string Lezen,
-          string Tekst, IInstellingen instellingen, string opslaanAls)
+        public StatusMelding Initialiseer(IEnumerable<ILiturgieRegel> liturgie, string voorganger, string collecte1, string collecte2, string lezen,
+          string tekst, IInstellingen instellingen, string opslaanAls)
         {
             lock (_locker)
             {
                 if (_huidigeStatus != State.Onbekend && _huidigeStatus != State.Geinitialiseerd)
                     return new StatusMelding(_huidigeStatus, "Kan powerpoint niet initialiseren", "Start het programma opnieuw op");
                 _liturgie = liturgie.ToList();
-                _voorganger = Voorganger;
-                _collecte1 = Collecte1;
-                _collecte2 = Collecte2;
-                _lezen = Lezen;
-                _tekst = Tekst;
+                _voorganger = voorganger;
+                _collecte1 = collecte1;
+                _collecte2 = collecte2;
+                _lezen = lezen;
+                _tekst = tekst;
                 _instellingen = instellingen;
                 _opslaanAls = opslaanAls;
 
                 if (!File.Exists(_instellingen.FullTemplatetheme))
                     return new StatusMelding(_huidigeStatus, "Het pad naar de achtergrond powerpoint presentatie kan niet worden gevonden", "Stel de achtergrond opnieuw in bij de templates");
-                else if (!File.Exists(instellingen.FullTemplateliederen))
+                if (!File.Exists(instellingen.FullTemplateliederen))
                     return new StatusMelding(_huidigeStatus, "Het pad naar de liederen template powerpoint presentatie kan niet worden gevonden", "Stel de achtergrond opnieuw in bij de templates");
 
                 _huidigeStatus = State.Geinitialiseerd;
@@ -88,7 +88,7 @@ namespace PowerpointGenerater.Powerpoint
                 _powerpoint.Voortgang = PresentatieVoortgangCallback;
                 _gereedMetFout = null;
                 _powerpoint.PreparePresentation(_liturgie, _voorganger, _collecte1, _collecte2, _lezen, _tekst, _instellingen, _opslaanAls);
-                _generatorThread = new Thread(new ThreadStart(StartThread));
+                _generatorThread = new Thread(StartThread);
                 _generatorThread.SetApartmentState(ApartmentState.STA);
                 _huidigeStatus = State.Gestart;
                 _generatorThread.Start();
@@ -104,7 +104,7 @@ namespace PowerpointGenerater.Powerpoint
             {
                 lock (_locker)
                 {
-                    _setGereedmelding.Invoke(null, foutmelding: "Kon powerpoint niet opstarten");
+                    _setGereedmelding.Invoke(null, "Kon powerpoint niet opstarten");
                 }
             }
         }
@@ -115,7 +115,7 @@ namespace PowerpointGenerater.Powerpoint
             {
                 if (_huidigeStatus != State.Gestart)
                     return new StatusMelding(_huidigeStatus, "Kan powerpoint niet stoppen", "Start het programma opnieuw op");
-                _stopThread = new Thread(new ThreadStart(ProbeerTeStoppen));
+                _stopThread = new Thread(ProbeerTeStoppen);
                 _stopThread.Start();
                 _huidigeStatus = State.AanHetStoppen;
                 return new StatusMelding(_huidigeStatus);
@@ -134,7 +134,7 @@ namespace PowerpointGenerater.Powerpoint
                 _powerpoint = null;
                 _huidigeStatus = State.Geinitialiseerd;
             }
-            _setGereedmelding.Invoke(_opslaanAls, foutmelding: _gereedMetFout);
+            _setGereedmelding.Invoke(_opslaanAls, _gereedMetFout);
         }
 
         private void PresentatieVoortgangCallback(int lijstStart, int lijstEind, int bijItem)

@@ -13,7 +13,7 @@ using System.Reflection;
 
 namespace PowerpointGenerater
 {
-    class DefaultContainer : UnityContainer
+    internal class DefaultContainer : UnityContainer
     {
         public void RegisterAll()
         {
@@ -32,13 +32,16 @@ namespace PowerpointGenerater
                 var assembly = Assembly.LoadFrom(takeFirstTypeFromThisAssembly);
                 resolveBuilderType = assembly.GetLoadableTypesWithInterface<T>().FirstOrDefault();
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
             if (resolveBuilderType != null)
                 this.RegisterType(typeof(T), resolveBuilderType);
         }
     }
 
-    static class TypeLoaderExtensions
+    internal static class TypeLoaderExtensions
     {
         public static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
         {
@@ -66,7 +69,7 @@ namespace PowerpointGenerater
             var interfaceFilter = new TypeFilter(InterfaceFilter);
             return GetLoadableTypes<T>(assembly, excludeSystemTypes).Where(t => t.FindInterfaces(interfaceFilter, qualifiedInterfaceName).Any());
         }
-        private static bool InterfaceFilter(Type typeObj, Object criteriaObj)
+        private static bool InterfaceFilter(Type typeObj, object criteriaObj)
         {
             return typeObj.ToString() == criteriaObj.ToString();
         }

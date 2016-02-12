@@ -61,6 +61,51 @@ namespace PowerpointGenerater.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Niet opgeslagen wegens te lang pad.
+        /// </summary>
+        internal static string Form1_Niet_opgeslagen_wegens_te_lang_pad {
+            get {
+                return ResourceManager.GetString("Form1_Niet_opgeslagen_wegens_te_lang_pad", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Liturgie bestanden|*.liturgie.
+        /// </summary>
+        internal static string Form1_Openen_liturgie_filter {
+            get {
+                return ResourceManager.GetString("Form1_Openen_liturgie_filter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Kies bestand.
+        /// </summary>
+        internal static string Form1_Openen_liturgie_title {
+            get {
+                return ResourceManager.GetString("Form1_Openen_liturgie_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Powerpoint bestand (*.ppt)|*.ppt|Powerpoint bestanden (*.pptx)|*.pptx.
+        /// </summary>
+        internal static string Form1_Opslaan_pp_filter {
+            get {
+                return ResourceManager.GetString("Form1_Opslaan_pp_filter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sla de presentatie op.
+        /// </summary>
+        internal static string Form1_Opslaan_pp_title {
+            get {
+                return ResourceManager.GetString("Form1_Opslaan_pp_title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap visitekaartje {

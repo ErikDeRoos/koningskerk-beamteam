@@ -121,4 +121,19 @@
   <data name="visitekaartje" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\screens\visitekaartje.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Form1_Niet_opgeslagen_wegens_te_lang_pad" xml:space="preserve">
+    <value>Niet opgeslagen wegens te lang pad</value>
+  </data>
+  <data name="Form1_Opslaan_pp_filter" xml:space="preserve">
+    <value>Powerpoint bestand (*.ppt)|*.ppt|Powerpoint bestanden (*.pptx)|*.pptx</value>
+  </data>
+  <data name="Form1_Opslaan_pp_title" xml:space="preserve">
+    <value>Sla de presentatie op</value>
+  </data>
+  <data name="Form1_Openen_liturgie_filter" xml:space="preserve">
+    <value>Liturgie bestanden|*.liturgie</value>
+  </data>
+  <data name="Form1_Openen_liturgie_title" xml:space="preserve">
+    <value>Kies bestand</value>
+  </data>
 </root>

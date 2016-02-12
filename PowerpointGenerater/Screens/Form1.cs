@@ -9,14 +9,15 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using PowerpointGenerater.Properties;
 
 namespace PowerpointGenerater
 {
-    partial class Form1 : Form
+    internal partial class Form1 : Form
     {
         // unity container voor dependency injection (t is niet een nette manier om de container te weten)
         [Dependency]
-        public IUnityContainer DI { get; set; }
+        public IUnityContainer Di { get; set; }
         [Dependency]
         public ILiturgieLosOp LiturgieOplosser { get; set; }
         [Dependency]
@@ -29,7 +30,8 @@ namespace PowerpointGenerater
         //locatie van temporary liturgie (restore punt)
         private string _tempLiturgiePath = "";
         //generator
-        private PPGenerator _powerpoint;
+        private PpGenerator _powerpoint;
+        private GeneratorStatus _status;
 
         public Form1()  // DI via constructor is t meest duidelijk, werkt helaas niet met forms
         {
@@ -38,13 +40,13 @@ namespace PowerpointGenerater
 
         public void Opstarten(string startBestand = null)
         {
-            HelpRequested += new HelpEventHandler(Form1_HelpRequested);
+            HelpRequested += Form1_HelpRequested;
             _programDirectory = Path.GetDirectoryName(Application.ExecutablePath) + Path.DirectorySeparatorChar;
             _tempLiturgiePath = _programDirectory + @"temp.liturgie";
 
-            KeyDown += new KeyEventHandler(Form1_KeyDown);
+            KeyDown += Form1_KeyDown;
 
-            _powerpoint = new PPGenerator(DI, PresentatieVoortgangCallback, PresentatieGereedmeldingCallback);
+            _powerpoint = new PpGenerator(Di, PresentatieVoortgangCallback, PresentatieGereedmeldingCallback);
             progressBar1.Visible = false;
 
             if (!string.IsNullOrEmpty(startBestand) && File.Exists(startBestand))
@@ -61,19 +63,23 @@ namespace PowerpointGenerater
         #region Eventhandlers
         #region menu eventhandlers
         #region bestand
-        void openLiturgieToolStripMenuItem_Click(object sender, EventArgs e)
+
+        private void openLiturgieToolStripMenuItem_Click(object sender, EventArgs e)
         {
             LoadWorkingfile(Openen());
         }
-        void toolStripMenuItem2_Click(object sender, EventArgs e)
+
+        private void toolStripMenuItem2_Click(object sender, EventArgs e)
         {
             Opslaan(GetWorkingFile());
         }
-        void slaLiturgieOpToolStripMenuItem_Click(object sender, EventArgs e)
+
+        private void slaLiturgieOpToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Opslaan_Op_Locatie(GetWorkingFile(), _currentfile);
         }
-        void nieuweLiturgieToolStripMenuItem_Click(object sender, EventArgs e)
+
+        private void nieuweLiturgieToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _currentfile = "";
             richTextBox1.Text = "";
@@ -83,13 +89,15 @@ namespace PowerpointGenerater
             textBox4.Text = "";
             textBox5.Text = "";
         }
-        void afsluitenToolStripMenuItem_Click(object sender, EventArgs e)
+
+        private void afsluitenToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Close();
         }
         #endregion bestand
         #region bewerken
-        void Form1_KeyDown(object sender, KeyEventArgs e)
+
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Control && e.KeyCode == Keys.N)
             {
@@ -108,27 +116,27 @@ namespace PowerpointGenerater
                 Close();
             }
         }
-        void toolStripMenuItem4_Click(object sender, EventArgs e)
+        private void toolStripMenuItem4_Click(object sender, EventArgs e)
         {
             richTextBox1.Redo();
         }
-        void toolStripMenuItem3_Click(object sender, EventArgs e)
+        private void toolStripMenuItem3_Click(object sender, EventArgs e)
         {
             richTextBox1.Undo();
         }
-        void toolStripMenuItem1_Click(object sender, EventArgs e)
+        private void toolStripMenuItem1_Click(object sender, EventArgs e)
         {
             richTextBox1.SelectAll();
         }
-        void plakkenToolStripMenuItem_Click(object sender, EventArgs e)
+        private void plakkenToolStripMenuItem_Click(object sender, EventArgs e)
         {
             richTextBox1.Paste();
         }
-        void kopierenToolStripMenuItem_Click(object sender, EventArgs e)
+        private void kopierenToolStripMenuItem_Click(object sender, EventArgs e)
         {
             richTextBox1.Copy();
         }
-        void knippenToolStripMenuItem_Click(object sender, EventArgs e)
+        private void knippenToolStripMenuItem_Click(object sender, EventArgs e)
         {
             richTextBox1.Cut();
         }
@@ -137,17 +145,17 @@ namespace PowerpointGenerater
         private void templatesToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             var formulier = new Instellingenform();
-            DI.BuildUp(formulier);
+            Di.BuildUp(formulier);
             formulier.Opstarten();
             if (formulier.ShowDialog() == DialogResult.Yes && formulier.Instellingen != null)
             {
-                if (!InstellingenFactory.WriteToXMLFile(formulier.Instellingen))
-                    MessageBox.Show("Niet opgeslagen wegens te lang pad");
+                if (!InstellingenFactory.WriteToXmlFile(formulier.Instellingen))
+                    MessageBox.Show(Resources.Form1_Niet_opgeslagen_wegens_te_lang_pad);
             }
         }
         private void bekijkDatabaseToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            Process.Start("explorer.exe", "/root, \"" + InstellingenFactory.LoadFromXMLFile().FullDatabasePath + "\"");
+            Process.Start("explorer.exe", "/root, \"" + InstellingenFactory.LoadFromXmlFile().FullDatabasePath + "\"");
         }
         private void stopPowerpointToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -155,17 +163,17 @@ namespace PowerpointGenerater
         }
         private void invoerenMasksToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var formulier = new MaskInvoer(InstellingenFactory.LoadFromXMLFile().Masks);
+            var formulier = new MaskInvoer(InstellingenFactory.LoadFromXmlFile().Masks);
             if (formulier.ShowDialog() == DialogResult.OK)
             {
-                var instellingen = InstellingenFactory.LoadFromXMLFile();
+                var instellingen = InstellingenFactory.LoadFromXmlFile();
                 instellingen.ClearMasks();
                 foreach (var mask in formulier.Masks)
                 {
                     instellingen.AddMask(mask);
                 }
-                if (!InstellingenFactory.WriteToXMLFile(instellingen))
-                    MessageBox.Show("Niet opgeslagen wegens te lang pad");
+                if (!InstellingenFactory.WriteToXmlFile(instellingen))
+                    MessageBox.Show(Resources.Form1_Niet_opgeslagen_wegens_te_lang_pad);
             }
         }
         #endregion opties
@@ -198,7 +206,7 @@ namespace PowerpointGenerater
 
         public void StartGenereren()
         {
-            if (button1.Text == "Generate")
+            if (_status == GeneratorStatus.Gestopt)
             {
                 //sla een back up voor als er iets fout gaat
                 Opslaan_Op_Locatie(GetWorkingFile(), _tempLiturgiePath);
@@ -207,26 +215,28 @@ namespace PowerpointGenerater
                 // Liturgie uit tekstbox omzetten in leesbare items
                 var ruweLiturgie = new InterpreteerLiturgieRuw().VanTekstregels(richTextBox1.Lines);
                 // Zoek op het bestandssysteem zo veel mogelijk al op (behalve ppt, die gaan via COM element)
-                var masks = MapMasksToLiturgie.Map(InstellingenFactory.LoadFromXMLFile().Masks);
-                var ingeladenLiturgie = LiturgieOplosser.LosOp(ruweLiturgie, masks);
+                var masks = MapMasksToLiturgie.Map(InstellingenFactory.LoadFromXmlFile().Masks);
+                var ingeladenLiturgie = LiturgieOplosser.LosOp(ruweLiturgie, masks).ToList();
 
                 //als niet alle liturgie is gevonden geven we een melding of de gebruiker toch door wil gaan met genereren
-                if (!ingeladenLiturgie.All(l => l.Resultaat == LiturgieOplossingResultaat.Opgelost))
+                if (ingeladenLiturgie.Any(l => l.Resultaat != LiturgieOplossingResultaat.Opgelost))
                 {
                     var errorformulier = new LiturgieNotFoundFormulier(ingeladenLiturgie.Where(l => l.Resultaat != LiturgieOplossingResultaat.Opgelost));
                     if (errorformulier.ShowDialog() == DialogResult.Cancel)
                         return;
-                    else
-                        ingeladenLiturgie = ingeladenLiturgie.Where(l => l.Resultaat == LiturgieOplossingResultaat.Opgelost).ToList();
+                    ingeladenLiturgie = ingeladenLiturgie.Where(l => l.Resultaat == LiturgieOplossingResultaat.Opgelost).ToList();
                 }
                 #endregion creeer lijst van liturgie
 
                 #region open een save window
-                var saveFileDialog1 = new SaveFileDialog();
-                saveFileDialog1.Filter = "Powerpoint bestand (*.ppt)|*.ppt|Powerpoint bestanden (*.pptx)|*.pptx";
-                saveFileDialog1.Title = "Sla de presentatie op";
+
+                var saveFileDialog1 = new SaveFileDialog
+                {
+                    Filter = Resources.Form1_Opslaan_pp_filter,
+                    Title = Resources.Form1_Opslaan_pp_title
+                };
                 //return als er word geannuleerd
-                var fileName = saveFileDialog1.ShowDialog() != System.Windows.Forms.DialogResult.Cancel ? saveFileDialog1.FileName : null;
+                var fileName = saveFileDialog1.ShowDialog() != DialogResult.Cancel ? saveFileDialog1.FileName : null;
                 if (string.IsNullOrEmpty(fileName))
                     return;
 
@@ -262,11 +272,12 @@ namespace PowerpointGenerater
                 progressBar1.Visible = true;
                 progressBar1.Value = 0;
                 progressBar1.Minimum = 0;
-                progressBar1.Maximum = ingeladenLiturgie.Count();
+                progressBar1.Maximum = ingeladenLiturgie.Count;
 
-                // via deze knop weten we de status van t proces (hacky)
+                // de knop de status laten reflecteren
                 button1.Text = "Stop";
-                var status = _powerpoint.Initialiseer(ingeladenLiturgie.Select(l => l.Regel).ToList(), textBox2.Text, textBox3.Text, textBox4.Text, textBox1.Text, textBox5.Text, InstellingenFactory.LoadFromXMLFile(), fileName);
+                _status = GeneratorStatus.AanHetGenereren;
+                var status = _powerpoint.Initialiseer(ingeladenLiturgie.Select(l => l.Regel).ToList(), textBox2.Text, textBox3.Text, textBox4.Text, textBox1.Text, textBox5.Text, InstellingenFactory.LoadFromXmlFile(), fileName);
                 if (status.Fout != null)
                     MessageBox.Show(status.Fout.Melding + "\n\n" + status.Fout.Oplossing, status.Fout.Oplossing);
                 else {
@@ -274,7 +285,7 @@ namespace PowerpointGenerater
                     if (status.Fout != null)
                         MessageBox.Show(status.Fout.Melding + "\n\n" + status.Fout.Oplossing, status.Fout.Oplossing);
                 }
-                if (status.NieuweStatus != PPGenerator.State.Gestart)
+                if (status.NieuweStatus != PpGenerator.State.Gestart)
                     PresentatieGereedmeldingCallback();
             }
             else {
@@ -290,21 +301,17 @@ namespace PowerpointGenerater
         /// <summary>
         /// Uitlezen van een file die gekozen word aan de hand van openfiledialog
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         /// <returns> return inhoud gekozen file als string</returns>
         private string Openen()
         {
             //open een open window met bepaalde instellingen
-            OpenFileDialog openFileDialog1 = new OpenFileDialog();
-            openFileDialog1.Filter = "Liturgie bestanden|*.liturgie";
-            openFileDialog1.Title = "Kies bestand";
+            OpenFileDialog openFileDialog1 = new OpenFileDialog
+            {
+                Filter = Resources.Form1_Openen_liturgie_filter,
+                Title = Resources.Form1_Openen_liturgie_title
+            };
 
-            //return als er word geannuleerd
-            if (openFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.Cancel)
-                return "";
-
-            return OpenenopLocatie(openFileDialog1.FileName);
+            return openFileDialog1.ShowDialog() == DialogResult.Cancel ? "" : OpenenopLocatie(openFileDialog1.FileName);
         }
 
         /// <summary>
@@ -314,15 +321,14 @@ namespace PowerpointGenerater
         /// <returns></returns>
         private string OpenenopLocatie(string pad)
         {
-            FileStream strm;
             //probeer om te lezen van gekozen bestand
             try
             {
                 //open een filestream naar het gekozen bestand
-                strm = new FileStream(pad, FileMode.Open, FileAccess.Read);
+                var strm = new FileStream(pad, FileMode.Open, FileAccess.Read);
 
                 //gebruik streamreader om te lezen van de filestream
-                using (StreamReader rdr = new StreamReader(strm))
+                using (var rdr = new StreamReader(strm))
                 {
                     //geef een melding dat het gelukt is
                     Console.WriteLine("uitgelezen");
@@ -334,7 +340,7 @@ namespace PowerpointGenerater
                     return rdr.ReadToEnd();
                 }
             }
-            //vang errors af en geef een melding dat er iets is fout gegaan
+                //vang errors af en geef een melding dat er iets is fout gegaan
             catch (Exception)
             {
                 MessageBox.Show("Fout tijdens openen bestand", "Bestand error",
@@ -350,12 +356,14 @@ namespace PowerpointGenerater
         private void Opslaan(string bestand)
         {
             //open een save window met bepaalde instellingen
-            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
-            saveFileDialog1.Filter = "Liturgie bestanden|*.liturgie";
-            saveFileDialog1.Title = "Sla het bestand op";
+            var saveFileDialog1 = new SaveFileDialog
+            {
+                Filter = Resources.Form1_Openen_liturgie_filter,
+                Title = "Sla het bestand op"
+            };
 
             //return als er word geannuleerd
-            if (saveFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.Cancel)
+            if (saveFileDialog1.ShowDialog() == DialogResult.Cancel)
                 return;
 
             // Als er een filename gekozen is die niet leeg is sla erin op
@@ -365,7 +373,7 @@ namespace PowerpointGenerater
                 try
                 {
                     //open een streamwriter naar gekozen bestand
-                    using (StreamWriter writer = new StreamWriter(saveFileDialog1.FileName))
+                    using (var writer = new StreamWriter(saveFileDialog1.FileName))
                     {
                         //schrijf string weg naar streamwriter
                         writer.Write(bestand);
@@ -402,7 +410,7 @@ namespace PowerpointGenerater
             try
             {
                 //open een streamwriter naar gekozen bestand
-                using (StreamWriter writer = new StreamWriter(path))
+                using (var writer = new StreamWriter(path))
                 {
                     //schrijf string weg naar streamwriter
                     writer.Write(bestand);
@@ -441,20 +449,21 @@ namespace PowerpointGenerater
         {
             var actie = new Action(() =>
             {
+                _status = GeneratorStatus.Gestopt;
                 button1.Text = "Generate";
                 progressBar1.Visible = false;
                 if (string.IsNullOrEmpty(foutmelding))
                 {
-                    if (!string.IsNullOrEmpty(opgeslagenAlsBestand))
+                    if (string.IsNullOrEmpty(opgeslagenAlsBestand)) return;
+                    if (File.Exists(_tempLiturgiePath))
+                        File.Delete(_tempLiturgiePath);
+                    var startInfo = new ProcessStartInfo
                     {
-                        if (File.Exists(_tempLiturgiePath))
-                            File.Delete(_tempLiturgiePath);
-                        var startInfo = new ProcessStartInfo();
-                        startInfo.FileName = @"POWERPNT.exe";
-                        startInfo.Arguments = string.Format("\"{0}\"", opgeslagenAlsBestand);
-                        startInfo.ErrorDialog = true;
-                        Process.Start(startInfo);
-                    }
+                        FileName = @"POWERPNT.exe",
+                        Arguments = $"\"{opgeslagenAlsBestand}\"",
+                        ErrorDialog = true
+                    };
+                    Process.Start(startInfo);
                 }
                 else
                     MessageBox.Show(foutmelding, "Fout", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -470,10 +479,9 @@ namespace PowerpointGenerater
             if (input.Equals(""))
                 return;
             richTextBox1.Text = "";
-            TextBox inputstring = new TextBox();
-            inputstring.Text = input;
-            int i = 0;
-            for (; i < inputstring.Lines.Count(); i++)
+            var inputstring = new TextBox {Text = input};
+            var i = 0;
+            for (; i < inputstring.Lines.Length; i++)
             {
                 if (inputstring.Lines[i].StartsWith("<"))
                 {
@@ -482,83 +490,73 @@ namespace PowerpointGenerater
                 if (!inputstring.Lines[i].Equals(""))
                     richTextBox1.Text += inputstring.Lines[i] + "\n";
             }
-            for (; i < inputstring.Lines.Count(); i++)
+            for (; i < inputstring.Lines.Length; i++)
             {
-                if (!inputstring.Lines[i].Equals(""))
+                if (inputstring.Lines[i].Equals("")) continue;
+                var inputstringparts = inputstring.Lines[i].Split('<', '>');
+                switch (inputstringparts[1])
                 {
-                    string[] inputstringparts = inputstring.Lines[i].Split('<', '>');
-                    switch (inputstringparts[1])
-                    {
-                        case "Voorganger:":
-                            textBox2.Text = inputstringparts[2];
-                            break;
-                        case "1e Collecte:":
-                            textBox3.Text = inputstringparts[2];
-                            break;
-                        case "2e Collecte:":
-                            textBox4.Text = inputstringparts[2];
-                            break;
-                        case "Lezen":
-                            textBox1.Text = "";
-                            for (int j = 2; j < inputstringparts.Count(); j += 2)
-                            {
-                                if (j + 2 < inputstringparts.Count())
-                                    textBox1.Text += inputstringparts[j] + "\n";
-                                else
-                                    textBox1.Text += inputstringparts[j];
-                            }
-                            break;
-                        case "Tekst":
-                            textBox5.Text = "";
-                            for (int j = 2; j < inputstringparts.Count(); j += 2)
-                            {
-                                if (j + 2 < inputstringparts.Count())
-                                    textBox5.Text += inputstringparts[j] + "\n";
-                                else
-                                    textBox5.Text += inputstringparts[j];
-                            }
-                            break;
-                        default:
-                            break;
-                    }
+                    case "Voorganger:":
+                        textBox2.Text = inputstringparts[2];
+                        break;
+                    case "1e Collecte:":
+                        textBox3.Text = inputstringparts[2];
+                        break;
+                    case "2e Collecte:":
+                        textBox4.Text = inputstringparts[2];
+                        break;
+                    case "Lezen":
+                        textBox1.Text = "";
+                        for (var j = 2; j < inputstringparts.Length; j += 2)
+                        {
+                            if (j + 2 < inputstringparts.Length)
+                                textBox1.Text += inputstringparts[j] + "\n";
+                            else
+                                textBox1.Text += inputstringparts[j];
+                        }
+                        break;
+                    case "Tekst":
+                        textBox5.Text = "";
+                        for (var j = 2; j < inputstringparts.Length; j += 2)
+                        {
+                            if (j + 2 < inputstringparts.Length)
+                                textBox5.Text += inputstringparts[j] + "\n";
+                            else
+                                textBox5.Text += inputstringparts[j];
+                        }
+                        break;
                 }
             }
         }
 
         private string GetWorkingFile()
         {
-            string output = richTextBox1.Text + "\n";
+            var output = richTextBox1.Text + "\n";
             output += "<Voorganger:>" + textBox2.Text + "\n";
             output += "<1e Collecte:>" + textBox3.Text + "\n";
             output += "<2e Collecte:>" + textBox4.Text + "\n";
 
-            TextBox box = new TextBox();
-
             output += "<Lezen>";
-            box.Text = textBox1.Text;
-            for (int i = 0; i < box.Lines.Count(); i++)
+            var regels = (textBox1.Text ?? "").Split(new[] { "\r\n" }, StringSplitOptions.None);
+            for (var i = 0; i < regels.Length; i++)
             {
-                if (!box.Lines[i].Equals(""))
-                {
-                    if (i + 1 < box.Lines.Count())
-                        output += box.Lines[i] + "<n>";
-                    else
-                        output += box.Lines[i];
-                }
+                if (regels[i].Equals("")) continue;
+                if (i + 1 < regels.Length)
+                    output += regels[i] + "<n>";
+                else
+                    output += regels[i];
             }
             output += "\n";
 
             output += "<Tekst>";
-            box.Text = textBox5.Text;
-            for (int i = 0; i < box.Lines.Count(); i++)
+            regels = (textBox5.Text ?? "").Split(new[] { "\r\n" }, StringSplitOptions.None);
+            for (var i = 0; i < regels.Length; i++)
             {
-                if (!box.Lines[i].Equals(""))
-                {
-                    if (i + 1 < box.Lines.Count())
-                        output += box.Lines[i] + "<n>";
-                    else
-                        output += box.Lines[i];
-                }
+                if (regels[i].Equals("")) continue;
+                if (i + 1 < regels.Length)
+                    output += regels[i] + "<n>";
+                else
+                    output += regels[i];
             }
             output += "\n";
 
@@ -567,5 +565,11 @@ namespace PowerpointGenerater
         #endregion Load/Save workingfile
 
         #endregion functies
+
+        private enum GeneratorStatus
+        {
+            Gestopt,
+            AanHetGenereren
+        }
     }
 }
