@@ -106,7 +106,7 @@ namespace PowerpointGenerater
             int regelsPerSlide = 0;
             if (!System.Int32.TryParse(textBox4.Text, out regelsPerSlide))
                 regelsPerSlide = 6;
-            Instellingen = new Instellingen(textBox3.Text, textBox3.Text, textBox2.Text, regelsPerSlide,
+            Instellingen = new Instellingen(textBox3.Text, textBox1.Text, textBox2.Text, regelsPerSlide,
                 new StandaardTeksten() { 
                     Volgende = tbVolgende.Text,
                     Voorganger = tbVoorganger.Text,
