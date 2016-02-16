@@ -3,13 +3,13 @@ using System.Collections;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Office.Interop.PowerPoint;
-using Microsoft.Office.Core;
 using ILiturgieDatabase;
 using ISettings;
 using ISlideBuilder;
 using System.Text;
-using Shape = Microsoft.Office.Interop.PowerPoint.Shape;
+using NetOffice.PowerPointApi;
+using NetOffice.OfficeApi.Enums;
+using NetOffice.PowerPointApi.Enums;
 
 namespace mppt
 {

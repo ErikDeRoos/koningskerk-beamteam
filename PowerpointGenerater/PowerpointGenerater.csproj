@@ -96,6 +96,14 @@
       <HintPath>..\packages\Unity.4.0.1\lib\net45\Microsoft.Practices.Unity.RegistrationByConvention.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="NetOffice, Version=1.7.4.0, Culture=neutral, PublicKeyToken=acf636d62c39f8f5, processorArchitecture=MSIL">
+      <HintPath>..\packages\NetOffice.Core.1.7.4-pre-jun-28-2015\lib\net45\NetOffice.dll</HintPath>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="OfficeApi, Version=1.7.4.0, Culture=neutral, PublicKeyToken=7c1c3e9d16cace88, processorArchitecture=MSIL">
+      <HintPath>..\packages\NetOffice.Core.1.7.4-pre-jun-28-2015\lib\net45\OfficeApi.dll</HintPath>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -113,6 +121,10 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="VBIDEApi, Version=1.7.4.0, Culture=neutral, PublicKeyToken=a3637beacf571e8a, processorArchitecture=MSIL">
+      <HintPath>..\packages\NetOffice.Core.1.7.4-pre-jun-28-2015\lib\net45\VBIDEApi.dll</HintPath>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Database\ArchiveExtender.cs" />
@@ -248,7 +260,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /Y "$(SolutionDir)lib\MicrosoftPowerpointWrapper.dll" "$(TargetDir)MicrosoftPowerpointWrapper.dll"</PostBuildEvent>
+    <PostBuildEvent>xcopy "$(SolutionDir)lib" "$(TargetDir)" /Y /F /I /D /S</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
