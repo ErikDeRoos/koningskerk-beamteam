@@ -91,14 +91,18 @@ namespace mppt
 
                 //sla de presentatie op
                 _presentatie.SaveAs(_opslaanAls);
-                StatusWijziging?.Invoke(Status.StopGoed, null);
+                SluitAlles();
+                if (_stop)
+                    StatusWijziging?.Invoke(Status.StopFout, "Tussentijds gestopt door de gebruiker.");
+                else
+                    StatusWijziging?.Invoke(Status.StopGoed, null);
             }
             catch (Exception ex)
             {
                 FoutmeldingSchrijver.Log(ex.ToString());
                 StatusWijziging?.Invoke(Status.StopFout, ex.ToString());
+                SluitAlles();
             }
-            SluitAlles();
         }
 
         /// <summary>
@@ -471,10 +475,23 @@ namespace mppt
         private void SluitAlles()
         {
             _layout = null;
-            _presentatie?.Close();
-            _presentatie = null;
-            _applicatie?.Quit();
-            _applicatie = null;
+            try {
+                _presentatie?.Close();
+                _presentatie?.Dispose();
+            }
+            finally
+            {
+                _presentatie = null;
+            }
+            try
+            {
+                _applicatie?.Quit();
+                _applicatie?.Dispose();
+            }
+            finally
+            {
+                _applicatie = null;
+            }
         }
         public void Dispose()
         {
