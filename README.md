@@ -1,4 +1,4 @@
-# koningskerk-beamteam
+# Kerkdienst liturgie generator
 Kerkdienst liturgie generator op basis van ms powerpoint (excl. database)
 Gebruikt windows forms, gemaakt met visual studio 2013 en draait icm alle windows en office versies.
 
