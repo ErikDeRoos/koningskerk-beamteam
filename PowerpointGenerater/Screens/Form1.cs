@@ -445,7 +445,7 @@ namespace PowerpointGenerater
             });
             Invoke(actie);
         }
-        private void PresentatieGereedmeldingCallback(string opgeslagenAlsBestand = null, string foutmelding = null)
+        private void PresentatieGereedmeldingCallback(string opgeslagenAlsBestand = null, string foutmelding = null, int? slidesGemist = null)
         {
             var actie = new Action(() =>
             {
@@ -455,6 +455,8 @@ namespace PowerpointGenerater
                 if (string.IsNullOrEmpty(foutmelding))
                 {
                     if (string.IsNullOrEmpty(opgeslagenAlsBestand)) return;
+                    if (slidesGemist !=null && slidesGemist > 0)
+                        MessageBox.Show($"Bij het maken van de presentatie zijn [{slidesGemist}] slides mislukt", "Missende slides", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     if (File.Exists(_tempLiturgiePath))
                         File.Delete(_tempLiturgiePath);
                     var startInfo = new ProcessStartInfo
