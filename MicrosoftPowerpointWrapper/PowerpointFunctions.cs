@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Collections;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Office.Interop.PowerPoint;
-using Microsoft.Office.Core;
 using ILiturgieDatabase;
 using ISettings;
 using ISlideBuilder;
 using System.Text;
-using Shape = Microsoft.Office.Interop.PowerPoint.Shape;
+using NetOffice.PowerPointApi;
+using NetOffice.OfficeApi.Enums;
+using NetOffice.PowerPointApi.Enums;
+using Clipboard = System.Windows.Forms.Clipboard;
 
 namespace mppt
 {
@@ -19,6 +19,7 @@ namespace mppt
         private _Presentation _presentatie;
         private CustomLayout _layout;
         private int _slideteller = 1;
+        private int _slidesGemist = 0;
         private bool _stop;
 
         private const string NieuweSlideAanduiding = "#";
@@ -33,7 +34,7 @@ namespace mppt
         private string _opslaanAls;
 
         public Action<int, int, int> Voortgang { get; set; }
-        public Action<Status, string> StatusWijziging { get; set; }
+        public Action<Status, string, int?> StatusWijziging { get; set; }
 
         public void PreparePresentation(IEnumerable<ILiturgieRegel> liturgie, string voorganger, string collecte1, string collecte2, string lezen, string tekst, IInstellingen gebruikInstellingen, string opslaanAls)
         {
@@ -54,7 +55,7 @@ namespace mppt
         /// </summary>
         public void GeneratePresentation()
         {
-            StatusWijziging?.Invoke(Status.Gestart, null);
+            StatusWijziging?.Invoke(Status.Gestart, null, null);
 
             //Creeer een nieuwe lege presentatie volgens een bepaald thema
             _applicatie = new Application {Visible = MsoTriState.msoTrue};
@@ -78,9 +79,9 @@ namespace mppt
                     foreach (var inhoud in regel.Content)
                     {
                         if (inhoud.InhoudType == InhoudType.Tekst)
-                            InvullenTekst(regel, inhoud, volgende);
+                            InvullenTekstOpTemplate(regel, inhoud, volgende);
                         else
-                            InvullenSlide(regel, inhoud, volgende);
+                            ToevoegenSlides(regel, inhoud, volgende);
                         if (_stop)
                             break;
                     }
@@ -91,14 +92,18 @@ namespace mppt
 
                 //sla de presentatie op
                 _presentatie.SaveAs(_opslaanAls);
-                StatusWijziging?.Invoke(Status.StopGoed, null);
+                SluitAlles();
+                if (_stop)
+                    StatusWijziging?.Invoke(Status.StopFout, "Tussentijds gestopt door de gebruiker.", null);
+                else
+                    StatusWijziging?.Invoke(Status.StopGoed, null, _slidesGemist);
             }
             catch (Exception ex)
             {
                 FoutmeldingSchrijver.Log(ex.ToString());
-                StatusWijziging?.Invoke(Status.StopFout, ex.ToString());
+                StatusWijziging?.Invoke(Status.StopFout, ex.ToString(), null);
+                SluitAlles();
             }
-            SluitAlles();
         }
 
         /// <summary>
@@ -117,7 +122,7 @@ namespace mppt
             _stop = true;
         }
 
-        private void InvullenTekst(ILiturgieRegel regel, ILiturgieContent inhoud, ILiturgieRegel volgende)
+        private void InvullenTekstOpTemplate(ILiturgieRegel regel, ILiturgieContent inhoud, ILiturgieRegel volgende)
         {
             var tekstOmTeRenderen = inhoud.Inhoud;
             var tekstOmTeRenderenLijst = new List<string>();
@@ -135,43 +140,42 @@ namespace mppt
             {
                 //regel de template om het lied op af te beelden
                 var presentatie = OpenPps(_instellingen.FullTemplateliederen);
-                //voor elke slide in de presentatie(in principe moet dit er 1 zijn)
-                foreach (Slide slide in presentatie.Slides)
+                var slide = presentatie.Slides.First() as Slide;  //alleen eerste slide gebruiken we
+                //voor elk object op de slides (we zoeken naar de tekst die vervangen moet worden in de template)
+                foreach (var shape in slide.Shapes.Cast<Shape>().Where(s => s.Type == MsoShapeType.msoTextBox).ToList())
+                    // Specifieke casts en tolists om COM problemen te minimaliseren
                 {
-                    //voor elk object op de slides (we zoeken naar de tekst die vervangen moet worden in de template)
-                    foreach (Shape shape in slide.Shapes)
+                    var text = shape.TextFrame.TextRange.Text;
+                    //als de template de tekst bevat "Liturgieregel" moet daar de liturgieregel komen
+                    if (text.Equals("<Liturgieregel>"))
+                        shape.TextFrame.TextRange.Text = InvullenLiturgieRegel(regel, inhoud);
+                    //als de template de tekst bevat "Inhoud" moet daar de inhoud van het vers komen
+                    else if (text.Equals("<Inhoud>"))
+                        shape.TextFrame.TextRange.Text = tekst;
+                    //als de template de tekst bevat "Volgende" moet daar de Liturgieregel van de volgende sheet komen
+                    else if (text.Equals("<Volgende>"))
                     {
-                        //als de shape gelijk is aan een textbox bevat het dus tekst
-                        if (shape.Type != MsoShapeType.msoTextBox) continue;
-                        var text = shape.TextFrame.TextRange.Text;
-                        //als de template de tekst bevat "Liturgieregel" moet daar de liturgieregel komen
-                        if (text.Equals("<Liturgieregel>"))
-                            shape.TextFrame.TextRange.Text = InvullenLiturgieRegel(regel, inhoud);
-                        //als de template de tekst bevat "Inhoud" moet daar de inhoud van het vers komen
-                        else if (text.Equals("<Inhoud>"))
-                            shape.TextFrame.TextRange.Text = tekst;
-                        //als de template de tekst bevat "Volgende" moet daar de Liturgieregel van de volgende sheet komen
-                        else if (text.Equals("<Volgende>"))
-                        {
-                            //we moeten dan wel al op de laatste slide zitten ('InvullenVolgende' is wel al intelligent maar in het geval van 1
-                            //lange tekst over meerdere dia's kan 'InvullenVolgende' niet de juiste keuze maken)
-                            shape.TextFrame.TextRange.Text = tekstOmTeRenderenLijst.Last() == tekst ? InvullenVolgende(regel, inhoud, volgende) : string.Empty;
-                        }
+                        //we moeten dan wel al op de laatste slide zitten ('InvullenVolgende' is wel al intelligent maar in het geval van 1
+                        //lange tekst over meerdere dia's kan 'InvullenVolgende' niet de juiste keuze maken)
+                        shape.TextFrame.TextRange.Text = tekstOmTeRenderenLijst.Last() == tekst ? InvullenVolgende(regel, inhoud, volgende) : string.Empty;
                     }
                 }
                 //voeg slide in in het grote geheel
-                VoegSlideinPresentatiein(presentatie.Slides);
+                SlidesKopieNaarPresentatie(new List<Slide> { slide });
                 //sluit de template weer af
                 presentatie.Close();
+                presentatie.Dispose();
             }
         }
 
-        private void InvullenSlide(ILiturgieRegel regel, ILiturgieContent inhoud, ILiturgieRegel volgende)
+        private void ToevoegenSlides(ILiturgieRegel regel, ILiturgieContent inhoud, ILiturgieRegel volgende)
         {
             //open de presentatie met de sheets erin
             var presentatie = OpenPps(inhoud.Inhoud);
-            //voor elke slide in de presentatie(in principe moet dit er 1 zijn)
-            foreach (Shape shape in from Slide slide in presentatie.Slides from Shape shape in slide.Shapes select shape)  // Specifieke declaratie als Shape omdat COM anders fout gaat
+            //voor elke slide in de presentatie
+            var slides = presentatie.Slides.Cast<Slide>().ToList();
+            foreach (var shape in slides.SelectMany(s => s.Shapes.Cast<Shape>()).ToList())  
+                // Specifieke casts en tolists om COM problemen te minimaliseren
             {
                 //als de shape gelijk is aan een textbox bevat het dus tekst
                 switch (shape.Type)
@@ -208,9 +212,10 @@ namespace mppt
                 }
             }
             //voeg de slides in in het grote geheel
-            VoegSlideinPresentatiein(presentatie.Slides);
+            SlidesKopieNaarPresentatie(slides);
             //sluit de geopende presentatie weer af
             presentatie.Close();
+            presentatie.Dispose();
         }
 
         private static void VulLiturgieTabel(Table inTabel, IEnumerable<ILiturgieRegel> liturgie, string lezen, string tekst, string instellingLiturgie)
@@ -428,33 +433,52 @@ namespace mppt
         /// Voeg een slide in in de hoofdpresentatie op de volgende positie (hoofdpresentatie werd aangemaakt bij het maken van deze klasse)
         /// </summary>
         /// <param name="slides">de slide die ingevoegd moet worden (voorwaarde is hierbij dat de presentatie waarvan de slide onderdeel is nog wel geopend is)</param>
-        private void VoegSlideinPresentatiein(IEnumerable slides)
+        private void SlidesKopieNaarPresentatie(IEnumerable<Slide> slides, int retryCount = 3)
         {
-            foreach (Slide slide in slides)
+            foreach (var slide in slides.ToList())
             {
-                //dit gedeelte is om het probleem van de eerste slide die al bestaat op te lossen voor alle andere gevallen maken we gewoon een nieuwe slide aan
-                var voeginslide = _slideteller == 1 ? _presentatie.Slides[_slideteller] : _presentatie.Slides.AddSlide(_slideteller, _layout);
-
-                //verwijder alle standaard toegevoegde dingen
-                while (voeginslide.Shapes.Count > 0)
-                {
-                    voeginslide.Shapes[1].Delete();
-                }
-                //voeg de dingen van de template toe
-                foreach (Shape shape in slide.Shapes)
+                if (_slideteller == 1)
+                    _presentatie.Slides[1].Delete();
+                slide.Copy();
+                var gelukt = false;
+                for (int currentTry = 1; currentTry < retryCount && gelukt == false; currentTry++)
                 {
                     try
                     {
-                        shape.Copy();
-                        voeginslide.Shapes.Paste();
+                        gelukt = ExecuteWhen(HasClipboardPowerpointSlideContent, () =>
+                        {
+                            _presentatie.Slides.Paste();
+                            _slideteller++;
+                        });
                     }
-                    catch (Exception)
+                    catch (System.Runtime.InteropServices.COMException)
                     {
-                        // ignored, gaat vaak fout. Geeft welliswaar elementen die ontbreken maar mag generatie proces niet onderbreken
+
                     }
                 }
-                _slideteller++;
+                if (!gelukt)
+                    _slidesGemist++;
             }
+        }
+        private static bool ExecuteWhen(Func<bool> isTrue, Action action, int minWaitTime = 5, int maxWaitTime = 250, int waitStep = 25, int waitBeforeExecute = 5)
+        {
+            var waited = 0;
+            if (minWaitTime > 0)
+                System.Threading.Thread.Sleep(minWaitTime);
+            waited += minWaitTime;
+            while (waited < maxWaitTime && waitStep > 0 && !isTrue.Invoke())
+            {
+                System.Threading.Thread.Sleep(waitStep);
+                waited += waitStep;
+            }
+            if (isTrue.Invoke())
+            {
+                if (waitBeforeExecute > 0)
+                    System.Threading.Thread.Sleep(waitBeforeExecute);
+                action.Invoke();
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -468,13 +492,34 @@ namespace mppt
             return File.Exists(path) ? _applicatie.Presentations.Open(path, MsoTriState.msoFalse, MsoTriState.msoTrue, MsoTriState.msoFalse) : null;
         }
 
+        private static bool HasClipboardPowerpointSlideContent()
+        {
+            var data = Clipboard.GetDataObject();
+            if (data == null)
+                return false;
+            var formats = data.GetFormats();
+            return formats.Any(f => f.StartsWith("PowerPoint"));
+        }
+
         private void SluitAlles()
         {
             _layout = null;
-            _presentatie?.Close();
-            _presentatie = null;
-            _applicatie?.Quit();
-            _applicatie = null;
+            try {
+                _presentatie?.Close();
+                _presentatie?.Dispose();
+            }
+            finally
+            {
+                _presentatie = null;
+            }
+            try
+            {
+                _applicatie?.Quit();
+            }
+            finally
+            {
+                _applicatie = null;
+            }
         }
         public void Dispose()
         {

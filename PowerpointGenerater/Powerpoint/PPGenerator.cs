@@ -33,9 +33,10 @@ namespace PowerpointGenerater.Powerpoint
 
         public delegate void Voortgang(int lijstStart, int lijstEind, int bijItem);
         private readonly Voortgang _setVoortgang;
-        public delegate void GereedMelding(string opgeslagenAlsBestand = null, string foutmelding = null);
+        public delegate void GereedMelding(string opgeslagenAlsBestand = null, string foutmelding = null, int? slidesGemist = null);
         private readonly GereedMelding _setGereedmelding;
         private string _gereedMetFout;
+        private int? _slidesGemist;
 
         public PpGenerator(IUnityContainer di, Voortgang voortgangDelegate, GereedMelding gereedmeldingDelegate)
         {
@@ -134,16 +135,17 @@ namespace PowerpointGenerater.Powerpoint
                 _powerpoint = null;
                 _huidigeStatus = State.Geinitialiseerd;
             }
-            _setGereedmelding.Invoke(_opslaanAls, _gereedMetFout);
+            _setGereedmelding.Invoke(_opslaanAls, _gereedMetFout, _slidesGemist);
         }
 
         private void PresentatieVoortgangCallback(int lijstStart, int lijstEind, int bijItem)
         {
             _setVoortgang.Invoke(lijstStart, lijstEind, bijItem);
         }
-        private void PresentatieStatusWijzigingCallback(Status nieuweStatus, string foutmelding = null)
+        private void PresentatieStatusWijzigingCallback(Status nieuweStatus, string foutmelding = null, int? slidesGemist = null)
         {
             _gereedMetFout = foutmelding;
+            _slidesGemist = slidesGemist;
             if (nieuweStatus == Status.StopFout || nieuweStatus == Status.StopGoed)
                 Stop();
         }
