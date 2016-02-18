@@ -16,5 +16,10 @@ namespace RemoteGenerator
         {
             InitializeComponent();
         }
+        public void Opstarten(string startBestand = null)
+        {
+        }
+
+
     }
 }

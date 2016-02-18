@@ -251,7 +251,7 @@
     </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>xcopy "$(SolutionDir)lib\PowerpointWrapper" "$(TargetDir)" /Y /F /I /D /S</PreBuildEvent>
+    <PreBuildEvent>xcopy "$(SolutionDir)lib\RemoteGeneratorConnect"\*.* "$(TargetDir)" /Y /F /I /D /S</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

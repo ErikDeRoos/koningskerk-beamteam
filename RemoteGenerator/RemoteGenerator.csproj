@@ -94,6 +94,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ILiturgieDatabase\ILiturgieDatabase.csproj">
+      <Project>{1338d41d-5e66-40f3-845f-170a8dcfb445}</Project>
+      <Name>ILiturgieDatabase</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ISettings\ISettings.csproj">
       <Project>{76821eaa-462d-4cad-813d-bcff31edad3a}</Project>
       <Name>ISettings</Name>
@@ -109,7 +113,7 @@
     </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>xcopy "$(SolutionDir)lib\PowerpointWrapper" "$(TargetDir)" /Y /F /I /D /S</PreBuildEvent>
+    <PreBuildEvent>xcopy "$(SolutionDir)lib\PowerpointWrapper\*.*" "$(TargetDir)" /Y /F /I /D /S</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
