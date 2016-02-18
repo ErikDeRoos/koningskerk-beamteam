@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ILiturgieDatabase", "ILitur
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteGenerator", "RemoteGenerator\RemoteGenerator.csproj", "{42A44165-7D09-448E-A17A-EBC768BB8FF8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tools", "Tools\Tools.csproj", "{4FCC4DE1-8D80-43A3-B422-4ADD6410E2AE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug PowerpointWrapper|Any CPU = Debug PowerpointWrapper|Any CPU
@@ -64,6 +66,12 @@ Global
 		{42A44165-7D09-448E-A17A-EBC768BB8FF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42A44165-7D09-448E-A17A-EBC768BB8FF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42A44165-7D09-448E-A17A-EBC768BB8FF8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4FCC4DE1-8D80-43A3-B422-4ADD6410E2AE}.Debug PowerpointWrapper|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FCC4DE1-8D80-43A3-B422-4ADD6410E2AE}.Debug PowerpointWrapper|Any CPU.Build.0 = Debug|Any CPU
+		{4FCC4DE1-8D80-43A3-B422-4ADD6410E2AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FCC4DE1-8D80-43A3-B422-4ADD6410E2AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FCC4DE1-8D80-43A3-B422-4ADD6410E2AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FCC4DE1-8D80-43A3-B422-4ADD6410E2AE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

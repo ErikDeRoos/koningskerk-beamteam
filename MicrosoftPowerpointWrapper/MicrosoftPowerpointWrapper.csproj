@@ -82,6 +82,10 @@
       <Project>{4ce33a64-db90-489b-9d01-99a88f24f2f7}</Project>
       <Name>ISlideBuilder</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Tools\Tools.csproj">
+      <Project>{4fcc4de1-8d80-43a3-b422-4add6410e2ae}</Project>
+      <Name>Tools</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

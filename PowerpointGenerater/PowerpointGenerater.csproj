@@ -119,7 +119,6 @@
     <Compile Include="Database\FileFinder.cs" />
     <Compile Include="Database\FileZipFinder.cs" />
     <Compile Include="Database\IZipArchiveDirectory.cs" />
-    <Compile Include="DefaultContainer.cs" />
     <Compile Include="Database\FileEngine.cs" />
     <Compile Include="Database\FileEngineSetSettings.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

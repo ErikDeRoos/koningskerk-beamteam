@@ -5,15 +5,15 @@ using System.Xml.Serialization;
 
 namespace PowerpointGenerater.Settings
 {
-    class SettingsFactory : IInstellingenFactory
+    public class SettingsFactory : IInstellingenFactory
     {
         private readonly string _baseDir;
         private readonly string _instellingenFileName;
         private readonly string _masksFileName;
 
-        public SettingsFactory(string baseDir, string instellingenFileName, string masksFileName)
+        public SettingsFactory(string instellingenFileName, string masksFileName)
         {
-            _baseDir = baseDir;
+            _baseDir = Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);
             _instellingenFileName = instellingenFileName;
             _masksFileName = masksFileName;
         }
