@@ -34,9 +34,19 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IResults.cs" />
+    <Compile Include="Interpreteren\ILiturgieLosop.cs" />
+    <Compile Include="Resultaten\Helpers\InhoudType.cs" />
+    <Compile Include="Resultaten\Helpers\ILiturgieContent.cs" />
+    <Compile Include="Resultaten\Helpers\ILiturgieDisplay.cs" />
+    <Compile Include="Interpreteren\Helpers\ILiturgieOplossing.cs" />
+    <Compile Include="Interpreteren\Helpers\ILiturgieInterpretatie.cs" />
+    <Compile Include="Interpreteren\Helpers\ILiturgieMapmaskArg.cs" />
+    <Compile Include="Interpreteren\ILiturgieInterpreteer.cs" />
+    <Compile Include="Interpreteren\Helpers\LiturgieOplossingResultaat.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resultaten\ILiturgieRegel.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
