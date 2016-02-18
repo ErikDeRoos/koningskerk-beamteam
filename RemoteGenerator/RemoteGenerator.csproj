@@ -76,6 +76,12 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MicrosoftPowerpointWrapper\MicrosoftPowerpointWrapper.csproj">
+      <Project>{d65aa3ef-0086-4ca5-802e-a2bb2e3bed20}</Project>
+      <Name>MicrosoftPowerpointWrapper</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
