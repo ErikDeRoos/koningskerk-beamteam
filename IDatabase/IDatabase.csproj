@@ -43,7 +43,11 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Sets\items\IDbItem.cs" />
+    <Compile Include="Sets\items\IDbItemContentcs.cs" />
+    <Compile Include="Sets\IDbSet.cs" />
     <Compile Include="IEngine.cs" />
+    <Compile Include="Sets\ISetSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
