@@ -91,9 +91,15 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ConnectTools\ConnectTools.csproj">
+      <Project>{00ef486e-9338-4978-97ef-1a165498e9c8}</Project>
+      <Name>ConnectTools</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ILiturgieDatabase\ILiturgieDatabase.csproj">
       <Project>{1338d41d-5e66-40f3-845f-170a8dcfb445}</Project>
       <Name>ILiturgieDatabase</Name>

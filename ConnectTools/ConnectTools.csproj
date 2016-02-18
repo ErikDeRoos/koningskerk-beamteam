@@ -4,14 +4,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{FD8E0799-7B0A-415B-B5B1-5395C13D93F3}</ProjectGuid>
+    <ProjectGuid>{00EF486E-9338-4978-97EF-1A165498E9C8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RemoteGeneratorConnect</RootNamespace>
-    <AssemblyName>RemoteGeneratorConnect</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <RootNamespace>ConnectTools</RootNamespace>
+    <AssemblyName>ConnectTools</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -32,39 +31,23 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FoutmeldingSchrijver.cs" />
-    <Compile Include="RemotePowerpointFunctions.cs" />
+    <Compile Include="Berichten\Instellingen.cs" />
+    <Compile Include="Berichten\Liturgie.cs" />
+    <Compile Include="Berichten\LiturgieRegel.cs" />
+    <Compile Include="Berichten\Mask.cs" />
+    <Compile Include="Berichten\StandaardTeksten.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ConnectTools\ConnectTools.csproj">
-      <Project>{00ef486e-9338-4978-97ef-1a165498e9c8}</Project>
-      <Name>ConnectTools</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ILiturgieDatabase\ILiturgieDatabase.csproj">
-      <Project>{1338d41d-5e66-40f3-845f-170a8dcfb445}</Project>
-      <Name>ILiturgieDatabase</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ISettings\ISettings.csproj">
-      <Project>{76821eaa-462d-4cad-813d-bcff31edad3a}</Project>
-      <Name>ISettings</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ISlideBuilder\ISlideBuilder.csproj">
-      <Project>{4ce33a64-db90-489b-9d01-99a88f24f2f7}</Project>
-      <Name>ISlideBuilder</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>xcopy /Y /D "$(TargetDir)*.dll" "$(SolutionDir)lib\RemoteGeneratorConnect"</PostBuildEvent>
-  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
