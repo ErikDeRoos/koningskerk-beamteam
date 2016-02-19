@@ -128,6 +128,8 @@ namespace PowerpointGenerator.Database {
             regel.DisplayEdit.Naam = item.Benaming;
             regel.DisplayEdit.SubNaam = item.Deel;
             regel.DisplayEdit.VersenDefault = item.VerzenZoalsIngevoerd;
+            // Underscores als spaties tonen
+            regel.DisplayEdit.Naam = (regel.DisplayEdit.Naam ?? "").Replace("_", " ");
             // Check of er een mask is (mooiere naam)
             var maskCheck = masks?.FirstOrDefault(m => Compare(m.RealName, item.Benaming, true) == 0);
             if (maskCheck != null)
