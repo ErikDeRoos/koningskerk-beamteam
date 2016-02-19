@@ -82,6 +82,11 @@ namespace PowerpointGenerator.Database {
             public IEnumerable<string> Opties { get; set; }
             public IEnumerable<string> Verzen { get; set; }
             public string VerzenZoalsIngevoerd { get; set; }
+
+            public override string ToString()
+            {
+                return $"{Benaming} {Deel} {VerzenZoalsIngevoerd}";
+            }
         }
     }
 
@@ -128,12 +133,6 @@ namespace PowerpointGenerator.Database {
             regel.DisplayEdit.Naam = item.Benaming;
             regel.DisplayEdit.SubNaam = item.Deel;
             regel.DisplayEdit.VersenDefault = item.VerzenZoalsIngevoerd;
-            // Underscores als spaties tonen
-            regel.DisplayEdit.Naam = (regel.DisplayEdit.Naam ?? "").Replace("_", " ");
-            // Check of er een mask is (mooiere naam)
-            var maskCheck = masks?.FirstOrDefault(m => Compare(m.RealName, item.Benaming, true) == 0);
-            if (maskCheck != null)
-                regel.DisplayEdit.Naam = maskCheck.Name;
 
             // zoek de regels in de database en pak ook de naamgeving daar uit over
             if (regel.VerwerkenAlsSlide)
@@ -156,6 +155,13 @@ namespace PowerpointGenerator.Database {
                 regel.DisplayEdit.VersenAfleiden = false;
             }
 
+            // Underscores als spaties tonen
+            regel.DisplayEdit.Naam = (regel.DisplayEdit.Naam ?? "").Replace("_", " ");
+            regel.DisplayEdit.SubNaam = (regel.DisplayEdit.SubNaam ?? "").Replace("_", " ");
+            // Check of er een mask is (mooiere naam)
+            var maskCheck = masks?.FirstOrDefault(m => Compare(m.RealName, regel.DisplayEdit.Naam, true) == 0);
+            if (maskCheck != null)
+                regel.DisplayEdit.Naam = maskCheck.Name;
             // regel visualisatie na bewerking
             if (IsNullOrEmpty(regel.DisplayEdit.NaamOverzicht))
                 regel.DisplayEdit.NaamOverzicht = regel.DisplayEdit.Naam;
@@ -329,6 +335,11 @@ namespace PowerpointGenerator.Database {
             public bool TonenInOverzicht { get; set; }
             public bool TonenInVolgende { get; set; }
             public bool VerwerkenAlsSlide { get; set; }
+
+            public override string ToString()
+            {
+                return $"{Display.Naam} {Display.SubNaam}";
+            }
         }
         private class RegelDisplay : ILiturgieDisplay
         {
