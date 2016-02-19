@@ -240,7 +240,7 @@ namespace mppt
                         {
                             inTabel.Rows[index].Cells[2].Shape.TextFrame.TextRange.Text = toonItem.Display.SubNaam;
                             if (!string.IsNullOrWhiteSpace(toonItem.Display.VersenDefault))
-                                inTabel.Rows[index].Cells[3].Shape.TextFrame.TextRange.Text = ":" + LiedFormattering.LiedVerzen(toonItem.Display, false, vanDelen: toonItem.Content);
+                                inTabel.Rows[index].Cells[3].Shape.TextFrame.TextRange.Text = $": {LiedFormattering.LiedVerzen(toonItem.Display, false, vanDelen: toonItem.Content)}";
                         }
                         liturgieIndex++;
                     }
