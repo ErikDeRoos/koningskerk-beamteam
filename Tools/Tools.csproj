@@ -38,6 +38,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FoutmeldingSchrijver.cs" />
     <Compile Include="LiedFormattering.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

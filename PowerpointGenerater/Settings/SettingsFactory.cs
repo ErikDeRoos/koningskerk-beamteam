@@ -1,4 +1,5 @@
 ﻿using ISettings;
+using ISettings.CommonImplementation;
 using System.IO;
 using System.Xml;
 using System.Xml.Serialization;

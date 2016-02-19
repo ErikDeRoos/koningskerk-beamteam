@@ -138,8 +138,6 @@
     <Compile Include="Screens\Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="FoutmeldingSchrijver.cs" />
-    <Compile Include="Settings\Instellingen.cs" />
     <Compile Include="Screens\LiturgieNotFoundFormulier.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -198,7 +196,6 @@
       <DependentUpon>Instellingenform.cs</DependentUpon>
     </Compile>
     <Compile Include="Settings\SettingsFactory.cs" />
-    <Compile Include="Settings\StandaardTeksten.cs" />
     <Compile Include="Database\Uitlezen_Liturgie.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -247,8 +244,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>xcopy "$(SolutionDir)lib\PowerpointWrapper" "$(TargetDir)" /Y /F /I /D /S
+xcopy "$(SolutionDir)lib\RemoteGeneratorConnect" "$(TargetDir)" /Y /F /I /D /S</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>xcopy "$(SolutionDir)lib\RemoteGeneratorConnect"\*.* "$(TargetDir)" /Y /F /I /D /S</PreBuildEvent>
