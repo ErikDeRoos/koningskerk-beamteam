@@ -1,4 +1,5 @@
 ﻿using ISettings;
+using ISettings.CommonImplementation;
 using Microsoft.Practices.Unity;
 using System;
 using System.Collections.Generic;
@@ -37,6 +38,8 @@ namespace PowerpointGenerater
             tbLezen.Text = vanInstellingen.StandaardTeksten.Lezen;
             tbTekst.Text = vanInstellingen.StandaardTeksten.Tekst;
             tbLiturgie.Text = vanInstellingen.StandaardTeksten.Liturgie;
+            tbLiturgieLezen.Text = vanInstellingen.StandaardTeksten.LiturgieLezen;
+            tbLiturgieTekst.Text = vanInstellingen.StandaardTeksten.LiturgieTekst;
 
             _masks = vanInstellingen.Masks;
         }
@@ -117,7 +120,7 @@ namespace PowerpointGenerater
                 regelsPerSlide = 6;
             Instellingen = new Instellingen(textBox3.Text, textBox1.Text, textBox2.Text, regelsPerSlide,
                 new StandaardTeksten
-                { 
+                {
                     Volgende = tbVolgende.Text,
                     Voorganger = tbVoorganger.Text,
                     Collecte = tbCollecte.Text,
@@ -126,6 +129,8 @@ namespace PowerpointGenerater
                     Lezen = tbLezen.Text,
                     Tekst = tbTekst.Text,
                     Liturgie = tbLiturgie.Text,
+                    LiturgieLezen = tbLiturgieLezen.Text,
+                    LiturgieTekst = tbLiturgieTekst.Text
                 },
                 _masks
             );

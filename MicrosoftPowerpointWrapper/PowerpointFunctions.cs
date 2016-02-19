@@ -208,7 +208,7 @@ namespace mppt
                         break;
                     case MsoShapeType.msoTable:
                         if (shape.Table.Rows[1].Cells[1].Shape.TextFrame.TextRange.Text.Equals("<Liturgie>"))
-                            VulLiturgieTabel(shape.Table, _liturgie, _lezen, _tekst, _instellingen.StandaardTeksten.Liturgie);
+                            VulLiturgieTabel(shape.Table, _liturgie, _lezen, _tekst, _instellingen.StandaardTeksten.LiturgieLezen, _instellingen.StandaardTeksten.LiturgieTekst, _instellingen.StandaardTeksten.Liturgie);
                         break;
                 }
             }
@@ -219,7 +219,7 @@ namespace mppt
             presentatie.Dispose();
         }
 
-        private static void VulLiturgieTabel(Table inTabel, IEnumerable<ILiturgieRegel> liturgie, string lezen, string tekst, string instellingLiturgie)
+        private static void VulLiturgieTabel(Table inTabel, IEnumerable<ILiturgieRegel> liturgie, string lezen, string tekst, string instellingenLezen, string instellingenTekst, string instellingLiturgie)
         {
             // Te tonen liturgie in lijst plaatsen zodat we de plek per index weten
             var liturgieIndex = 0;
@@ -258,7 +258,7 @@ namespace mppt
                         {
                             if (!string.IsNullOrWhiteSpace(lezen))
                             {
-                                inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = "L ";
+                                inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = instellingenLezen;
                                 inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text += lezen;
                                 inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignLeft;
                             }
@@ -272,7 +272,7 @@ namespace mppt
                         {
                             if (!string.IsNullOrWhiteSpace(tekst))
                             {
-                                inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = "T ";
+                                inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = instellingenTekst;
                                 inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text += tekst;
                                 inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignLeft;
                             }
