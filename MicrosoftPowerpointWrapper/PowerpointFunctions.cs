@@ -10,6 +10,7 @@ using NetOffice.PowerPointApi;
 using NetOffice.OfficeApi.Enums;
 using NetOffice.PowerPointApi.Enums;
 using Clipboard = System.Windows.Forms.Clipboard;
+using Tools;
 
 namespace mppt
 {
@@ -207,7 +208,7 @@ namespace mppt
                         break;
                     case MsoShapeType.msoTable:
                         if (shape.Table.Rows[1].Cells[1].Shape.TextFrame.TextRange.Text.Equals("<Liturgie>"))
-                            VulLiturgieTabel(shape.Table, _liturgie, _lezen, _tekst, _instellingen.StandaardTeksten.Liturgie);
+                            VulLiturgieTabel(shape.Table, _liturgie, _lezen, _tekst, _instellingen.StandaardTeksten.LiturgieLezen, _instellingen.StandaardTeksten.LiturgieTekst, _instellingen.StandaardTeksten.Liturgie);
                         break;
                 }
             }
@@ -218,7 +219,7 @@ namespace mppt
             presentatie.Dispose();
         }
 
-        private static void VulLiturgieTabel(Table inTabel, IEnumerable<ILiturgieRegel> liturgie, string lezen, string tekst, string instellingLiturgie)
+        private static void VulLiturgieTabel(Table inTabel, IEnumerable<ILiturgieRegel> liturgie, string lezen, string tekst, string instellingenLezen, string instellingenTekst, string instellingLiturgie)
         {
             // Te tonen liturgie in lijst plaatsen zodat we de plek per index weten
             var liturgieIndex = 0;
@@ -239,7 +240,7 @@ namespace mppt
                         {
                             inTabel.Rows[index].Cells[2].Shape.TextFrame.TextRange.Text = toonItem.Display.SubNaam;
                             if (!string.IsNullOrWhiteSpace(toonItem.Display.VersenDefault))
-                                inTabel.Rows[index].Cells[3].Shape.TextFrame.TextRange.Text = ":" + LiedVerzen(toonItem.Display, false, vanDelen: toonItem.Content);
+                                inTabel.Rows[index].Cells[3].Shape.TextFrame.TextRange.Text = ":" + LiedFormattering.LiedVerzen(toonItem.Display, false, vanDelen: toonItem.Content);
                         }
                         liturgieIndex++;
                     }
@@ -257,7 +258,7 @@ namespace mppt
                         {
                             if (!string.IsNullOrWhiteSpace(lezen))
                             {
-                                inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = "L ";
+                                inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = instellingenLezen;
                                 inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text += lezen;
                                 inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignLeft;
                             }
@@ -271,7 +272,7 @@ namespace mppt
                         {
                             if (!string.IsNullOrWhiteSpace(tekst))
                             {
-                                inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = "T ";
+                                inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = instellingenTekst;
                                 inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text += tekst;
                                 inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignLeft;
                             }
@@ -300,7 +301,7 @@ namespace mppt
         {
             // Alleen volgende tonen als we op het laatste item zitten en als volgende er is
             if (regel.Content.Last() == deel && volgende != null && volgende.TonenInVolgende)
-                return $"{_instellingen.StandaardTeksten.Volgende} {LiedNaam(volgende)}";
+                return $"{_instellingen.StandaardTeksten.Volgende} {LiedFormattering.LiedNaam(volgende)}";
             return string.Empty;
         }
 
@@ -374,59 +375,7 @@ namespace mppt
 
         private static string InvullenLiturgieRegel(ILiturgieRegel regel, ILiturgieContent vanafDeel)
         {
-            return LiedNaam(regel, vanafDeel);
-        }
-
-        private static string LiedNaam(ILiturgieRegel regel, ILiturgieContent vanafDeelHint = null)
-        {
-            if (string.IsNullOrWhiteSpace(regel.Display.SubNaam))
-                return regel.Display.Naam;
-            if ((regel.Content == null || regel.Content.Count() <= 1 || vanafDeelHint == null) && string.IsNullOrWhiteSpace(regel.Display.VersenDefault))
-                return $"{regel.Display.Naam} {regel.Display.SubNaam}";
-            if (!regel.Display.VersenAfleiden || regel.Content == null)
-                return $"{regel.Display.Naam} {regel.Display.SubNaam}: {LiedVerzen(regel.Display, vanafDeelHint != null)}";
-            var vanafDeel = vanafDeelHint ?? regel.Content.FirstOrDefault();  // Bij een deel hint tonen we alleen nog de huidige en komende versen
-            var gebruikDeelRegels = regel.Content.SkipWhile(r => r != vanafDeel);
-            return $"{regel.Display.Naam} {regel.Display.SubNaam}: {LiedVerzen(regel.Display, vanafDeelHint != null, gebruikDeelRegels)}";
-        }
-        /// <summary>
-        /// Maak een mooie samenvatting van de opgegeven nummers
-        /// </summary>
-        /// Probeer de nummers samen te vatten door een bereik te tonen.
-        /// Waar niet mogelijk toon daar gewoon komma gescheiden nummers.
-        /// Als het in beeld is dan wordt de eerste in ieder geval los getoond.
-        /// <remarks>
-        /// </remarks>
-        private static string LiedVerzen(ILiturgieDisplay regelDisplay, bool inBeeld, IEnumerable<ILiturgieContent> vanDelen = null)
-        {
-            if (!regelDisplay.VersenAfleiden || vanDelen == null)
-                return regelDisplay.VersenDefault ?? string.Empty;
-            var over = vanDelen.Where(v => v.Nummer.HasValue).Select(v => v.Nummer.Value).ToList();
-            if (!over.Any())
-                return "";
-            var builder = new StringBuilder(" ");
-            if (inBeeld)
-            {
-                builder.Append(over.First()).Append(", ");
-                over.RemoveAt(0);
-            }
-            while (over.Any())
-            {
-                var nieuweReeks = new List<int> { over.First() };
-                over.RemoveAt(0);
-                while (over.Any() && over[0] == nieuweReeks.Last() + 1)
-                {
-                    nieuweReeks.Add(over[0]);
-                    over.RemoveAt(0);
-                }
-                if (nieuweReeks.Count == 1)
-                    builder.Append(nieuweReeks[0]).Append(", ");
-                else if (nieuweReeks.Count == 2)
-                    builder.Append(string.Join(", ", nieuweReeks));
-                else
-                    builder.AppendFormat("{0} - {1}, ", nieuweReeks.First(), nieuweReeks.Last());
-            }
-            return builder.ToString().TrimEnd(',', ' ');
+            return LiedFormattering.LiedNaam(regel, vanafDeel);
         }
 
         /// <summary>

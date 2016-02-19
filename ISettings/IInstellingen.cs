@@ -8,7 +8,7 @@ namespace ISettings
         string Templateliederen { get; }
         string Templatetheme { get; }
         int Regelsperslide { get; }
-        IStandaardTeksten StandaardTeksten { get; }
+        CommonImplementation.StandaardTeksten StandaardTeksten { get; }
 
         IEnumerable<IMapmask> Masks { get; }
 

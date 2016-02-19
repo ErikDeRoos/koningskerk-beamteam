@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 using System;
-using ISettings;
-using Microsoft.Practices.ObjectBuilder2;
+using System.Linq;
 
-namespace PowerpointGenerater
+namespace ISettings.CommonImplementation
 {
     public class Instellingen : IInstellingen
     {
@@ -12,8 +11,7 @@ namespace PowerpointGenerater
         public string Templatetheme { get; set; }
         public int Regelsperslide { get; set; }
         private readonly List<IMapmask> _lijstmasks = new List<IMapmask>();
-        private readonly StandaardTeksten _standaardTeksten;
-        public IStandaardTeksten StandaardTeksten => _standaardTeksten;
+        public StandaardTeksten StandaardTeksten { get; set; }
 
         public Instellingen()
         {
@@ -22,7 +20,7 @@ namespace PowerpointGenerater
             Templatetheme = "";
             Regelsperslide = 4;
 
-            _standaardTeksten = new StandaardTeksten()
+            StandaardTeksten = new StandaardTeksten()
             {
                 Volgende = "Straks :",
                 Voorganger = "Voorganger :",
@@ -31,7 +29,9 @@ namespace PowerpointGenerater
                 Collecte = "Collecte :",
                 Lezen = "Lezen :",
                 Tekst = "Tekst :",
-                Liturgie = "liturgie"
+                Liturgie = "liturgie",
+                LiturgieLezen = "L ",
+                LiturgieTekst = "T "
             };
 
         }
@@ -44,8 +44,8 @@ namespace PowerpointGenerater
             Templatetheme = templatetheme;
             Regelsperslide = regelsperslide;
             if (standaardTeksten != null)
-                _standaardTeksten = standaardTeksten;
-            masks?.ForEach(m => AddMask(m));
+                StandaardTeksten = standaardTeksten;
+            masks?.ToList().ForEach(m => AddMask(m));
         }
 
         public bool AddMask(IMapmask mask)

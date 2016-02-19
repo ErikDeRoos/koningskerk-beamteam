@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 
-namespace mppt
+namespace Tools
 {
-    class FoutmeldingSchrijver
+    public class FoutmeldingSchrijver
     {
         public static void Log(Exception melding)
         {

@@ -101,7 +101,7 @@ namespace PowerpointGenerator.Database {
     /// <summary>
     /// Zoek naar de opgegeven liturgieen.
     /// </summary>
-    class LiturgieDatabase : ILiturgieLosOp
+    public class LiturgieDatabase : ILiturgieLosOp
     {
         private readonly IEngine<FileEngineSetSettings> _database;
         public LiturgieDatabase(IEngine<FileEngineSetSettings> database)

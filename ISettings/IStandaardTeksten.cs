@@ -10,5 +10,7 @@
         string Lezen { get; }
         string Tekst { get; }
         string Liturgie { get; }
+        string LiturgieLezen { get; }
+        string LiturgieTekst { get; }
     }
 }
