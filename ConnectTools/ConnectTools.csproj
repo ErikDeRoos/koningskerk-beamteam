@@ -11,6 +11,7 @@
     <AssemblyName>ConnectTools</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -40,11 +41,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Berichten\InhoudType.cs" />
     <Compile Include="Berichten\Instellingen.cs" />
     <Compile Include="Berichten\Liturgie.cs" />
     <Compile Include="Berichten\LiturgieRegel.cs" />
+    <Compile Include="Berichten\LiturgieRegelContent.cs" />
+    <Compile Include="Berichten\LiturgieRegelDisplay.cs" />
     <Compile Include="Berichten\Mask.cs" />
+    <Compile Include="Berichten\Voortgang.cs" />
     <Compile Include="Berichten\StandaardTeksten.cs" />
+    <Compile Include="Berichten\Token.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

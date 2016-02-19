@@ -1,5 +1,6 @@
 ﻿using Microsoft.Practices.Unity;
 using Microsoft.Practices.Unity.Configuration;
+using RemoteGenerator.WCF;
 using System;
 using System.Windows.Forms;
 
@@ -22,7 +23,9 @@ namespace RemoteGenerator
             container.BuildUp(startupForm);
             startupForm.Opstarten(args.Length >= 1 ? args[0] : null);
 
+            container.Resolve<IHost>().Start();
             Application.Run(startupForm);
+            container.Resolve<IHost>().Stop();
         }
     }
 }

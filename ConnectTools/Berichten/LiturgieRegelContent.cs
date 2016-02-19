@@ -12,8 +12,8 @@ namespace ConnectTools.Berichten
         /// </summary>
         public InhoudType InhoudType { get; set; }
         /// <summary>
-        /// De inhoud. De actuele tekst bij tekst, een link bij ppt.
+        /// De inhoud. De actuele tekst bij tekst, de ppt bij een ppt.
         /// </summary>
-        public string Inhoud { get; set; }
+        public byte[] Inhoud { get; set; }
     }
 }
