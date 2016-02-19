@@ -64,7 +64,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Builder\PPGenerator.cs" />
+    <Compile Include="Builder\IPpGenerator.cs" />
+    <Compile Include="Builder\PpGenerator.cs" />
+    <Compile Include="Builder\WachtrijRegel.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

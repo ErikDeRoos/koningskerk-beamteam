@@ -8,5 +8,6 @@ namespace ConnectTools.Berichten
 {
     public class Token
     {
+        public Guid ID { get; set; }
     }
 }

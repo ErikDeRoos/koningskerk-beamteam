@@ -1,4 +1,5 @@
-﻿using ILiturgieDatabase;
+﻿using ConnectTools.Berichten;
+using ILiturgieDatabase;
 using ISettings;
 using ISlideBuilder;
 using Microsoft.Practices.Unity;
@@ -8,12 +9,11 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 
-namespace PowerpointGenerater.Powerpoint
+namespace RemoteGenerator.Builder
 {
-    /// Powerpoint roepen we aan via een wrapper zodat we de resources goed
-    /// kunnen beheren. Dat is namelijk een must voor een goed gebruik van
-    /// interop klassen.
-    internal class PpGenerator : IDisposable
+    /// Powerpoint roepen we aan via een wrapper zodat we meerdere requests af kunnen
+    /// handelen terwijl we maar 1 generatie gelijktijdig doen.
+    class PpGenerator : IDisposable, IPpGenerator
     {
         private State _huidigeStatus;
         private IEnumerable<ILiturgieRegel> _liturgie;
@@ -38,12 +38,32 @@ namespace PowerpointGenerater.Powerpoint
         private string _gereedMetFout;
         private int? _slidesGemist;
 
+        private List<WachtrijRegel> _wachtrij;
+        public IEnumerable<WachtrijRegel> Wachtrij => _wachtrij;
+
         public PpGenerator(IUnityContainer di, Voortgang voortgangDelegate, GereedMelding gereedmeldingDelegate)
         {
             _di = di;
             _huidigeStatus = State.Onbekend;
             _setVoortgang = voortgangDelegate;
             _setGereedmelding = gereedmeldingDelegate;
+            _wachtrij = new List<WachtrijRegel>();
+        }
+
+        public WachtrijRegel NieuweWachtrijRegel(Liturgie opBasisVanLiturgie)
+        {
+            var regel = new WachtrijRegel()
+            {
+                Liturgie = opBasisVanLiturgie,
+                Voortgang = new ConnectTools.Berichten.Voortgang(),
+                Token = new Token() { ID = Guid.NewGuid() }
+            };
+            lock(this)
+            {
+                regel.Index = _wachtrij.Count() > 0 ? _wachtrij.Max(w => w.Index) + 1 : 1;
+                _wachtrij.Add(regel);
+            }
+            return regel;
         }
 
         public StatusMelding Initialiseer(IEnumerable<ILiturgieRegel> liturgie, string voorganger, string collecte1, string collecte2, string lezen,
