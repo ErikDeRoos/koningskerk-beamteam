@@ -244,8 +244,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(SolutionDir)lib\PowerpointWrapper" "$(TargetDir)" /Y /F /I /D /S
-xcopy "$(SolutionDir)lib\RemoteGeneratorConnect" "$(TargetDir)" /Y /F /I /D /S</PostBuildEvent>
+    <PostBuildEvent>xcopy "$(SolutionDir)lib\PowerpointWrapper" "$(TargetDir)" /Y /F /I /D /S</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>xcopy "$(SolutionDir)lib\RemoteGeneratorConnect"\*.* "$(TargetDir)" /Y /F /I /D /S</PreBuildEvent>

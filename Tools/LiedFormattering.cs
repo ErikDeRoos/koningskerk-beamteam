@@ -35,7 +35,7 @@ namespace Tools
             var over = vanDelen.Where(v => v.Nummer.HasValue).Select(v => v.Nummer.Value).ToList();
             if (!over.Any())
                 return "";
-            var builder = new StringBuilder(" ");
+            var builder = new StringBuilder();
             if (inBeeld)
             {
                 builder.Append(over.First()).Append(", ");
