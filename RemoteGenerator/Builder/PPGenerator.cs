@@ -27,6 +27,7 @@ namespace RemoteGenerator.Builder
         private string _opslaanAls;
         private readonly IUnityContainer _di;
 
+        private Thread _startThread;
         private IBuilder _powerpoint;
         private Thread _generatorThread;
         private Thread _stopThread;
@@ -46,6 +47,7 @@ namespace RemoteGenerator.Builder
             _huidigeStatus = State.Onbekend;
             _wachtrij = new List<WachtrijRegel>();
             _verwerkt = new List<WachtrijRegel>();
+            _startThread = new Thread(PollVoorStart);
         }
 
         public WachtrijRegel NieuweWachtrijRegel(Instellingen metInstellingen)
@@ -62,45 +64,53 @@ namespace RemoteGenerator.Builder
                 regel.Index = _wachtrij.Count() > 0 ? _wachtrij.Max(w => w.Index) + 1 : 1;
                 _wachtrij.Add(regel);
             }
-            ProbeerTeStarten(regel);
             return regel;
         }
         public void UpdateWachtrijRegel(Token vanToken, Liturgie gebruikliturgie)
         {
-            lock(this)
+            WachtrijRegel regel;
+            lock (this)
             {
-                var regel = _wachtrij.FirstOrDefault(w => w.Token.ID == vanToken.ID);
+                regel = _wachtrij.FirstOrDefault(w => w.Token.ID == vanToken.ID);
                 if (regel == null || !MagUpdaten(regel, _bezigMetRegel) || regel.Liturgie != null)
                     return;
                 regel.Liturgie = gebruikliturgie;
             }
         }
 
-        private void StartVolgende()
+        /// <summary>
+        /// Alleen de poll thread start een generatie.
+        /// </summary>
+        private void PollVoorStart()
         {
-            var volgendePresentatie = _wachtrij.FirstOrDefault(r => KanRegelStarten(r));
-            if (volgendePresentatie != null)
-                ProbeerTeStarten(volgendePresentatie);
-        }
-        private void ProbeerTeStarten(WachtrijRegel regel)
-        {
-            if (!KanRegelStarten(regel))
-                return;
-            lock(this)
+            while (_startThread != null)
             {
-                if (_bezigMetRegel == null)
+                Thread.Sleep(100);
+                if (_bezigMetRegel == null && _huidigeStatus == State.Geinitialiseerd)
                 {
-                    _bezigMetRegel = regel;
-                    Start(regel);
+                    var volgendePresentatie = _wachtrij.FirstOrDefault(r => IsRegelCompleet(r));
+                    if (volgendePresentatie != null)
+                    {
+                        if (!IsRegelCompleet(volgendePresentatie))
+                            continue;
+                        lock (this)
+                        {
+                            if (MagUpdaten(volgendePresentatie, _bezigMetRegel) && _wachtrij.Contains(volgendePresentatie))
+                            {
+                                _bezigMetRegel = volgendePresentatie;
+                                Start(volgendePresentatie);
+                            }
+                        }
+                    }
                 }
             }
         }
-        private static bool KanRegelStarten(WachtrijRegel regel)
+
+        private static bool IsRegelCompleet(WachtrijRegel regel)
         {
             return regel != null 
                 && regel.Instellingen != null
-                && regel.Liturgie != null 
-                && !regel.Voortgang.Gereed;
+                && regel.Liturgie != null;
         }
         private static bool MagUpdaten(WachtrijRegel regel, WachtrijRegel bezigMetRegel)
         {
@@ -218,7 +228,7 @@ namespace RemoteGenerator.Builder
             lock (this)
             {
                 _powerpoint.Stop();
-                for (int teller = 0; teller < 1000 && _generatorThread.IsAlive; teller++)
+                for (int teller = 0; teller < 100 && _generatorThread.IsAlive; teller++)
                     Thread.Sleep(5);
                 _generatorThread = null;
                 _powerpoint.Dispose();
@@ -260,7 +270,6 @@ namespace RemoteGenerator.Builder
                 _wachtrij.Remove(_bezigMetRegel);
                 _bezigMetRegel = null;
             }
-            StartVolgende();
         }
 
         private void AfrondenMislukt(string opgeslagenAlsBestand)
@@ -302,6 +311,8 @@ namespace RemoteGenerator.Builder
 
         public void Dispose()
         {
+            _startThread.Abort();
+            _startThread = null;
             HardeStop();
         }
 

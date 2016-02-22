@@ -25,7 +25,7 @@ namespace RemoteGenerator.WCF
         {
             var item = Generator.Wachtrij.FirstOrDefault(w => w.Token.ID == token.ID);
             if (item == null)
-                item = Generator.Gereed.FirstOrDefault(w => w.Token.ID == token.ID);
+                item = Generator.Verwerkt.FirstOrDefault(w => w.Token.ID == token.ID);
             if (item == null)
                 return null;
             return item.Voortgang;
@@ -33,7 +33,7 @@ namespace RemoteGenerator.WCF
 
         public byte[] DownloadResultaat(Token token)
         {
-            var item = Generator.Gereed.FirstOrDefault(w => w.Token.ID == token.ID);
+            var item = Generator.Verwerkt.FirstOrDefault(w => w.Token.ID == token.ID);
             if (item == null || item.Voortgang.VolledigMislukt)
                 return null;
             return System.IO.File.ReadAllBytes(item.ResultaatOpgeslagenOp);

@@ -1,6 +1,7 @@
 ﻿using ILiturgieDatabase;
 using System;
 using System.IO;
+using System.Text;
 
 namespace RemoteGenerator.Builder.LiturgieRegels
 {
@@ -23,8 +24,7 @@ namespace RemoteGenerator.Builder.LiturgieRegels
                     break;
                 case ConnectTools.Berichten.InhoudType.Tekst:
                     InhoudType = InhoudType.Tekst;
-                    throw new NotImplementedException();
-                    //Inhoud = 
+                    Inhoud = Encoding.Unicode.GetString(vanContent.Inhoud);
                     break;
                 default:
                     throw new NotImplementedException();
