@@ -19,8 +19,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteGenerator", "RemoteGe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tools", "Tools\Tools.csproj", "{4FCC4DE1-8D80-43A3-B422-4ADD6410E2AE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteGeneratorConnect", "RemoteGeneratorConnect\RemoteGeneratorConnect.csproj", "{FD8E0799-7B0A-415B-B5B1-5395C13D93F3}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectTools", "ConnectTools\ConnectTools.csproj", "{00EF486E-9338-4978-97EF-1A165498E9C8}"
 EndProject
 Global
@@ -61,10 +59,6 @@ Global
 		{4FCC4DE1-8D80-43A3-B422-4ADD6410E2AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4FCC4DE1-8D80-43A3-B422-4ADD6410E2AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4FCC4DE1-8D80-43A3-B422-4ADD6410E2AE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FD8E0799-7B0A-415B-B5B1-5395C13D93F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FD8E0799-7B0A-415B-B5B1-5395C13D93F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FD8E0799-7B0A-415B-B5B1-5395C13D93F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FD8E0799-7B0A-415B-B5B1-5395C13D93F3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{00EF486E-9338-4978-97EF-1A165498E9C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{00EF486E-9338-4978-97EF-1A165498E9C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{00EF486E-9338-4978-97EF-1A165498E9C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
