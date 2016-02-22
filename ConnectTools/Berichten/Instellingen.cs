@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace ConnectTools.Berichten
 {
     public class Instellingen
     {
-        int Regelsperslide { get; set; }
-        StandaardTeksten StandaardTeksten { get; set; }
-
-        IEnumerable<Mask> Masks { get; set; }
+        public int Regelsperslide { get; set; }
+        public StandaardTeksten StandaardTeksten { get; set; }
+        public byte[] TemplateTheme { get; set; }
+        public byte[] TemplateLiederen { get; set; }
 
     }
 }

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using Tools;
 
 namespace RemoteGenerator.Builder
 {
@@ -29,50 +30,125 @@ namespace RemoteGenerator.Builder
         private IBuilder _powerpoint;
         private Thread _generatorThread;
         private Thread _stopThread;
-        private readonly object _locker = new object();
 
-        public delegate void Voortgang(int lijstStart, int lijstEind, int bijItem);
-        private readonly Voortgang _setVoortgang;
-        public delegate void GereedMelding(string opgeslagenAlsBestand = null, string foutmelding = null, int? slidesGemist = null);
-        private readonly GereedMelding _setGereedmelding;
         private string _gereedMetFout;
         private int? _slidesGemist;
 
+        private WachtrijRegel _bezigMetRegel;
         private List<WachtrijRegel> _wachtrij;
         public IEnumerable<WachtrijRegel> Wachtrij => _wachtrij;
+        private List<WachtrijRegel> _verwerkt;
+        public IEnumerable<WachtrijRegel> Verwerkt => _verwerkt;
 
-        public PpGenerator(IUnityContainer di, Voortgang voortgangDelegate, GereedMelding gereedmeldingDelegate)
+        public PpGenerator(IUnityContainer di)
         {
             _di = di;
             _huidigeStatus = State.Onbekend;
-            _setVoortgang = voortgangDelegate;
-            _setGereedmelding = gereedmeldingDelegate;
             _wachtrij = new List<WachtrijRegel>();
+            _verwerkt = new List<WachtrijRegel>();
         }
 
-        public WachtrijRegel NieuweWachtrijRegel(Liturgie opBasisVanLiturgie)
+        public WachtrijRegel NieuweWachtrijRegel(Instellingen metInstellingen)
         {
             var regel = new WachtrijRegel()
             {
-                Liturgie = opBasisVanLiturgie,
-                Voortgang = new ConnectTools.Berichten.Voortgang(),
-                Token = new Token() { ID = Guid.NewGuid() }
+                Instellingen = metInstellingen,
+                Voortgang = new Voortgang(),
+                Token = new Token() { ID = Guid.NewGuid() },
+                ToegevoegdOp = DateTime.Now
             };
-            lock(this)
+            lock (this)
             {
                 regel.Index = _wachtrij.Count() > 0 ? _wachtrij.Max(w => w.Index) + 1 : 1;
                 _wachtrij.Add(regel);
             }
+            ProbeerTeStarten(regel);
             return regel;
         }
+        public void UpdateWachtrijRegel(Token vanToken, Liturgie gebruikliturgie)
+        {
+            lock(this)
+            {
+                var regel = _wachtrij.FirstOrDefault(w => w.Token.ID == vanToken.ID);
+                if (regel == null || !MagUpdaten(regel, _bezigMetRegel) || regel.Liturgie != null)
+                    return;
+                regel.Liturgie = gebruikliturgie;
+            }
+        }
 
-        public StatusMelding Initialiseer(IEnumerable<ILiturgieRegel> liturgie, string voorganger, string collecte1, string collecte2, string lezen,
+        private void StartVolgende()
+        {
+            var volgendePresentatie = _wachtrij.FirstOrDefault(r => KanRegelStarten(r));
+            if (volgendePresentatie != null)
+                ProbeerTeStarten(volgendePresentatie);
+        }
+        private void ProbeerTeStarten(WachtrijRegel regel)
+        {
+            if (!KanRegelStarten(regel))
+                return;
+            lock(this)
+            {
+                if (_bezigMetRegel == null)
+                {
+                    _bezigMetRegel = regel;
+                    Start(regel);
+                }
+            }
+        }
+        private static bool KanRegelStarten(WachtrijRegel regel)
+        {
+            return regel != null 
+                && regel.Instellingen != null
+                && regel.Liturgie != null 
+                && !regel.Voortgang.Gereed;
+        }
+        private static bool MagUpdaten(WachtrijRegel regel, WachtrijRegel bezigMetRegel)
+        {
+            return
+                regel != bezigMetRegel
+                && !regel.Voortgang.Gereed;
+        }
+
+        private void Start(WachtrijRegel regel)
+        {
+            var instellingen = new ISettings.CommonImplementation.Instellingen()
+            {
+                Templateliederen = SaveToTempFile(regel.Instellingen.TemplateLiederen),
+                Templatetheme = SaveToTempFile(regel.Instellingen.TemplateTheme),
+                Regelsperslide = regel.Instellingen.Regelsperslide,
+                StandaardTeksten = new ISettings.CommonImplementation.StandaardTeksten()
+                {
+                    Volgende = regel.Instellingen.StandaardTeksten.Volgende,
+                    Voorganger = regel.Instellingen.StandaardTeksten.Voorganger,
+                    Collecte1 = regel.Instellingen.StandaardTeksten.Collecte1,
+                    Collecte2 = regel.Instellingen.StandaardTeksten.Collecte2,
+                    Collecte = regel.Instellingen.StandaardTeksten.Collecte,
+                    Lezen = regel.Instellingen.StandaardTeksten.Lezen,
+                    Tekst = regel.Instellingen.StandaardTeksten.Tekst,
+                    Liturgie = regel.Instellingen.StandaardTeksten.Liturgie,
+                    LiturgieLezen = regel.Instellingen.StandaardTeksten.LiturgieLezen,
+                    LiturgieTekst = regel.Instellingen.StandaardTeksten.LiturgieTekst,
+                }
+            };
+            var liturgie = regel.Liturgie.Regels.OrderBy(r => r.Index).Select(r => new LiturgieRegels.LiturgieRegel(r)).ToList();
+            var opslaanAlsBestandsnaam = Path.GetTempFileName();
+            Initialiseer(liturgie, regel.Liturgie.Voorganger, regel.Liturgie.Collecte1, regel.Liturgie.Collecte2,
+                regel.Liturgie.Lezen, regel.Liturgie.Tekst, instellingen, opslaanAlsBestandsnaam);
+            Start();
+        }
+
+        private static string SaveToTempFile(byte[] content)
+        {
+            var fileName = Path.GetTempFileName();
+            File.WriteAllBytes(fileName, content);
+            return fileName;
+        }
+
+        private StatusMelding Initialiseer(IEnumerable<ILiturgieRegel> liturgie, string voorganger, string collecte1, string collecte2, string lezen,
           string tekst, IInstellingen instellingen, string opslaanAls)
         {
-            lock (_locker)
+            lock (this)
             {
-                if (_huidigeStatus != State.Onbekend && _huidigeStatus != State.Geinitialiseerd)
-                    return new StatusMelding(_huidigeStatus, "Kan powerpoint niet initialiseren", "Start het programma opnieuw op");
                 _liturgie = liturgie.ToList();
                 _voorganger = voorganger;
                 _collecte1 = collecte1;
@@ -81,20 +157,14 @@ namespace RemoteGenerator.Builder
                 _tekst = tekst;
                 _instellingen = instellingen;
                 _opslaanAls = opslaanAls;
-
-                if (!File.Exists(_instellingen.FullTemplatetheme))
-                    return new StatusMelding(_huidigeStatus, "Het pad naar de achtergrond powerpoint presentatie kan niet worden gevonden", "Stel de achtergrond opnieuw in bij de templates");
-                if (!File.Exists(instellingen.FullTemplateliederen))
-                    return new StatusMelding(_huidigeStatus, "Het pad naar de liederen template powerpoint presentatie kan niet worden gevonden", "Stel de achtergrond opnieuw in bij de templates");
-
                 _huidigeStatus = State.Geinitialiseerd;
                 return new StatusMelding(_huidigeStatus);
             }
         }
 
-        public StatusMelding Start()
+        private StatusMelding Start()
         {
-            lock (_locker)
+            lock (this)
             {
                 if (_huidigeStatus != State.Geinitialiseerd)
                     return new StatusMelding(_huidigeStatus, "Kan powerpoint niet starten", "Start het programma opnieuw op");
@@ -123,16 +193,16 @@ namespace RemoteGenerator.Builder
             }
             catch (System.Runtime.InteropServices.COMException)
             {
-                lock (_locker)
+                lock (this)
                 {
-                    _setGereedmelding.Invoke(null, "Kon powerpoint niet opstarten");
+                    GereedMelding(null, "Kon powerpoint niet opstarten");
                 }
             }
         }
 
-        public StatusMelding Stop()
+        private StatusMelding Stop()
         {
-            lock (_locker)
+            lock (this)
             {
                 if (_huidigeStatus != State.Gestart)
                     return new StatusMelding(_huidigeStatus, "Kan powerpoint niet stoppen", "Start het programma opnieuw op");
@@ -145,7 +215,7 @@ namespace RemoteGenerator.Builder
 
         private void ProbeerTeStoppen()
         {
-            lock (_locker)
+            lock (this)
             {
                 _powerpoint.Stop();
                 for (int teller = 0; teller < 1000 && _generatorThread.IsAlive; teller++)
@@ -155,12 +225,12 @@ namespace RemoteGenerator.Builder
                 _powerpoint = null;
                 _huidigeStatus = State.Geinitialiseerd;
             }
-            _setGereedmelding.Invoke(_opslaanAls, _gereedMetFout, _slidesGemist);
+            GereedMelding(_opslaanAls, _gereedMetFout, _slidesGemist);
         }
 
         private void PresentatieVoortgangCallback(int lijstStart, int lijstEind, int bijItem)
         {
-            _setVoortgang.Invoke(lijstStart, lijstEind, bijItem);
+            Voortgang(lijstStart, lijstEind, bijItem);
         }
         private void PresentatieStatusWijzigingCallback(Status nieuweStatus, string foutmelding = null, int? slidesGemist = null)
         {
@@ -170,10 +240,53 @@ namespace RemoteGenerator.Builder
                 Stop();
         }
 
-
-        public void Dispose()
+        private void Voortgang(int lijstStart, int lijstEind, int bijItem)
         {
-            var gelocked = Monitor.TryEnter(_locker, 100);  // probeer eerst lief maar als dat niet lukt, forceer exit
+            _bezigMetRegel.Voortgang.BijIndex = bijItem;
+        }
+        private void GereedMelding(string opgeslagenAlsBestand = null, string foutmelding = null, int? slidesGemist = null)
+        {
+            if (opgeslagenAlsBestand != null && foutmelding == null)
+                AfrondenGelukt(opgeslagenAlsBestand, slidesGemist ?? 0);
+            else {
+                if (foutmelding != null)
+                    FoutmeldingSchrijver.Log(foutmelding);
+                AfrondenMislukt(opgeslagenAlsBestand);
+            }
+            lock (this)
+            {
+                _verwerkt.Add(_bezigMetRegel);
+                _bezigMetRegel.Voortgang.Gereed = true;
+                _wachtrij.Remove(_bezigMetRegel);
+                _bezigMetRegel = null;
+            }
+            StartVolgende();
+        }
+
+        private void AfrondenMislukt(string opgeslagenAlsBestand)
+        {
+            if (opgeslagenAlsBestand != null)
+                try
+                {
+                    File.Delete(opgeslagenAlsBestand);
+                }
+                catch { }
+            _bezigMetRegel.Voortgang.VolledigMislukt = true;
+        }
+        private void AfrondenGelukt(string opgeslagenAlsBestand, int slidesGemist)
+        {
+            _bezigMetRegel.Voortgang.MislukteSlides = slidesGemist;
+            _bezigMetRegel.ResultaatOpgeslagenOp = opgeslagenAlsBestand;
+        }
+        private void Opruimen(WachtrijRegel regel)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        private void HardeStop()
+        {
+            var gelocked = Monitor.TryEnter(this, 100);  // probeer eerst lief maar als dat niet lukt, forceer exit
             if (_stopThread != null && _stopThread.IsAlive)
                 _stopThread.Abort();
             _stopThread = null;
@@ -182,8 +295,14 @@ namespace RemoteGenerator.Builder
             _generatorThread = null;
             _powerpoint.Dispose();
             _powerpoint = null;
+            _huidigeStatus = State.Onbekend;
             if (gelocked)
-                Monitor.Exit(_locker);
+                Monitor.Exit(this);
+        }
+
+        public void Dispose()
+        {
+            HardeStop();
         }
 
         public enum State

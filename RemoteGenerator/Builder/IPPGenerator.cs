@@ -6,6 +6,8 @@ namespace RemoteGenerator.Builder
     interface IPpGenerator
     {
         IEnumerable<WachtrijRegel> Wachtrij { get; }
-        WachtrijRegel NieuweWachtrijRegel(Liturgie opBasisVanLiturgie);
+        IEnumerable<WachtrijRegel> Gereed { get; }
+        WachtrijRegel NieuweWachtrijRegel(Instellingen gebruikInstellingen);
+        void UpdateWachtrijRegel(Token voorToken, Liturgie liturgie);
     }
 }

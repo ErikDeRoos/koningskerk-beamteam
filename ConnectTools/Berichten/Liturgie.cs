@@ -14,7 +14,5 @@ namespace ConnectTools.Berichten
         public string Collecte2 { get; set; }
         public string Lezen { get; set; }
         public string Tekst { get; set; }
-        public byte[] TemplateTheme { get; set; }
-        public byte[] TemplateLiederen { get; set; }
     }
 }

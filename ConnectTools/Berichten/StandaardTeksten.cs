@@ -11,5 +11,7 @@ namespace ConnectTools.Berichten
         public string Lezen { get; set; }
         public string Tekst { get; set; }
         public string Liturgie { get; set; }
+        public string LiturgieLezen { get; set; }
+        public string LiturgieTekst { get; set; }
     }
 }

@@ -65,6 +65,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Builder\IPpGenerator.cs" />
+    <Compile Include="Builder\LiturgieRegels\LiturgieContent.cs" />
+    <Compile Include="Builder\LiturgieRegels\LiturgieDisplay.cs" />
+    <Compile Include="Builder\LiturgieRegels\LiturgieRegel.cs" />
     <Compile Include="Builder\PpGenerator.cs" />
     <Compile Include="Builder\WachtrijRegel.cs" />
     <Compile Include="Form1.cs">
@@ -121,6 +124,10 @@
     <ProjectReference Include="..\ISlideBuilder\ISlideBuilder.csproj">
       <Project>{4ce33a64-db90-489b-9d01-99a88f24f2f7}</Project>
       <Name>ISlideBuilder</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tools\Tools.csproj">
+      <Project>{4fcc4de1-8d80-43a3-b422-4add6410e2ae}</Project>
+      <Name>Tools</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -11,14 +11,21 @@ namespace RemoteGenerator.WCF
         [Dependency]
         internal IPpGenerator Generator { get; set; }
 
-        public Token StartConnectie(Liturgie metLiturgie)
+        public Token StartConnectie(Instellingen gebruikInstellingen)
         {
-            return Generator.NieuweWachtrijRegel(metLiturgie).Token;
+            return Generator.NieuweWachtrijRegel(gebruikInstellingen).Token;
+        }
+
+        public void StartGenereren(Token token, Liturgie metLiturgie)
+        {
+            Generator.UpdateWachtrijRegel(token, metLiturgie);
         }
 
         public Voortgang CheckVoortgang(Token token)
         {
             var item = Generator.Wachtrij.FirstOrDefault(w => w.Token.ID == token.ID);
+            if (item == null)
+                item = Generator.Gereed.FirstOrDefault(w => w.Token.ID == token.ID);
             if (item == null)
                 return null;
             return item.Voortgang;
@@ -26,10 +33,10 @@ namespace RemoteGenerator.WCF
 
         public byte[] DownloadResultaat(Token token)
         {
-            var item = Generator.Wachtrij.FirstOrDefault(w => w.Token.ID == token.ID);
-            if (item == null || !item.Voortgang.Gereed)
+            var item = Generator.Gereed.FirstOrDefault(w => w.Token.ID == token.ID);
+            if (item == null || item.Voortgang.VolledigMislukt)
                 return null;
-            return item.Resultaat;
+            return System.IO.File.ReadAllBytes(item.ResultaatOpgeslagenOp);
         }
     }
 }

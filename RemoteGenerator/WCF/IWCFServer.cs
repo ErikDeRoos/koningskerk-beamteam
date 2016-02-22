@@ -7,8 +7,10 @@ namespace RemoteGenerator.WCF
     public interface IWCFServer
     {
         [OperationContract]
-        Token StartConnectie(Liturgie metLiturgie);
+        Token StartConnectie(Instellingen gebruikInstellingen);
 
+        [OperationContract]
+        void StartGenereren(Token token, Liturgie metLiturgie);
         [OperationContract]
         Voortgang CheckVoortgang(Token token);
 
