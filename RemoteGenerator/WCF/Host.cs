@@ -1,6 +1,6 @@
-﻿using System;
+﻿using ConnectTools;
+using System;
 using System.ServiceModel;
-using System.Threading;
 
 namespace RemoteGenerator.WCF
 {

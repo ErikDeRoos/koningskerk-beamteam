@@ -80,8 +80,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WCF\Host.cs" />
     <Compile Include="WCF\IHost.cs" />
-    <Compile Include="WCF\IWCFServer.cs" />
     <Compile Include="WCF\WCFServer.cs" />
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

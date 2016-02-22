@@ -1,8 +1,8 @@
-﻿using System;
-using ConnectTools.Berichten;
+﻿using ConnectTools.Berichten;
 using RemoteGenerator.Builder;
 using Microsoft.Practices.Unity;
 using System.Linq;
+using ConnectTools;
 
 namespace RemoteGenerator.WCF
 {

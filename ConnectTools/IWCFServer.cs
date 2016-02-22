@@ -1,7 +1,7 @@
 ﻿using ConnectTools.Berichten;
 using System.ServiceModel;
 
-namespace RemoteGenerator.WCF
+namespace ConnectTools
 {
     [ServiceContract]
     public interface IWCFServer
