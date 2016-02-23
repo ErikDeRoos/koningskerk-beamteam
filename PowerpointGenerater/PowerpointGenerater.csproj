@@ -102,6 +102,7 @@
     </Reference>
     <Reference Include="System.DirectoryServices" />
     <Reference Include="System.IO.Compression" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -121,6 +122,7 @@
     <Compile Include="Database\IZipArchiveDirectory.cs" />
     <Compile Include="Database\FileEngine.cs" />
     <Compile Include="Database\FileEngineSetSettings.cs" />
+    <Compile Include="Powerpoint\RemotePowerpointClient.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -216,6 +218,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ConnectTools\ConnectTools.csproj">
+      <Project>{00ef486e-9338-4978-97ef-1a165498e9c8}</Project>
+      <Name>ConnectTools</Name>
+    </ProjectReference>
     <ProjectReference Include="..\IDatabase\IDatabase.csproj">
       <Project>{318647d0-b6bb-410e-a547-628049eadb9d}</Project>
       <Name>IDatabase</Name>
@@ -232,6 +238,10 @@
       <Project>{4ce33a64-db90-489b-9d01-99a88f24f2f7}</Project>
       <Name>ISlideBuilder</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Tools\Tools.csproj">
+      <Project>{4fcc4de1-8d80-43a3-b422-4add6410e2ae}</Project>
+      <Name>Tools</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Powerpoint-Overlay-icon.ico">
@@ -244,7 +254,11 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(SolutionDir)lib\PowerpointWrapper" "$(TargetDir)" /Y /F /I /D /S</PostBuildEvent>
+    <PostBuildEvent>xcopy "$(SolutionDir)lib\PowerpointWrapper" "$(TargetDir)" /Y /F /I /D /S
+xcopy "$(SolutionDir)lib\RemoteGeneratorConnect" "$(TargetDir)" /Y /F /I /D /S</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>xcopy "$(SolutionDir)lib\RemoteGeneratorConnect\*.*" "$(TargetDir)" /Y /F /I /D /S</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

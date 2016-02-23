@@ -2,25 +2,16 @@
 
 namespace ISettings
 {
-    public interface IInstellingen
+    public interface IInstellingen : IInstellingenBase
     {
         string Databasepad { get; }
         string Templateliederen { get; }
         string Templatetheme { get; }
-        int Regelsperslide { get; }
-        CommonImplementation.StandaardTeksten StandaardTeksten { get; }
-
         IEnumerable<IMapmask> Masks { get; }
 
         bool AddMask(IMapmask mask);
         void ClearMasks();
 
         string FullDatabasePath { get; }
-
-        string FullTemplatetheme { get; }
-
-        string FullTemplateliederen { get; }
-
-        string ToString();
     }
 }
