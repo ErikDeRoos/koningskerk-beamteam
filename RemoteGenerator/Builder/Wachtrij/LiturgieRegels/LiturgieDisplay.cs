@@ -1,6 +1,6 @@
 ﻿using ILiturgieDatabase;
 
-namespace RemoteGenerator.Builder.LiturgieRegels
+namespace RemoteGenerator.Builder.Wachtrij.LiturgieRegels
 {
     class LiturgieDisplay : ILiturgieDisplay
     {

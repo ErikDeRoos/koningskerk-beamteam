@@ -1,4 +1,5 @@
 ﻿using ConnectTools;
+using Microsoft.Practices.Unity;
 using System;
 using System.ServiceModel;
 
@@ -6,6 +7,8 @@ namespace RemoteGenerator.WCF
 {
     class Host : IHost, IDisposable
     {
+        internal static IUnityContainer DI;  // Dirty, maar WCF ondersteunt geen DI
+
         private string _address;
         private ServiceHost _serviceHost;
 
@@ -27,6 +30,12 @@ namespace RemoteGenerator.WCF
             }
             var binding = new NetTcpBinding();
             binding.TransferMode = TransferMode.Streamed;
+            binding.MaxBufferSize = 65536;  // 64kb
+            binding.MaxReceivedMessageSize = 67108864; // max 64mb
+            binding.OpenTimeout = new TimeSpan(0, 1, 0);
+            binding.CloseTimeout = new TimeSpan(0, 1, 0);
+            binding.ReceiveTimeout = new TimeSpan(0, 10, 0);
+            binding.SendTimeout = new TimeSpan(0, 10, 0);
             _serviceHost.AddServiceEndpoint(typeof(IWCFServer), binding, baseAddress);
             _serviceHost.Open();
         }

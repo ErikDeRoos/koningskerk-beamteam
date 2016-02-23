@@ -8,10 +8,14 @@ namespace ConnectTools
     public interface IWCFServer
     {
         [OperationContract]
-        Token StartConnectie(Instellingen gebruikInstellingen);
+        Token StartConnectie(Instellingen gebruikInstellingen, Liturgie metLiturgie);
 
         [OperationContract]
-        void StartGenereren(Token token, Liturgie metLiturgie);
+        void ToevoegenBestand(SendFile file);
+
+        [OperationContract]
+        Voortgang StartGenereren(Token token);
+
         [OperationContract]
         Voortgang CheckVoortgang(Token token);
 

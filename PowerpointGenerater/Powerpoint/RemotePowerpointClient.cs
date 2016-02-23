@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using ConnectTools.Berichten;
 using System.Linq;
 using System.IO;
-using System.Text;
 using System.Threading;
 using Tools;
 
@@ -19,35 +18,41 @@ namespace PowerpointGenerater.Powerpoint
         private int _slideteller = 0;
         private int _slidesGemist = 0;
         private bool _stop;
-        private ConnectieState _state = ConnectieState.Leeg;
+        private ConnectieState _state = ConnectieState.MaakConnectie;
 
         private IWCFServer _proxy;
         private Token _token;
         private string _opslaanAls;
         private Instellingen _verzendInstellingen;
         private Liturgie _verzendLiturgie;
-        private List<Stream> _streams;
+        private List<StreamTokenHolder> _streams;
 
         public Action<Status, string, int?> StatusWijziging { get; set; }
         public Action<int, int, int> Voortgang { get; set; }
 
         public RemotePowerpointClient(string endpoint)
         {
-            _streams = new List<Stream>();
+            _streams = new List<StreamTokenHolder>();
             var binding = new NetTcpBinding();
             binding.TransferMode = TransferMode.Streamed;
+            binding.MaxBufferSize = 65536;  // 64kb
+            binding.MaxReceivedMessageSize = 67108864; // max 64mb
+            binding.OpenTimeout = new TimeSpan(0, 1, 0);
+            binding.CloseTimeout = new TimeSpan(0, 1, 0);
+            binding.ReceiveTimeout = new TimeSpan(0, 10, 0);
+            binding.SendTimeout = new TimeSpan(0, 10, 0);
             var address = new EndpointAddress(endpoint);
             var factory = new ChannelFactory<IWCFServer>(binding, address);
             _proxy = factory.CreateChannel();
         }
 
-        public void PreparePresentation(IEnumerable<ILiturgieRegel> liturgie, string voorganger, string collecte1, string collecte2, string lezen, string tekst, IInstellingen gebruikInstellingen, string opslaanAls)
+        public void PreparePresentation(IEnumerable<ILiturgieRegel> liturgie, string voorganger, string collecte1, string collecte2, string lezen, string tekst, IInstellingenBase gebruikInstellingen, string opslaanAls)
         {
             _verzendInstellingen = new Instellingen()
             {
                 Regelsperslide = gebruikInstellingen.Regelsperslide,
-                TemplateLiederenBestand = new FileStream(gebruikInstellingen.FullTemplateliederen, FileMode.Open, FileAccess.Read),
-                TemplateThemeBestand = new FileStream(gebruikInstellingen.FullTemplatetheme, FileMode.Open, FileAccess.Read),
+                TemplateLiederenBestand = AddStream(gebruikInstellingen.FullTemplateliederen),
+                TemplateThemeBestand = AddStream(gebruikInstellingen.FullTemplatetheme),
                 StandaardTeksten = new StandaardTeksten()
                 {
                     Volgende = gebruikInstellingen.StandaardTeksten.Volgende,
@@ -81,7 +86,7 @@ namespace PowerpointGenerater.Powerpoint
                         Nummer = c.Nummer,
                         InhoudType = c.InhoudType == ILiturgieDatabase.InhoudType.Tekst ? ConnectTools.Berichten.InhoudType.Tekst : ConnectTools.Berichten.InhoudType.PptLink,
                         InhoudTekst = c.InhoudType == ILiturgieDatabase.InhoudType.Tekst ? c.Inhoud : null,
-                        InhoudBestand = c.InhoudType == ILiturgieDatabase.InhoudType.PptLink ? new FileStream(c.Inhoud, FileMode.Open, FileAccess.Read) : null
+                        InhoudBestand = c.InhoudType == ILiturgieDatabase.InhoudType.PptLink ? AddStream(c.Inhoud) : null
                     }),
                     Display = new LiturgieRegelDisplay()
                     {
@@ -102,33 +107,34 @@ namespace PowerpointGenerater.Powerpoint
         public void GeneratePresentation()
         {
             StatusWijziging?.Invoke(Status.Gestart, null, null);
-            var liturgieGrootte = _verzendLiturgie.Regels.Count();
-            var aantalStappen = liturgieGrootte + 3;
 
             try
             {
-                while (_state != ConnectieState.PresentatieOntvangen)
+                while (_state != ConnectieState.GereedPresentatieOntvangen)
                 {
                     switch (_state)
                     {
-                        case ConnectieState.Leeg:
+                        case ConnectieState.MaakConnectie:
                             _state = MaakConnectie();
                             break;
-                        case ConnectieState.ConnectieBeschikbaar:
-                            _state = VerzendVerzoek();
+                        case ConnectieState.VerzendBestanden:
+                            _state = VerzendBestand();
                             break;
-                        case ConnectieState.VerzoekVerzonden:
+                        case ConnectieState.StartGenereren:
+                            _state = StartGenereren();
+                            break;
+                        case ConnectieState.WachtOpGereed:
                             _state = CheckStatus();
                             break;
                     }
-                    Voortgang?.Invoke(0, aantalStappen, (int)_state + _slideteller);
+                    Voortgang?.Invoke(0, VoortgangTotaal(), VoortgangBij());
                     if (_stop)
                         break;
-                    if (_state == ConnectieState.PresentatieOntvangen) {
+                    if (_state == ConnectieState.GereedPresentatieOntvangen) {
                         StatusWijziging?.Invoke(Status.StopGoed, null, _slidesGemist);
                         break;
                     }
-                    else if (_state == ConnectieState.PresentatieMislukt) {
+                    else if (_state == ConnectieState.GereedPresentatieMislukt) {
                         StatusWijziging?.Invoke(Status.StopFout, "Genereren is mislukt", null);
                         break;
                     }
@@ -142,46 +148,94 @@ namespace PowerpointGenerater.Powerpoint
                 SluitAlles();
             }
         }
-        
-        private ConnectieState MaakConnectie()
+
+        private int VoortgangTotaal()
         {
-            _token = _proxy.StartConnectie(_verzendInstellingen);
-            if (_token == null)
-                return ConnectieState.PresentatieMislukt;
-            return ConnectieState.ConnectieBeschikbaar;
+            return _verzendLiturgie.Regels.Count() + 3 + _streams.Count;
+        }
+        private int VoortgangBij()
+        {
+            return _slideteller + (int)_state + _streams.Count(s => s.Verzonden);
         }
 
-        private ConnectieState VerzendVerzoek()
+        private ConnectieState MaakConnectie()
         {
-            _proxy.StartGenereren(_token, _verzendLiturgie);
+            _token = _proxy.StartConnectie(_verzendInstellingen, _verzendLiturgie);
+            if (_token == null)
+            {
+                FoutmeldingSchrijver.Log("Kon connectie niet maken met remote server");
+                return ConnectieState.GereedPresentatieMislukt;
+            }
+            return ConnectieState.VerzendBestanden;
+        }
+
+        private ConnectieState VerzendBestand()
+        {
+            var verzendStream = _streams.FirstOrDefault(s => !s.Verzonden);
+            if (verzendStream == null)
+                return ConnectieState.StartGenereren;
+            _proxy.ToevoegenBestand(new SendFile() { Token = _token, FileToken = new StreamToken() { ID = verzendStream.ID }, FileByteStream = verzendStream.Stream });
+            verzendStream.SetVerzonden();
+            return _streams.All(s => s.Verzonden) ? ConnectieState.StartGenereren : ConnectieState.VerzendBestanden;
+        }
+
+        private ConnectieState StartGenereren()
+        {
+            var voortgang = _proxy.StartGenereren(_token);
             DisposeStreams();
-            return ConnectieState.VerzoekVerzonden;
+            if (voortgang == null)
+            {
+                FoutmeldingSchrijver.Log("Kon genereren niet starten op remote server");
+                return ConnectieState.GereedPresentatieMislukt;
+            }
+            return ConnectieState.WachtOpGereed;
         }
 
         private ConnectieState CheckStatus()
         {
             var voortgang = _proxy.CheckVoortgang(_token);
-            if (voortgang.VolledigMislukt)
-                return ConnectieState.PresentatieMislukt;
+            if (voortgang == null)
+            {
+                FoutmeldingSchrijver.Log("Kon geen voortgang ontvangen van remote server");
+                return ConnectieState.GereedPresentatieMislukt;
+            }
+            else if (voortgang.VolledigMislukt)
+            {
+                FoutmeldingSchrijver.Log("Generatie mislukt op remote server");
+                return ConnectieState.GereedPresentatieMislukt;
+            }
             _slideteller = voortgang.BijIndex;
             _slidesGemist = voortgang.MislukteSlides;
             if (voortgang.Gereed)
             {
-                var copyTo = new FileStream(_opslaanAls, FileMode.Create);
-                _proxy.DownloadResultaat(_token).CopyTo(copyTo);
-                copyTo.Close();
-                return ConnectieState.PresentatieOntvangen;
+                using (var copyTo = new FileStream(_opslaanAls, FileMode.Create))
+                {
+                    var resultaatStream = _proxy.DownloadResultaat(_token);
+                    if (resultaatStream == null)
+                    {
+                        FoutmeldingSchrijver.Log("Kon geen presentatie vinden op remote server");
+                        return ConnectieState.GereedPresentatieMislukt;
+                    }
+                    resultaatStream.CopyTo(copyTo);
+                    copyTo.Close();
+                }
+                return ConnectieState.GereedPresentatieOntvangen;
             }
-            return ConnectieState.VerzoekVerzonden;
+            return ConnectieState.WachtOpGereed;
+        }
+
+        private StreamToken AddStream(string file)
+        {
+            var token = new StreamTokenHolder(file);
+            _streams.Add(token);
+            return new StreamToken() { ID = token.ID, };
         }
 
         private void DisposeStreams()
         {
-            Stream stream = null;
-            while((stream = _streams.FirstOrDefault()) != null)
+            foreach(var stream in _streams)
             {
-                stream.Dispose();
-                _streams.Remove(stream);
+                stream.DisposeStream();
             }
         }
 
@@ -201,11 +255,36 @@ namespace PowerpointGenerater.Powerpoint
 
         public enum ConnectieState
         {
-            Leeg,
-            ConnectieBeschikbaar,
-            VerzoekVerzonden,
-            PresentatieOntvangen,
-            PresentatieMislukt
+            MaakConnectie,
+            StartGenereren,
+            VerzendBestanden,
+            WachtOpGereed,
+            GereedPresentatieOntvangen,
+            GereedPresentatieMislukt
+        }
+
+        class StreamTokenHolder
+        {
+            public Stream Stream { get; private set; }
+            public Guid ID { get; private set; }
+            public bool Verzonden { get; private set; }
+
+            public StreamTokenHolder(string url)
+            {
+                Stream = new FileStream(url, FileMode.Open, FileAccess.Read);
+                ID = Guid.NewGuid();
+            }
+            public void SetVerzonden()
+            {
+                Verzonden = true;
+            }
+            public void DisposeStream()
+            {
+                if (Stream == null)
+                    return;
+                Stream.Dispose();
+                Stream = null;
+            }
         }
     }
 }

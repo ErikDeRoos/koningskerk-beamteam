@@ -49,6 +49,8 @@
     <Compile Include="Berichten\LiturgieRegelContent.cs" />
     <Compile Include="Berichten\LiturgieRegelDisplay.cs" />
     <Compile Include="Berichten\Mask.cs" />
+    <Compile Include="Berichten\SendFile.cs" />
+    <Compile Include="Berichten\StreamToken.cs" />
     <Compile Include="Berichten\Voortgang.cs" />
     <Compile Include="Berichten\StandaardTeksten.cs" />
     <Compile Include="Berichten\Token.cs" />

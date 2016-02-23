@@ -3,6 +3,7 @@ using ILiturgieDatabase;
 using ISettings;
 using ISlideBuilder;
 using Microsoft.Practices.Unity;
+using RemoteGenerator.Builder.Wachtrij;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,7 +24,7 @@ namespace RemoteGenerator.Builder
         private string _collecte2;
         private string _lezen;
         private string _tekst;
-        private IInstellingen _instellingen;
+        private IInstellingenBase _instellingen;
         private string _opslaanAls;
         private readonly IUnityContainer _di;
 
@@ -48,17 +49,20 @@ namespace RemoteGenerator.Builder
             _wachtrij = new List<WachtrijRegel>();
             _verwerkt = new List<WachtrijRegel>();
             _startThread = new Thread(PollVoorStart);
+            _startThread.Start();
         }
 
-        public WachtrijRegel NieuweWachtrijRegel(Instellingen metInstellingen)
+        public WachtrijRegel NieuweWachtrijRegel(ConnectTools.Berichten.Instellingen metInstellingen, ConnectTools.Berichten.Liturgie metLiturgie)
         {
             var regel = new WachtrijRegel()
             {
-                Instellingen = metInstellingen,
                 Voortgang = new Voortgang(),
                 Token = new Token() { ID = Guid.NewGuid() },
-                ToegevoegdOp = DateTime.Now
+                ToegevoegdOp = DateTime.Now,
+                Bestanden = new List<BestandStreamToken>()
             };
+            regel.Liturgie = new Wachtrij.Liturgie(metLiturgie, (new PrepareSaveToFileFactory(regel)).MaakBestandStreamToken);
+            regel.Instellingen = new Wachtrij.Instellingen(metInstellingen, (new PrepareSaveToFileFactory(regel)).MaakBestandStreamToken);
             lock (this)
             {
                 regel.Index = _wachtrij.Count() > 0 ? _wachtrij.Max(w => w.Index) + 1 : 1;
@@ -66,16 +70,30 @@ namespace RemoteGenerator.Builder
             }
             return regel;
         }
-        public void UpdateWachtrijRegel(Token vanToken, Liturgie gebruikliturgie)
+
+        public void UpdateWachtrijRegel(Token vanToken, Guid bestandToken, Stream toevoegenBestand)
         {
             WachtrijRegel regel;
             lock (this)
             {
                 regel = _wachtrij.FirstOrDefault(w => w.Token.ID == vanToken.ID);
-                if (regel == null || !MagUpdaten(regel, _bezigMetRegel) || regel.Liturgie != null)
+                if (regel == null || !MagUpdaten(regel, _bezigMetRegel))
                     return;
-                regel.Liturgie = gebruikliturgie;
+                var bestandStreamToken = regel.Bestanden.FirstOrDefault(t => t.ID == bestandToken && !t.Ontvangen);
+                if (bestandStreamToken == null)
+                    return;
+                bestandStreamToken.LinkOpFilesysteem = SaveToTempFile(toevoegenBestand);
             }
+        }
+        /// <summary>
+        /// Compleetheid check. Start niet echt maar checkt alleen.
+        /// </summary>
+        public Voortgang ProbeerTeStarten(Token vanToken)
+        {
+            var regel = _wachtrij.FirstOrDefault(w => w.Token.ID == vanToken.ID);
+            if (regel != null && IsRegelCompleet(regel))
+                return regel.Voortgang;
+            return null;
         }
 
         /// <summary>
@@ -86,7 +104,7 @@ namespace RemoteGenerator.Builder
             while (_startThread != null)
             {
                 Thread.Sleep(100);
-                if (_bezigMetRegel == null && _huidigeStatus == State.Geinitialiseerd)
+                if (_bezigMetRegel == null && (new[] { State.Onbekend, State.Geinitialiseerd }.Contains(_huidigeStatus)))
                 {
                     var volgendePresentatie = _wachtrij.FirstOrDefault(r => IsRegelCompleet(r));
                     if (volgendePresentatie != null)
@@ -108,9 +126,10 @@ namespace RemoteGenerator.Builder
 
         private static bool IsRegelCompleet(WachtrijRegel regel)
         {
-            return regel != null 
+            return regel != null
                 && regel.Instellingen != null
-                && regel.Liturgie != null;
+                && regel.Liturgie != null
+                && regel.Bestanden.All(b => b.Ontvangen);
         }
         private static bool MagUpdaten(WachtrijRegel regel, WachtrijRegel bezigMetRegel)
         {
@@ -121,43 +140,27 @@ namespace RemoteGenerator.Builder
 
         private void Start(WachtrijRegel regel)
         {
-            var instellingen = new ISettings.CommonImplementation.Instellingen()
-            {
-                Templateliederen = SaveToTempFile(regel.Instellingen.TemplateLiederenBestand),
-                Templatetheme = SaveToTempFile(regel.Instellingen.TemplateThemeBestand),
-                Regelsperslide = regel.Instellingen.Regelsperslide,
-                StandaardTeksten = new ISettings.CommonImplementation.StandaardTeksten()
-                {
-                    Volgende = regel.Instellingen.StandaardTeksten.Volgende,
-                    Voorganger = regel.Instellingen.StandaardTeksten.Voorganger,
-                    Collecte1 = regel.Instellingen.StandaardTeksten.Collecte1,
-                    Collecte2 = regel.Instellingen.StandaardTeksten.Collecte2,
-                    Collecte = regel.Instellingen.StandaardTeksten.Collecte,
-                    Lezen = regel.Instellingen.StandaardTeksten.Lezen,
-                    Tekst = regel.Instellingen.StandaardTeksten.Tekst,
-                    Liturgie = regel.Instellingen.StandaardTeksten.Liturgie,
-                    LiturgieLezen = regel.Instellingen.StandaardTeksten.LiturgieLezen,
-                    LiturgieTekst = regel.Instellingen.StandaardTeksten.LiturgieTekst,
-                }
-            };
-            var liturgie = regel.Liturgie.Regels.OrderBy(r => r.Index).Select(r => new LiturgieRegels.LiturgieRegel(r)).ToList();
             var opslaanAlsBestandsnaam = Path.GetTempFileName();
-            Initialiseer(liturgie, regel.Liturgie.Voorganger, regel.Liturgie.Collecte1, regel.Liturgie.Collecte2,
-                regel.Liturgie.Lezen, regel.Liturgie.Tekst, instellingen, opslaanAlsBestandsnaam);
+            Initialiseer(regel.Liturgie.LiturgieRegels, regel.Liturgie.Voorganger, regel.Liturgie.Collecte1, regel.Liturgie.Collecte2,
+                regel.Liturgie.Lezen, regel.Liturgie.Tekst, regel.Instellingen, opslaanAlsBestandsnaam);
             Start();
         }
 
-        private static string SaveToTempFile(Stream content)
+        private static string SaveToTempFile(Stream request)
         {
             var fileName = Path.GetTempFileName();
-            var copyTo = new FileStream(fileName, FileMode.Create);
-            content.CopyTo(copyTo);
-            copyTo.Close();
+            const int bufferSize = 2048;
+            byte[] buffer = new byte[bufferSize];
+            using (var outputStream = new FileStream(fileName, FileMode.Create, FileAccess.Write))
+            {
+                request.CopyTo(outputStream);
+                outputStream.Close();
+            }
             return fileName;
         }
 
         private StatusMelding Initialiseer(IEnumerable<ILiturgieRegel> liturgie, string voorganger, string collecte1, string collecte2, string lezen,
-          string tekst, IInstellingen instellingen, string opslaanAls)
+          string tekst, IInstellingenBase instellingen, string opslaanAls)
         {
             lock (this)
             {
@@ -242,7 +245,7 @@ namespace RemoteGenerator.Builder
 
         private void PresentatieVoortgangCallback(int lijstStart, int lijstEind, int bijItem)
         {
-            Voortgang(lijstStart, lijstEind, bijItem);
+            _bezigMetRegel.Voortgang.BijIndex = bijItem;
         }
         private void PresentatieStatusWijzigingCallback(Status nieuweStatus, string foutmelding = null, int? slidesGemist = null)
         {
@@ -252,10 +255,6 @@ namespace RemoteGenerator.Builder
                 Stop();
         }
 
-        private void Voortgang(int lijstStart, int lijstEind, int bijItem)
-        {
-            _bezigMetRegel.Voortgang.BijIndex = bijItem;
-        }
         private void GereedMelding(string opgeslagenAlsBestand = null, string foutmelding = null, int? slidesGemist = null)
         {
             if (opgeslagenAlsBestand != null && foutmelding == null)
@@ -324,6 +323,26 @@ namespace RemoteGenerator.Builder
             Geinitialiseerd,
             Gestart,
             AanHetStoppen,
+        }
+
+        class PrepareSaveToFileFactory
+        {
+            private WachtrijRegel _voorRegel;
+            public PrepareSaveToFileFactory(WachtrijRegel voorRegel)
+            {
+                _voorRegel = voorRegel;
+            }
+            public BestandStreamToken MaakBestandStreamToken(StreamToken voorBericht)
+            {
+                var token = new BestandStreamToken()
+                {
+                    ID = voorBericht.ID
+                };
+                var nieuweCollectie = new List<BestandStreamToken>(_voorRegel.Bestanden);
+                nieuweCollectie.Add(token);
+                _voorRegel.Bestanden = nieuweCollectie;
+                return token;
+            }
         }
 
         public class StatusMelding

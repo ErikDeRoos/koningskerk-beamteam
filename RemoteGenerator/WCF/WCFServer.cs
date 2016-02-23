@@ -12,14 +12,24 @@ namespace RemoteGenerator.WCF
         [Dependency]
         internal IPpGenerator Generator { get; set; }
 
-        public Token StartConnectie(Instellingen gebruikInstellingen)
+        public WCFServer()
         {
-            return Generator.NieuweWachtrijRegel(gebruikInstellingen).Token;
+            Host.DI.BuildUp(this);  // Dirty, maar WCF ondersteunt geen DI
         }
 
-        public void StartGenereren(Token token, Liturgie metLiturgie)
+        public Token StartConnectie(Instellingen gebruikInstellingen, Liturgie metLiturgie)
         {
-            Generator.UpdateWachtrijRegel(token, metLiturgie);
+            return Generator.NieuweWachtrijRegel(gebruikInstellingen, metLiturgie).Token;
+        }
+
+        public void ToevoegenBestand(SendFile file)
+        {
+            Generator.UpdateWachtrijRegel(file.Token, file.FileToken.ID, file.FileByteStream);
+        }
+
+        public Voortgang StartGenereren(Token token)
+        {
+            return Generator.ProbeerTeStarten(token);
         }
 
         public Voortgang CheckVoortgang(Token token)

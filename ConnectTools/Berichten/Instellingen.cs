@@ -7,8 +7,8 @@ namespace ConnectTools.Berichten
     {
         public int Regelsperslide { get; set; }
         public StandaardTeksten StandaardTeksten { get; set; }
-        public Stream TemplateThemeBestand { get; set; }
-        public Stream TemplateLiederenBestand { get; set; }
+        public StreamToken TemplateThemeBestand { get; set; }
+        public StreamToken TemplateLiederenBestand { get; set; }
 
     }
 }

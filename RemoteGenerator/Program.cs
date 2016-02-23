@@ -23,6 +23,7 @@ namespace RemoteGenerator
             container.BuildUp(startupForm);
             startupForm.Opstarten(args.Length >= 1 ? args[0] : null);
 
+            Host.DI = container;  // Dirty, maar WCF ondersteunt geen DI
             container.Resolve<IHost>().Start();
             Application.Run(startupForm);
             container.Resolve<IHost>().Stop();

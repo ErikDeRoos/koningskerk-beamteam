@@ -5,7 +5,6 @@ using System.Linq;
 using ILiturgieDatabase;
 using ISettings;
 using ISlideBuilder;
-using System.Text;
 using NetOffice.PowerPointApi;
 using NetOffice.OfficeApi.Enums;
 using NetOffice.PowerPointApi.Enums;
@@ -31,13 +30,13 @@ namespace mppt
         private string _collecte2;
         private string _lezen;
         private string _tekst;
-        private IInstellingen _instellingen;
+        private IInstellingenBase _instellingen;
         private string _opslaanAls;
 
         public Action<int, int, int> Voortgang { get; set; }
         public Action<Status, string, int?> StatusWijziging { get; set; }
 
-        public void PreparePresentation(IEnumerable<ILiturgieRegel> liturgie, string voorganger, string collecte1, string collecte2, string lezen, string tekst, IInstellingen gebruikInstellingen, string opslaanAls)
+        public void PreparePresentation(IEnumerable<ILiturgieRegel> liturgie, string voorganger, string collecte1, string collecte2, string lezen, string tekst, IInstellingenBase gebruikInstellingen, string opslaanAls)
         {
             _liturgie = liturgie;
             _voorganger = voorganger;

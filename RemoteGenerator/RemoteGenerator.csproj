@@ -64,12 +64,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Builder\Wachtrij\BestandStreamToken.cs" />
     <Compile Include="Builder\IPpGenerator.cs" />
-    <Compile Include="Builder\LiturgieRegels\LiturgieContent.cs" />
-    <Compile Include="Builder\LiturgieRegels\LiturgieDisplay.cs" />
-    <Compile Include="Builder\LiturgieRegels\LiturgieRegel.cs" />
+    <Compile Include="Builder\Wachtrij\Instellingen.cs" />
+    <Compile Include="Builder\Wachtrij\Liturgie.cs" />
+    <Compile Include="Builder\Wachtrij\LiturgieRegels\LiturgieContent.cs" />
+    <Compile Include="Builder\Wachtrij\LiturgieRegels\LiturgieDisplay.cs" />
+    <Compile Include="Builder\Wachtrij\LiturgieRegels\LiturgieRegel.cs" />
     <Compile Include="Builder\PpGenerator.cs" />
-    <Compile Include="Builder\WachtrijRegel.cs" />
+    <Compile Include="Builder\Wachtrij\WachtrijRegel.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

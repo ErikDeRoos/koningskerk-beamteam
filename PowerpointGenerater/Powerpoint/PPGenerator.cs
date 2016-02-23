@@ -82,9 +82,10 @@ namespace PowerpointGenerater.Powerpoint
                 {
                     _powerpoint = _di.Resolve<IBuilder>();
                 }
-                catch (ResolutionFailedException) { }
-                if (_powerpoint == null)
+                catch
+                {
                     return new StatusMelding(_huidigeStatus, "Kan powerpoint niet starten", "Powerpoint koppeling kon niet geladen worden");
+                }
                 _powerpoint.StatusWijziging = PresentatieStatusWijzigingCallback;
                 _powerpoint.Voortgang = PresentatieVoortgangCallback;
                 _gereedMetFout = null;

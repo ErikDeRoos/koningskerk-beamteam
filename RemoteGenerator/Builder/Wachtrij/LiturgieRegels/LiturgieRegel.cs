@@ -1,8 +1,9 @@
 ﻿using ILiturgieDatabase;
 using System.Linq;
 using System.Collections.Generic;
+using System;
 
-namespace RemoteGenerator.Builder.LiturgieRegels
+namespace RemoteGenerator.Builder.Wachtrij.LiturgieRegels
 {
     class LiturgieRegel : ILiturgieRegel
     {
@@ -16,9 +17,9 @@ namespace RemoteGenerator.Builder.LiturgieRegels
 
         public bool VerwerkenAlsSlide { get; set; }
 
-        public LiturgieRegel(ConnectTools.Berichten.LiturgieRegel vanRegel)
+        public LiturgieRegel(ConnectTools.Berichten.LiturgieRegel vanRegel, Func<ConnectTools.Berichten.StreamToken, BestandStreamToken> bestandStreamTokenFactory)
         {
-            Content = vanRegel.Content?.Select(c => new LiturgieContent(c)).ToList();
+            Content = vanRegel.Content?.Select(c => new LiturgieContent(c, bestandStreamTokenFactory)).ToList();
             Display = new LiturgieDisplay(vanRegel.Display);
             TonenInOverzicht = vanRegel.TonenInOverzicht;
             TonenInVolgende = vanRegel.TonenInVolgende;

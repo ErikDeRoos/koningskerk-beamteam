@@ -20,6 +20,6 @@ namespace ConnectTools.Berichten
         /// <summary>
         /// De inhoud. De actuele tekst bij tekst, de ppt bij een ppt.
         /// </summary>
-        public Stream InhoudBestand { get; set; }
+        public StreamToken InhoudBestand { get; set; }
     }
 }
