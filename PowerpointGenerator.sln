@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerpointGenerator", "PowerpointGenerater\PowerpointGenerator.csproj", "{6B51E79C-9BED-457F-BF11-889863FF5BAA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerpointGenerator", "PowerpointGenerator\PowerpointGenerator.csproj", "{6B51E79C-9BED-457F-BF11-889863FF5BAA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicrosoftPowerpointWrapper", "MicrosoftPowerpointWrapper\MicrosoftPowerpointWrapper.csproj", "{D65AA3EF-0086-4CA5-802E-A2BB2E3BED20}"
 EndProject

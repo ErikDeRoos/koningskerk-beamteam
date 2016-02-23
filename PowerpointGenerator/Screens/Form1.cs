@@ -1,7 +1,7 @@
 ﻿using ILiturgieDatabase;
 using ISettings;
 using Microsoft.Practices.Unity;
-using PowerpointGenerater.Powerpoint;
+using PowerpointGenerator.Powerpoint;
 using PowerpointGenerator.Database;
 using System;
 using System.Diagnostics;
@@ -9,7 +9,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using PowerpointGenerater.Properties;
+using PowerpointGenerator.Properties;
 
 namespace PowerpointGenerator
 {

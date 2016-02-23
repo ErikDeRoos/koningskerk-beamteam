@@ -34,7 +34,7 @@
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Image = global::PowerpointGenerater.Properties.Resources.visitekaartje;
+            this.pictureBox1.Image = global::PowerpointGenerator.Properties.Resources.visitekaartje;
             this.pictureBox1.Location = new System.Drawing.Point(0, 0);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(672, 385);

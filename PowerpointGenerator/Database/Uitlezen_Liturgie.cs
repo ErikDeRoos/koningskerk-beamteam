@@ -1,7 +1,7 @@
 ﻿using IDatabase;
 using ILiturgieDatabase;
 using ISettings;
-using PowerpointGenerater.Database;
+using PowerpointGenerator.Database;
 using System;
 using System.Collections.Generic;
 using System.IO;
