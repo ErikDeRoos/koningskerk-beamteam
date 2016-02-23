@@ -26,13 +26,16 @@ namespace PowerpointGenerater.Powerpoint
         private string _opslaanAls;
         private Instellingen _verzendInstellingen;
         private Liturgie _verzendLiturgie;
+        private List<Stream> _streams;
 
         public Action<Status, string, int?> StatusWijziging { get; set; }
         public Action<int, int, int> Voortgang { get; set; }
 
         public RemotePowerpointClient(string endpoint)
         {
+            _streams = new List<Stream>();
             var binding = new NetTcpBinding();
+            binding.TransferMode = TransferMode.Streamed;
             var address = new EndpointAddress(endpoint);
             var factory = new ChannelFactory<IWCFServer>(binding, address);
             _proxy = factory.CreateChannel();
@@ -43,8 +46,8 @@ namespace PowerpointGenerater.Powerpoint
             _verzendInstellingen = new Instellingen()
             {
                 Regelsperslide = gebruikInstellingen.Regelsperslide,
-                TemplateLiederen = File.ReadAllBytes(gebruikInstellingen.FullTemplateliederen),
-                TemplateTheme = File.ReadAllBytes(gebruikInstellingen.FullTemplatetheme),
+                TemplateLiederenBestand = new FileStream(gebruikInstellingen.FullTemplateliederen, FileMode.Open, FileAccess.Read),
+                TemplateThemeBestand = new FileStream(gebruikInstellingen.FullTemplatetheme, FileMode.Open, FileAccess.Read),
                 StandaardTeksten = new StandaardTeksten()
                 {
                     Volgende = gebruikInstellingen.StandaardTeksten.Volgende,
@@ -77,7 +80,8 @@ namespace PowerpointGenerater.Powerpoint
                     {
                         Nummer = c.Nummer,
                         InhoudType = c.InhoudType == ILiturgieDatabase.InhoudType.Tekst ? ConnectTools.Berichten.InhoudType.Tekst : ConnectTools.Berichten.InhoudType.PptLink,
-                        Inhoud = c.InhoudType == ILiturgieDatabase.InhoudType.Tekst ? Encoding.Unicode.GetBytes(c.Inhoud) : File.ReadAllBytes(c.Inhoud)
+                        InhoudTekst = c.InhoudType == ILiturgieDatabase.InhoudType.Tekst ? c.Inhoud : null,
+                        InhoudBestand = c.InhoudType == ILiturgieDatabase.InhoudType.PptLink ? new FileStream(c.Inhoud, FileMode.Open, FileAccess.Read) : null
                     }),
                     Display = new LiturgieRegelDisplay()
                     {
@@ -150,6 +154,7 @@ namespace PowerpointGenerater.Powerpoint
         private ConnectieState VerzendVerzoek()
         {
             _proxy.StartGenereren(_token, _verzendLiturgie);
+            DisposeStreams();
             return ConnectieState.VerzoekVerzonden;
         }
 
@@ -162,10 +167,22 @@ namespace PowerpointGenerater.Powerpoint
             _slidesGemist = voortgang.MislukteSlides;
             if (voortgang.Gereed)
             {
-                File.WriteAllBytes(_opslaanAls, _proxy.DownloadResultaat(_token));
+                var copyTo = new FileStream(_opslaanAls, FileMode.Create);
+                _proxy.DownloadResultaat(_token).CopyTo(copyTo);
+                copyTo.Close();
                 return ConnectieState.PresentatieOntvangen;
             }
             return ConnectieState.VerzoekVerzonden;
+        }
+
+        private void DisposeStreams()
+        {
+            Stream stream = null;
+            while((stream = _streams.FirstOrDefault()) != null)
+            {
+                stream.Dispose();
+                _streams.Remove(stream);
+            }
         }
 
         public void Stop()
@@ -175,6 +192,7 @@ namespace PowerpointGenerater.Powerpoint
 
         private void SluitAlles()
         {
+            DisposeStreams();
         }
         public void Dispose()
         {

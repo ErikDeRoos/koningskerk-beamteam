@@ -123,8 +123,8 @@ namespace RemoteGenerator.Builder
         {
             var instellingen = new ISettings.CommonImplementation.Instellingen()
             {
-                Templateliederen = SaveToTempFile(regel.Instellingen.TemplateLiederen),
-                Templatetheme = SaveToTempFile(regel.Instellingen.TemplateTheme),
+                Templateliederen = SaveToTempFile(regel.Instellingen.TemplateLiederenBestand),
+                Templatetheme = SaveToTempFile(regel.Instellingen.TemplateThemeBestand),
                 Regelsperslide = regel.Instellingen.Regelsperslide,
                 StandaardTeksten = new ISettings.CommonImplementation.StandaardTeksten()
                 {
@@ -147,10 +147,12 @@ namespace RemoteGenerator.Builder
             Start();
         }
 
-        private static string SaveToTempFile(byte[] content)
+        private static string SaveToTempFile(Stream content)
         {
             var fileName = Path.GetTempFileName();
-            File.WriteAllBytes(fileName, content);
+            var copyTo = new FileStream(fileName, FileMode.Create);
+            content.CopyTo(copyTo);
+            copyTo.Close();
             return fileName;
         }
 

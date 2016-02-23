@@ -1,4 +1,6 @@
 ﻿
+using System.IO;
+
 namespace ConnectTools.Berichten
 {
     public class LiturgieRegelContent
@@ -14,6 +16,10 @@ namespace ConnectTools.Berichten
         /// <summary>
         /// De inhoud. De actuele tekst bij tekst, de ppt bij een ppt.
         /// </summary>
-        public byte[] Inhoud { get; set; }
+        public string InhoudTekst { get; set; }
+        /// <summary>
+        /// De inhoud. De actuele tekst bij tekst, de ppt bij een ppt.
+        /// </summary>
+        public Stream InhoudBestand { get; set; }
     }
 }

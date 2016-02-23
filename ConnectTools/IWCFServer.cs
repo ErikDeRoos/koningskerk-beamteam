@@ -1,4 +1,5 @@
 ﻿using ConnectTools.Berichten;
+using System.IO;
 using System.ServiceModel;
 
 namespace ConnectTools
@@ -15,6 +16,6 @@ namespace ConnectTools
         Voortgang CheckVoortgang(Token token);
 
         [OperationContract]
-        byte[] DownloadResultaat(Token token);
+        Stream DownloadResultaat(Token token);
     }
 }

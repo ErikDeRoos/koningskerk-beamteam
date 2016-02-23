@@ -3,6 +3,7 @@ using RemoteGenerator.Builder;
 using Microsoft.Practices.Unity;
 using System.Linq;
 using ConnectTools;
+using System.IO;
 
 namespace RemoteGenerator.WCF
 {
@@ -31,12 +32,12 @@ namespace RemoteGenerator.WCF
             return item.Voortgang;
         }
 
-        public byte[] DownloadResultaat(Token token)
+        public Stream DownloadResultaat(Token token)
         {
             var item = Generator.Verwerkt.FirstOrDefault(w => w.Token.ID == token.ID);
             if (item == null || item.Voortgang.VolledigMislukt)
                 return null;
-            return System.IO.File.ReadAllBytes(item.ResultaatOpgeslagenOp);
+            return new FileStream(item.ResultaatOpgeslagenOp, FileMode.Open, FileAccess.Read);
         }
     }
 }

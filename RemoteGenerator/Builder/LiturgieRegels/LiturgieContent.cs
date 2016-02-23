@@ -20,11 +20,13 @@ namespace RemoteGenerator.Builder.LiturgieRegels
                 case ConnectTools.Berichten.InhoudType.PptLink:
                     InhoudType = InhoudType.PptLink;
                     Inhoud = Path.GetTempFileName();
-                    File.WriteAllBytes(Inhoud, vanContent.Inhoud);
+                    var copyTo = new FileStream(Inhoud, FileMode.Create);
+                    vanContent.InhoudBestand.CopyTo(copyTo);
+                    copyTo.Close();
                     break;
                 case ConnectTools.Berichten.InhoudType.Tekst:
                     InhoudType = InhoudType.Tekst;
-                    Inhoud = Encoding.Unicode.GetString(vanContent.Inhoud);
+                    Inhoud = vanContent.InhoudTekst;
                     break;
                 default:
                     throw new NotImplementedException();

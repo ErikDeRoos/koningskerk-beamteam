@@ -26,6 +26,7 @@ namespace RemoteGenerator.WCF
                 _serviceHost = new ServiceHost(typeof(WCFServer), baseAddress);
             }
             var binding = new NetTcpBinding();
+            binding.TransferMode = TransferMode.Streamed;
             _serviceHost.AddServiceEndpoint(typeof(IWCFServer), binding, baseAddress);
             _serviceHost.Open();
         }

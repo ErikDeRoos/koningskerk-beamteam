@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 
 namespace ConnectTools.Berichten
 {
@@ -6,8 +7,8 @@ namespace ConnectTools.Berichten
     {
         public int Regelsperslide { get; set; }
         public StandaardTeksten StandaardTeksten { get; set; }
-        public byte[] TemplateTheme { get; set; }
-        public byte[] TemplateLiederen { get; set; }
+        public Stream TemplateThemeBestand { get; set; }
+        public Stream TemplateLiederenBestand { get; set; }
 
     }
 }
