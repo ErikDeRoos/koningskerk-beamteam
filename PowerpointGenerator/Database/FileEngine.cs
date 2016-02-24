@@ -117,13 +117,13 @@ namespace PowerpointGenerator.Database
                 return _settingsCached;
             }
 
-            var fileName = Path.Combine(_inDir, FileEngineDefaults.SetSettingsName);
-            if (!File.Exists(fileName))
+            var fileName = _fileManager.CombineDirectories(_inDir, FileEngineDefaults.SetSettingsName);
+            if (!_fileManager.FileExists(fileName))
                 ChangeSettings(new T(), false);
             try {
                 var serializer = new XmlSerializer(typeof(T));
                 var settings = new XmlReaderSettings();
-                using (var textReader = new StreamReader(fileName))
+                using (var textReader = new StreamReader(_fileManager.FileReadStream(fileName)))
                 {
                     using (var xmlReader = XmlReader.Create(textReader, settings))
                     {
@@ -142,9 +142,9 @@ namespace PowerpointGenerator.Database
         private void ChangeSettings(T newSettings, bool cached)
         {
             try {
-                var fileName = Path.Combine(_inDir, FileEngineDefaults.SetSettingsName);
+                var fileName = _fileManager.CombineDirectories(_inDir, FileEngineDefaults.SetSettingsName);
                 var serializer = new XmlSerializer(typeof(T));
-                using (TextWriter sw = new StreamWriter(fileName))
+                using (var sw = new StreamWriter(_fileManager.FileWriteStream(fileName)))
                 {
                     serializer.Serialize(sw, newSettings);
                     sw.Flush();
