@@ -132,12 +132,10 @@ namespace PowerpointGenerator.Database {
             // regel visualisatie default
             regel.DisplayEdit.Naam = item.Benaming;
             regel.DisplayEdit.SubNaam = item.Deel;
-            regel.DisplayEdit.VersenDefault = item.VerzenZoalsIngevoerd;
 
             // zoek de regels in de database en pak ook de naamgeving daar uit over
             if (regel.VerwerkenAlsSlide)
             {
-                regel.DisplayEdit.VersenAfleiden = true;
                 var setNaam = item.Benaming;
                 var zoekNaam = item.Deel;
                 if (IsNullOrEmpty(item.Deel))
@@ -152,7 +150,7 @@ namespace PowerpointGenerator.Database {
                     return new Oplossing(fout.Value, item);
             } else
             {
-                regel.DisplayEdit.VersenAfleiden = false;
+                regel.DisplayEdit.VersenGebruikDefault = item.VerzenZoalsIngevoerd;
             }
 
             // Underscores als spaties tonen
@@ -193,20 +191,24 @@ namespace PowerpointGenerator.Database {
             if (subSet == null)
                 return LiturgieOplossingResultaat.SubSetFout;
             if (setNaam == FileEngineDefaults.CommonFilesSetName)
+            {
                 regel.DisplayEdit.Naam = subSet.Name;
+                regel.DisplayEdit.VersenGebruikDefault = "";  // Expliciet: Common bestanden hebben nooit versen
+            }
             else {
                 regel.DisplayEdit.Naam = set.Name;
                 regel.DisplayEdit.SubNaam = subSet.Name;
             }
             if (!verzenList.Any())
             {
-                // Als de set zonder verzen is hebben we n samengevoegd item
+                // We hebben geen versenlijst en de set instellingen zeggen zonder verzen te zijn dus hebben we n samengevoegd item
                 if (!set.Settings.ItemsHaveSubContent)
                 {
                     var content = KrijgDirecteContent(subSet.Content, null);
                     if (content == null)
                         return LiturgieOplossingResultaat.VersOnleesbaar;
                     regel.Content = new List<ILiturgieContent> { content };
+                    regel.DisplayEdit.VersenGebruikDefault = "";  // Altijd default gebruiken omdat er altijd maar 1 content is
                 }
                 // Een item met alle verzen
                 else
@@ -217,6 +219,7 @@ namespace PowerpointGenerator.Database {
                         .OrderBy(s => s.Nummer)  // Op volgorde van nummer
                         .ToList();
                 }
+                regel.DisplayEdit.VolledigeContent = true;
             }
             else
             {
@@ -235,6 +238,7 @@ namespace PowerpointGenerator.Database {
                 // Specifieke verzen moeten allemaal interpreteerbaar zijn
                 if (regel.Content.Any(c => c == null))
                     return LiturgieOplossingResultaat.VersOnleesbaar;
+                regel.DisplayEdit.VolledigeContent = false;
             }
 
             // bepaal de naamgeving
@@ -346,8 +350,8 @@ namespace PowerpointGenerator.Database {
             public string Naam { get; set; }
             public string NaamOverzicht { get; set; }
             public string SubNaam { get; set; }
-            public bool VersenAfleiden { get; set; }
-            public string VersenDefault { get; set; }
+            public bool VolledigeContent { get; set; }
+            public string VersenGebruikDefault { get; set; }
         }
 
         private class Content : ILiturgieContent

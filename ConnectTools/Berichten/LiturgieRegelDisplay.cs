@@ -21,10 +21,10 @@ namespace ConnectTools.Berichten
         /// <summary>
         /// Als de versbeschrijving afgeleid moet worden van de liturgie content
         /// </summary>
-        public bool VersenAfleiden { get; set; }
+        public bool VolledigeContent { get; set; }
         /// <summary>
         /// Basis verzen, als afleiden niet lukt / kan
         /// </summary>
-        public string VersenDefault { get; set; }
+        public string VersenGebruikDefault { get; set; }
     }
 }

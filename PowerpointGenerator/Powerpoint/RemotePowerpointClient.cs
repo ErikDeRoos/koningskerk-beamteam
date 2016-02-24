@@ -93,8 +93,8 @@ namespace PowerpointGenerator.Powerpoint
                         Naam = r.Display.Naam,
                         NaamOverzicht = r.Display.NaamOverzicht,
                         SubNaam = r.Display.SubNaam,
-                        VersenAfleiden = r.Display.VersenAfleiden,
-                        VersenDefault = r.Display.VersenDefault
+                        VolledigeContent = r.Display.VolledigeContent,
+                        VersenGebruikDefault = r.Display.VersenGebruikDefault
                     }
                 })
             };

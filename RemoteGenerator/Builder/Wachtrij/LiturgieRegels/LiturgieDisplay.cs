@@ -11,17 +11,17 @@ namespace RemoteGenerator.Builder.Wachtrij.LiturgieRegels
 
         public string SubNaam { get; set; }
 
-        public bool VersenAfleiden { get; set; }
+        public bool VolledigeContent { get; set; }
 
-        public string VersenDefault { get; set; }
+        public string VersenGebruikDefault { get; set; }
 
         public LiturgieDisplay(ConnectTools.Berichten.LiturgieRegelDisplay vanDisplay)
         {
             Naam = vanDisplay.Naam;
             NaamOverzicht = vanDisplay.NaamOverzicht;
             SubNaam = vanDisplay.SubNaam;
-            VersenAfleiden = vanDisplay.VersenAfleiden;
-            VersenDefault = vanDisplay.VersenDefault;
+            VolledigeContent = vanDisplay.VolledigeContent;
+            VersenGebruikDefault = vanDisplay.VersenGebruikDefault;
         }
     }
 }
