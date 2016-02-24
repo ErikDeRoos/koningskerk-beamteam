@@ -16,6 +16,7 @@ namespace Tools.Tests
             liturgieRegel.Display.ReturnsForAnyArgs(liturgieRegelDisplay);
             liturgieRegelDisplay.Naam.ReturnsForAnyArgs(naam);
             liturgieRegelDisplay.SubNaam.ReturnsForAnyArgs((string)null);
+            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
 
             var geformatteerd = Tools.LiedFormattering.LiedNaam(liturgieRegel);
 
@@ -30,47 +31,79 @@ namespace Tools.Tests
             liturgieRegel.Display.ReturnsForAnyArgs(liturgieRegelDisplay);
             liturgieRegelDisplay.Naam.ReturnsForAnyArgs(naam);
             liturgieRegelDisplay.SubNaam.ReturnsForAnyArgs(subNaam);
+            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
 
             var geformatteerd = Tools.LiedFormattering.LiedNaam(liturgieRegel);
 
             Assert.That(geformatteerd, Is.EqualTo($"{naam} {subNaam}"));
         }
 
-        [TestCase("Psalm", "100", "21", 21)]
-        public void LiedNaam_NaamEnSubnaamEnVers_FormatteertStrak(string naam, string subNaam, string defaultNaam, int versNummer1)
+        [TestCase("Psalm", "100", 21)]
+        public void LiedNaam_NaamEnSubnaamEnVersMetDeelVanContent_FormatteertStrak(string naam, string subNaam, int versNummer1)
         {
             var liturgieRegel = Substitute.For<ILiturgieRegel>();
             var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
-            var liturgieRegelContent = Substitute.For<ILiturgieContent>();
+            var liturgieRegelContent1 = Substitute.For<ILiturgieContent>();
             liturgieRegel.Display.ReturnsForAnyArgs(liturgieRegelDisplay);
             liturgieRegelDisplay.Naam.ReturnsForAnyArgs(naam);
             liturgieRegelDisplay.SubNaam.ReturnsForAnyArgs(subNaam);
-            liturgieRegelDisplay.VersenDefault.ReturnsForAnyArgs(defaultNaam);
-            liturgieRegelContent.Nummer.ReturnsForAnyArgs(versNummer1);
-            liturgieRegel.Content.ReturnsForAnyArgs(new List<ILiturgieContent>() { liturgieRegelContent });
+            liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(false);
+            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
+            liturgieRegelContent1.Nummer.ReturnsForAnyArgs(versNummer1);
+            liturgieRegel.Content.ReturnsForAnyArgs(new List<ILiturgieContent>() { liturgieRegelContent1 });
 
             var geformatteerd = Tools.LiedFormattering.LiedNaam(liturgieRegel);
 
             Assert.That(geformatteerd, Is.EqualTo($"{naam} {subNaam}: {versNummer1}"));
         }
 
-        [TestCase("10, 5")]
-        public void LiedVerzen_NietAfleiden_ToontDefault(string defaultNaam)
+        [TestCase("Psalm", "100", 21, 22)]
+        public void LiedNaam_NaamEnSubnaamEnVersMetVolledigeContentInBeeld_FormatteertStrak(string naam, string subNaam, int versNummer1, int versNummer2)
         {
+            var liturgieRegel = Substitute.For<ILiturgieRegel>();
             var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
-            liturgieRegelDisplay.VersenDefault.ReturnsForAnyArgs(defaultNaam);
-            liturgieRegelDisplay.VersenAfleiden.ReturnsForAnyArgs(false);
+            var liturgieRegelContent1 = Substitute.For<ILiturgieContent>();
+            var liturgieRegelContent2 = Substitute.For<ILiturgieContent>();
+            liturgieRegel.Display.ReturnsForAnyArgs(liturgieRegelDisplay);
+            liturgieRegelDisplay.Naam.ReturnsForAnyArgs(naam);
+            liturgieRegelDisplay.SubNaam.ReturnsForAnyArgs(subNaam);
+            liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(true);
+            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
+            liturgieRegelContent1.Nummer.ReturnsForAnyArgs(versNummer1);
+            liturgieRegelContent2.Nummer.ReturnsForAnyArgs(versNummer2);
+            liturgieRegel.Content.ReturnsForAnyArgs(new List<ILiturgieContent>() { liturgieRegelContent1, liturgieRegelContent2 });
 
-            var verwerkt = Tools.LiedFormattering.LiedVerzen(liturgieRegelDisplay, false, null);
+            var geformatteerd = Tools.LiedFormattering.LiedNaam(liturgieRegel);
 
-            Assert.That(verwerkt, Is.EqualTo(defaultNaam));
+            Assert.That(geformatteerd, Is.EqualTo($"{naam} {subNaam}"));
+        }
+
+        [TestCase("Psalm", "100", 21, 22)]
+        public void LiedNaam_NaamEnSubnaamEnVersMetVolledigeContentUitBeeld_FormatteertStrak(string naam, string subNaam, int versNummer1, int versNummer2)
+        {
+            var liturgieRegel = Substitute.For<ILiturgieRegel>();
+            var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
+            var liturgieRegelContent1 = Substitute.For<ILiturgieContent>();
+            var liturgieRegelContent2 = Substitute.For<ILiturgieContent>();
+            liturgieRegel.Display.ReturnsForAnyArgs(liturgieRegelDisplay);
+            liturgieRegelDisplay.Naam.ReturnsForAnyArgs(naam);
+            liturgieRegelDisplay.SubNaam.ReturnsForAnyArgs(subNaam);
+            liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(true);
+            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
+            liturgieRegelContent1.Nummer.ReturnsForAnyArgs(versNummer1);
+            liturgieRegelContent2.Nummer.ReturnsForAnyArgs(versNummer2);
+            liturgieRegel.Content.ReturnsForAnyArgs(new List<ILiturgieContent>() { liturgieRegelContent1, liturgieRegelContent2 });
+
+            var geformatteerd = Tools.LiedFormattering.LiedNaam(liturgieRegel, liturgieRegelContent1);
+
+            Assert.That(geformatteerd, Is.EqualTo($"{naam} {subNaam}: {versNummer1}, {versNummer2}"));
         }
 
         [TestCase("10, 5")]
         public void LiedVerzen_ZonderDelen_ToontDefault(string defaultNaam)
         {
             var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
-            liturgieRegelDisplay.VersenDefault.ReturnsForAnyArgs(defaultNaam);
+            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs(defaultNaam);
 
             var verwerkt = Tools.LiedFormattering.LiedVerzen(liturgieRegelDisplay, false, null);
 
