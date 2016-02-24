@@ -226,6 +226,10 @@
       <Project>{318647d0-b6bb-410e-a547-628049eadb9d}</Project>
       <Name>IDatabase</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Interfaces\IFileSystem\IFileSystem.csproj">
+      <Project>{10295c3d-bc8b-4fca-a6c8-abc0e1dfe510}</Project>
+      <Name>IFileSystem</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Interfaces\ILiturgieDatabase\ILiturgieDatabase.csproj">
       <Project>{1338d41d-5e66-40f3-845f-170a8dcfb445}</Project>
       <Name>ILiturgieDatabase</Name>

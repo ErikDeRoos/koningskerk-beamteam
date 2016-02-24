@@ -1,4 +1,5 @@
 ﻿using IDatabase;
+using IFileSystem;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,8 +13,11 @@ namespace PowerpointGenerator.Database
         private readonly string _atDir;
         private readonly bool _itemsHaveSubContent;
         private readonly bool _cached;
-        public FileFinder(string atDir, bool itemsHaveSubContent, bool askCached)
+        private IFileOperations _fileManager;
+
+        public FileFinder(IFileOperations fileManager, string atDir, bool itemsHaveSubContent, bool askCached)
         {
+            _fileManager = fileManager;
             _atDir = atDir;
             _itemsHaveSubContent = itemsHaveSubContent;
             _cached = askCached;
@@ -22,8 +26,8 @@ namespace PowerpointGenerator.Database
         public IEnumerable<IDbItem> GetItems()
         {
             if (_itemsHaveSubContent)
-                return Directory.GetDirectories(_atDir).Select(d => new FileBundledItem(d, _cached)).ToList();
-            return Directory.GetFiles(_atDir).Select(d => new FileItem(d)).ToList();
+                return _fileManager.GetDirectories(_atDir).Select(d => new FileBundledItem(_fileManager, d, _cached)).ToList();
+            return _fileManager.GetFiles(_atDir).Select(d => new FileItem(_fileManager, d)).ToList();
         }
     }
 
@@ -31,11 +35,13 @@ namespace PowerpointGenerator.Database
     {
         public string Name { get; }
         public IDbItemContent Content { get; }
+        private IFileOperations _fileManager;
 
-        internal FileBundledItem(string dirPath, bool cached)
+        internal FileBundledItem(IFileOperations fileManager, string dirPath, bool cached)
         {
+            _fileManager = fileManager;
             Name = FileEngineDefaults.ClosestPathName(dirPath);
-            Content = new DirContent(dirPath, cached);
+            Content = new DirContent(_fileManager, dirPath, cached);
         }
 
         private class DirContent : IDbItemContent
@@ -43,6 +49,7 @@ namespace PowerpointGenerator.Database
             private readonly string _inDir;
             private readonly bool _cached;
             private IEnumerable<IDbItem> _itemCache;
+            private IFileOperations _fileManager;
 
             public string Type => FileEngineDefaults.BundleTypeDir;
 
@@ -50,15 +57,11 @@ namespace PowerpointGenerator.Database
 
             public string PersistentLink => string.Empty;
 
-            public DirContent(string dirPath, bool cached)
+            public DirContent(IFileOperations fileManager, string dirPath, bool cached)
             {
+                _fileManager = fileManager;
                 _inDir = dirPath;
                 _cached = cached;
-            }
-
-            private static IEnumerable<IDbItem> GetItems(string atDir)
-            {
-                return Directory.GetFiles(atDir).Select(d => new FileItem(d)).ToList();
             }
 
             public IEnumerable<IDbItem> TryAccessSubs()
@@ -67,6 +70,11 @@ namespace PowerpointGenerator.Database
                     return GetItems(_inDir);
                 return _itemCache ?? (_itemCache = GetItems(_inDir));
             }
+
+            private IEnumerable<IDbItem> GetItems(string atDir)
+            {
+                return _fileManager.GetFiles(atDir).Select(d => new FileItem(_fileManager, d)).ToList();
+            }
         }
     }
 
@@ -74,30 +82,34 @@ namespace PowerpointGenerator.Database
     {
         public string Name { get; }
         public IDbItemContent Content { get; }
+        private IFileOperations _fileManager;
 
-        public FileItem(string filePath)
+        public FileItem(IFileOperations fileManager, string filePath)
         {
+            _fileManager = fileManager;
             Name = Path.GetFileNameWithoutExtension(filePath);
-            Content = new FileContent(filePath);
+            Content = new FileContent(_fileManager, filePath);
         }
         class FileContent : IDbItemContent
         {
             private readonly string _filePath;
+            private IFileOperations _fileManager;
 
             public string Type { get; }
             public Stream Content => ReadFile(_filePath);
             public string PersistentLink => _filePath;
 
-            public FileContent(string filePath)
+            public FileContent(IFileOperations fileManager, string filePath)
             {
+                _fileManager = fileManager;
                 _filePath = filePath;
 
                 Type = _filePath != null ? Path.GetExtension(_filePath).Substring(1) : string.Empty;
             }
 
-            private static Stream ReadFile(string filePath)
+            private Stream ReadFile(string filePath)
             {
-                return new FileStream(filePath, FileMode.Open);
+                return _fileManager.FileReadStream(filePath);
             }
 
             public IEnumerable<IDbItem> TryAccessSubs()

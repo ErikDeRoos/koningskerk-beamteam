@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectTools.Tests", "Tests
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Interfaces", "Interfaces", "{61E1F30A-F73D-4228-B559-DBD9F8511AC8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IFileSystem", "Interfaces\IFileSystem\IFileSystem.csproj", "{10295C3D-BC8B-4FCA-A6C8-ABC0E1DFE510}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug PowerpointWrapper|Any CPU = Debug PowerpointWrapper|Any CPU
@@ -110,6 +112,12 @@ Global
 		{51839F5A-7EB1-4B3B-9D86-8B9A55263E7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{51839F5A-7EB1-4B3B-9D86-8B9A55263E7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{51839F5A-7EB1-4B3B-9D86-8B9A55263E7F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10295C3D-BC8B-4FCA-A6C8-ABC0E1DFE510}.Debug PowerpointWrapper|Any CPU.ActiveCfg = Debug|Any CPU
+		{10295C3D-BC8B-4FCA-A6C8-ABC0E1DFE510}.Debug PowerpointWrapper|Any CPU.Build.0 = Debug|Any CPU
+		{10295C3D-BC8B-4FCA-A6C8-ABC0E1DFE510}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10295C3D-BC8B-4FCA-A6C8-ABC0E1DFE510}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10295C3D-BC8B-4FCA-A6C8-ABC0E1DFE510}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10295C3D-BC8B-4FCA-A6C8-ABC0E1DFE510}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -122,5 +130,6 @@ Global
 		{D621AAA0-8D96-451B-ACE5-AD68596273AD} = {82068B2E-5C2D-4417-A7CE-828B8C4B6F8A}
 		{451902C3-E15B-4D8A-8FC7-62A641FC13E8} = {82068B2E-5C2D-4417-A7CE-828B8C4B6F8A}
 		{51839F5A-7EB1-4B3B-9D86-8B9A55263E7F} = {82068B2E-5C2D-4417-A7CE-828B8C4B6F8A}
+		{10295C3D-BC8B-4FCA-A6C8-ABC0E1DFE510} = {61E1F30A-F73D-4228-B559-DBD9F8511AC8}
 	EndGlobalSection
 EndGlobal
