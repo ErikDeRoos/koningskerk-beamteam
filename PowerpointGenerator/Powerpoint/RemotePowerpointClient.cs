@@ -10,6 +10,7 @@ using System.Linq;
 using System.IO;
 using System.Threading;
 using Tools;
+using IFileSystem;
 
 namespace PowerpointGenerator.Powerpoint
 {
@@ -19,19 +20,20 @@ namespace PowerpointGenerator.Powerpoint
         private int _slidesGemist = 0;
         private bool _stop;
         private ConnectieState _state = ConnectieState.MaakConnectie;
-
         private IWCFServer _proxy;
         private Token _token;
         private string _opslaanAls;
         private Instellingen _verzendInstellingen;
         private Liturgie _verzendLiturgie;
         private List<StreamTokenHolder> _streams;
+        private IFileOperations _fileManager;
 
         public Action<Status, string, int?> StatusWijziging { get; set; }
         public Action<int, int, int> Voortgang { get; set; }
 
-        public RemotePowerpointClient(string endpoint)
+        public RemotePowerpointClient(IFileOperations fileManager, string endpoint)
         {
+            _fileManager = fileManager;
             _streams = new List<StreamTokenHolder>();
             var binding = new NetTcpBinding();
             binding.TransferMode = TransferMode.Streamed;
@@ -208,7 +210,7 @@ namespace PowerpointGenerator.Powerpoint
             _slidesGemist = voortgang.MislukteSlides;
             if (voortgang.Gereed)
             {
-                using (var copyTo = new FileStream(_opslaanAls, FileMode.Create))
+                using (var copyTo = _fileManager.FileWriteStream(_opslaanAls))
                 {
                     var resultaatStream = _proxy.DownloadResultaat(_token);
                     if (resultaatStream == null)
@@ -226,7 +228,7 @@ namespace PowerpointGenerator.Powerpoint
 
         private StreamToken AddStream(string file)
         {
-            var token = new StreamTokenHolder(file);
+            var token = new StreamTokenHolder(_fileManager, file);
             _streams.Add(token);
             return new StreamToken() { ID = token.ID, };
         }
@@ -269,9 +271,9 @@ namespace PowerpointGenerator.Powerpoint
             public Guid ID { get; private set; }
             public bool Verzonden { get; private set; }
 
-            public StreamTokenHolder(string url)
+            public StreamTokenHolder(IFileOperations fileManager, string url)
             {
-                Stream = new FileStream(url, FileMode.Open, FileAccess.Read);
+                Stream = fileManager.FileReadStream(url);
                 ID = Guid.NewGuid();
             }
             public void SetVerzonden()

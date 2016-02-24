@@ -13,6 +13,10 @@ using Tools;
 
 namespace mppt
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <remarks>Zit hard op het file systeem! (powerpoint heeft geen ondersteuning voor streams)</remarks>
     public class PowerpointFunctions : IBuilder
     {
         private Application _applicatie;

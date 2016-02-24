@@ -14,7 +14,7 @@ namespace RemoteGenerator.WCF
 
         public WCFServer()
         {
-            Host.DI.BuildUp(this);  // Dirty, maar WCF ondersteunt geen DI
+            Host.DI.BuildUp(this);  // Dirty, maar WCF ondersteunt geen DI. We gebruiken dus een servicelocator
         }
 
         public Token StartConnectie(Instellingen gebruikInstellingen, Liturgie metLiturgie)
@@ -44,10 +44,7 @@ namespace RemoteGenerator.WCF
 
         public Stream DownloadResultaat(Token token)
         {
-            var item = Generator.Verwerkt.FirstOrDefault(w => w.Token.ID == token.ID);
-            if (item == null || item.Voortgang.VolledigMislukt)
-                return null;
-            return new FileStream(item.ResultaatOpgeslagenOp, FileMode.Open, FileAccess.Read);
+            return Generator.KrijgGegenereerdBestand(token);
         }
     }
 }

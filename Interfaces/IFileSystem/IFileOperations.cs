@@ -11,5 +11,6 @@ namespace IFileSystem
         string CombineDirectories(string atPath, string otherPath);
         Stream FileReadStream(string filename);
         Stream FileWriteStream(string filename);
+        string GetTempFileName();
     }
 }

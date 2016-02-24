@@ -1,7 +1,6 @@
 ﻿using IFileSystem;
 using System.Collections.Generic;
 using System.IO;
-using System;
 
 namespace Tools
 {
@@ -35,6 +34,11 @@ namespace Tools
         public IEnumerable<string> GetFiles(string atPath)
         {
             return Directory.GetFiles(atPath);
+        }
+
+        public string GetTempFileName()
+        {
+            return Path.GetTempFileName();
         }
     }
 }

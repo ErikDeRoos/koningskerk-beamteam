@@ -33,7 +33,12 @@ namespace IFileSystem
             throw new NotImplementedException();
         }
 
-        public IEnumerable<string> GetFiles(string atPath)
+        public virtual IEnumerable<string> GetFiles(string atPath)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual string GetTempFileName()
         {
             throw new NotImplementedException();
         }
