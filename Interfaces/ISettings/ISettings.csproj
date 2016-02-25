@@ -4,12 +4,12 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{318647D0-B6BB-410E-A547-628049EADB9D}</ProjectGuid>
+    <ProjectGuid>{76821EAA-462D-4CAD-813D-BCFF31EDAD3A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>IDatabase</RootNamespace>
-    <AssemblyName>IDatabase</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <RootNamespace>ISettings</RootNamespace>
+    <AssemblyName>ISettings</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -42,14 +42,17 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Sets\items\IDbItem.cs" />
-    <Compile Include="Sets\items\IDbItemContentcs.cs" />
-    <Compile Include="Sets\IDbSet.cs" />
-    <Compile Include="IEngine.cs" />
-    <Compile Include="Sets\ISetSettings.cs" />
+    <Compile Include="IInstellingenBase.cs" />
+    <Compile Include="IInstellingen.cs" />
+    <Compile Include="IInstellingenFactory.cs" />
+    <Compile Include="IMapmask.cs" />
+    <Compile Include="CommonImplementation\Instellingen.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="IStandaardTeksten.cs" />
+    <Compile Include="CommonImplementation\StandaardTeksten.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

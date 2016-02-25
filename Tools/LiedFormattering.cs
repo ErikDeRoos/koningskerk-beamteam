@@ -9,15 +9,22 @@ namespace Tools
     {
         public static string LiedNaam(ILiturgieRegel regel, ILiturgieContent vanafDeelHint = null)
         {
+            var builder = new StringBuilder(regel.Display.Naam);
             if (string.IsNullOrWhiteSpace(regel.Display.SubNaam))
-                return regel.Display.Naam;
-            if ((regel.Content == null || regel.Content.Count() <= 1 || vanafDeelHint == null) && string.IsNullOrWhiteSpace(regel.Display.VersenDefault))
-                return $"{regel.Display.Naam} {regel.Display.SubNaam}";
-            if (!regel.Display.VersenAfleiden || regel.Content == null)
-                return $"{regel.Display.Naam} {regel.Display.SubNaam}: {LiedVerzen(regel.Display, vanafDeelHint != null)}";
-            var vanafDeel = vanafDeelHint ?? regel.Content.FirstOrDefault();  // Bij een deel hint tonen we alleen nog de huidige en komende versen
-            var gebruikDeelRegels = regel.Content.SkipWhile(r => r != vanafDeel);
-            return $"{regel.Display.Naam} {regel.Display.SubNaam}: {LiedVerzen(regel.Display, vanafDeelHint != null, gebruikDeelRegels)}";
+                return builder.ToString();
+            builder.Append($" {regel.Display.SubNaam}");
+            var subVerzen = string.Empty;
+            if (regel.Content == null)
+                subVerzen = LiedVerzen(regel.Display, vanafDeelHint != null);
+            else
+            {
+                var vanafDeel = vanafDeelHint ?? regel.Content.FirstOrDefault();  // Bij een deel hint tonen we alleen nog de huidige en komende versen
+                var gebruikDeelRegels = regel.Content.SkipWhile(r => r != vanafDeel);
+                subVerzen = LiedVerzen(regel.Display, vanafDeelHint != null, gebruikDeelRegels);
+            }
+            if (!string.IsNullOrWhiteSpace(subVerzen))
+                builder.Append($": {subVerzen}");
+            return builder.ToString();
         }
         
         /// <summary>
@@ -30,8 +37,8 @@ namespace Tools
         /// </remarks>
         public static string LiedVerzen(ILiturgieDisplay regelDisplay, bool inBeeld, IEnumerable<ILiturgieContent> vanDelen = null)
         {
-            if (!regelDisplay.VersenAfleiden || vanDelen == null)
-                return regelDisplay.VersenDefault ?? string.Empty;
+            if (regelDisplay.VersenGebruikDefault != null || vanDelen == null || (!inBeeld && regelDisplay.VolledigeContent))
+                return regelDisplay.VersenGebruikDefault ?? string.Empty;
             var over = vanDelen.Where(v => v.Nummer.HasValue).Select(v => v.Nummer.Value).ToList();
             if (!over.Any())
                 return "";
