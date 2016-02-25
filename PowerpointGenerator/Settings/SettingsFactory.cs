@@ -1,4 +1,5 @@
-﻿using ISettings;
+﻿using IFileSystem;
+using ISettings;
 using ISettings.CommonImplementation;
 using System.IO;
 using System.Xml;
@@ -11,20 +12,33 @@ namespace PowerpointGenerator.Settings
         private readonly string _baseDir;
         private readonly string _instellingenFileName;
         private readonly string _masksFileName;
+        private IFileOperations _fileManager;
 
-        public SettingsFactory(string instellingenFileName, string masksFileName)
+        public SettingsFactory(IFileOperations fileManager, string instellingenFileName, string masksFileName)
         {
-            _baseDir = Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);
+            _fileManager = fileManager;
+            _baseDir = Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);  // TODO alternatief voor vinden
             _instellingenFileName = instellingenFileName;
             _masksFileName = masksFileName;
         }
-        private static bool WriteToXmlFile(string instellingenFile, string maskFile, Instellingen instellingen)
+
+        public bool WriteToXmlFile(IInstellingen instellingen)
+        {
+            return WriteToXmlFile(_fileManager, _fileManager.CombineDirectories(_baseDir, _instellingenFileName), _fileManager.CombineDirectories(_baseDir, _masksFileName), (instellingen as Instellingen) ?? GetDefault(_baseDir));
+        }
+
+        public IInstellingen LoadFromXmlFile()
+        {
+            return LoadFromXmlFile(_fileManager, _fileManager.CombineDirectories(_baseDir, _instellingenFileName), _fileManager.CombineDirectories(_baseDir, _masksFileName)) ?? GetDefault(_baseDir);
+        }
+
+        private static bool WriteToXmlFile(IFileOperations fileManager, string instellingenFile, string maskFile, Instellingen instellingen)
         {
             try
             {
                 //schrijf instellingen weg
                 var serializer = new XmlSerializer(typeof(Instellingen));
-                using (TextWriter sw = new StreamWriter(instellingenFile))
+                using (var sw = new StreamWriter(fileManager.FileWriteStream(instellingenFile)))
                 {
                     serializer.Serialize(sw, instellingen);
                     sw.Flush();
@@ -60,32 +74,17 @@ namespace PowerpointGenerator.Settings
             }
         }
 
-        public bool WriteToXmlFile(IInstellingen instellingen)
-        {
-            return WriteToXmlFile(Path.Combine(_baseDir, _instellingenFileName), Path.Combine(_baseDir, _masksFileName), (instellingen as Instellingen) ?? GetDefault(_baseDir));
-        }
-
-        private static Instellingen GetDefault(string baseDir)
-        {
-            return new Instellingen(
-                (baseDir + @"Resources\Database"), 
-                (baseDir + @"Resources\Database\Template Liederen.pptx"), 
-                (baseDir + @"Resources\Database\Achtergrond.pptx")
-            );
-        }
-
-
-        private static Instellingen LoadFromXmlFile(string instellingenFile, string maskFile)
+        private static Instellingen LoadFromXmlFile(IFileOperations fileManager, string instellingenFile, string maskFile)
         {
             Instellingen instellingen;
 
-            if (!File.Exists(instellingenFile))
+            if (!fileManager.FileExists(instellingenFile))
                 return null;
 
             var serializer = new XmlSerializer(typeof(Instellingen));
             var settings = new XmlReaderSettings();
 
-            using (var textReader = new StreamReader(instellingenFile))
+            using (var textReader = new StreamReader(fileManager.FileReadStream(instellingenFile)))
             {
                 using (var xmlReader = XmlReader.Create(textReader, settings))
                 {
@@ -95,29 +94,37 @@ namespace PowerpointGenerator.Settings
             if (instellingen == null)
                 return null;
 
-            if (!File.Exists(maskFile))
+            if (!fileManager.FileExists(maskFile))
                 return instellingen;
 
-            var xdoc = new XmlDocument();
-            xdoc.Load(maskFile);
-            var root = xdoc.DocumentElement;
-
-            if (root == null) return instellingen;
-            var masklist = root.GetElementsByTagName("Mask");
-            foreach (XmlNode mask in masklist)
+            using (var maskStream = fileManager.FileReadStream(maskFile))
             {
-                var nameNode = mask.SelectSingleNode("Name");
-                var realnameNode = mask.SelectSingleNode("RealName");
-                if (nameNode != null && realnameNode != null)
-                    instellingen.AddMask(new Mapmask(nameNode.InnerText, realnameNode.InnerText));
+                var xdoc = new XmlDocument();
+                xdoc.Load(maskStream);
+                var root = xdoc.DocumentElement;
+
+                if (root == null)
+                    return instellingen;
+                var masklist = root.GetElementsByTagName("Mask");
+                foreach (XmlNode mask in masklist)
+                {
+                    var nameNode = mask.SelectSingleNode("Name");
+                    var realnameNode = mask.SelectSingleNode("RealName");
+                    if (nameNode != null && realnameNode != null)
+                        instellingen.AddMask(new Mapmask(nameNode.InnerText, realnameNode.InnerText));
+                }
             }
 
             return instellingen;
         }
 
-        public IInstellingen LoadFromXmlFile()
+        private static Instellingen GetDefault(string baseDir)
         {
-            return LoadFromXmlFile(Path.Combine(_baseDir, _instellingenFileName), Path.Combine(_baseDir, _masksFileName)) ?? GetDefault(_baseDir);
+            return new Instellingen(
+                (baseDir + @"Resources\Database"),
+                (baseDir + @"Resources\Database\Template Liederen.pptx"),
+                (baseDir + @"Resources\Database\Achtergrond.pptx")
+            );
         }
     }
 }

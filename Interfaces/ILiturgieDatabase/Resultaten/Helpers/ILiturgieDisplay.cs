@@ -19,12 +19,13 @@ namespace ILiturgieDatabase
         /// <example>'100' in 'psalm 100: 1, 2'</example>
         string SubNaam { get; }
         /// <summary>
-        /// Als de versbeschrijving afgeleid moet worden van de liturgie content
+        /// Indien True dan bevat de content alle content die er is. De visualisatie kan dan kiezen om shorthands
+        /// te gebruiken.
         /// </summary>
-        bool VersenAfleiden { get; }
+        bool VolledigeContent { get; }
         /// <summary>
-        /// Basis verzen, als afleiden niet lukt / kan
+        /// Basis verzen, als afleiden niet lukt / kan. Indien niet null dan altijd gebruiken
         /// </summary>
-        string VersenDefault { get; }
+        string VersenGebruikDefault { get; }
     }
 }

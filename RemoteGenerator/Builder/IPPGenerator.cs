@@ -12,5 +12,6 @@ namespace RemoteGenerator.Builder
         WachtrijRegel NieuweWachtrijRegel(Instellingen gebruikInstellingen, Liturgie metLiturgie);
         void UpdateWachtrijRegel(Token voorToken, Guid bestandToken, Stream toevoegenBestand);
         Voortgang ProbeerTeStarten(Token voorToken);
+        Stream KrijgGegenereerdBestand(Token token);
     }
 }
