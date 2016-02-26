@@ -12,11 +12,8 @@ namespace Tools.Tests
         public void LiedNaam_AlleenNaam_FormatteertStrak(string naam)
         {
             var liturgieRegel = Substitute.For<ILiturgieRegel>();
-            var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
-            liturgieRegel.Display.ReturnsForAnyArgs(liturgieRegelDisplay);
-            liturgieRegelDisplay.Naam.ReturnsForAnyArgs(naam);
-            liturgieRegelDisplay.SubNaam.ReturnsForAnyArgs((string)null);
-            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
+            liturgieRegel.Display.Naam.ReturnsForAnyArgs(naam);
+            liturgieRegel.Display.SubNaam.ReturnsForAnyArgs((string)null);
 
             var geformatteerd = Tools.LiedFormattering.LiedNaam(liturgieRegel);
 
@@ -27,11 +24,8 @@ namespace Tools.Tests
         public void LiedNaam_NaamEnSubnaam_FormatteertStrak(string naam, string subNaam)
         {
             var liturgieRegel = Substitute.For<ILiturgieRegel>();
-            var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
-            liturgieRegel.Display.ReturnsForAnyArgs(liturgieRegelDisplay);
-            liturgieRegelDisplay.Naam.ReturnsForAnyArgs(naam);
-            liturgieRegelDisplay.SubNaam.ReturnsForAnyArgs(subNaam);
-            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
+            liturgieRegel.Display.Naam.ReturnsForAnyArgs(naam);
+            liturgieRegel.Display.SubNaam.ReturnsForAnyArgs(subNaam);
 
             var geformatteerd = Tools.LiedFormattering.LiedNaam(liturgieRegel);
 
@@ -42,13 +36,10 @@ namespace Tools.Tests
         public void LiedNaam_NaamEnSubnaamEnVersMetDeelVanContent_FormatteertStrak(string naam, string subNaam, int versNummer1)
         {
             var liturgieRegel = Substitute.For<ILiturgieRegel>();
-            var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
+            liturgieRegel.Display.Naam.ReturnsForAnyArgs(naam);
+            liturgieRegel.Display.SubNaam.ReturnsForAnyArgs(subNaam);
+            liturgieRegel.Display.VolledigeContent.ReturnsForAnyArgs(false);
             var liturgieRegelContent1 = Substitute.For<ILiturgieContent>();
-            liturgieRegel.Display.ReturnsForAnyArgs(liturgieRegelDisplay);
-            liturgieRegelDisplay.Naam.ReturnsForAnyArgs(naam);
-            liturgieRegelDisplay.SubNaam.ReturnsForAnyArgs(subNaam);
-            liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(false);
-            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
             liturgieRegelContent1.Nummer.ReturnsForAnyArgs(versNummer1);
             liturgieRegel.Content.ReturnsForAnyArgs(new List<ILiturgieContent>() { liturgieRegelContent1 });
 
@@ -61,15 +52,12 @@ namespace Tools.Tests
         public void LiedNaam_NaamEnSubnaamEnVersMetVolledigeContentInBeeld_FormatteertStrak(string naam, string subNaam, int versNummer1, int versNummer2)
         {
             var liturgieRegel = Substitute.For<ILiturgieRegel>();
-            var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
+            liturgieRegel.Display.Naam.ReturnsForAnyArgs(naam);
+            liturgieRegel.Display.SubNaam.ReturnsForAnyArgs(subNaam);
+            liturgieRegel.Display.VolledigeContent.ReturnsForAnyArgs(true);
             var liturgieRegelContent1 = Substitute.For<ILiturgieContent>();
-            var liturgieRegelContent2 = Substitute.For<ILiturgieContent>();
-            liturgieRegel.Display.ReturnsForAnyArgs(liturgieRegelDisplay);
-            liturgieRegelDisplay.Naam.ReturnsForAnyArgs(naam);
-            liturgieRegelDisplay.SubNaam.ReturnsForAnyArgs(subNaam);
-            liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(true);
-            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
             liturgieRegelContent1.Nummer.ReturnsForAnyArgs(versNummer1);
+            var liturgieRegelContent2 = Substitute.For<ILiturgieContent>();
             liturgieRegelContent2.Nummer.ReturnsForAnyArgs(versNummer2);
             liturgieRegel.Content.ReturnsForAnyArgs(new List<ILiturgieContent>() { liturgieRegelContent1, liturgieRegelContent2 });
 
@@ -82,15 +70,12 @@ namespace Tools.Tests
         public void LiedNaam_NaamEnSubnaamEnVersMetVolledigeContentUitBeeld_FormatteertStrak(string naam, string subNaam, int versNummer1, int versNummer2)
         {
             var liturgieRegel = Substitute.For<ILiturgieRegel>();
-            var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
+            liturgieRegel.Display.Naam.ReturnsForAnyArgs(naam);
+            liturgieRegel.Display.SubNaam.ReturnsForAnyArgs(subNaam);
+            liturgieRegel.Display.VolledigeContent.ReturnsForAnyArgs(true);
             var liturgieRegelContent1 = Substitute.For<ILiturgieContent>();
-            var liturgieRegelContent2 = Substitute.For<ILiturgieContent>();
-            liturgieRegel.Display.ReturnsForAnyArgs(liturgieRegelDisplay);
-            liturgieRegelDisplay.Naam.ReturnsForAnyArgs(naam);
-            liturgieRegelDisplay.SubNaam.ReturnsForAnyArgs(subNaam);
-            liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(true);
-            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
             liturgieRegelContent1.Nummer.ReturnsForAnyArgs(versNummer1);
+            var liturgieRegelContent2 = Substitute.For<ILiturgieContent>();
             liturgieRegelContent2.Nummer.ReturnsForAnyArgs(versNummer2);
             liturgieRegel.Content.ReturnsForAnyArgs(new List<ILiturgieContent>() { liturgieRegelContent1, liturgieRegelContent2 });
 
@@ -103,7 +88,7 @@ namespace Tools.Tests
         public void LiedVerzen_ZonderDelen_ToontDefault(string defaultNaam)
         {
             var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
-            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs(defaultNaam);
+            liturgieRegelDisplay.VersenGebruikDefault.Tekst.ReturnsForAnyArgs(defaultNaam);
 
             var verwerkt = Tools.LiedFormattering.LiedVerzen(liturgieRegelDisplay, false, null);
 
@@ -118,7 +103,8 @@ namespace Tools.Tests
         public void LiedVerzen_MetDefaultNotNull_ToontAltijdDefault(int[] aansluitendeNummerLijst, bool inBeeld, bool volledigeContent, string defaultNaam)
         {
             var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
-            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs(defaultNaam);
+            liturgieRegelDisplay.VersenGebruikDefault.Tekst.ReturnsForAnyArgs(defaultNaam);
+            liturgieRegelDisplay.VersenGebruikDefault.Gebruik.ReturnsForAnyArgs(true);
             var nummerLijst = PrepareContentLijst(aansluitendeNummerLijst).ToList();
 
             var verwerkt = Tools.LiedFormattering.LiedVerzen(liturgieRegelDisplay, false, nummerLijst);
@@ -130,7 +116,6 @@ namespace Tools.Tests
         public void LiedVerzen_VolledigeContentNietInBeeld_ToonLeeg(int[] aansluitendeNummerLijst)
         {
             var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
-            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
             liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(true);
             var nummerLijst = PrepareContentLijst(aansluitendeNummerLijst).ToList();
 
@@ -144,7 +129,6 @@ namespace Tools.Tests
         {
             var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
             liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(true);
-            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
             var nummerLijst = PrepareContentLijst(aansluitendeNummerLijst).ToList();
 
             var verwerkt = Tools.LiedFormattering.LiedVerzen(liturgieRegelDisplay, true, nummerLijst);
@@ -157,7 +141,6 @@ namespace Tools.Tests
         {
             var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
             liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(false);
-            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
             var nummerLijst = PrepareContentLijst(aansluitendeNummerLijst).ToList();
 
             var verwerkt = Tools.LiedFormattering.LiedVerzen(liturgieRegelDisplay, false, nummerLijst);
@@ -170,7 +153,6 @@ namespace Tools.Tests
         {
             var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
             liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(false);
-            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
             var nummerLijst = PrepareContentLijst(aansluitendeNummerLijst).ToList();
 
             var verwerkt = Tools.LiedFormattering.LiedVerzen(liturgieRegelDisplay, true, nummerLijst);
@@ -183,7 +165,6 @@ namespace Tools.Tests
         {
             var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
             liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(false);
-            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
             var nummerLijst = PrepareContentLijst(aansluitendeNummerLijstMetLaasteLos).ToList();
 
             var verwerkt = Tools.LiedFormattering.LiedVerzen(liturgieRegelDisplay, true, nummerLijst);
@@ -196,7 +177,6 @@ namespace Tools.Tests
         {
             var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
             liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(false);
-            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
             var nummerLijst = PrepareContentLijst(aansluitendeNummerLijstMetLaaste2Los).ToList();
 
             var verwerkt = Tools.LiedFormattering.LiedVerzen(liturgieRegelDisplay, true, nummerLijst);

@@ -45,6 +45,7 @@
     <Compile Include="Interpreteren\ILiturgieInterpreteer.cs" />
     <Compile Include="Interpreteren\Helpers\LiturgieOplossingResultaat.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resultaten\Helpers\IVersenDefault.cs" />
     <Compile Include="Resultaten\ILiturgieRegel.cs" />
   </ItemGroup>
   <ItemGroup />

@@ -96,7 +96,7 @@ namespace PowerpointGenerator.Powerpoint
                         NaamOverzicht = r.Display.NaamOverzicht,
                         SubNaam = r.Display.SubNaam,
                         VolledigeContent = r.Display.VolledigeContent,
-                        VersenGebruikDefault = r.Display.VersenGebruikDefault
+                        VersenGebruikDefault = new VerzenDefault() { Gebruik = r.Display.VersenGebruikDefault.Gebruik, Tekst = r.Display.VersenGebruikDefault.Tekst },
                     }
                 })
             };

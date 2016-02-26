@@ -13,7 +13,7 @@ namespace RemoteGenerator.Builder.Wachtrij.LiturgieRegels
 
         public bool VolledigeContent { get; set; }
 
-        public string VersenGebruikDefault { get; set; }
+        public IVersenDefault VersenGebruikDefault { get; set; }
 
         public LiturgieDisplay(ConnectTools.Berichten.LiturgieRegelDisplay vanDisplay)
         {
@@ -21,7 +21,7 @@ namespace RemoteGenerator.Builder.Wachtrij.LiturgieRegels
             NaamOverzicht = vanDisplay.NaamOverzicht;
             SubNaam = vanDisplay.SubNaam;
             VolledigeContent = vanDisplay.VolledigeContent;
-            VersenGebruikDefault = vanDisplay.VersenGebruikDefault;
+            VersenGebruikDefault = vanDisplay.VersenGebruikDefault != null ? new VersenDefault(vanDisplay.VersenGebruikDefault) : null;
         }
     }
 }
