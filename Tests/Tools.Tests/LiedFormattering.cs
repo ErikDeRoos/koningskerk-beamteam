@@ -109,5 +109,111 @@ namespace Tools.Tests
 
             Assert.That(verwerkt, Is.EqualTo(defaultNaam));
         }
+
+        [TestCase(new int[] { 1, 2, 3, 4 }, true, true, "10, 5")]
+        [TestCase(new int[] { 1, 2, 3, 4 }, true, false, "10, 5")]
+        [TestCase(new int[] { 1, 2, 3, 4 }, false, true, "10, 5")]
+        [TestCase(new int[] { 1, 2, 3, 4 }, false, false, "10, 5")]
+        [TestCase(new int[] { 1, 2, 3, 4 }, false, false, "")]
+        public void LiedVerzen_MetDefaultNotNull_ToontAltijdDefault(int[] aansluitendeNummerLijst, bool inBeeld, bool volledigeContent, string defaultNaam)
+        {
+            var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
+            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs(defaultNaam);
+            var nummerLijst = PrepareContentLijst(aansluitendeNummerLijst).ToList();
+
+            var verwerkt = Tools.LiedFormattering.LiedVerzen(liturgieRegelDisplay, false, nummerLijst);
+
+            Assert.That(verwerkt, Is.EqualTo(defaultNaam));
+        }
+
+        [TestCase(new int[] { 1, 2, 3, 4 })]
+        public void LiedVerzen_VolledigeContentNietInBeeld_ToonLeeg(int[] aansluitendeNummerLijst)
+        {
+            var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
+            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
+            liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(true);
+            var nummerLijst = PrepareContentLijst(aansluitendeNummerLijst).ToList();
+
+            var verwerkt = Tools.LiedFormattering.LiedVerzen(liturgieRegelDisplay, false, nummerLijst);
+
+            Assert.That(verwerkt, Is.EqualTo(string.Empty));
+        }
+
+        [TestCase(new int[] { 1, 2, 3, 4 })]
+        public void LiedVerzen_VolledigeContentInBeeld_ToonEersteLosToonRestGekoppeld(int[] aansluitendeNummerLijst)
+        {
+            var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
+            liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(true);
+            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
+            var nummerLijst = PrepareContentLijst(aansluitendeNummerLijst).ToList();
+
+            var verwerkt = Tools.LiedFormattering.LiedVerzen(liturgieRegelDisplay, true, nummerLijst);
+
+            Assert.That(verwerkt, Is.EqualTo($"{nummerLijst.First().Nummer}, {nummerLijst.Skip(1).First().Nummer} - {nummerLijst.Last().Nummer}"));
+        }
+
+        [TestCase(new int[] { 1, 2, 3, 4 })]
+        public void LiedVerzen_AansluitendeNummeringNietInBeeld_ToonGekoppeld(int[] aansluitendeNummerLijst)
+        {
+            var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
+            liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(false);
+            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
+            var nummerLijst = PrepareContentLijst(aansluitendeNummerLijst).ToList();
+
+            var verwerkt = Tools.LiedFormattering.LiedVerzen(liturgieRegelDisplay, false, nummerLijst);
+
+            Assert.That(verwerkt, Is.EqualTo($"{nummerLijst.First().Nummer} - {nummerLijst.Last().Nummer}"));
+        }
+
+        [TestCase(new int[] { 1, 2, 3, 4 })]
+        public void LiedVerzen_AansluitendeNummeringInBeeld_ToonEersteLosToonRestGekoppeld(int[] aansluitendeNummerLijst)
+        {
+            var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
+            liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(false);
+            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
+            var nummerLijst = PrepareContentLijst(aansluitendeNummerLijst).ToList();
+
+            var verwerkt = Tools.LiedFormattering.LiedVerzen(liturgieRegelDisplay, true, nummerLijst);
+
+            Assert.That(verwerkt, Is.EqualTo($"{nummerLijst.First().Nummer}, {nummerLijst.Skip(1).First().Nummer} - {nummerLijst.Last().Nummer}"));
+        }
+
+        [TestCase(new int[] { 1, 2, 3, 4, 6 })]
+        public void LiedVerzen_AansluitendeNummeringMetLosNummer_ToonLosToonReeksToonLos(int[] aansluitendeNummerLijstMetLaasteLos)
+        {
+            var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
+            liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(false);
+            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
+            var nummerLijst = PrepareContentLijst(aansluitendeNummerLijstMetLaasteLos).ToList();
+
+            var verwerkt = Tools.LiedFormattering.LiedVerzen(liturgieRegelDisplay, true, nummerLijst);
+
+            Assert.That(verwerkt, Is.EqualTo($"{nummerLijst.First().Nummer}, {nummerLijst.Skip(1).First().Nummer} - {nummerLijst.OrderByDescending(n => n.Nummer).Skip(1).First().Nummer}, {nummerLijst.Last().Nummer}"));
+        }
+
+        [TestCase(new int[] { 5, 6, 7, 12, 14 })]
+        public void LiedVerzen_AansluitendeNummeringMetLosNummerInBeeld_ToonLos(int[] aansluitendeNummerLijstMetLaaste2Los)
+        {
+            var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
+            liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(false);
+            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
+            var nummerLijst = PrepareContentLijst(aansluitendeNummerLijstMetLaaste2Los).ToList();
+
+            var verwerkt = Tools.LiedFormattering.LiedVerzen(liturgieRegelDisplay, true, nummerLijst);
+
+            Assert.That(verwerkt, Is.EqualTo(string.Join(", ", nummerLijst.Select(n => n.Nummer))));
+        }
+
+
+
+        private static IEnumerable<ILiturgieContent> PrepareContentLijst(int[] aansluitendeNummerLijst)
+        {
+            foreach (var n in aansluitendeNummerLijst)
+            {
+                var added = Substitute.For<ILiturgieContent>();
+                added.Nummer.ReturnsForAnyArgs(n);
+                yield return added;
+            }
+        }
     }
 }
