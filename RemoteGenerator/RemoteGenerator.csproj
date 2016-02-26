@@ -69,6 +69,7 @@
     <Compile Include="Builder\Wachtrij\Instellingen.cs" />
     <Compile Include="Builder\Wachtrij\Liturgie.cs" />
     <Compile Include="Builder\Wachtrij\LiturgieRegels\LiturgieContent.cs" />
+    <Compile Include="Builder\Wachtrij\LiturgieRegels\VersenDefault.cs" />
     <Compile Include="Builder\Wachtrij\LiturgieRegels\LiturgieDisplay.cs" />
     <Compile Include="Builder\Wachtrij\LiturgieRegels\LiturgieRegel.cs" />
     <Compile Include="Builder\PpGenerator.cs" />

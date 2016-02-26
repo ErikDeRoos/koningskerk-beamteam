@@ -132,6 +132,7 @@ namespace PowerpointGenerator.Database {
             // regel visualisatie default
             regel.DisplayEdit.Naam = item.Benaming;
             regel.DisplayEdit.SubNaam = item.Deel;
+            regel.DisplayEdit.VersenGebruikDefault = new VersenDefault();
 
             // zoek de regels in de database en pak ook de naamgeving daar uit over
             if (regel.VerwerkenAlsSlide)
@@ -150,7 +151,7 @@ namespace PowerpointGenerator.Database {
                     return new Oplossing(fout.Value, item);
             } else
             {
-                regel.DisplayEdit.VersenGebruikDefault = item.VerzenZoalsIngevoerd;
+                regel.DisplayEdit.VersenGebruikDefault = new VersenDefault(item.VerzenZoalsIngevoerd);
             }
 
             // Underscores als spaties tonen
@@ -193,7 +194,7 @@ namespace PowerpointGenerator.Database {
             if (setNaam == FileEngineDefaults.CommonFilesSetName)
             {
                 regel.DisplayEdit.Naam = subSet.Name;
-                regel.DisplayEdit.VersenGebruikDefault = "";  // Expliciet: Common bestanden hebben nooit versen
+                regel.DisplayEdit.VersenGebruikDefault = new VersenDefault(string.Empty);  // Expliciet: Common bestanden hebben nooit versen
             }
             else {
                 regel.DisplayEdit.Naam = set.Name;
@@ -208,7 +209,7 @@ namespace PowerpointGenerator.Database {
                     if (content == null)
                         return LiturgieOplossingResultaat.VersOnleesbaar;
                     regel.Content = new List<ILiturgieContent> { content };
-                    regel.DisplayEdit.VersenGebruikDefault = "";  // Altijd default gebruiken omdat er altijd maar 1 content is
+                    regel.DisplayEdit.VersenGebruikDefault = new VersenDefault(string.Empty);  // Altijd default gebruiken omdat er altijd maar 1 content is
                 }
                 // Een item met alle verzen
                 else
@@ -351,7 +352,22 @@ namespace PowerpointGenerator.Database {
             public string NaamOverzicht { get; set; }
             public string SubNaam { get; set; }
             public bool VolledigeContent { get; set; }
-            public string VersenGebruikDefault { get; set; }
+            public IVersenDefault VersenGebruikDefault { get; set; }
+        }
+        private class VersenDefault : IVersenDefault
+        {
+            public VersenDefault()
+            {
+                Gebruik = false;
+            }
+            public VersenDefault(string tekst)
+            {
+                Tekst = tekst;
+                Gebruik = true;
+            }
+
+            public bool Gebruik { get; set; }
+            public string Tekst { get; set; }
         }
 
         private class Content : ILiturgieContent

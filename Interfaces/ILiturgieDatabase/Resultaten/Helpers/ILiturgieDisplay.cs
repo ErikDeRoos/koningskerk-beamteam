@@ -26,6 +26,6 @@ namespace ILiturgieDatabase
         /// <summary>
         /// Basis verzen, als afleiden niet lukt / kan. Indien niet null dan altijd gebruiken
         /// </summary>
-        string VersenGebruikDefault { get; }
+        IVersenDefault VersenGebruikDefault { get; }
     }
 }

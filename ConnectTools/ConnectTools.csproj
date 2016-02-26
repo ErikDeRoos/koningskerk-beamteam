@@ -47,6 +47,7 @@
     <Compile Include="Berichten\Liturgie.cs" />
     <Compile Include="Berichten\LiturgieRegel.cs" />
     <Compile Include="Berichten\LiturgieRegelContent.cs" />
+    <Compile Include="Berichten\VerzenDefault.cs" />
     <Compile Include="Berichten\LiturgieRegelDisplay.cs" />
     <Compile Include="Berichten\Mask.cs" />
     <Compile Include="Berichten\SendFile.cs" />
