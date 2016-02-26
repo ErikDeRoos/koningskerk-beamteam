@@ -1,4 +1,5 @@
 ﻿using ConnectTools.Berichten;
+using IFileSystem;
 using ILiturgieDatabase;
 using ISettings;
 using ISlideBuilder;
@@ -27,6 +28,7 @@ namespace RemoteGenerator.Builder
         private IInstellingenBase _instellingen;
         private string _opslaanAls;
         private readonly IUnityContainer _di;
+        private IFileOperations _fileManager;
 
         private Thread _startThread;
         private IBuilder _powerpoint;
@@ -42,9 +44,10 @@ namespace RemoteGenerator.Builder
         private List<WachtrijRegel> _verwerkt;
         public IEnumerable<WachtrijRegel> Verwerkt => _verwerkt;
 
-        public PpGenerator(IUnityContainer di)
+        public PpGenerator(IUnityContainer di, IFileOperations fileManager)
         {
             _di = di;
+            _fileManager = fileManager;
             _huidigeStatus = State.Onbekend;
             _wachtrij = new List<WachtrijRegel>();
             _verwerkt = new List<WachtrijRegel>();
@@ -146,15 +149,14 @@ namespace RemoteGenerator.Builder
             Start();
         }
 
-        private static string SaveToTempFile(Stream request)
+        private string SaveToTempFile(Stream request)
         {
-            var fileName = Path.GetTempFileName();
+            var fileName = _fileManager.GetTempFileName();
             const int bufferSize = 2048;
             byte[] buffer = new byte[bufferSize];
-            using (var outputStream = new FileStream(fileName, FileMode.Create, FileAccess.Write))
+            using (var outputStream = _fileManager.FileWriteStream(fileName))
             {
                 request.CopyTo(outputStream);
-                outputStream.Close();
             }
             return fileName;
         }
@@ -293,6 +295,13 @@ namespace RemoteGenerator.Builder
             throw new NotImplementedException();
         }
 
+        public Stream KrijgGegenereerdBestand(Token token)
+        {
+            var item = Verwerkt.FirstOrDefault(w => w.Token.ID == token.ID);
+            if (item == null || item.Voortgang.VolledigMislukt)
+                return null;
+            return _fileManager.FileReadStream(item.ResultaatOpgeslagenOp);
+        }
 
         private void HardeStop()
         {

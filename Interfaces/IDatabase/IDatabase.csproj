@@ -4,12 +4,12 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4CE33A64-DB90-489B-9D01-99A88F24F2F7}</ProjectGuid>
+    <ProjectGuid>{318647D0-B6BB-410E-A547-628049EADB9D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ISlideBuilder</RootNamespace>
-    <AssemblyName>ISlideBuilder</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <RootNamespace>IDatabase</RootNamespace>
+    <AssemblyName>IDatabase</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -44,18 +44,12 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IBuilder.cs" />
+    <Compile Include="Sets\items\IDbItem.cs" />
+    <Compile Include="Sets\items\IDbItemContentcs.cs" />
+    <Compile Include="Sets\IDbSet.cs" />
+    <Compile Include="IEngine.cs" />
+    <Compile Include="Sets\ISetSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ILiturgieDatabase\ILiturgieDatabase.csproj">
-      <Project>{1338d41d-5e66-40f3-845f-170a8dcfb445}</Project>
-      <Name>ILiturgieDatabase</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ISettings\ISettings.csproj">
-      <Project>{76821eaa-462d-4cad-813d-bcff31edad3a}</Project>
-      <Name>ISettings</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

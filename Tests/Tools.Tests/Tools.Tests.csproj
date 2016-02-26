@@ -74,7 +74,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\ILiturgieDatabase\ILiturgieDatabase.csproj">
+    <ProjectReference Include="..\..\Interfaces\ILiturgieDatabase\ILiturgieDatabase.csproj">
       <Project>{1338d41d-5e66-40f3-845f-170a8dcfb445}</Project>
       <Name>ILiturgieDatabase</Name>
     </ProjectReference>

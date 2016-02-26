@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.IO.Compression;
+using IFileSystem;
 
 namespace PowerpointGenerator.Database
 {
@@ -15,19 +16,15 @@ namespace PowerpointGenerator.Database
         private readonly bool _cached;
         private Stream _archiveStream;
         private ZipArchive _archive;
-        public FileZipFinder(string atDir, string setName, bool itemsHaveSubContent, bool askCached)
+        private IFileOperations _fileManager;
+
+        public FileZipFinder(IFileOperations fileManager, string atDir, string setName, bool itemsHaveSubContent, bool askCached)
         {
+            _fileManager = fileManager;
             _atDir = atDir;
             _setName = setName;
             _itemsHaveSubContent = itemsHaveSubContent;
             _cached = askCached;
-        }
-
-        private ZipArchive GetZip()
-        {
-            if (_archiveStream == null)
-                _archiveStream = new FileStream(Path.Combine(_atDir, _setName), FileMode.Open, FileAccess.Read);
-            return _archive ?? (_archive = new ZipArchive(_archiveStream, ZipArchiveMode.Read));
         }
 
         /// <remarks>cache is geregeld door FileEngine die deze aanroep doet</remarks>
@@ -40,6 +37,13 @@ namespace PowerpointGenerator.Database
                 return dirStructure.Directories.Select(d => new FileZipBundledItem(d, _cached)).ToList();
             }
             return archive.Entries.Select(e => new FileZipItem(e)).ToList();
+        }
+
+        private ZipArchive GetZip()
+        {
+            if (_archiveStream == null)
+                _archiveStream = _fileManager.FileReadStream(_fileManager.CombineDirectories(_atDir, _setName));
+            return _archive ?? (_archive = new ZipArchive(_archiveStream, ZipArchiveMode.Read));
         }
 
         public void Dispose()

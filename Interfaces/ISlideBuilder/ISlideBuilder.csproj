@@ -4,12 +4,12 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{1338D41D-5E66-40F3-845F-170A8DCFB445}</ProjectGuid>
+    <ProjectGuid>{4CE33A64-DB90-489B-9D01-99A88F24F2F7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ILiturgieDatabase</RootNamespace>
-    <AssemblyName>ILiturgieDatabase</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <RootNamespace>ISlideBuilder</RootNamespace>
+    <AssemblyName>ISlideBuilder</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -30,24 +30,33 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug PowerpointWrapper|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug PowerpointWrapper\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Interpreteren\ILiturgieLosop.cs" />
-    <Compile Include="Resultaten\Helpers\InhoudType.cs" />
-    <Compile Include="Resultaten\Helpers\ILiturgieContent.cs" />
-    <Compile Include="Resultaten\Helpers\ILiturgieDisplay.cs" />
-    <Compile Include="Interpreteren\Helpers\ILiturgieOplossing.cs" />
-    <Compile Include="Interpreteren\Helpers\ILiturgieInterpretatie.cs" />
-    <Compile Include="Interpreteren\Helpers\ILiturgieMapmaskArg.cs" />
-    <Compile Include="Interpreteren\ILiturgieInterpreteer.cs" />
-    <Compile Include="Interpreteren\Helpers\LiturgieOplossingResultaat.cs" />
+    <Compile Include="IBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Resultaten\ILiturgieRegel.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\ILiturgieDatabase\ILiturgieDatabase.csproj">
+      <Project>{1338d41d-5e66-40f3-845f-170a8dcfb445}</Project>
+      <Name>ILiturgieDatabase</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ISettings\ISettings.csproj">
+      <Project>{76821eaa-462d-4cad-813d-bcff31edad3a}</Project>
+      <Name>ISettings</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

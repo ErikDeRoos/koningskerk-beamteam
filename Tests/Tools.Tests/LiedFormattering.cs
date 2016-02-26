@@ -16,7 +16,6 @@ namespace Tools.Tests
             liturgieRegel.Display.ReturnsForAnyArgs(liturgieRegelDisplay);
             liturgieRegelDisplay.Naam.ReturnsForAnyArgs(naam);
             liturgieRegelDisplay.SubNaam.ReturnsForAnyArgs((string)null);
-            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
 
             var geformatteerd = Tools.LiedFormattering.LiedNaam(liturgieRegel);
 
@@ -31,7 +30,6 @@ namespace Tools.Tests
             liturgieRegel.Display.ReturnsForAnyArgs(liturgieRegelDisplay);
             liturgieRegelDisplay.Naam.ReturnsForAnyArgs(naam);
             liturgieRegelDisplay.SubNaam.ReturnsForAnyArgs(subNaam);
-            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
 
             var geformatteerd = Tools.LiedFormattering.LiedNaam(liturgieRegel);
 
@@ -68,7 +66,6 @@ namespace Tools.Tests
             liturgieRegelDisplay.Naam.ReturnsForAnyArgs(naam);
             liturgieRegelDisplay.SubNaam.ReturnsForAnyArgs(subNaam);
             liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(true);
-            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
             liturgieRegelContent1.Nummer.ReturnsForAnyArgs(versNummer1);
             liturgieRegelContent2.Nummer.ReturnsForAnyArgs(versNummer2);
             liturgieRegel.Content.ReturnsForAnyArgs(new List<ILiturgieContent>() { liturgieRegelContent1, liturgieRegelContent2 });
@@ -89,7 +86,6 @@ namespace Tools.Tests
             liturgieRegelDisplay.Naam.ReturnsForAnyArgs(naam);
             liturgieRegelDisplay.SubNaam.ReturnsForAnyArgs(subNaam);
             liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(true);
-            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
             liturgieRegelContent1.Nummer.ReturnsForAnyArgs(versNummer1);
             liturgieRegelContent2.Nummer.ReturnsForAnyArgs(versNummer2);
             liturgieRegel.Content.ReturnsForAnyArgs(new List<ILiturgieContent>() { liturgieRegelContent1, liturgieRegelContent2 });
@@ -103,7 +99,9 @@ namespace Tools.Tests
         public void LiedVerzen_ZonderDelen_ToontDefault(string defaultNaam)
         {
             var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
-            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs(defaultNaam);
+            var versenDefault = Substitute.For<IVersenDefault>();
+            versenDefault.Tekst.ReturnsForAnyArgs(defaultNaam);
+            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs(versenDefault);
 
             var verwerkt = Tools.LiedFormattering.LiedVerzen(liturgieRegelDisplay, false, null);
 
@@ -118,7 +116,10 @@ namespace Tools.Tests
         public void LiedVerzen_MetDefaultNotNull_ToontAltijdDefault(int[] aansluitendeNummerLijst, bool inBeeld, bool volledigeContent, string defaultNaam)
         {
             var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
-            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs(defaultNaam);
+            var versenDefault = Substitute.For<IVersenDefault>();
+            versenDefault.Tekst.ReturnsForAnyArgs(defaultNaam);
+            versenDefault.Gebruik.ReturnsForAnyArgs(true);
+            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs(versenDefault);
             var nummerLijst = PrepareContentLijst(aansluitendeNummerLijst).ToList();
 
             var verwerkt = Tools.LiedFormattering.LiedVerzen(liturgieRegelDisplay, false, nummerLijst);
@@ -130,7 +131,6 @@ namespace Tools.Tests
         public void LiedVerzen_VolledigeContentNietInBeeld_ToonLeeg(int[] aansluitendeNummerLijst)
         {
             var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
-            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
             liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(true);
             var nummerLijst = PrepareContentLijst(aansluitendeNummerLijst).ToList();
 
@@ -144,7 +144,6 @@ namespace Tools.Tests
         {
             var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
             liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(true);
-            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
             var nummerLijst = PrepareContentLijst(aansluitendeNummerLijst).ToList();
 
             var verwerkt = Tools.LiedFormattering.LiedVerzen(liturgieRegelDisplay, true, nummerLijst);
@@ -157,7 +156,6 @@ namespace Tools.Tests
         {
             var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
             liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(false);
-            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
             var nummerLijst = PrepareContentLijst(aansluitendeNummerLijst).ToList();
 
             var verwerkt = Tools.LiedFormattering.LiedVerzen(liturgieRegelDisplay, false, nummerLijst);
@@ -170,12 +168,35 @@ namespace Tools.Tests
         {
             var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
             liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(false);
-            liturgieRegelDisplay.VersenGebruikDefault.ReturnsForAnyArgs((string)null);
             var nummerLijst = PrepareContentLijst(aansluitendeNummerLijst).ToList();
 
             var verwerkt = Tools.LiedFormattering.LiedVerzen(liturgieRegelDisplay, true, nummerLijst);
 
             Assert.That(verwerkt, Is.EqualTo($"{nummerLijst.First().Nummer}, {nummerLijst.Skip(1).First().Nummer} - {nummerLijst.Last().Nummer}"));
+        }
+
+        [TestCase(new int[] { 1, 2, 3, 4, 6 })]
+        public void LiedVerzen_AansluitendeNummeringMetLosNummer_ToonLosToonReeksToonLos(int[] aansluitendeNummerLijstMetLaasteLos)
+        {
+            var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
+            liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(false);
+            var nummerLijst = PrepareContentLijst(aansluitendeNummerLijstMetLaasteLos).ToList();
+
+            var verwerkt = Tools.LiedFormattering.LiedVerzen(liturgieRegelDisplay, true, nummerLijst);
+
+            Assert.That(verwerkt, Is.EqualTo($"{nummerLijst.First().Nummer}, {nummerLijst.Skip(1).First().Nummer} - {nummerLijst.OrderByDescending(n => n.Nummer).Skip(1).First().Nummer}, {nummerLijst.Last().Nummer}"));
+        }
+
+        [TestCase(new int[] { 5, 6, 7, 12, 14 })]
+        public void LiedVerzen_AansluitendeNummeringMetLosNummerInBeeld_ToonLos(int[] aansluitendeNummerLijstMetLaaste2Los)
+        {
+            var liturgieRegelDisplay = Substitute.For<ILiturgieDisplay>();
+            liturgieRegelDisplay.VolledigeContent.ReturnsForAnyArgs(false);
+            var nummerLijst = PrepareContentLijst(aansluitendeNummerLijstMetLaaste2Los).ToList();
+
+            var verwerkt = Tools.LiedFormattering.LiedVerzen(liturgieRegelDisplay, true, nummerLijst);
+
+            Assert.That(verwerkt, Is.EqualTo(string.Join(", ", nummerLijst.Select(n => n.Nummer))));
         }
 
 
