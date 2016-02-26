@@ -37,11 +37,11 @@ namespace Tools
         /// </remarks>
         public static string LiedVerzen(ILiturgieDisplay regelDisplay, bool inBeeld, IEnumerable<ILiturgieContent> vanDelen = null)
         {
-            if (regelDisplay.VersenGebruikDefault != null || vanDelen == null || (!inBeeld && regelDisplay.VolledigeContent))
-                return regelDisplay.VersenGebruikDefault ?? string.Empty;
+            if (regelDisplay.VersenGebruikDefault.Gebruik || vanDelen == null || (!inBeeld && regelDisplay.VolledigeContent))
+                return regelDisplay.VersenGebruikDefault.Tekst ?? string.Empty;
             var over = vanDelen.Where(v => v.Nummer.HasValue).Select(v => v.Nummer.Value).ToList();
             if (!over.Any())
-                return "";
+                return string.Empty;
             var builder = new StringBuilder();
             if (inBeeld)
             {
@@ -58,11 +58,12 @@ namespace Tools
                     over.RemoveAt(0);
                 }
                 if (nieuweReeks.Count == 1)
-                    builder.Append(nieuweReeks[0]).Append(", ");
+                    builder.Append(nieuweReeks[0]);
                 else if (nieuweReeks.Count == 2)
                     builder.Append(string.Join(", ", nieuweReeks));
                 else
-                    builder.AppendFormat("{0} - {1}, ", nieuweReeks.First(), nieuweReeks.Last());
+                    builder.AppendFormat("{0} - {1}", nieuweReeks.First(), nieuweReeks.Last());
+                builder.Append(", ");
             }
             return builder.ToString().TrimEnd(',', ' ');
         }

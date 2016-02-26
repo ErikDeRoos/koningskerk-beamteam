@@ -25,6 +25,6 @@ namespace ConnectTools.Berichten
         /// <summary>
         /// Basis verzen, als afleiden niet lukt / kan
         /// </summary>
-        public string VersenGebruikDefault { get; set; }
+        public VerzenDefault VersenGebruikDefault { get; set; }
     }
 }
