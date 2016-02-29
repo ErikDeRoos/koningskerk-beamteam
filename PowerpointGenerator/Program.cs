@@ -5,12 +5,6 @@ using System.Windows.Forms;
 
 namespace PowerpointGenerator
 {
-
-    //TODO: de volgorde in de liturgie bijbellezingen op de juiste plek;
-    //TODO: de lay-out van het programma
-    //TODO: het mogelijk maken om in het programma te kunnen werken met bijvoorbeeld “rechtmuisknop, plakken”
-
-
     public static class Program
     {
         /// <summary>
