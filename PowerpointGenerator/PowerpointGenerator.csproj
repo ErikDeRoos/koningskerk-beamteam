@@ -180,6 +180,9 @@
     <Content Include="Help.chm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="LICENSE.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <None Include="PowerpointGenerater_TemporaryKey.pfx" />
     <None Include="Properties\Settings.settings">

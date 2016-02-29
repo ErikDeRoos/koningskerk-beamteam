@@ -8,5 +8,10 @@ namespace PowerpointGenerator
         {
             InitializeComponent();
         }
+
+        private void button1_Click(object sender, System.EventArgs e)
+        {
+            Help.ShowHelp(this, "help.chm", HelpNavigator.TopicId, "20");
+        }
     }
 }
