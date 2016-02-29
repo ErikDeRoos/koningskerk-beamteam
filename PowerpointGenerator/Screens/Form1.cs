@@ -15,13 +15,9 @@ namespace PowerpointGenerator
 {
     internal partial class Form1 : Form
     {
-        // unity container voor dependency injection (t is niet een nette manier om de container te weten)
-        [Dependency]
-        public IUnityContainer Di { get; set; }
-        [Dependency]
-        public ILiturgieLosOp LiturgieOplosser { get; set; }
-        [Dependency]
-        public IInstellingenFactory InstellingenFactory { get; set; }
+        private readonly ILiturgieLosOp _liturgieOplosser;
+        private readonly IInstellingenFactory _instellingenFactory;
+        private readonly Func<ISlideBuilder.IBuilder> _builderResolver;
 
         //huidige bestand
         private string _currentfile = "";
@@ -33,8 +29,11 @@ namespace PowerpointGenerator
         private PpGenerator _powerpoint;
         private GeneratorStatus _status;
 
-        public Form1()  // DI via constructor is t meest duidelijk, werkt helaas niet met forms
+        public Form1(ILiturgieLosOp liturgieOplosser, IInstellingenFactory instellingenOplosser, Func<ISlideBuilder.IBuilder> builderResolver)
         {
+            _liturgieOplosser = liturgieOplosser;
+            _instellingenFactory = instellingenOplosser;
+            _builderResolver = builderResolver;
             InitializeComponent();
         }
 
@@ -46,7 +45,7 @@ namespace PowerpointGenerator
 
             KeyDown += Form1_KeyDown;
 
-            _powerpoint = new PpGenerator(Di, PresentatieVoortgangCallback, PresentatieGereedmeldingCallback);
+            _powerpoint = new PpGenerator(_builderResolver, PresentatieVoortgangCallback, PresentatieGereedmeldingCallback);
             progressBar1.Visible = false;
 
             if (!string.IsNullOrEmpty(startBestand) && File.Exists(startBestand))
@@ -144,18 +143,17 @@ namespace PowerpointGenerator
         #region opties
         private void templatesToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            var formulier = new Instellingenform();
-            Di.BuildUp(formulier);
+            var formulier = new Instellingenform(_instellingenFactory);
             formulier.Opstarten();
             if (formulier.ShowDialog() == DialogResult.Yes && formulier.Instellingen != null)
             {
-                if (!InstellingenFactory.WriteToXmlFile(formulier.Instellingen))
+                if (!_instellingenFactory.WriteToXmlFile(formulier.Instellingen))
                     MessageBox.Show(Resources.Form1_Niet_opgeslagen_wegens_te_lang_pad);
             }
         }
         private void bekijkDatabaseToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            Process.Start("explorer.exe", "/root, \"" + InstellingenFactory.LoadFromXmlFile().FullDatabasePath + "\"");
+            Process.Start("explorer.exe", "/root, \"" + _instellingenFactory.LoadFromXmlFile().FullDatabasePath + "\"");
         }
         private void stopPowerpointToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -163,16 +161,16 @@ namespace PowerpointGenerator
         }
         private void invoerenMasksToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var formulier = new MaskInvoer(InstellingenFactory.LoadFromXmlFile().Masks);
+            var formulier = new MaskInvoer(_instellingenFactory.LoadFromXmlFile().Masks);
             if (formulier.ShowDialog() == DialogResult.OK)
             {
-                var instellingen = InstellingenFactory.LoadFromXmlFile();
+                var instellingen = _instellingenFactory.LoadFromXmlFile();
                 instellingen.ClearMasks();
                 foreach (var mask in formulier.Masks)
                 {
                     instellingen.AddMask(mask);
                 }
-                if (!InstellingenFactory.WriteToXmlFile(instellingen))
+                if (!_instellingenFactory.WriteToXmlFile(instellingen))
                     MessageBox.Show(Resources.Form1_Niet_opgeslagen_wegens_te_lang_pad);
             }
         }
@@ -215,8 +213,8 @@ namespace PowerpointGenerator
                 // Liturgie uit tekstbox omzetten in leesbare items
                 var ruweLiturgie = new InterpreteerLiturgieRuw().VanTekstregels(richTextBox1.Lines);
                 // Zoek op het bestandssysteem zo veel mogelijk al op (behalve ppt, die gaan via COM element)
-                var masks = MapMasksToLiturgie.Map(InstellingenFactory.LoadFromXmlFile().Masks);
-                var ingeladenLiturgie = LiturgieOplosser.LosOp(ruweLiturgie, masks).ToList();
+                var masks = MapMasksToLiturgie.Map(_instellingenFactory.LoadFromXmlFile().Masks);
+                var ingeladenLiturgie = _liturgieOplosser.LosOp(ruweLiturgie, masks).ToList();
 
                 //als niet alle liturgie is gevonden geven we een melding of de gebruiker toch door wil gaan met genereren
                 if (ingeladenLiturgie.Any(l => l.Resultaat != LiturgieOplossingResultaat.Opgelost))
@@ -277,7 +275,7 @@ namespace PowerpointGenerator
                 // de knop de status laten reflecteren
                 button1.Text = "Stop";
                 _status = GeneratorStatus.AanHetGenereren;
-                var status = _powerpoint.Initialiseer(ingeladenLiturgie.Select(l => l.Regel).ToList(), textBox2.Text, textBox3.Text, textBox4.Text, textBox1.Text, textBox5.Text, InstellingenFactory.LoadFromXmlFile(), fileName);
+                var status = _powerpoint.Initialiseer(ingeladenLiturgie.Select(l => l.Regel).ToList(), textBox2.Text, textBox3.Text, textBox4.Text, textBox1.Text, textBox5.Text, _instellingenFactory.LoadFromXmlFile(), fileName);
                 if (status.Fout != null)
                     MessageBox.Show(status.Fout.Melding + "\n\n" + status.Fout.Oplossing, status.Fout.Oplossing);
                 else {

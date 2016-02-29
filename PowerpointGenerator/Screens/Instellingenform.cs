@@ -10,20 +10,20 @@ namespace PowerpointGenerator
 {
     partial class Instellingenform : Form
     {
-        [Dependency]
-        public IInstellingenFactory InstellingenFactory { get; set; }
+        private readonly IInstellingenFactory _instellingenFactory;
 
         public IInstellingen Instellingen { get; private set; }
         private IEnumerable<IMapmask> _masks; 
 
-        public Instellingenform()
+        public Instellingenform(IInstellingenFactory instellingenFactory)
         {
+            _instellingenFactory = instellingenFactory;
             InitializeComponent();
         }
 
         public void Opstarten()
         {
-            var vanInstellingen = InstellingenFactory.LoadFromXmlFile();
+            var vanInstellingen = _instellingenFactory.LoadFromXmlFile();
 
             textBox1.Text = vanInstellingen.Templateliederen;
             textBox2.Text = vanInstellingen.Templatetheme;

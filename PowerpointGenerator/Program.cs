@@ -20,8 +20,7 @@ namespace PowerpointGenerator
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            var startupForm = new Form1();
-            container.BuildUp(startupForm);
+            var startupForm = new Form1(container.Resolve<ILiturgieDatabase.ILiturgieLosOp>(), container.Resolve<ISettings.IInstellingenFactory>(), container.Resolve<Func<ISlideBuilder.IBuilder>>());
             startupForm.Opstarten(args.Length >= 1 ? args[0] : null);
 
             Application.Run(startupForm);
