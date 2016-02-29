@@ -13,7 +13,9 @@ namespace PowerpointGenerator
         [STAThread]
         public static void Main(string[] args)
         {
-            var container = new UnityContainer().LoadConfiguration();
+            var container = new UnityContainer();
+            IocConfig.SetDefault(container);
+            container.LoadConfiguration();  // Overschijf default
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

@@ -80,6 +80,7 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="IocConfig.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WCF\Host.cs" />
@@ -135,6 +136,10 @@
       <Project>{4ce33a64-db90-489b-9d01-99a88f24f2f7}</Project>
       <Name>ISlideBuilder</Name>
     </ProjectReference>
+    <ProjectReference Include="..\MicrosoftPowerpointWrapper\MicrosoftPowerpointWrapper.csproj">
+      <Project>{d65aa3ef-0086-4ca5-802e-a2bb2e3bed20}</Project>
+      <Name>MicrosoftPowerpointWrapper</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Tools\Tools.csproj">
       <Project>{4fcc4de1-8d80-43a3-b422-4add6410e2ae}</Project>
       <Name>Tools</Name>
@@ -146,7 +151,8 @@
     </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>xcopy "$(SolutionDir)lib\PowerpointWrapper\*.*" "$(TargetDir)" /Y /F /I /D /S</PreBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
