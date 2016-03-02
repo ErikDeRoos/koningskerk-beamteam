@@ -1,5 +1,4 @@
 ﻿using Autofac;
-//using Autofac.Configuration;
 using RemoteGenerator.WCF;
 using System;
 using System.Windows.Forms;
@@ -16,15 +15,14 @@ namespace RemoteGenerator
         {
             var builder = new ContainerBuilder();
             Bootstrap.SetDefault(builder);
-            //container.RegisterModule(new ConfigurationModule( ConfigurationSettingsReader("mycomponents"));  // Overschijf default
 
             using (var container = builder.Build())
             {
-                // Alles wat geen DI ondersteund nu aanmaken
+                // Voor alles wat geen DI ondersteund een servicelocator plaatsen
                 Host.StaticIoCContainer = container;
 
                 // Start de main programma loop
-                new ProgramInternals(container.Resolve<IHost>(new NamedParameter("address", "net.tcp://localhost:8000/wcfserver")), container.Resolve<Func<string, Form>>())
+                new ProgramInternals(container.Resolve<IHost>(), container.Resolve<Func<string, Form>>())
                     .Run(args.Length >= 1 ? args[0] : null);
             }
         }
