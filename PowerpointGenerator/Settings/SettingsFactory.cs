@@ -121,9 +121,9 @@ namespace PowerpointGenerator.Settings
         private static Instellingen GetDefault(string baseDir)
         {
             return new Instellingen(
-                (baseDir + @"Resources\Database"),
-                (baseDir + @"Resources\Database\Template Liederen.pptx"),
-                (baseDir + @"Resources\Database\Achtergrond.pptx")
+                (@".Resources\Database"),
+                (@".Resources\Database\Template Liederen.pptx"),
+                (@".Resources\Database\Achtergrond.pptx")
             );
         }
     }

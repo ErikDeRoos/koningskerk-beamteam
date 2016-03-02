@@ -22,5 +22,32 @@ namespace PowerpointGenerator.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("lib\\instellingen.xml")]
+        public string InstellingenFileName {
+            get {
+                return ((string)(this["InstellingenFileName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("lib\\masks.xml")]
+        public string MasksFileName {
+            get {
+                return ((string)(this["MasksFileName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("!leeg")]
+        public string SetNameEmpty {
+            get {
+                return ((string)(this["SetNameEmpty"]));
+            }
+        }
     }
 }

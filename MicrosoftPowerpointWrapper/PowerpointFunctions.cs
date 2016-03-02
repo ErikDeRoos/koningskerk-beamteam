@@ -238,13 +238,15 @@ namespace mppt
                     if (liturgiegevonden)
                     {
                         var toonItem = teTonenLiturgie[liturgieIndex];
-                        inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = toonItem.Display.NaamOverzicht;
-                        if (!string.IsNullOrWhiteSpace(toonItem.Display.SubNaam))
-                        {
-                            inTabel.Rows[index].Cells[2].Shape.TextFrame.TextRange.Text = toonItem.Display.SubNaam;
-                            if (toonItem.Display.VersenGebruikDefault != null)
-                                inTabel.Rows[index].Cells[3].Shape.TextFrame.TextRange.Text = $": {LiedFormattering.LiedVerzen(toonItem.Display, false, vanDelen: toonItem.Content)}";
-                        }
+                        var kolom1 = toonItem.Display.NaamOverzicht;
+                        var kolom2 = toonItem.Display.SubNaam;
+                        var kolom3 = LiedFormattering.LiedVerzen(toonItem.Display, false, vanDelen: toonItem.Content);
+
+                        inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = kolom1;
+                        if (!string.IsNullOrWhiteSpace(kolom2))
+                            inTabel.Rows[index].Cells[2].Shape.TextFrame.TextRange.Text = kolom2;
+                        if (!string.IsNullOrWhiteSpace(kolom3))
+                            inTabel.Rows[index].Cells[3].Shape.TextFrame.TextRange.Text = $": {kolom3}";
                         liturgieIndex++;
                     }
                     if (!liturgiegevonden)

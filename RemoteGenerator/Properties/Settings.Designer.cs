@@ -22,5 +22,14 @@ namespace RemoteGenerator.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("net.tcp://localhost:8000/wcfserver ")]
+        public string BindOnAddress {
+            get {
+                return ((string)(this["BindOnAddress"]));
+            }
+        }
     }
 }
