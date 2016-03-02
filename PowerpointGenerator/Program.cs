@@ -1,5 +1,4 @@
-﻿using Microsoft.Practices.Unity;
-using Microsoft.Practices.Unity.Configuration;
+﻿using Autofac;
 using System;
 using System.Windows.Forms;
 
@@ -11,19 +10,34 @@ namespace PowerpointGenerator
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        public static void Main(string[] args)
+        static void Main(string[] args)
         {
-            var container = new UnityContainer();
-            IocConfig.SetDefault(container);
-            container.LoadConfiguration();  // Overschijf default
+            var builder = new ContainerBuilder();
+            Bootstrap.SetDefault(builder);
 
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
+            using (var container = builder.Build())
+            {
+                // Start de main programma loop
+                new ProgramInternals(container.Resolve<Func<string, Form>>())
+                    .Run(args.Length >= 1 ? args[0] : null);
+            }
+        }
 
-            var startupForm = new Form1(container.Resolve<ILiturgieDatabase.ILiturgieLosOp>(), container.Resolve<ISettings.IInstellingenFactory>(), container.Resolve<Func<ISlideBuilder.IBuilder>>());
-            startupForm.Opstarten(args.Length >= 1 ? args[0] : null);
+        private class ProgramInternals
+        {
+            private readonly Func<string, Form> _startupFormResolver;
+            public ProgramInternals(Func<string, Form> startupFormResolver)
+            {
+                _startupFormResolver = startupFormResolver;
+            }
 
-            Application.Run(startupForm);
+            public void Run(string startBestand)
+            {
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                var startForm = _startupFormResolver(startBestand);
+                Application.Run(startForm);
+            }
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using ILiturgieDatabase;
 using ISettings;
-using Microsoft.Practices.Unity;
 using PowerpointGenerator.Powerpoint;
 using PowerpointGenerator.Database;
 using System;
@@ -18,6 +17,7 @@ namespace PowerpointGenerator
         private readonly ILiturgieLosOp _liturgieOplosser;
         private readonly IInstellingenFactory _instellingenFactory;
         private readonly Func<ISlideBuilder.IBuilder> _builderResolver;
+        private readonly string _startBestand;
 
         //huidige bestand
         private string _currentfile = "";
@@ -29,15 +29,16 @@ namespace PowerpointGenerator
         private PpGenerator _powerpoint;
         private GeneratorStatus _status;
 
-        public Form1(ILiturgieLosOp liturgieOplosser, IInstellingenFactory instellingenOplosser, Func<ISlideBuilder.IBuilder> builderResolver)
+        public Form1(ILiturgieLosOp liturgieOplosser, IInstellingenFactory instellingenOplosser, Func<ISlideBuilder.IBuilder> builderResolver, string startBestand)
         {
             _liturgieOplosser = liturgieOplosser;
             _instellingenFactory = instellingenOplosser;
             _builderResolver = builderResolver;
+            _startBestand = startBestand;
             InitializeComponent();
         }
 
-        public void Opstarten(string startBestand = null)
+        public void Opstarten()
         {
             HelpRequested += Form1_HelpRequested;
             _programDirectory = Path.GetDirectoryName(Application.ExecutablePath) + Path.DirectorySeparatorChar;
@@ -48,9 +49,9 @@ namespace PowerpointGenerator
             _powerpoint = new PpGenerator(_builderResolver, PresentatieVoortgangCallback, PresentatieGereedmeldingCallback);
             progressBar1.Visible = false;
 
-            if (!string.IsNullOrEmpty(startBestand) && File.Exists(startBestand))
+            if (!string.IsNullOrEmpty(_startBestand) && File.Exists(_startBestand))
             {
-                LoadWorkingfile(OpenenopLocatie(startBestand));
+                LoadWorkingfile(OpenenopLocatie(_startBestand));
             }
             else if (File.Exists(_tempLiturgiePath))
             {

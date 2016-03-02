@@ -1,6 +1,5 @@
 ﻿using ISettings;
 using ISettings.CommonImplementation;
-using Microsoft.Practices.Unity;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;

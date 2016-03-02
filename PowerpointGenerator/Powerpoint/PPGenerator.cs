@@ -1,7 +1,6 @@
 ﻿using ILiturgieDatabase;
 using ISettings;
 using ISlideBuilder;
-using Microsoft.Practices.Unity;
 using System;
 using System.Collections.Generic;
 using System.IO;
