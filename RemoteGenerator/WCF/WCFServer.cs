@@ -1,20 +1,19 @@
 ﻿using ConnectTools.Berichten;
 using RemoteGenerator.Builder;
-using Microsoft.Practices.Unity;
 using System.Linq;
 using ConnectTools;
 using System.IO;
+using Autofac;
 
 namespace RemoteGenerator.WCF
 {
     public class WCFServer : IWCFServer
     {
-        [Dependency]
         internal IPpGenerator Generator { get; set; }
 
         public WCFServer()
         {
-            Host.DI.BuildUp(this);  // Dirty, maar WCF ondersteunt geen DI. We gebruiken dus een servicelocator
+            Host.StaticIoCContainer.InjectProperties(this);  // Dirty, maar WCF ondersteunt geen DI. We gebruiken dus een servicelocator
         }
 
         public Token StartConnectie(Instellingen gebruikInstellingen, Liturgie metLiturgie)
