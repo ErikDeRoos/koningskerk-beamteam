@@ -132,7 +132,7 @@ namespace PowerpointGenerator.Powerpoint
                 for (int teller = 0; teller < 1000 && _generatorThread.IsAlive; teller++)
                     Thread.Sleep(5);
                 _generatorThread = null;
-                _powerpoint.Dispose();
+                _powerpoint?.Dispose();
                 _powerpoint = null;
                 _huidigeStatus = State.Geinitialiseerd;
             }

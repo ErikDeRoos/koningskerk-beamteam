@@ -305,7 +305,7 @@ namespace RemoteGenerator.Builder
             if (_generatorThread != null && _generatorThread.IsAlive)
                 _generatorThread.Abort();
             _generatorThread = null;
-            _powerpoint.Dispose();
+            _powerpoint?.Dispose();
             _powerpoint = null;
             _huidigeStatus = State.Onbekend;
             if (gelocked)
