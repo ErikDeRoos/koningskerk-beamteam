@@ -25,7 +25,7 @@ namespace PowerpointGenerator.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("instellingen.xml")]
+        [global::System.Configuration.DefaultSettingValueAttribute("lib\\instellingen.xml")]
         public string InstellingenFileName {
             get {
                 return ((string)(this["InstellingenFileName"]));
@@ -34,7 +34,7 @@ namespace PowerpointGenerator.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("masks.xml")]
+        [global::System.Configuration.DefaultSettingValueAttribute("lib\\masks.xml")]
         public string MasksFileName {
             get {
                 return ((string)(this["MasksFileName"]));
