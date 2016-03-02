@@ -1,5 +1,5 @@
-﻿using ConnectTools;
-using Microsoft.Practices.Unity;
+﻿using Autofac;
+using ConnectTools;
 using System;
 using System.ServiceModel;
 
@@ -7,7 +7,7 @@ namespace RemoteGenerator.WCF
 {
     class Host : IHost, IDisposable
     {
-        internal static IUnityContainer DI;  // Dirty, maar WCF ondersteunt geen DI
+        internal static IContainer StaticIoCContainer;  // Dirty, maar WCF ondersteunt geen DI
 
         private string _address;
         private ServiceHost _serviceHost;
