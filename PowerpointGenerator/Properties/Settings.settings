@@ -3,10 +3,10 @@
   <Profiles />
   <Settings>
     <Setting Name="InstellingenFileName" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">instellingen.xml</Value>
+      <Value Profile="(Default)">lib\instellingen.xml</Value>
     </Setting>
     <Setting Name="MasksFileName" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">masks.xml</Value>
+      <Value Profile="(Default)">lib\masks.xml</Value>
     </Setting>
   </Settings>
 </SettingsFile>
