@@ -189,6 +189,10 @@
     </Compile>
     <Compile Include="Settings\SettingsFactory.cs" />
     <Compile Include="Database\Uitlezen_Liturgie.cs" />
+    <None Include="settings.config">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

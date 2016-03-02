@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using System;
 
 namespace PowerpointGenerator
 {
@@ -11,7 +10,7 @@ namespace PowerpointGenerator
             container.RegisterGeneric(typeof(Database.FileEngine<>)).As(typeof(IDatabase.IEngine<>));
             container.RegisterType<mppt.PowerpointFunctions>().As<ISlideBuilder.IBuilder>();
             container.RegisterType<Tools.LocalFileOperations>().As<IFileSystem.IFileOperations>();
-            container.RegisterType<Settings.SettingsFactory>().As<ISettings.IInstellingenFactory>().WithParameter("instellingenFileName", "instellingen.xml").WithParameter("masksFileName", "masks.xml");
+            container.RegisterType<Settings.SettingsFactory>().As<ISettings.IInstellingenFactory>().WithParameter("instellingenFileName", Properties.Settings.Default.InstellingenFileName).WithParameter("masksFileName", Properties.Settings.Default.MasksFileName);
             container.RegisterType<Form1>().As<System.Windows.Forms.Form>().OnActivated(f => f.Instance.Opstarten());
         }
     }
