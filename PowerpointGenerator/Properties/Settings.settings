@@ -8,10 +8,7 @@
     <Setting Name="MasksFileName" Type="System.String" Scope="Application">
       <Value Profile="(Default)">lib\masks.xml</Value>
     </Setting>
-    <Setting Name="SetContainerName" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">inhoud</Value>
-    </Setting>
-    <Setting Name="SetNameEmpty" Type="System.String" Scope="User">
+    <Setting Name="SetNameEmpty" Type="System.String" Scope="Application">
       <Value Profile="(Default)">!leeg</Value>
     </Setting>
   </Settings>
