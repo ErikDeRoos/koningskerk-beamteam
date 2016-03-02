@@ -40,5 +40,26 @@ namespace PowerpointGenerator.Properties {
                 return ((string)(this["MasksFileName"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("inhoud")]
+        public string SetContainerName {
+            get {
+                return ((string)(this["SetContainerName"]));
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("!leeg")]
+        public string SetNameEmpty {
+            get {
+                return ((string)(this["SetNameEmpty"]));
+            }
+            set {
+                this["SetNameEmpty"] = value;
+            }
+        }
     }
 }
