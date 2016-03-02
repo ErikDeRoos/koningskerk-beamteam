@@ -161,6 +161,12 @@ namespace PowerpointGenerator.Database {
             var maskCheck = masks?.FirstOrDefault(m => Compare(m.RealName, regel.DisplayEdit.Naam, true) == 0);
             if (maskCheck != null)
                 regel.DisplayEdit.Naam = maskCheck.Name;
+            // Check of de hoofdnaam genegeerd moet worden (is leeg)
+            if (IsNullOrWhiteSpace(regel.DisplayEdit.Naam) && !IsNullOrWhiteSpace(regel.DisplayEdit.SubNaam))
+            {
+                regel.DisplayEdit.Naam = regel.Display.SubNaam;
+                regel.DisplayEdit.SubNaam = null;
+            }
             // regel visualisatie na bewerking
             if (IsNullOrEmpty(regel.DisplayEdit.NaamOverzicht))
                 regel.DisplayEdit.NaamOverzicht = regel.DisplayEdit.Naam;
@@ -243,7 +249,7 @@ namespace PowerpointGenerator.Database {
             }
 
             // bepaal de naamgeving
-            regel.DisplayEdit.Naam = !IsNullOrWhiteSpace(set.Settings.DisplayName) ? set.Settings.DisplayName : regel.DisplayEdit.Naam;
+            regel.DisplayEdit.Naam = !IsNullOrWhiteSpace(set.Settings.DisplayName) ? (set.Settings.DisplayName.Equals(Properties.Settings.Default.SetNameEmpty, StringComparison.CurrentCultureIgnoreCase) ? null : set.Settings.DisplayName) : regel.DisplayEdit.Naam;
 
             return null;
         }
