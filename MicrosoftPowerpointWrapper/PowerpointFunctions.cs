@@ -5,10 +5,6 @@ using System.Linq;
 using ILiturgieDatabase;
 using ISettings;
 using ISlideBuilder;
-using NetOffice.PowerPointApi;
-using NetOffice.OfficeApi.Enums;
-using NetOffice.PowerPointApi.Enums;
-using Clipboard = System.Windows.Forms.Clipboard;
 using Tools;
 
 namespace mppt
@@ -19,10 +15,8 @@ namespace mppt
     /// <remarks>Zit hard op het file systeem! (powerpoint heeft geen ondersteuning voor streams)</remarks>
     public class PowerpointFunctions : IBuilder
     {
-        private Application _applicatie;
-        private _Presentation _presentatie;
-        private CustomLayout _layout;
-        private int _slideteller = 1;
+        private MppInterfaceApplication _applicatie;
+        private MppInterfacePresentatie _presentatie;
         private int _slidesGemist = 0;
         private bool _stop;
 
@@ -50,7 +44,6 @@ namespace mppt
             _tekst = tekst;
             _instellingen = gebruikInstellingen;
             _opslaanAls = opslaanAls;
-            _slideteller = 1;
             // Hier GEEN COM calls want dit kan nog in n andere thread zijn
         }
 
@@ -61,14 +54,11 @@ namespace mppt
         {
             StatusWijziging?.Invoke(Status.Gestart, null, null);
 
-            //Creeer een nieuwe lege presentatie volgens een bepaald thema
-            _applicatie = new Application {Visible = MsoTriState.msoTrue};
-            var presSet = _applicatie.Presentations;
-            _presentatie = presSet.Open(_instellingen.FullTemplatetheme, MsoTriState.msoFalse, MsoTriState.msoTrue);
-            //sla het thema op, zodat dat in iedere nieuwe slide kan worden meegenomen
-            _layout = _presentatie.SlideMaster.CustomLayouts[PpSlideLayout.ppLayoutTitle];
-            //minimaliseer powerpoint
-            _applicatie.WindowState = PpWindowState.ppWindowMinimized;
+            _applicatie = new MppInterfaceApplication();
+            //Creeer een nieuwe lege presentatie volgens de template thema (toon scherm zodat bij fout nog iets te zien is)
+            _presentatie = _applicatie.Open(_instellingen.FullTemplatetheme, metWindow: true);
+            //Minimaliseer scherm
+            _applicatie.MinimizeInterface();
 
             try
             {
@@ -95,7 +85,7 @@ namespace mppt
                 }
 
                 //sla de presentatie op
-                _presentatie.SaveAs(_opslaanAls);
+                _presentatie.OpslaanAls(_opslaanAls);
                 SluitAlles();
                 if (_stop)
                     StatusWijziging?.Invoke(Status.StopFout, "Tussentijds gestopt door de gebruiker.", null);
@@ -144,30 +134,28 @@ namespace mppt
             {
                 //regel de template om het lied op af te beelden
                 var presentatie = OpenPps(_instellingen.FullTemplateliederen);
-                var slide = presentatie.Slides.First() as Slide;  //alleen eerste slide gebruiken we
+                var slide = presentatie.EersteSlide();  //alleen eerste slide gebruiken we
                 //voor elk object op de slides (we zoeken naar de tekst die vervangen moet worden in de template)
-                foreach (var shape in slide.Shapes.Cast<Shape>().Where(s => s.Type == MsoShapeType.msoTextBox).ToList())
-                    // Specifieke casts en tolists om COM problemen te minimaliseren
+                foreach (var shape in slide.Shapes().Where(s => s is MppInterfaceShapeTextbox).Cast<MppInterfaceShapeTextbox>())
                 {
-                    var text = shape.TextFrame.TextRange.Text;
+                    var text = shape.Text;
                     //als de template de tekst bevat "Liturgieregel" moet daar de liturgieregel komen
                     if (text.Equals("<Liturgieregel>"))
-                        shape.TextFrame.TextRange.Text = InvullenLiturgieRegel(regel, inhoud);
+                        shape.Text = InvullenLiturgieRegel(regel, inhoud);
                     //als de template de tekst bevat "Inhoud" moet daar de inhoud van het vers komen
                     else if (text.Equals("<Inhoud>"))
-                        shape.TextFrame.TextRange.Text = tekst;
+                        shape.Text = tekst;
                     //als de template de tekst bevat "Volgende" moet daar de Liturgieregel van de volgende sheet komen
                     else if (text.Equals("<Volgende>"))
                     {
                         //we moeten dan wel al op de laatste slide zitten ('InvullenVolgende' is wel al intelligent maar in het geval van 1
                         //lange tekst over meerdere dia's kan 'InvullenVolgende' niet de juiste keuze maken)
-                        shape.TextFrame.TextRange.Text = tekstOmTeRenderenLijst.Last() == tekst ? InvullenVolgende(regel, inhoud, volgende) : string.Empty;
+                        shape.Text = tekstOmTeRenderenLijst.Last() == tekst ? InvullenVolgende(regel, inhoud, volgende) : string.Empty;
                     }
                 }
                 //voeg slide in in het grote geheel
-                SlidesKopieNaarPresentatie(new List<Slide> { slide });
+                _slidesGemist += _presentatie.SlidesKopieNaarPresentatie(new List<MppInterfaceSlide> { slide });
                 //sluit de template weer af
-                presentatie.Close();
                 presentatie.Dispose();
             }
         }
@@ -177,125 +165,66 @@ namespace mppt
             //open de presentatie met de sheets erin
             var presentatie = OpenPps(inhoud.Inhoud);
             //voor elke slide in de presentatie
-            var slides = presentatie.Slides.Cast<Slide>().ToList();
-            foreach (var shape in slides.SelectMany(s => s.Shapes.Cast<Shape>()).ToList())  
-                // Specifieke casts en tolists om COM problemen te minimaliseren
+            var slides = presentatie.AlleSlides().ToList();
+            foreach (var shape in slides.SelectMany(s => s.Shapes()).ToList())  
             {
-                //als de shape gelijk is aan een textbox bevat het dus tekst
-                switch (shape.Type)
-                {
-                    case MsoShapeType.msoTextBox:
-                        var text = shape.TextFrame.TextRange.Text;
-                        //als de template de tekst bevat "Voorganger: " moet daar de Voorgangersnaam achter komen
-                        if (text.Equals("<Voorganger:>"))
-                            shape.TextFrame.TextRange.Text = _instellingen.StandaardTeksten.Voorganger + _voorganger;
-                        //als de template de tekst bevat "Collecte: " moet daar de collectedoel achter komen
-                        else if (text.Equals("<Collecte:>"))
-                            shape.TextFrame.TextRange.Text = _instellingen.StandaardTeksten.Collecte + _collecte1;
-                        //als de template de tekst bevat "1e Collecte: " moet daar de 1e collecte achter komen
-                        else if (text.Equals("<1e Collecte:>"))
-                            shape.TextFrame.TextRange.Text = _instellingen.StandaardTeksten.Collecte1 + _collecte1;
-                        //als de template de tekst bevat "2e Collecte: " moet daar de 2e collecte achter komen
-                        else if (text.Equals("<2e Collecte:>"))
-                            shape.TextFrame.TextRange.Text = _instellingen.StandaardTeksten.Collecte2 + _collecte2;
-                        //als de template de tekst bevat "Volgende" moet daar de Liturgieregel van de volgende sheet komen
-                        else if (text.Equals("<Volgende>"))
-                            shape.TextFrame.TextRange.Text = InvullenVolgende(regel, inhoud, volgende);
-                        //als de template de tekst bevat "Volgende" moet daar de te lezen schriftgedeeltes komen
-                        else if (text.Equals("<Lezen>"))
-                            shape.TextFrame.TextRange.Text = _instellingen.StandaardTeksten.Lezen + _lezen;
-                        else if (text.Equals("<Tekst>"))
-                            shape.TextFrame.TextRange.Text = _instellingen.StandaardTeksten.Tekst + _tekst;
-                        else if (text.Equals("<Tekst_Onder>"))
-                            shape.TextFrame.TextRange.Text = _tekst;
-                        break;
-                    case MsoShapeType.msoTable:
-                        if (shape.Table.Rows[1].Cells[1].Shape.TextFrame.TextRange.Text.Equals("<Liturgie>"))
-                            VulLiturgieTabel(shape.Table, _liturgie, _lezen, _tekst, _instellingen.StandaardTeksten.LiturgieLezen, _instellingen.StandaardTeksten.LiturgieTekst, _instellingen.StandaardTeksten.Liturgie);
-                        break;
+                var textbox = shape as MppInterfaceShapeTextbox;
+                var table = shape as MppInterfaceShapeTable;
+
+                if (textbox != null) {
+                    var text = textbox.Text;
+                    //als de template de tekst bevat "Voorganger: " moet daar de Voorgangersnaam achter komen
+                    if (text.Equals("<Voorganger:>"))
+                        textbox.Text = _instellingen.StandaardTeksten.Voorganger + _voorganger;
+                    //als de template de tekst bevat "Collecte: " moet daar de collectedoel achter komen
+                    else if (text.Equals("<Collecte:>"))
+                        textbox.Text = _instellingen.StandaardTeksten.Collecte + _collecte1;
+                    //als de template de tekst bevat "1e Collecte: " moet daar de 1e collecte achter komen
+                    else if (text.Equals("<1e Collecte:>"))
+                        textbox.Text = _instellingen.StandaardTeksten.Collecte1 + _collecte1;
+                    //als de template de tekst bevat "2e Collecte: " moet daar de 2e collecte achter komen
+                    else if (text.Equals("<2e Collecte:>"))
+                        textbox.Text = _instellingen.StandaardTeksten.Collecte2 + _collecte2;
+                    //als de template de tekst bevat "Volgende" moet daar de Liturgieregel van de volgende sheet komen
+                    else if (text.Equals("<Volgende>"))
+                        textbox.Text = InvullenVolgende(regel, inhoud, volgende);
+                    //als de template de tekst bevat "Volgende" moet daar de te lezen schriftgedeeltes komen
+                    else if (text.Equals("<Lezen>"))
+                        textbox.Text = _instellingen.StandaardTeksten.Lezen + _lezen;
+                    else if (text.Equals("<Tekst>"))
+                        textbox.Text = _instellingen.StandaardTeksten.Tekst + _tekst;
+                    else if (text.Equals("<Tekst_Onder>"))
+                        textbox.Text = _tekst;
+                }
+                else if (table != null) { 
+                    if (table.GetTitel().Equals("<Liturgie>"))
+                        VulLiturgieTabel(table, _liturgie, _lezen, _tekst, _instellingen.StandaardTeksten.LiturgieLezen, _instellingen.StandaardTeksten.LiturgieTekst, _instellingen.StandaardTeksten.Liturgie);
                 }
             }
             //voeg de slides in in het grote geheel
-            SlidesKopieNaarPresentatie(slides);
+            _slidesGemist += _presentatie.SlidesKopieNaarPresentatie(slides);
             //sluit de geopende presentatie weer af
-            presentatie.Close();
             presentatie.Dispose();
         }
 
-        private static void VulLiturgieTabel(Table inTabel, IEnumerable<ILiturgieRegel> liturgie, string lezen, string tekst, string instellingenLezen, string instellingenTekst, string instellingLiturgie)
+        private static void VulLiturgieTabel(MppInterfaceShapeTable inTabel, IEnumerable<ILiturgieRegel> liturgie, string lezen, string tekst, string instellingenLezen, string instellingenTekst, string instellingLiturgie)
         {
-            // Te tonen liturgie in lijst plaatsen zodat we de plek per index weten
-            var liturgieIndex = 0;
-            var teTonenLiturgie = liturgie.Where(l => l.TonenInOverzicht).ToList();
-
-            var lezengehad = false;
-            var tekstgehad = false;
-            for (var index = 1; index <= inTabel.Rows.Count; index++)
+            var toonLijst = new List<IMppInterfaceShapeTableContent>();
+            toonLijst.Add(new MppInterfaceShapeTableContent1Column(0, instellingLiturgie, false));
+            foreach (var liturgieItem in liturgie.Where(l => l.TonenInOverzicht))
             {
-                if (!inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text.Equals("<Liturgie>"))
-                {
-                    var liturgiegevonden = liturgieIndex < teTonenLiturgie.Count;
-                    if (liturgiegevonden)
-                    {
-                        var toonItem = teTonenLiturgie[liturgieIndex];
-                        var kolom1 = toonItem.Display.NaamOverzicht;
-                        var kolom2 = toonItem.Display.SubNaam;
-                        var kolom3 = LiedFormattering.LiedVerzen(toonItem.Display, false, vanDelen: toonItem.Content);
-
-                        inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = kolom1;
-                        if (!string.IsNullOrWhiteSpace(kolom2))
-                            inTabel.Rows[index].Cells[2].Shape.TextFrame.TextRange.Text = kolom2;
-                        if (!string.IsNullOrWhiteSpace(kolom3))
-                            inTabel.Rows[index].Cells[3].Shape.TextFrame.TextRange.Text = $": {kolom3}";
-                        liturgieIndex++;
-                    }
-                    if (!liturgiegevonden)
-                    {
-                        inTabel.Rows[index].Cells[1].Merge(inTabel.Rows[index].Cells[2]);
-                        if (inTabel.Rows[index].Cells.Count >= 3)
-                            inTabel.Rows[index].Cells[2].Merge(inTabel.Rows[index].Cells[3]);
-
-                        //volgorde voor het liturgiebord is
-                        //liederen
-                        //lezen
-                        //tekst
-                        if (!lezengehad)
-                        {
-                            if (!string.IsNullOrWhiteSpace(lezen))
-                            {
-                                inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = instellingenLezen;
-                                inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text += lezen;
-                                inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignLeft;
-                            }
-                            else {
-                                inTabel.Rows[index].Delete();
-                                index--;
-                            }
-                            lezengehad = true;
-                        }
-                        else if (!tekstgehad)
-                        {
-                            if (!string.IsNullOrWhiteSpace(tekst))
-                            {
-                                inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = instellingenTekst;
-                                inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text += tekst;
-                                inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignLeft;
-                            }
-                            else {
-                                inTabel.Rows[index].Delete();
-                                index--;
-                            }
-                            tekstgehad = true;
-                        }
-                        else {
-                            inTabel.Rows[index].Delete();
-                            index--;
-                        }
-                    }
-                }
-                else
-                    inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = instellingLiturgie;
+                var kolom1 = liturgieItem.Display.NaamOverzicht;
+                var kolom2 = liturgieItem.Display.SubNaam;
+                var kolom3 = LiedFormattering.LiedVerzen(liturgieItem.Display, false, vanDelen: liturgieItem.Content);
+                if (!string.IsNullOrWhiteSpace(kolom3))
+                    kolom3 = $": {kolom3}";
+                toonLijst.Add(new MppInterfaceShapeTableContent3Column(toonLijst.Count, kolom1, kolom2, kolom3));
             }
+            if (!string.IsNullOrWhiteSpace(lezen))
+                toonLijst.Add(new MppInterfaceShapeTableContent1Column(toonLijst.Count, $"{instellingenLezen}{lezen}", true));
+            if (!string.IsNullOrWhiteSpace(tekst))
+                toonLijst.Add(new MppInterfaceShapeTableContent1Column(toonLijst.Count, $"{instellingenTekst}{tekst}", true));
+            inTabel.InsertContent(toonLijst);
         }
 
         /// Een 'volgende' tekst is alleen relevant om te tonen op de laatste pagina binnen een item voordat 
@@ -384,96 +313,20 @@ namespace mppt
         }
 
         /// <summary>
-        /// Voeg een slide in in de hoofdpresentatie op de volgende positie (hoofdpresentatie werd aangemaakt bij het maken van deze klasse)
-        /// </summary>
-        /// <param name="slides">de slide die ingevoegd moet worden (voorwaarde is hierbij dat de presentatie waarvan de slide onderdeel is nog wel geopend is)</param>
-        private void SlidesKopieNaarPresentatie(IEnumerable<Slide> slides, int retryCount = 3)
-        {
-            foreach (var slide in slides.ToList())
-            {
-                if (_slideteller == 1)
-                    _presentatie.Slides[1].Delete();
-                slide.Copy();
-                var gelukt = false;
-                for (int currentTry = 1; currentTry < retryCount && gelukt == false; currentTry++)
-                {
-                    try
-                    {
-                        gelukt = ExecuteWhen(HasClipboardPowerpointSlideContent, () =>
-                        {
-                            _presentatie.Slides.Paste();
-                            _slideteller++;
-                        });
-                    }
-                    catch (System.Runtime.InteropServices.COMException)
-                    {
-
-                    }
-                }
-                if (!gelukt)
-                    _slidesGemist++;
-            }
-        }
-        private static bool ExecuteWhen(Func<bool> isTrue, Action action, int minWaitTime = 5, int maxWaitTime = 250, int waitStep = 25, int waitBeforeExecute = 5)
-        {
-            var waited = 0;
-            if (minWaitTime > 0)
-                System.Threading.Thread.Sleep(minWaitTime);
-            waited += minWaitTime;
-            while (waited < maxWaitTime && waitStep > 0 && !isTrue.Invoke())
-            {
-                System.Threading.Thread.Sleep(waitStep);
-                waited += waitStep;
-            }
-            if (isTrue.Invoke())
-            {
-                if (waitBeforeExecute > 0)
-                    System.Threading.Thread.Sleep(waitBeforeExecute);
-                action.Invoke();
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
         /// Open een presentatie op het meegegeven pad
         /// </summary>
         /// <param name="path">het pad waar de powerpointpresentatie kan worden gevonden</param>
         /// <returns>de powerpoint presentatie</returns>
-        private _Presentation OpenPps(string path)
+        private MppInterfacePresentatie OpenPps(string path)
         {
             //controleer voor het openen van de presentatie op het meegegeven path of de presentatie bestaat
-            return File.Exists(path) ? _applicatie.Presentations.Open(path, MsoTriState.msoFalse, MsoTriState.msoTrue, MsoTriState.msoFalse) : null;
-        }
-
-        private static bool HasClipboardPowerpointSlideContent()
-        {
-            var data = Clipboard.GetDataObject();
-            if (data == null)
-                return false;
-            var formats = data.GetFormats();
-            return formats.Any(f => f.StartsWith("PowerPoint"));
+            return File.Exists(path) ? _applicatie.Open(path, metWindow: false) : null;
         }
 
         private void SluitAlles()
         {
-            _layout = null;
-            try {
-                _presentatie?.Close();
-                _presentatie?.Dispose();
-            }
-            finally
-            {
-                _presentatie = null;
-            }
-            try
-            {
-                _applicatie?.Quit();
-            }
-            finally
-            {
-                _applicatie = null;
-            }
+            _presentatie?.Dispose();
+            _applicatie?.Dispose();
         }
         public void Dispose()
         {
