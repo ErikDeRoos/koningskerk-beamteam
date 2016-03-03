@@ -6,6 +6,7 @@ using ILiturgieDatabase;
 using ISettings;
 using ISlideBuilder;
 using Tools;
+using mppt.Connect;
 
 namespace mppt
 {
@@ -15,8 +16,10 @@ namespace mppt
     /// <remarks>Zit hard op het file systeem! (powerpoint heeft geen ondersteuning voor streams)</remarks>
     public class PowerpointFunctions : IBuilder
     {
-        private MppInterfaceApplication _applicatie;
-        private MppInterfacePresentatie _presentatie;
+        private IMppFactory _mppFactory;
+
+        private IMppApplication _applicatie;
+        private IMppPresentatie _presentatie;
         private int _slidesGemist = 0;
         private bool _stop;
 
@@ -33,6 +36,11 @@ namespace mppt
 
         public Action<int, int, int> Voortgang { get; set; }
         public Action<Status, string, int?> StatusWijziging { get; set; }
+
+        public PowerpointFunctions(IMppFactory mppFactory)
+        {
+            _mppFactory = mppFactory;
+        }
 
         public void PreparePresentation(IEnumerable<ILiturgieRegel> liturgie, string voorganger, string collecte1, string collecte2, string lezen, string tekst, IInstellingenBase gebruikInstellingen, string opslaanAls)
         {
@@ -54,7 +62,7 @@ namespace mppt
         {
             StatusWijziging?.Invoke(Status.Gestart, null, null);
 
-            _applicatie = new MppInterfaceApplication();
+            _applicatie = _mppFactory.GetApplication();
             //Creeer een nieuwe lege presentatie volgens de template thema (toon scherm zodat bij fout nog iets te zien is)
             _presentatie = _applicatie.Open(_instellingen.FullTemplatetheme, metWindow: true);
             //Minimaliseer scherm
@@ -136,7 +144,7 @@ namespace mppt
                 var presentatie = OpenPps(_instellingen.FullTemplateliederen);
                 var slide = presentatie.EersteSlide();  //alleen eerste slide gebruiken we
                 //voor elk object op de slides (we zoeken naar de tekst die vervangen moet worden in de template)
-                foreach (var shape in slide.Shapes().Where(s => s is MppInterfaceShapeTextbox).Cast<MppInterfaceShapeTextbox>())
+                foreach (var shape in slide.Shapes().Where(s => s is IMppShapeTextbox).Cast<IMppShapeTextbox>())
                 {
                     var text = shape.Text;
                     //als de template de tekst bevat "Liturgieregel" moet daar de liturgieregel komen
@@ -154,7 +162,7 @@ namespace mppt
                     }
                 }
                 //voeg slide in in het grote geheel
-                _slidesGemist += _presentatie.SlidesKopieNaarPresentatie(new List<MppInterfaceSlide> { slide });
+                _slidesGemist += _presentatie.SlidesKopieNaarPresentatie(new List<IMppSlide> { slide });
                 //sluit de template weer af
                 presentatie.Dispose();
             }
@@ -168,8 +176,8 @@ namespace mppt
             var slides = presentatie.AlleSlides().ToList();
             foreach (var shape in slides.SelectMany(s => s.Shapes()).ToList())  
             {
-                var textbox = shape as MppInterfaceShapeTextbox;
-                var table = shape as MppInterfaceShapeTable;
+                var textbox = shape as IMppShapeTextbox;
+                var table = shape as IMppShapeTable;
 
                 if (textbox != null) {
                     var text = textbox.Text;
@@ -198,7 +206,7 @@ namespace mppt
                 }
                 else if (table != null) { 
                     if (table.GetTitel().Equals("<Liturgie>"))
-                        VulLiturgieTabel(table, _liturgie, _lezen, _tekst, _instellingen.StandaardTeksten.LiturgieLezen, _instellingen.StandaardTeksten.LiturgieTekst, _instellingen.StandaardTeksten.Liturgie);
+                        VulLiturgieTabel(table, _mppFactory, _liturgie, _lezen, _tekst, _instellingen.StandaardTeksten.LiturgieLezen, _instellingen.StandaardTeksten.LiturgieTekst, _instellingen.StandaardTeksten.Liturgie);
                 }
             }
             //voeg de slides in in het grote geheel
@@ -207,10 +215,10 @@ namespace mppt
             presentatie.Dispose();
         }
 
-        private static void VulLiturgieTabel(MppInterfaceShapeTable inTabel, IEnumerable<ILiturgieRegel> liturgie, string lezen, string tekst, string instellingenLezen, string instellingenTekst, string instellingLiturgie)
+        private static void VulLiturgieTabel(IMppShapeTable inTabel, IMppFactory mppFactory, IEnumerable<ILiturgieRegel> liturgie, string lezen, string tekst, string instellingenLezen, string instellingenTekst, string instellingLiturgie)
         {
-            var toonLijst = new List<IMppInterfaceShapeTableContent>();
-            toonLijst.Add(new MppInterfaceShapeTableContent1Column(0, instellingLiturgie, false));
+            var toonLijst = new List<IMppShapeTableContent>();
+            toonLijst.Add(mppFactory.GetMppShapeTableContent1Column(0, instellingLiturgie, false));
             foreach (var liturgieItem in liturgie.Where(l => l.TonenInOverzicht))
             {
                 var kolom1 = liturgieItem.Display.NaamOverzicht;
@@ -218,12 +226,12 @@ namespace mppt
                 var kolom3 = LiedFormattering.LiedVerzen(liturgieItem.Display, false, vanDelen: liturgieItem.Content);
                 if (!string.IsNullOrWhiteSpace(kolom3))
                     kolom3 = $": {kolom3}";
-                toonLijst.Add(new MppInterfaceShapeTableContent3Column(toonLijst.Count, kolom1, kolom2, kolom3));
+                toonLijst.Add(mppFactory.GetMppShapeTableContent3Column(toonLijst.Count, kolom1, kolom2, kolom3));
             }
             if (!string.IsNullOrWhiteSpace(lezen))
-                toonLijst.Add(new MppInterfaceShapeTableContent1Column(toonLijst.Count, $"{instellingenLezen}{lezen}", true));
+                toonLijst.Add(mppFactory.GetMppShapeTableContent1Column(toonLijst.Count, $"{instellingenLezen}{lezen}", true));
             if (!string.IsNullOrWhiteSpace(tekst))
-                toonLijst.Add(new MppInterfaceShapeTableContent1Column(toonLijst.Count, $"{instellingenTekst}{tekst}", true));
+                toonLijst.Add(mppFactory.GetMppShapeTableContent1Column(toonLijst.Count, $"{instellingenTekst}{tekst}", true));
             inTabel.InsertContent(toonLijst);
         }
 
@@ -317,7 +325,7 @@ namespace mppt
         /// </summary>
         /// <param name="path">het pad waar de powerpointpresentatie kan worden gevonden</param>
         /// <returns>de powerpoint presentatie</returns>
-        private MppInterfacePresentatie OpenPps(string path)
+        private IMppPresentatie OpenPps(string path)
         {
             //controleer voor het openen van de presentatie op het meegegeven path of de presentatie bestaat
             return File.Exists(path) ? _applicatie.Open(path, metWindow: false) : null;
