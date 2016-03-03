@@ -62,10 +62,25 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="PowerpointFunctions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Interfaces\ILiturgieDatabase\ILiturgieDatabase.csproj">
+      <Project>{1338d41d-5e66-40f3-845f-170a8dcfb445}</Project>
+      <Name>ILiturgieDatabase</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Interfaces\ISettings\ISettings.csproj">
+      <Project>{76821eaa-462d-4cad-813d-bcff31edad3a}</Project>
+      <Name>ISettings</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MicrosoftPowerpointWrapper\MicrosoftPowerpointWrapper.csproj">
+      <Project>{d65aa3ef-0086-4ca5-802e-a2bb2e3bed20}</Project>
+      <Name>MicrosoftPowerpointWrapper</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
