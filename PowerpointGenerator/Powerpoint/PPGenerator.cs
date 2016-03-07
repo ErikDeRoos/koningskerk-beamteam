@@ -1,7 +1,6 @@
 ﻿using ILiturgieDatabase;
 using ISettings;
 using ISlideBuilder;
-using Microsoft.Practices.Unity;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,7 +23,7 @@ namespace PowerpointGenerator.Powerpoint
         private string _tekst;
         private IInstellingen _instellingen;
         private string _opslaanAls;
-        private readonly IUnityContainer _di;
+        private readonly Func<IBuilder> _builderResolver;
 
         private IBuilder _powerpoint;
         private Thread _generatorThread;
@@ -38,9 +37,9 @@ namespace PowerpointGenerator.Powerpoint
         private string _gereedMetFout;
         private int? _slidesGemist;
 
-        public PpGenerator(IUnityContainer di, Voortgang voortgangDelegate, GereedMelding gereedmeldingDelegate)
+        public PpGenerator(Func<IBuilder> builderResolver, Voortgang voortgangDelegate, GereedMelding gereedmeldingDelegate)
         {
-            _di = di;
+            _builderResolver = builderResolver;
             _huidigeStatus = State.Onbekend;
             _setVoortgang = voortgangDelegate;
             _setGereedmelding = gereedmeldingDelegate;
@@ -80,7 +79,7 @@ namespace PowerpointGenerator.Powerpoint
                     return new StatusMelding(_huidigeStatus, "Kan powerpoint niet starten", "Start het programma opnieuw op");
                 try
                 {
-                    _powerpoint = _di.Resolve<IBuilder>();
+                    _powerpoint = _builderResolver();
                 }
                 catch
                 {
@@ -132,7 +131,7 @@ namespace PowerpointGenerator.Powerpoint
                 for (int teller = 0; teller < 1000 && _generatorThread.IsAlive; teller++)
                     Thread.Sleep(5);
                 _generatorThread = null;
-                _powerpoint.Dispose();
+                _powerpoint?.Dispose();
                 _powerpoint = null;
                 _huidigeStatus = State.Geinitialiseerd;
             }

@@ -3,7 +3,6 @@ using IFileSystem;
 using ILiturgieDatabase;
 using ISettings;
 using ISlideBuilder;
-using Microsoft.Practices.Unity;
 using RemoteGenerator.Builder.Wachtrij;
 using System;
 using System.Collections.Generic;
@@ -27,8 +26,8 @@ namespace RemoteGenerator.Builder
         private string _tekst;
         private IInstellingenBase _instellingen;
         private string _opslaanAls;
-        private readonly IUnityContainer _di;
         private IFileOperations _fileManager;
+        private readonly Func<IBuilder> _builderResolver;
 
         private Thread _startThread;
         private IBuilder _powerpoint;
@@ -44,9 +43,9 @@ namespace RemoteGenerator.Builder
         private List<WachtrijRegel> _verwerkt;
         public IEnumerable<WachtrijRegel> Verwerkt => _verwerkt;
 
-        public PpGenerator(IUnityContainer di, IFileOperations fileManager)
+        public PpGenerator(Func<IBuilder> builderResolver, IFileOperations fileManager)
         {
-            _di = di;
+            _builderResolver = builderResolver;
             _fileManager = fileManager;
             _huidigeStatus = State.Onbekend;
             _wachtrij = new List<WachtrijRegel>();
@@ -185,13 +184,7 @@ namespace RemoteGenerator.Builder
             {
                 if (_huidigeStatus != State.Geinitialiseerd)
                     return new StatusMelding(_huidigeStatus, "Kan powerpoint niet starten", "Start het programma opnieuw op");
-                try
-                {
-                    _powerpoint = _di.Resolve<IBuilder>();
-                }
-                catch (ResolutionFailedException) { }
-                if (_powerpoint == null)
-                    return new StatusMelding(_huidigeStatus, "Kan powerpoint niet starten", "Powerpoint koppeling kon niet geladen worden");
+                _powerpoint = _builderResolver();
                 _powerpoint.StatusWijziging = PresentatieStatusWijzigingCallback;
                 _powerpoint.Voortgang = PresentatieVoortgangCallback;
                 _gereedMetFout = null;
@@ -312,7 +305,7 @@ namespace RemoteGenerator.Builder
             if (_generatorThread != null && _generatorThread.IsAlive)
                 _generatorThread.Abort();
             _generatorThread = null;
-            _powerpoint.Dispose();
+            _powerpoint?.Dispose();
             _powerpoint = null;
             _huidigeStatus = State.Onbekend;
             if (gelocked)

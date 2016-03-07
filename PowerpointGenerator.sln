@@ -33,6 +33,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Interfaces", "Interfaces", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IFileSystem", "Interfaces\IFileSystem\IFileSystem.csproj", "{10295C3D-BC8B-4FCA-A6C8-ABC0E1DFE510}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityFactoryInXML", "UnityFactoryInXML\UnityFactoryInXML.csproj", "{EF75E2B7-8CBF-4B8D-9729-D66FA91C7137}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug PowerpointWrapper|Any CPU = Debug PowerpointWrapper|Any CPU
@@ -118,6 +120,12 @@ Global
 		{10295C3D-BC8B-4FCA-A6C8-ABC0E1DFE510}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{10295C3D-BC8B-4FCA-A6C8-ABC0E1DFE510}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{10295C3D-BC8B-4FCA-A6C8-ABC0E1DFE510}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF75E2B7-8CBF-4B8D-9729-D66FA91C7137}.Debug PowerpointWrapper|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF75E2B7-8CBF-4B8D-9729-D66FA91C7137}.Debug PowerpointWrapper|Any CPU.Build.0 = Debug|Any CPU
+		{EF75E2B7-8CBF-4B8D-9729-D66FA91C7137}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF75E2B7-8CBF-4B8D-9729-D66FA91C7137}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF75E2B7-8CBF-4B8D-9729-D66FA91C7137}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF75E2B7-8CBF-4B8D-9729-D66FA91C7137}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
