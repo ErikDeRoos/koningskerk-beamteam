@@ -25,7 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{82068B2E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tools.Tests", "Tests\Tools.Tests\Tools.Tests.csproj", "{D621AAA0-8D96-451B-ACE5-AD68596273AD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicrosoftPowerpointWrapper.Tests", "Tools\MicrosoftPowerpointWrapper.Tests\MicrosoftPowerpointWrapper.Tests.csproj", "{451902C3-E15B-4D8A-8FC7-62A641FC13E8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicrosoftPowerpointWrapper.Tests", "Tests\MicrosoftPowerpointWrapper.Tests\MicrosoftPowerpointWrapper.Tests.csproj", "{451902C3-E15B-4D8A-8FC7-62A641FC13E8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectTools.Tests", "Tests\ConnectTools.Tests\ConnectTools.Tests.csproj", "{51839F5A-7EB1-4B3B-9D86-8B9A55263E7F}"
 EndProject
