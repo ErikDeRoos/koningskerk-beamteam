@@ -45,7 +45,7 @@ namespace PowerpointGenerator.Database {
                 regel.Deel = voorPreBenamingStukken[voorPreBenamingStukken.Length - 1];  // Is altijd laatste deel
             regel.Benaming = preBenamingTrimmed.Substring(0, preBenamingTrimmed.Length - (regel.Deel ?? "").Length).Trim();
             // Verzen als '1,2' in 'psalm 110:1,2'
-            regel.VerzenZoalsIngevoerd = voorBenamingStukken.Length > 1 ? voorBenamingStukken[1] : null;
+            regel.VerzenZoalsIngevoerd = voorBenamingStukken.Length > 1 ? voorBenamingStukken[1].Trim() : null;
             regel.Verzen = (regel.VerzenZoalsIngevoerd ?? "")
               .Split(VersScheidingstekens, StringSplitOptions.RemoveEmptyEntries)
               .Select(v => v.Trim())
