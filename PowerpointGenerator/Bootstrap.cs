@@ -18,6 +18,7 @@ namespace PowerpointGenerator
             container.RegisterType<mppt.PowerpointFunctions>().As<ISlideBuilder.IBuilder>();
             container.RegisterType<mppt.Connect.MppFactory>().As<mppt.Connect.IMppFactory>();
             container.RegisterType<mppt.Connect.MppApplication>().As<mppt.Connect.IMppApplication>();
+            container.RegisterType<mppt.LiedPresentator.LiedFormatter>().As<mppt.LiedPresentator.ILiedFormatter>();
         }
     }
 }

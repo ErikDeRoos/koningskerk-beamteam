@@ -7,6 +7,7 @@ using ISettings;
 using ISlideBuilder;
 using Tools;
 using mppt.Connect;
+using mppt.LiedPresentator;
 
 namespace mppt
 {
@@ -17,6 +18,7 @@ namespace mppt
     public class PowerpointFunctions : IBuilder
     {
         private IMppFactory _mppFactory;
+        private ILiedFormatter _liedFormatter;
 
         private IMppApplication _applicatie;
         private IMppPresentatie _presentatie;
@@ -37,7 +39,7 @@ namespace mppt
         public Action<int, int, int> Voortgang { get; set; }
         public Action<Status, string, int?> StatusWijziging { get; set; }
 
-        public PowerpointFunctions(IMppFactory mppFactory)
+        public PowerpointFunctions(IMppFactory mppFactory, ILiedFormatter liedFormatter)
         {
             _mppFactory = mppFactory;
         }
@@ -149,7 +151,7 @@ namespace mppt
                     var text = shape.Text;
                     //als de template de tekst bevat "Liturgieregel" moet daar de liturgieregel komen
                     if (text.Equals("<Liturgieregel>"))
-                        shape.Text = InvullenLiturgieRegel(regel, inhoud);
+                        shape.Text = _liedFormatter.Huidig(regel, inhoud).Display;
                     //als de template de tekst bevat "Inhoud" moet daar de inhoud van het vers komen
                     else if (text.Equals("<Inhoud>"))
                         shape.Text = tekst;
@@ -158,7 +160,8 @@ namespace mppt
                     {
                         //we moeten dan wel al op de laatste slide zitten ('InvullenVolgende' is wel al intelligent maar in het geval van 1
                         //lange tekst over meerdere dia's kan 'InvullenVolgende' niet de juiste keuze maken)
-                        shape.Text = tekstOmTeRenderenLijst.Last() == tekst ? InvullenVolgende(regel, inhoud, volgende) : string.Empty;
+                        var display = IsLaatsteSlide(tekstOmTeRenderenLijst, tekst, regel, inhoud) ? _liedFormatter.Volgende(volgende) : null;
+                        shape.Text = display != null ? $"{_instellingen.StandaardTeksten.Volgende} {display.Display}" : string.Empty;
                     }
                 }
                 //voeg slide in in het grote geheel
@@ -193,9 +196,13 @@ namespace mppt
                     //als de template de tekst bevat "2e Collecte: " moet daar de 2e collecte achter komen
                     else if (text.Equals("<2e Collecte:>"))
                         textbox.Text = _instellingen.StandaardTeksten.Collecte2 + _collecte2;
-                    //als de template de tekst bevat "Volgende" moet daar de Liturgieregel van de volgende sheet komen
+                    //als de template de tekst bevat "Volgende" moet daar _altijd_ de Liturgieregel van de volgende sheet komen
+                    //(omdat het hier handmatig bepaald wordt door degene die de slides gemaakt heeft)
                     else if (text.Equals("<Volgende>"))
-                        textbox.Text = InvullenVolgende(regel, inhoud, volgende);
+                    {
+                        var display = _liedFormatter.Volgende(volgende);
+                        textbox.Text = display != null ? $"{_instellingen.StandaardTeksten.Volgende} {display.Display}" : string.Empty;
+                    }
                     //als de template de tekst bevat "Volgende" moet daar de te lezen schriftgedeeltes komen
                     else if (text.Equals("<Lezen>"))
                         textbox.Text = _instellingen.StandaardTeksten.Lezen + _lezen;
@@ -206,7 +213,7 @@ namespace mppt
                 }
                 else if (table != null) { 
                     if (table.GetTitel().Equals("<Liturgie>"))
-                        VulLiturgieTabel(table, _mppFactory, _liturgie, _lezen, _tekst, _instellingen.StandaardTeksten.LiturgieLezen, _instellingen.StandaardTeksten.LiturgieTekst, _instellingen.StandaardTeksten.Liturgie);
+                        VulLiturgieTabel(table, _mppFactory, _liedFormatter, _liturgie, _lezen, _tekst, _instellingen.StandaardTeksten.LiturgieLezen, _instellingen.StandaardTeksten.LiturgieTekst, _instellingen.StandaardTeksten.Liturgie);
                 }
             }
             //voeg de slides in in het grote geheel
@@ -215,15 +222,16 @@ namespace mppt
             presentatie.Dispose();
         }
 
-        private static void VulLiturgieTabel(IMppShapeTable inTabel, IMppFactory mppFactory, IEnumerable<ILiturgieRegel> liturgie, string lezen, string tekst, string instellingenLezen, string instellingenTekst, string instellingLiturgie)
+        private static void VulLiturgieTabel(IMppShapeTable inTabel, IMppFactory mppFactory, ILiedFormatter liedFormatter, IEnumerable<ILiturgieRegel> liturgie, string lezen, string tekst, string instellingenLezen, string instellingenTekst, string instellingLiturgie)
         {
             var toonLijst = new List<IMppShapeTableContent>();
             toonLijst.Add(mppFactory.GetMppShapeTableContent1Column(0, instellingLiturgie, false));
             foreach (var liturgieItem in liturgie.Where(l => l.TonenInOverzicht))
             {
-                var kolom1 = liturgieItem.Display.NaamOverzicht;
-                var kolom2 = liturgieItem.Display.SubNaam;
-                var kolom3 = LiedFormattering.LiedVerzen(liturgieItem.Display, false, vanDelen: liturgieItem.Content);
+                var display = liedFormatter.Liturgie(liturgieItem);
+                var kolom1 = display.Naam;
+                var kolom2 = display.SubNaam;
+                var kolom3 = display.Verzen;
                 if (!string.IsNullOrWhiteSpace(kolom3))
                     kolom3 = $": {kolom3}";
                 toonLijst.Add(mppFactory.GetMppShapeTableContent3Column(toonLijst.Count, kolom1, kolom2, kolom3));
@@ -239,12 +247,9 @@ namespace mppt
         /// een nieuw item komt.
         /// Je kunt er echter ook voor kiezen dat een volgende item gewoon niet aangekondigd wordt. Dat gaat
         /// via 'TonenInVolgende'.
-        private string InvullenVolgende(ILiturgieRegel regel, ILiturgieContent deel, ILiturgieRegel volgende)
+        private static bool IsLaatsteSlide(IEnumerable<string> tekstOmTeRenderen, string huidigeTekst, ILiturgieRegel regel, ILiturgieContent deel)
         {
-            // Alleen volgende tonen als we op het laatste item zitten en als volgende er is
-            if (regel.Content.Last() == deel && volgende != null && volgende.TonenInVolgende)
-                return $"{_instellingen.StandaardTeksten.Volgende} {LiedFormattering.LiedNaam(volgende)}";
-            return string.Empty;
+            return tekstOmTeRenderen.Last() == huidigeTekst && regel.Content.Last() == deel;
         }
 
         private SlideVuller InvullenLiedTekst(string tempinhoud)
@@ -313,11 +318,6 @@ namespace mppt
         private static bool SkipRegel(string regel)
         {
             return string.IsNullOrWhiteSpace(regel) || regel == NieuweSlideAanduiding;
-        }
-
-        private static string InvullenLiturgieRegel(ILiturgieRegel regel, ILiturgieContent vanafDeel)
-        {
-            return LiedFormattering.LiedNaam(regel, vanafDeel);
         }
 
         /// <summary>
