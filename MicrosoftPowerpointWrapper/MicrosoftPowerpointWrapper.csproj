@@ -66,6 +66,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Connect\MppFactory.cs" />
+    <Compile Include="Connect\MppImplement.cs" />
+    <Compile Include="Connect\MppInterface.cs" />
     <Compile Include="PowerpointFunctions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
