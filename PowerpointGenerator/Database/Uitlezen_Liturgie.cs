@@ -18,7 +18,7 @@ namespace PowerpointGenerator.Database {
     /// <summary>
     /// Maak een ruwe lijst van een tekstuele liturgie
     /// </summary>
-    class InterpreteerLiturgieRuw : ILiturgieInterpreteer
+    public class InterpreteerLiturgieRuw : ILiturgieInterpreteer
     {
         private static readonly char[] BenamingScheidingstekens = { ':' };
         private static readonly char[] BenamingDeelScheidingstekens = { ' ' };
