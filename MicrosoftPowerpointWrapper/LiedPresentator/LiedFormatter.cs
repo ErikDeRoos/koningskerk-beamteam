@@ -1,0 +1,105 @@
+﻿using ILiturgieDatabase;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Tools;
+
+namespace mppt.LiedPresentator
+{
+    public class LiedFormatter : ILiedFormatter
+    {
+        public LiedFormatResult Huidig(ILiturgieRegel regel, ILiturgieContent vanafDeel)
+        {
+            return ToonMetVerzenEnEersteLos(regel, vanafDeel);
+        }
+
+        /// Je kunt er voor kiezen dat een volgende item gewoon niet aangekondigd wordt. Dat gaat
+        /// via 'TonenInVolgende'.
+        public LiedFormatResult Volgende(ILiturgieRegel volgende)
+        {
+            // Alleen volgende tonen als volgende er is
+            if (volgende != null && volgende.TonenInVolgende)
+                return ToonWaarNodigMetVerzen(volgende);
+            return null;
+        }
+
+        public LiedFormatResult Liturgie(ILiturgieRegel regel)
+        {
+            return ToonWaarNodigMetVerzen(regel);
+        }
+
+        private static LiedFormatResult ToonWaarNodigMetVerzen(ILiturgieRegel regel)
+        {
+            var result = new LiedFormatResult()
+            {
+                Naam = regel.Display.NaamOverzicht
+            };
+            if (!string.IsNullOrWhiteSpace(regel.Display.SubNaam))
+                result.SubNaam = regel.Display.SubNaam;
+            result.Verzen = LiedVerzen(regel.Display, false, regel.Content);
+            return result;
+        }
+
+        private static LiedFormatResult ToonMetVerzenEnEersteLos(ILiturgieRegel regel, ILiturgieContent vanafDeelHint)
+        {
+            var result = new LiedFormatResult()
+            {
+                Naam = regel.Display.Naam
+            };
+            if (!string.IsNullOrWhiteSpace(regel.Display.SubNaam))
+                result.SubNaam = regel.Display.SubNaam;
+            if (regel.Content == null)
+                result.Verzen = LiedVerzen(regel.Display, true);
+            else
+            {
+                var vanafDeel = vanafDeelHint ?? regel.Content.FirstOrDefault();  // Bij een deel hint tonen we alleen nog de huidige en komende versen
+                var gebruikDeelRegels = regel.Content.SkipWhile(r => r != vanafDeel);
+                result.Verzen = LiedVerzen(regel.Display, true, gebruikDeelRegels);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Maak een mooie samenvatting van de opgegeven nummers
+        /// </summary>
+        /// Probeer de nummers samen te vatten door een bereik te tonen.
+        /// Waar niet mogelijk toon daar gewoon komma gescheiden nummers.
+        /// Als het in beeld is dan wordt de eerste in ieder geval los getoond.
+        /// <remarks>
+        /// </remarks>
+        private static string LiedVerzen(ILiturgieDisplay regelDisplay, bool toonEersteLos, IEnumerable<ILiturgieContent> vanDelen = null)
+        {
+            if (regelDisplay.VersenGebruikDefault.Gebruik || vanDelen == null || (!toonEersteLos && regelDisplay.VolledigeContent))
+                return !string.IsNullOrEmpty(regelDisplay.VersenGebruikDefault.Tekst) ? regelDisplay.VersenGebruikDefault.Tekst : null;
+            var over = vanDelen.Where(v => v.Nummer.HasValue).Select(v => v.Nummer.Value).ToList();
+            if (!over.Any())
+                return null;
+            var builder = new StringBuilder();
+            if (toonEersteLos)
+            {
+                builder.Append(over.First()).Append(", ");
+                over.RemoveAt(0);
+            }
+            while (over.Any())
+            {
+                var nieuweReeks = new List<int> { over.First() };
+                over.RemoveAt(0);
+                while (over.Any() && over[0] == nieuweReeks.Last() + 1)
+                {
+                    nieuweReeks.Add(over[0]);
+                    over.RemoveAt(0);
+                }
+                if (nieuweReeks.Count == 1)
+                    builder.Append(nieuweReeks[0]);
+                else if (nieuweReeks.Count == 2)
+                    builder.Append(string.Join(", ", nieuweReeks));
+                else
+                    builder.AppendFormat("{0} - {1}", nieuweReeks.First(), nieuweReeks.Last());
+                builder.Append(", ");
+            }
+            return builder.ToString().TrimEnd(',', ' ');
+        }
+    }
+}
