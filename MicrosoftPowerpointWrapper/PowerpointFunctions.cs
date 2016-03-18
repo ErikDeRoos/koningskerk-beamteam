@@ -42,6 +42,7 @@ namespace mppt
         public PowerpointFunctions(IMppFactory mppFactory, ILiedFormatter liedFormatter)
         {
             _mppFactory = mppFactory;
+            _liedFormatter = liedFormatter;
         }
 
         public void PreparePresentation(IEnumerable<ILiturgieRegel> liturgie, string voorganger, string collecte1, string collecte2, string lezen, string tekst, IInstellingenBase gebruikInstellingen, string opslaanAls)
