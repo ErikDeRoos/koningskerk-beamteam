@@ -350,7 +350,7 @@ namespace PowerpointGenerator.Database {
             if (resultaat.Fout != null)
                 return resultaat.Fout;
 
-            if (setNaam == FileEngineDefaults.CommonFilesSetName)
+            if (resultaat.OnderdeelNaam == FileEngineDefaults.CommonFilesSetName)
             {
                 regel.DisplayEdit.Naam = resultaat.FragmentNaam;
                 regel.DisplayEdit.VersenGebruikDefault = new VersenDefault(string.Empty);  // Expliciet: Common bestanden hebben nooit versen
