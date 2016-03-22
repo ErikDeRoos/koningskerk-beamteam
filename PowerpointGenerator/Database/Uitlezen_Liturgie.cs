@@ -101,15 +101,176 @@ namespace PowerpointGenerator.Database {
         public const string VersSamenvoeging = "-";
     }
 
+    public interface ILiturgieDatabase
+    {
+        IZoekresultaat ZoekOnderdeel(string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen = null);
+    }
+    public interface IZoekresultaat
+    {
+        LiturgieOplossingResultaat? Fout { get; }
+        string OnderdeelNaam { get; }
+        string OnderdeelDisplayNaam { get; }
+        string FragmentNaam { get; }
+        IEnumerable<ILiturgieContent> Content { get; }
+        bool ZonderContentSplitsing { get; }
+    }
 
 
     /// <summary>
     /// Zoek naar de opgegeven liturgieen.
     /// </summary>
-    public class LiturgieDatabase : ILiturgieLosOp
+    public class LiturgieDatabase : ILiturgieDatabase
     {
         private readonly IEngine<FileEngineSetSettings> _database;
         public LiturgieDatabase(IEngine<FileEngineSetSettings> database)
+        {
+            _database = database;
+        }
+
+        public IZoekresultaat ZoekOnderdeel(string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen = null)
+        {
+            var set = _database.Where(s => Compare(s.Name, onderdeelNaam, StringComparison.OrdinalIgnoreCase) == 0 || Compare(s.Settings.DisplayName, onderdeelNaam, StringComparison.OrdinalIgnoreCase) == 0).FirstOrDefault();
+            if (set == null)
+                return new Zoekresultaat() { Fout = LiturgieOplossingResultaat.SetFout };
+            // Je kunt geen verzen opgeven als we ze niet los hebben.
+            // (Andere kant op kan wel: geen verzen opgeven terwijl ze er wel zijn (wat 'alle verzen' betekend))
+            if (fragmentDelen != null && fragmentDelen.Any() && !set.Settings.ItemsHaveSubContent)
+                return new Zoekresultaat() { Fout = LiturgieOplossingResultaat.VersOnderverdelingMismatch };
+            // Kijk of we het specifieke item in de set kunnen vinden (alleen via de op-schijf naam)
+            var subSet = set.Where(r => Compare(r.Name, fragmentNaam, StringComparison.OrdinalIgnoreCase) == 0).FirstOrDefault();
+            if (subSet == null)
+                return new Zoekresultaat() { Fout = LiturgieOplossingResultaat.SubSetFout };
+            var returnValue = new Zoekresultaat()
+            {
+                OnderdeelNaam = set.Name,
+                FragmentNaam = subSet.Name,
+                ZonderContentSplitsing = !set.Settings.ItemsHaveSubContent,
+                OnderdeelDisplayNaam = set.Settings.DisplayName,
+            };
+            if (fragmentDelen == null || !fragmentDelen.Any())
+            {
+                // We hebben geen versenlijst en de set instellingen zeggen zonder verzen te zijn dus hebben we n samengevoegd item
+                if (!set.Settings.ItemsHaveSubContent)
+                {
+                    var content = KrijgDirecteContent(subSet.Content, null);
+                    if (content == null)
+                        return new Zoekresultaat() { Fout = LiturgieOplossingResultaat.VersOnleesbaar };
+                    returnValue.Content = new List<ILiturgieContent> { content };
+                }
+                // Een item met alle verzen
+                else
+                {
+                    returnValue.Content = subSet.Content.TryAccessSubs()
+                        .Select(s => KrijgDirecteContent(s.Content, s.Name))
+                        .Where(s => s != null)  // omdat we alles ophalen kunnen hier dingen in zitten die niet kloppen
+                        .OrderBy(s => s.Nummer)  // Op volgorde van nummer
+                        .ToList();
+                }
+            }
+            else
+            {
+                // Specifieke verzen
+                var content = subSet.Content.TryAccessSubs();
+                var preSelect = InterpreteerNummers(fragmentDelen)  // We houden de volgorde van het opgeven aan omdat die afwijkend kan zijn
+                    .Select(n => n.ToString())
+                    .Select(n => new { Naam = n, SubSet = content.FirstOrDefault(c => c.Name == n), })
+                    .ToList();
+                // Specifieke verzen moeten allemaal gevonden kunnen worden
+                if (preSelect.Any(c => c.SubSet == null))
+                    return new Zoekresultaat() { Fout = LiturgieOplossingResultaat.VersFout };
+                returnValue.Content = preSelect
+                    .Select(s => KrijgDirecteContent(s.SubSet.Content, s.Naam))
+                    .ToList();
+                // Specifieke verzen moeten allemaal interpreteerbaar zijn
+                if (returnValue.Content.Any(c => c == null))
+                    return new Zoekresultaat() { Fout = LiturgieOplossingResultaat.VersOnleesbaar };
+            }
+            return returnValue;
+        }
+
+        public class Zoekresultaat : IZoekresultaat
+        {
+            public LiturgieOplossingResultaat? Fout { get; set; }
+            public string OnderdeelNaam { get; set; }
+            public string OnderdeelDisplayNaam { get; set; }
+            public string FragmentNaam { get; set; }
+            public IEnumerable<ILiturgieContent> Content { get; set; }
+            public bool ZonderContentSplitsing { get; set; }
+        }
+
+        private static Content KrijgDirecteContent(IDbItemContent metItem, string possibleNummer)
+        {
+            int? nummer = null;
+            int parseNummer;
+            if (int.TryParse(possibleNummer ?? "", out parseNummer))
+                nummer = parseNummer;
+            switch (metItem.Type)
+            {
+                case "txt":
+                    using (var fs = metItem.Content)
+                    {
+                        using (var rdr = new StreamReader(fs))
+                        {
+                            // geef de inhoud als tekst terug
+                            return new Content { Inhoud = rdr.ReadToEnd(), InhoudType = InhoudType.Tekst, Nummer = nummer };
+                        }
+                    }
+                case "ppt":
+                case "pptx":
+                    // geef de inhoud als link terug
+                    return new Content { Inhoud = metItem.PersistentLink, InhoudType = InhoudType.PptLink, Nummer = nummer };
+            }
+            // Geef een leeg item terug als we het niet konden verwerken
+            return null;
+        }
+
+        private static IEnumerable<int> InterpreteerNummers(IEnumerable<string> nummers)
+        {
+            foreach (var nummer in nummers)
+            {
+                var safeNummer = (nummer ?? "").Trim();
+                int parseNummer;
+                if (int.TryParse(safeNummer, out parseNummer))
+                {
+                    yield return parseNummer;
+                    continue;
+                }
+                if (safeNummer.Contains(LiturgieDatabaseSettings.VersSamenvoeging))
+                {
+                    var split = safeNummer.Split(new[] { LiturgieDatabaseSettings.VersSamenvoeging }, StringSplitOptions.RemoveEmptyEntries);
+                    if (split.Length == 2)
+                    {
+                        int vanNummer;
+                        int totEnMetNummer;
+                        if (int.TryParse(split[0].Trim(), out vanNummer) && int.TryParse(split[1].Trim(), out totEnMetNummer))
+                        {
+                            foreach (var teller in Enumerable.Range(vanNummer, totEnMetNummer - vanNummer + 1))
+                                yield return teller;
+                        }
+                    }
+                }
+                // TODO fout, hoe naar buiten laten komen?
+            }
+        }
+
+        private class Content : ILiturgieContent
+        {
+            public string Inhoud { get; set; }
+
+            public InhoudType InhoudType { get; set; }
+
+            public int? Nummer { get; set; }
+        }
+    }
+
+
+    /// <summary>
+    /// Zoek naar de opgegeven liturgieen.
+    /// </summary>
+    public class LiturgieOplosser : ILiturgieLosOp
+    {
+        private readonly ILiturgieDatabase _database;
+        public LiturgieOplosser(ILiturgieDatabase database)
         {
             _database = database;
         }
@@ -146,7 +307,7 @@ namespace PowerpointGenerator.Database {
                     regel.TonenInOverzicht = false;  // TODO tijdelijk default gedrag van het niet tonen van algemene items in het overzicht overgenomen uit de oude situatie
                 }
                 
-                var fout = Aanvullen(_database, regel, setNaam, zoekNaam, item.Verzen.ToList());
+                var fout = Aanvullen(regel, setNaam, zoekNaam, item.Verzen.ToList());
                 if (fout.HasValue)
                     return new Oplossing(fout.Value, item);
             } else
@@ -182,104 +343,33 @@ namespace PowerpointGenerator.Database {
             return new Oplossing(LiturgieOplossingResultaat.Opgelost, item, regel);
         }
 
-        private static LiturgieOplossingResultaat? Aanvullen(IEngine<FileEngineSetSettings> db, Regel regel, string setNaam, string zoekNaam, IEnumerable<string> verzen)
+        private LiturgieOplossingResultaat? Aanvullen(Regel regel, string setNaam, string zoekNaam, IEnumerable<string> verzen)
         {
             var verzenList = verzen.ToList();
-            // zoek de set via op-schijf naam of de aangepaste naam
-            var set = db.Where(s => Compare(s.Name, setNaam, StringComparison.OrdinalIgnoreCase) == 0 || Compare(s.Settings.DisplayName, setNaam, StringComparison.OrdinalIgnoreCase) == 0).FirstOrDefault();
-            if (set == null)
-                return LiturgieOplossingResultaat.SetFout;
-            // Je kunt geen verzen opgeven als we ze niet los hebben.
-            // (Andere kant op kan wel: geen verzen opgeven terwijl ze er wel zijn (wat 'alle verzen' betekend))
-            if (verzenList.Any() && !set.Settings.ItemsHaveSubContent)
-                return LiturgieOplossingResultaat.VersOnderverdelingMismatch;
-            // Kijk of we het specifieke item in de set kunnen vinden (alleen via de op-schijf naam)
-            var subSet = set.Where(r => Compare(r.Name, zoekNaam, StringComparison.OrdinalIgnoreCase) == 0).FirstOrDefault();
-            if (subSet == null)
-                return LiturgieOplossingResultaat.SubSetFout;
+            var resultaat = _database.ZoekOnderdeel(setNaam, zoekNaam, verzenList);
+            if (resultaat.Fout != null)
+                return resultaat.Fout;
+
             if (setNaam == FileEngineDefaults.CommonFilesSetName)
             {
-                regel.DisplayEdit.Naam = subSet.Name;
+                regel.DisplayEdit.Naam = resultaat.FragmentNaam;
                 regel.DisplayEdit.VersenGebruikDefault = new VersenDefault(string.Empty);  // Expliciet: Common bestanden hebben nooit versen
             }
             else {
-                regel.DisplayEdit.Naam = set.Name;
-                regel.DisplayEdit.SubNaam = subSet.Name;
+                regel.DisplayEdit.Naam = resultaat.OnderdeelNaam;
+                regel.DisplayEdit.SubNaam = resultaat.FragmentNaam;
             }
-            if (!verzenList.Any())
-            {
-                // We hebben geen versenlijst en de set instellingen zeggen zonder verzen te zijn dus hebben we n samengevoegd item
-                if (!set.Settings.ItemsHaveSubContent)
-                {
-                    var content = KrijgDirecteContent(subSet.Content, null);
-                    if (content == null)
-                        return LiturgieOplossingResultaat.VersOnleesbaar;
-                    regel.Content = new List<ILiturgieContent> { content };
-                    regel.DisplayEdit.VersenGebruikDefault = new VersenDefault(string.Empty);  // Altijd default gebruiken omdat er altijd maar 1 content is
-                }
-                // Een item met alle verzen
-                else
-                {
-                    regel.Content = subSet.Content.TryAccessSubs()
-                        .Select(s => KrijgDirecteContent(s.Content, s.Name))
-                        .Where(s => s != null)  // omdat we alles ophalen kunnen hier dingen in zitten die niet kloppen
-                        .OrderBy(s => s.Nummer)  // Op volgorde van nummer
-                        .ToList();
-                }
-                regel.DisplayEdit.VolledigeContent = true;
-            }
-            else
-            {
-                // Specifieke verzen
-                var content = subSet.Content.TryAccessSubs();
-                var preSelect = InterpreteerNummers(verzenList)  // We houden de volgorde van het opgeven aan omdat die afwijkend kan zijn
-                    .Select(n => n.ToString())
-                    .Select(n => new { Naam = n, SubSet = content.FirstOrDefault(c => c.Name == n), })
-                    .ToList();
-                // Specifieke verzen moeten allemaal gevonden kunnen worden
-                if (preSelect.Any(c => c.SubSet == null))
-                    return LiturgieOplossingResultaat.VersFout;
-                regel.Content = preSelect
-                    .Select(s => KrijgDirecteContent(s.SubSet.Content, s.Naam))
-                    .ToList();
-                // Specifieke verzen moeten allemaal interpreteerbaar zijn
-                if (regel.Content.Any(c => c == null))
-                    return LiturgieOplossingResultaat.VersOnleesbaar;
-                regel.DisplayEdit.VolledigeContent = false;
-            }
+            regel.Content = resultaat.Content.ToList();
+            if (resultaat.ZonderContentSplitsing)
+                regel.DisplayEdit.VersenGebruikDefault = new VersenDefault(string.Empty);  // Altijd default gebruiken omdat er altijd maar 1 content is
+            regel.DisplayEdit.VolledigeContent = !verzenList.Any();
 
             // bepaal de naamgeving
-            regel.DisplayEdit.Naam = !IsNullOrWhiteSpace(set.Settings.DisplayName) ? (set.Settings.DisplayName.Equals(Properties.Settings.Default.SetNameEmpty, StringComparison.CurrentCultureIgnoreCase) ? null : set.Settings.DisplayName) : regel.DisplayEdit.Naam;
+            if (!IsNullOrWhiteSpace(resultaat.OnderdeelDisplayNaam))
+                regel.DisplayEdit.Naam = resultaat.OnderdeelDisplayNaam.Equals(Properties.Settings.Default.SetNameEmpty, StringComparison.CurrentCultureIgnoreCase) ? null : resultaat.OnderdeelDisplayNaam;
 
             return null;
         }
-
-        private static Content KrijgDirecteContent(IDbItemContent metItem, string possibleNummer)
-        {
-            int? nummer = null;
-            int parseNummer;
-            if (int.TryParse(possibleNummer ?? "", out parseNummer))
-                nummer = parseNummer;
-            switch (metItem.Type)
-            {
-                case "txt":
-                    using (var fs = metItem.Content)
-                    {
-                        using (var rdr = new StreamReader(fs))
-                        {
-                            // geef de inhoud als tekst terug
-                            return new Content { Inhoud = rdr.ReadToEnd(), InhoudType = InhoudType.Tekst, Nummer = nummer };
-                        }
-                    }
-                case "ppt":
-                case "pptx":
-                    // geef de inhoud als link terug
-                    return new Content { Inhoud = metItem.PersistentLink, InhoudType = InhoudType.PptLink, Nummer = nummer };
-            }
-            // Geef een leeg item terug als we het niet konden verwerken
-            return null;
-        }
-
 
         private static string GetOptieParam(IEnumerable<string> opties, string optie)
         {
@@ -287,40 +377,10 @@ namespace PowerpointGenerator.Database {
             return optieMetParam?.Substring(optie.Length).Trim();
         }
 
-        private static IEnumerable<int> InterpreteerNummers(IEnumerable<string> nummers)
-        {
-            foreach (var nummer in nummers)
-            {
-                var safeNummer = (nummer ?? "").Trim();
-                int parseNummer;
-                if (int.TryParse(safeNummer, out parseNummer)) {
-                    yield return parseNummer;
-                    continue;
-                }
-                if (safeNummer.Contains(LiturgieDatabaseSettings.VersSamenvoeging))
-                {
-                    var split = safeNummer.Split(new[] { LiturgieDatabaseSettings.VersSamenvoeging }, StringSplitOptions.RemoveEmptyEntries);
-                    if (split.Length == 2)
-                    {
-                        int vanNummer;
-                        int totEnMetNummer;
-                        if (int.TryParse(split[0].Trim(), out vanNummer) && int.TryParse(split[1].Trim(), out totEnMetNummer))
-                        {
-                            foreach (var teller in Enumerable.Range(vanNummer, totEnMetNummer - vanNummer + 1))
-                                yield return teller;
-                        }
-                    }
-                }
-                // TODO fout, hoe naar buiten laten komen?
-            }
-        }
-
-
         public IEnumerable<ILiturgieOplossing> LosOp(IEnumerable<ILiturgieInterpretatie> items, IEnumerable<ILiturgieMapmaskArg> masks)
         {
             return items.Select(i => LosOp(i, masks)).ToList();
         }
-
 
 
         private class Oplossing : ILiturgieOplossing
@@ -374,15 +434,6 @@ namespace PowerpointGenerator.Database {
 
             public bool Gebruik { get; set; }
             public string Tekst { get; set; }
-        }
-
-        private class Content : ILiturgieContent
-        {
-            public string Inhoud { get; set; }
-
-            public InhoudType InhoudType { get; set; }
-
-            public int? Nummer { get; set; }
         }
     }
 
