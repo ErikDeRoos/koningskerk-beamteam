@@ -8,7 +8,7 @@ namespace PowerpointGenerator
         {
             container.RegisterType<Database.LiturgieDatabase>().As<ILiturgieDatabase.ILiturgieDatabase>();
             container.RegisterType<LiturgieOplosser.LiturgieOplosser>().As<ILiturgieDatabase.ILiturgieLosOp>();
-            container.RegisterGeneric(typeof(Database.FileEngine<>)).As(typeof(IDatabase.IEngine<>));
+            container.RegisterGeneric(typeof(Database.FileSystem.FileEngine<>)).As(typeof(IDatabase.IEngine<>));
             SetMsPowerpointBuilder(container);
             container.RegisterType<Tools.LocalFileOperations>().As<IFileSystem.IFileOperations>();
             container.RegisterType<Settings.SettingsFactory>().As<ISettings.IInstellingenFactory>().WithParameter("instellingenFileName", Properties.Settings.Default.InstellingenFileName).WithParameter("masksFileName", Properties.Settings.Default.MasksFileName);

@@ -8,7 +8,7 @@ using System.IO;
 using ISettings;
 using IFileSystem;
 
-namespace PowerpointGenerator.Database
+namespace PowerpointGenerator.Database.FileSystem
 {
     public static class FileEngineDefaults
     {

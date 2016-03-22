@@ -3,7 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 
-namespace PowerpointGenerator.Database
+namespace PowerpointGenerator.Database.FileSystem
 {
     internal static class ArchiveExtender
     {
