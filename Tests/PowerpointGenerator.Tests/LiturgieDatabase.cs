@@ -66,10 +66,7 @@ namespace PowerpointGenerator.Tests
         [TestCase("Psalm2", "100", "psalm2", "Psalm")]
         public void LosOp_NormaalItem_GebruikMask(string onderdeel, string fragment, string maskRealName, string maskUseName)
         {
-            var maskItem = A.Fake<ILiturgieMapmaskArg>();
-            A.CallTo(() => maskItem.RealName).Returns(maskRealName);
-            A.CallTo(() => maskItem.Name).Returns(maskUseName);
-            var maskList = new[] { maskItem };
+            var maskList = FakeMask(maskRealName, maskUseName);
             var liturgieItem = FakeInterpretatie(onderdeel, fragment: fragment);
             var database = FakeDatabase(onderdeel, fragment);
             var sut = (new Database.LiturgieOplosser(database)) as ILiturgieLosOp;
@@ -79,6 +76,26 @@ namespace PowerpointGenerator.Tests
             Assert.That(oplossing.Regel.Display.Naam, Is.EqualTo(maskUseName));
         }
 
+        [TestCase("Welkom_groot", "Welkom_groot", "Welkom")]
+        public void LosOp_CommonItem_GebruikMask(string onderdeel, string maskRealName, string maskUseName)
+        {
+            var maskList = FakeMask(maskRealName, maskUseName);
+            var liturgieItem = FakeInterpretatie(onderdeel);
+            var database = FakeDatabase(FileEngineDefaults.CommonFilesSetName, onderdeel);
+            var sut = (new Database.LiturgieOplosser(database)) as ILiturgieLosOp;
+
+            var oplossing = sut.LosOp(liturgieItem, maskList);
+
+            Assert.That(oplossing.Regel.Display.Naam, Is.EqualTo(maskUseName));
+        }
+
+        private static IEnumerable<ILiturgieMapmaskArg> FakeMask(string maskRealName, string maskUseName)
+        {
+            var maskItem = A.Fake<ILiturgieMapmaskArg>();
+            A.CallTo(() => maskItem.RealName).Returns(maskRealName);
+            A.CallTo(() => maskItem.Name).Returns(maskUseName);
+            return new[] { maskItem };
+        }
 
         private static ILiturgieInterpretatie FakeInterpretatie(string onderdeel, string fragment = null)
         {
