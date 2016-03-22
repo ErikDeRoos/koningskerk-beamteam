@@ -6,7 +6,8 @@ namespace PowerpointGenerator
     {
         internal static void SetDefault(ContainerBuilder container)
         {
-            container.RegisterType<Database.LiturgieDatabase>().As<ILiturgieDatabase.ILiturgieLosOp>();
+            container.RegisterType<Database.LiturgieDatabase>().As<Database.ILiturgieDatabase>();
+            container.RegisterType<Database.LiturgieOplosser>().As<ILiturgieDatabase.ILiturgieLosOp>();
             container.RegisterGeneric(typeof(Database.FileEngine<>)).As(typeof(IDatabase.IEngine<>));
             SetMsPowerpointBuilder(container);
             container.RegisterType<Tools.LocalFileOperations>().As<IFileSystem.IFileOperations>();
