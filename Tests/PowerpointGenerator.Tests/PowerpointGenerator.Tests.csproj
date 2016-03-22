@@ -3,11 +3,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D621AAA0-8D96-451B-ACE5-AD68596273AD}</ProjectGuid>
+    <ProjectGuid>{06D1D7F9-FB24-464B-8EFD-52E93D561E4E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Tools.Tests</RootNamespace>
-    <AssemblyName>Tools.Tests</AssemblyName>
+    <RootNamespace>PowerpointGenerator.Tests</RootNamespace>
+    <AssemblyName>PowerpointGenerator.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -62,20 +62,26 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="InterpreteerLiturgieRuw.cs" />
+    <Compile Include="LiturgieDatabase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Interfaces\IDatabase\IDatabase.csproj">
+      <Project>{318647d0-b6bb-410e-a547-628049eadb9d}</Project>
+      <Name>IDatabase</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Interfaces\ILiturgieDatabase\ILiturgieDatabase.csproj">
       <Project>{1338d41d-5e66-40f3-845f-170a8dcfb445}</Project>
       <Name>ILiturgieDatabase</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Tools\Tools.csproj">
-      <Project>{4fcc4de1-8d80-43a3-b422-4add6410e2ae}</Project>
-      <Name>Tools</Name>
+    <ProjectReference Include="..\..\PowerpointGenerator\PowerpointGenerator.csproj">
+      <Project>{6b51e79c-9bed-457f-bf11-889863ff5baa}</Project>
+      <Name>PowerpointGenerator</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
@@ -95,8 +101,8 @@
       </ItemGroup>
     </When>
   </Choose>
-  <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

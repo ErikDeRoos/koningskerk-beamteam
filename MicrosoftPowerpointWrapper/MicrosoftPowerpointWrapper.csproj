@@ -66,6 +66,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Connect\MppFactory.cs" />
+    <Compile Include="Connect\MppImplement.cs" />
+    <Compile Include="Connect\MppInterface.cs" />
+    <Compile Include="LiedPresentator\ILiedFormatter.cs" />
+    <Compile Include="LiedPresentator\LiedFormatResult.cs" />
+    <Compile Include="LiedPresentator\LiedFormatter.cs" />
     <Compile Include="PowerpointFunctions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -90,6 +96,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>
