@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using PowerpointGenerator.Properties;
+using PowerpointGenerator.LiturgieInterpretator;
 
 namespace PowerpointGenerator
 {
