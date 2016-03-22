@@ -23,25 +23,10 @@ namespace PowerpointGenerator.Database
         public const string VersSamenvoeging = "-";
     }
 
-    public interface ILiturgieDatabase
-    {
-        IZoekresultaat ZoekOnderdeel(string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen = null);
-    }
-    public interface IZoekresultaat
-    {
-        LiturgieOplossingResultaat? Fout { get; }
-        string OnderdeelNaam { get; }
-        string OnderdeelDisplayNaam { get; }
-        string FragmentNaam { get; }
-        IEnumerable<ILiturgieContent> Content { get; }
-        bool ZonderContentSplitsing { get; }
-    }
-
-
     /// <summary>
     /// Zoek naar de opgegeven liturgieen.
     /// </summary>
-    public class LiturgieDatabase : ILiturgieDatabase
+    public class LiturgieDatabase : ILiturgieDatabase.ILiturgieDatabase
     {
         private readonly IEngine<FileEngineSetSettings> _database;
         public LiturgieDatabase(IEngine<FileEngineSetSettings> database)

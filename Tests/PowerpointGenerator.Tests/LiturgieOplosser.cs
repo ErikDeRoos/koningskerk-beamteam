@@ -101,14 +101,14 @@ namespace PowerpointGenerator.Tests
             return liturgieItem;
         }
 
-        private static Database.ILiturgieDatabase FakeDatabase(string onderdeel, string fragment, string display = null)
+        private static ILiturgieDatabase.ILiturgieDatabase FakeDatabase(string onderdeel, string fragment, string display = null)
         {
             var zoekresultaat = A.Fake<IZoekresultaat>();
             A.CallTo(() => zoekresultaat.OnderdeelNaam).Returns(onderdeel);
             A.CallTo(() => zoekresultaat.FragmentNaam).Returns(fragment);
             if (display != null)
                 A.CallTo(() => zoekresultaat.OnderdeelDisplayNaam).Returns(display);
-            var database = A.Fake<Database.ILiturgieDatabase>();
+            var database = A.Fake<ILiturgieDatabase.ILiturgieDatabase>();
             A.CallTo(database)
                 .Where(d => d.Method.Name == "ZoekOnderdeel")
                 .WithReturnType<IZoekresultaat>()

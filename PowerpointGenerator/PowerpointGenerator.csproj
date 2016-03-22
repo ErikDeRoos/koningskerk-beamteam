@@ -193,7 +193,7 @@
       <DependentUpon>Instellingenform.cs</DependentUpon>
     </Compile>
     <Compile Include="Settings\SettingsFactory.cs" />
-    <Compile Include="Database\Uitlezen_Liturgie.cs" />
+    <Compile Include="Database\LiturgieDatabase.cs" />
     <None Include="settings.config">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

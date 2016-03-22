@@ -13,8 +13,8 @@ namespace PowerpointGenerator.LiturgieOplosser
     /// </summary>
     public class LiturgieOplosser : ILiturgieLosOp
     {
-        private readonly Database.ILiturgieDatabase _database;
-        public LiturgieOplosser(Database.ILiturgieDatabase database)
+        private readonly ILiturgieDatabase.ILiturgieDatabase _database;
+        public LiturgieOplosser(ILiturgieDatabase.ILiturgieDatabase database)
         {
             _database = database;
         }
