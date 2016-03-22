@@ -80,8 +80,8 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Autofac, Version=4.0.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
-      <HintPath>..\packages\Autofac.4.0.0-rc1-177\lib\net45\Autofac.dll</HintPath>
+    <Reference Include="Autofac, Version=3.5.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
+      <HintPath>..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
@@ -105,13 +105,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Database\ArchiveExtender.cs" />
-    <Compile Include="Database\FileFinder.cs" />
-    <Compile Include="Database\FileZipFinder.cs" />
-    <Compile Include="Database\IZipArchiveDirectory.cs" />
-    <Compile Include="Database\FileEngine.cs" />
-    <Compile Include="Database\FileEngineSetSettings.cs" />
+    <Compile Include="Database\FileSystem\ArchiveExtender.cs" />
+    <Compile Include="Database\FileSystem\FileFinder.cs" />
+    <Compile Include="Database\FileSystem\FileZipFinder.cs" />
+    <Compile Include="Database\FileSystem\IZipArchiveDirectory.cs" />
+    <Compile Include="Database\FileSystem\FileEngine.cs" />
+    <Compile Include="Database\FileSystem\FileEngineSetSettings.cs" />
     <Compile Include="Bootstrap.cs" />
+    <Compile Include="LiturgieInterpretator\InterpreteerLiturgieRuw.cs" />
+    <Compile Include="LiturgieOplosser\LiturgieOplosser.cs" />
     <Compile Include="Powerpoint\RemotePowerpointClient.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -191,7 +193,7 @@
       <DependentUpon>Instellingenform.cs</DependentUpon>
     </Compile>
     <Compile Include="Settings\SettingsFactory.cs" />
-    <Compile Include="Database\Uitlezen_Liturgie.cs" />
+    <Compile Include="Database\LiturgieDatabase.cs" />
     <None Include="settings.config">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

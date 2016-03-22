@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace PowerpointGenerator.Database
+namespace PowerpointGenerator.Database.FileSystem
 {
 
     public class FileFinder : IFinder
