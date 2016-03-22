@@ -112,6 +112,7 @@
     <Compile Include="Database\FileEngine.cs" />
     <Compile Include="Database\FileEngineSetSettings.cs" />
     <Compile Include="Bootstrap.cs" />
+    <Compile Include="LiturgieOplosser\LiturgieOplosser.cs" />
     <Compile Include="Powerpoint\RemotePowerpointClient.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

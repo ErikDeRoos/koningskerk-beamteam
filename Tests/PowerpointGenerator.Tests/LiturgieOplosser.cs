@@ -1,25 +1,20 @@
-﻿using Autofac.Extras.FakeItEasy;
-using FakeItEasy;
-using IDatabase;
+﻿using FakeItEasy;
 using ILiturgieDatabase;
 using NUnit.Framework;
 using PowerpointGenerator.Database;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PowerpointGenerator.Tests
 {
-    public class LiturgieDatabase
+    public class LiturgieOplosser
     {
         [TestCase("Psalm", "100")]
         public void LosOp_NormaalItem_Gevonden(string onderdeel, string fragment)
         {
             var liturgieItem = FakeInterpretatie(onderdeel, fragment: fragment);
             var database = FakeDatabase(onderdeel, fragment);
-            var sut = (new Database.LiturgieOplosser(database)) as ILiturgieLosOp;
+            var sut = (new PowerpointGenerator.LiturgieOplosser.LiturgieOplosser(database)) as ILiturgieLosOp;
 
             var oplossing = sut.LosOp(liturgieItem);
 
@@ -31,7 +26,7 @@ namespace PowerpointGenerator.Tests
         {
             var liturgieItem = FakeInterpretatie(onderdeel);
             var database = FakeDatabase(FileEngineDefaults.CommonFilesSetName, onderdeel);
-            var sut = (new Database.LiturgieOplosser(database)) as ILiturgieLosOp;
+            var sut = (new PowerpointGenerator.LiturgieOplosser.LiturgieOplosser(database)) as ILiturgieLosOp;
 
             var oplossing = sut.LosOp(liturgieItem);
 
@@ -44,7 +39,7 @@ namespace PowerpointGenerator.Tests
         {
             var liturgieItem = FakeInterpretatie(onderdeel, fragment: fragment);
             var database = fragment != null ? FakeDatabase(onderdeel, fragment) : FakeDatabase(FileEngineDefaults.CommonFilesSetName, onderdeel);
-            var sut = (new Database.LiturgieOplosser(database)) as ILiturgieLosOp;
+            var sut = (new PowerpointGenerator.LiturgieOplosser.LiturgieOplosser(database)) as ILiturgieLosOp;
 
             var oplossing = sut.LosOp(liturgieItem);
 
@@ -56,7 +51,7 @@ namespace PowerpointGenerator.Tests
         {
             var liturgieItem = FakeInterpretatie(onderdeel, fragment: fragment);
             var database = FakeDatabase(onderdeel, fragment, display: display);
-            var sut = (new Database.LiturgieOplosser(database)) as ILiturgieLosOp;
+            var sut = (new PowerpointGenerator.LiturgieOplosser.LiturgieOplosser(database)) as ILiturgieLosOp;
 
             var oplossing = sut.LosOp(liturgieItem);
 
@@ -69,7 +64,7 @@ namespace PowerpointGenerator.Tests
             var maskList = FakeMask(maskRealName, maskUseName);
             var liturgieItem = FakeInterpretatie(onderdeel, fragment: fragment);
             var database = FakeDatabase(onderdeel, fragment);
-            var sut = (new Database.LiturgieOplosser(database)) as ILiturgieLosOp;
+            var sut = (new PowerpointGenerator.LiturgieOplosser.LiturgieOplosser(database)) as ILiturgieLosOp;
 
             var oplossing = sut.LosOp(liturgieItem, maskList);
 
@@ -82,7 +77,7 @@ namespace PowerpointGenerator.Tests
             var maskList = FakeMask(maskRealName, maskUseName);
             var liturgieItem = FakeInterpretatie(onderdeel);
             var database = FakeDatabase(FileEngineDefaults.CommonFilesSetName, onderdeel);
-            var sut = (new Database.LiturgieOplosser(database)) as ILiturgieLosOp;
+            var sut = (new PowerpointGenerator.LiturgieOplosser.LiturgieOplosser(database)) as ILiturgieLosOp;
 
             var oplossing = sut.LosOp(liturgieItem, maskList);
 
