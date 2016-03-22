@@ -50,6 +50,22 @@ namespace PowerpointGenerator.Tests
             Assert.That(oplossing.Regel.Display.Naam, Is.EqualTo(display));
         }
 
+        [TestCase("Psalm2", "100", "psalm2", "Psalm")]
+        public void LosOp_NormaalItem_GebruikMask(string onderdeel, string fragment, string maskRealName, string maskUseName)
+        {
+            var maskItem = A.Fake<ILiturgieMapmaskArg>();
+            A.CallTo(() => maskItem.RealName).Returns(maskRealName);
+            A.CallTo(() => maskItem.Name).Returns(maskUseName);
+            var maskList = new[] { maskItem };
+            var liturgieItem = FakeInterpretatie(onderdeel, fragment: fragment);
+            var database = FakeDatabase(onderdeel, fragment);
+            var sut = (new Database.LiturgieOplosser(database)) as ILiturgieLosOp;
+
+            var oplossing = sut.LosOp(liturgieItem, maskList);
+
+            Assert.That(oplossing.Regel.Display.Naam, Is.EqualTo(maskUseName));
+        }
+
 
         private static ILiturgieInterpretatie FakeInterpretatie(string onderdeel, string fragment = null)
         {
