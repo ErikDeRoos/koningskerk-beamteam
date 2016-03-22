@@ -315,13 +315,14 @@ namespace PowerpointGenerator.Database {
                 regel.DisplayEdit.VersenGebruikDefault = new VersenDefault(item.VerzenZoalsIngevoerd);
             }
 
-            // Underscores als spaties tonen
-            regel.DisplayEdit.Naam = (regel.DisplayEdit.Naam ?? "").Replace("_", " ");
-            regel.DisplayEdit.SubNaam = (regel.DisplayEdit.SubNaam ?? "").Replace("_", " ");
             // Check of er een mask is (mooiere naam)
+            // Anders underscores als spaties tonen
             var maskCheck = masks?.FirstOrDefault(m => Compare(m.RealName, regel.DisplayEdit.Naam, true) == 0);
             if (maskCheck != null)
                 regel.DisplayEdit.Naam = maskCheck.Name;
+            else
+                regel.DisplayEdit.Naam = (regel.DisplayEdit.Naam ?? "").Replace("_", " ");
+            regel.DisplayEdit.SubNaam = (regel.DisplayEdit.SubNaam ?? "").Replace("_", " ");
             // Check of de hoofdnaam genegeerd moet worden (is leeg)
             if (IsNullOrWhiteSpace(regel.DisplayEdit.Naam) && !IsNullOrWhiteSpace(regel.DisplayEdit.SubNaam))
             {

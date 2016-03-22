@@ -38,6 +38,19 @@ namespace PowerpointGenerator.Tests
             Assert.That(oplossing.Resultaat, Is.EqualTo(LiturgieOplossingResultaat.Opgelost));
         }
 
+        [TestCase("Psalm", "100")]
+        [TestCase("Welkom", null)]
+        public void LosOp_AlleItems_GebruikStandaardNaam(string onderdeel, string fragment)
+        {
+            var liturgieItem = FakeInterpretatie(onderdeel, fragment: fragment);
+            var database = fragment != null ? FakeDatabase(onderdeel, fragment) : FakeDatabase(FileEngineDefaults.CommonFilesSetName, onderdeel);
+            var sut = (new Database.LiturgieOplosser(database)) as ILiturgieLosOp;
+
+            var oplossing = sut.LosOp(liturgieItem);
+
+            Assert.That(oplossing.Regel.Display.Naam, Is.EqualTo(onderdeel));
+        }
+
         [TestCase("Psalm2", "100", "Psalm")]
         public void LosOp_NormaalItem_GebruikDisplay(string onderdeel, string fragment, string display)
         {
@@ -50,6 +63,39 @@ namespace PowerpointGenerator.Tests
             Assert.That(oplossing.Regel.Display.Naam, Is.EqualTo(display));
         }
 
+        [TestCase("Psalm2", "100", "psalm2", "Psalm")]
+        public void LosOp_NormaalItem_GebruikMask(string onderdeel, string fragment, string maskRealName, string maskUseName)
+        {
+            var maskList = FakeMask(maskRealName, maskUseName);
+            var liturgieItem = FakeInterpretatie(onderdeel, fragment: fragment);
+            var database = FakeDatabase(onderdeel, fragment);
+            var sut = (new Database.LiturgieOplosser(database)) as ILiturgieLosOp;
+
+            var oplossing = sut.LosOp(liturgieItem, maskList);
+
+            Assert.That(oplossing.Regel.Display.Naam, Is.EqualTo(maskUseName));
+        }
+
+        [TestCase("Welkom_groot", "Welkom_groot", "Welkom")]
+        public void LosOp_CommonItem_GebruikMask(string onderdeel, string maskRealName, string maskUseName)
+        {
+            var maskList = FakeMask(maskRealName, maskUseName);
+            var liturgieItem = FakeInterpretatie(onderdeel);
+            var database = FakeDatabase(FileEngineDefaults.CommonFilesSetName, onderdeel);
+            var sut = (new Database.LiturgieOplosser(database)) as ILiturgieLosOp;
+
+            var oplossing = sut.LosOp(liturgieItem, maskList);
+
+            Assert.That(oplossing.Regel.Display.Naam, Is.EqualTo(maskUseName));
+        }
+
+        private static IEnumerable<ILiturgieMapmaskArg> FakeMask(string maskRealName, string maskUseName)
+        {
+            var maskItem = A.Fake<ILiturgieMapmaskArg>();
+            A.CallTo(() => maskItem.RealName).Returns(maskRealName);
+            A.CallTo(() => maskItem.Name).Returns(maskUseName);
+            return new[] { maskItem };
+        }
 
         private static ILiturgieInterpretatie FakeInterpretatie(string onderdeel, string fragment = null)
         {
@@ -63,8 +109,8 @@ namespace PowerpointGenerator.Tests
         private static Database.ILiturgieDatabase FakeDatabase(string onderdeel, string fragment, string display = null)
         {
             var zoekresultaat = A.Fake<IZoekresultaat>();
-            A.CallTo(() => zoekresultaat.OnderdeelNaam).Returns(FileEngineDefaults.CommonFilesSetName);
-            A.CallTo(() => zoekresultaat.FragmentNaam).Returns(onderdeel);
+            A.CallTo(() => zoekresultaat.OnderdeelNaam).Returns(onderdeel);
+            A.CallTo(() => zoekresultaat.FragmentNaam).Returns(fragment);
             if (display != null)
                 A.CallTo(() => zoekresultaat.OnderdeelDisplayNaam).Returns(display);
             var database = A.Fake<Database.ILiturgieDatabase>();
