@@ -15,36 +15,25 @@ namespace PowerpointGenerator.Tests
     public class LiturgieDatabase
     {
         [TestCase("Psalm", "100")]
-        public void LosOp_NormaalItem_OpgezochtInDatabase(string naam, string deel)
+        public void LosOp_NormaalItem_Gevonden(string onderdeel, string fragment)
         {
             var liturgieItem = A.Fake<ILiturgieInterpretatie>();
-            A.CallTo(() => liturgieItem.Benaming).Returns(naam);
-            A.CallTo(() => liturgieItem.Deel).Returns(deel);
-            var result = A.Fake<IDbItem>();
-            A.CallTo(() => result.Name).Returns(deel);
-            var dbSet = A.Fake<IDbSet<FileEngineSetSettings>>();
-            A.CallTo(() => dbSet.Name).Returns(naam);
-            A.CallTo(() => dbSet.Where(a => true)).Returns(new[] { result });
-            var fileEngine = A.Fake<IEngine<FileEngineSetSettings>>();
-            A.CallTo(() => fileEngine.Where(a => true)).Returns(new[] { dbSet });
-            var sut = (new Database.LiturgieDatabase(fileEngine)) as ILiturgieLosOp;
+            A.CallTo(() => liturgieItem.Benaming).Returns(onderdeel);
+            A.CallTo(() => liturgieItem.Deel).Returns(fragment);
+            var zoekresultaat = A.Fake<IZoekresultaat>();
+            A.CallTo(() => zoekresultaat.OnderdeelNaam).Returns(onderdeel);
+            A.CallTo(() => zoekresultaat.FragmentNaam).Returns(fragment);
+            var database = A.Fake<Database.ILiturgieDatabase>();
+            A.CallTo(database)
+                .Where(d => d.Method.Name == "ZoekOnderdeel")
+                .WithReturnType<IZoekresultaat>()
+                .WithAnyArguments()
+                .Returns(zoekresultaat);
+            var sut = (new Database.LiturgieOplosser(database)) as ILiturgieLosOp;
 
             var oplossing = sut.LosOp(liturgieItem);
 
-            A.CallTo(() => result.Content).MustHaveHappened();
-        }
-
-
-        private static IEngine<FileEngineSetSettings> GetEngine(string dbSetName, string deelName)
-        {
-            var result = A.Fake<IDbItem>();
-            A.CallTo(() => result.Name).Returns(deelName);
-            var dbSet = A.Fake<IDbSet<FileEngineSetSettings>>();
-            A.CallTo(() => dbSet.Name).Returns(dbSetName);
-            A.CallTo(() => dbSet.Where(a => true)).Returns(new[] { result });
-            var fileEngine = A.Fake<IEngine<FileEngineSetSettings>>();
-            A.CallTo(() => fileEngine.Where(a => true)).Returns(new[] { dbSet });
-            return fileEngine;
+            Assert.That(oplossing.Resultaat, Is.EqualTo(LiturgieOplossingResultaat.Opgelost));
         }
     }
 }
