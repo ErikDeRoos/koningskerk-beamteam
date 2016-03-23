@@ -3,11 +3,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D621AAA0-8D96-451B-ACE5-AD68596273AD}</ProjectGuid>
+    <ProjectGuid>{451902C3-E15B-4D8A-8FC7-62A641FC13E8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Tools.Tests</RootNamespace>
-    <AssemblyName>Tools.Tests</AssemblyName>
+    <RootNamespace>MicrosoftPowerpointWrapper.Tests</RootNamespace>
+    <AssemblyName>MicrosoftPowerpointWrapper.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -62,21 +62,27 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="LiedFormattering.cs" />
+    <Compile Include="PowerpointFunctions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Interfaces\ILiturgieDatabase\ILiturgieDatabase.csproj">
       <Project>{1338d41d-5e66-40f3-845f-170a8dcfb445}</Project>
       <Name>ILiturgieDatabase</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Tools\Tools.csproj">
-      <Project>{4fcc4de1-8d80-43a3-b422-4add6410e2ae}</Project>
-      <Name>Tools</Name>
+    <ProjectReference Include="..\..\Interfaces\ISettings\ISettings.csproj">
+      <Project>{76821eaa-462d-4cad-813d-bcff31edad3a}</Project>
+      <Name>ISettings</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-    <None Include="packages.config" />
+    <ProjectReference Include="..\..\MicrosoftPowerpointWrapper\MicrosoftPowerpointWrapper.csproj">
+      <Project>{d65aa3ef-0086-4ca5-802e-a2bb2e3bed20}</Project>
+      <Name>MicrosoftPowerpointWrapper</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

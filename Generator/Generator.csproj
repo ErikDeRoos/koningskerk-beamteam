@@ -4,12 +4,12 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D65AA3EF-0086-4CA5-802E-A2BB2E3BED20}</ProjectGuid>
+    <ProjectGuid>{E502AED1-D6CD-4E2B-9524-AA333AA1AC21}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>mppt</RootNamespace>
-    <AssemblyName>MicrosoftPowerpointWrapper</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <RootNamespace>Generator</RootNamespace>
+    <AssemblyName>Generator</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -30,52 +30,48 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug PowerpointWrapper|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\Debug PowerpointWrapper\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NetOffice, Version=1.7.4.0, Culture=neutral, PublicKeyToken=acf636d62c39f8f5, processorArchitecture=MSIL">
-      <HintPath>..\packages\NetOffice.Core.1.7.4-pre-jun-28-2015\lib\net45\NetOffice.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-    </Reference>
-    <Reference Include="OfficeApi, Version=1.7.4.0, Culture=neutral, PublicKeyToken=7c1c3e9d16cace88, processorArchitecture=MSIL">
-      <HintPath>..\packages\NetOffice.Core.1.7.4-pre-jun-28-2015\lib\net45\OfficeApi.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-    </Reference>
-    <Reference Include="PowerPointApi, Version=1.7.4.0, Culture=neutral, PublicKeyToken=2aedeb5ce89d4005, processorArchitecture=MSIL">
-      <HintPath>..\packages\NetOffice.PowerPoint.1.7.4-pre-jun-28-2015\lib\net45\PowerPointApi.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="VBIDEApi, Version=1.7.4.0, Culture=neutral, PublicKeyToken=a3637beacf571e8a, processorArchitecture=MSIL">
-      <HintPath>..\packages\NetOffice.Core.1.7.4-pre-jun-28-2015\lib\net45\VBIDEApi.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Connect\MppFactory.cs" />
-    <Compile Include="Connect\MppImplement.cs" />
-    <Compile Include="Connect\MppInterface.cs" />
-    <Compile Include="LiedPresentator\ILiedFormatter.cs" />
-    <Compile Include="LiedPresentator\LiedFormatResult.cs" />
-    <Compile Include="LiedPresentator\LiedFormatter.cs" />
-    <Compile Include="PowerpointFunctions.cs" />
+    <Compile Include="Database\FileSystem\ArchiveExtender.cs" />
+    <Compile Include="Database\FileSystem\FileEngine.cs" />
+    <Compile Include="Database\FileSystem\FileEngineSetSettings.cs" />
+    <Compile Include="Database\FileSystem\FileFinder.cs" />
+    <Compile Include="Database\FileSystem\FileZipFinder.cs" />
+    <Compile Include="Database\FileSystem\IZipArchiveDirectory.cs" />
+    <Compile Include="Database\LiturgieDatabase.cs" />
+    <Compile Include="GeneratieInterface.cs" />
+    <Compile Include="GeneratorStatus.cs" />
+    <Compile Include="ICompRegistration.cs" />
+    <Compile Include="LiturgieInterpretator\InterpreteerLiturgieRuw.cs" />
+    <Compile Include="LiturgieOplosser\LiturgieOplosser.cs" />
+    <Compile Include="Powerpoint\PPGenerator.cs" />
+    <Compile Include="Powerpoint\RemotePowerpointClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ConnectTools\ConnectTools.csproj">
+      <Project>{00ef486e-9338-4978-97ef-1a165498e9c8}</Project>
+      <Name>ConnectTools</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Interfaces\IDatabase\IDatabase.csproj">
+      <Project>{318647d0-b6bb-410e-a547-628049eadb9d}</Project>
+      <Name>IDatabase</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Interfaces\IFileSystem\IFileSystem.csproj">
+      <Project>{10295c3d-bc8b-4fca-a6c8-abc0e1dfe510}</Project>
+      <Name>IFileSystem</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Interfaces\ILiturgieDatabase\ILiturgieDatabase.csproj">
       <Project>{1338d41d-5e66-40f3-845f-170a8dcfb445}</Project>
       <Name>ILiturgieDatabase</Name>
@@ -93,15 +89,7 @@
       <Name>Tools</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
-  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

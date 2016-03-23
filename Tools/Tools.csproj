@@ -40,8 +40,8 @@
   <ItemGroup>
     <Compile Include="LocalFileOperations.cs" />
     <Compile Include="FoutmeldingSchrijver.cs" />
-    <Compile Include="LiedFormattering.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SplitRegels.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Interfaces\IFileSystem\IFileSystem.csproj">
