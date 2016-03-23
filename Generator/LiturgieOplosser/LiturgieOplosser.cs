@@ -1,12 +1,12 @@
-﻿using ILiturgieDatabase;
-using PowerpointGenerator.Database;
-using PowerpointGenerator.Database.FileSystem;
+﻿using Generator.Database;
+using Generator.Database.FileSystem;
+using ILiturgieDatabase;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using static System.String;
 
-namespace PowerpointGenerator.LiturgieOplosser
+namespace Generator.LiturgieOplosser
 {
 
     /// <summary>
@@ -15,9 +15,12 @@ namespace PowerpointGenerator.LiturgieOplosser
     public class LiturgieOplosser : ILiturgieLosOp
     {
         private readonly ILiturgieDatabase.ILiturgieDatabase _database;
-        public LiturgieOplosser(ILiturgieDatabase.ILiturgieDatabase database)
+        private readonly string _defaultSetNameEmpty;
+
+        public LiturgieOplosser(ILiturgieDatabase.ILiturgieDatabase database, string defaultSetNameEmpty)
         {
             _database = database;
+            _defaultSetNameEmpty = defaultSetNameEmpty;
         }
 
 
@@ -112,7 +115,7 @@ namespace PowerpointGenerator.LiturgieOplosser
 
             // bepaal de naamgeving
             if (!IsNullOrWhiteSpace(resultaat.OnderdeelDisplayNaam))
-                regel.DisplayEdit.Naam = resultaat.OnderdeelDisplayNaam.Equals(Properties.Settings.Default.SetNameEmpty, StringComparison.CurrentCultureIgnoreCase) ? null : resultaat.OnderdeelDisplayNaam;
+                regel.DisplayEdit.Naam = resultaat.OnderdeelDisplayNaam.Equals(_defaultSetNameEmpty, StringComparison.CurrentCultureIgnoreCase) ? null : resultaat.OnderdeelDisplayNaam;
 
             return null;
         }

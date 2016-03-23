@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using static System.String;
 
-namespace PowerpointGenerator.LiturgieInterpretator
+namespace Generator.LiturgieInterpretator
 {
     /// <summary>
     /// Maak een ruwe lijst van een tekstuele liturgie

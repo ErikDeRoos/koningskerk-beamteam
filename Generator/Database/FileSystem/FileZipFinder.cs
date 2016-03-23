@@ -6,7 +6,7 @@ using System.Linq;
 using System.IO.Compression;
 using IFileSystem;
 
-namespace PowerpointGenerator.Database.FileSystem
+namespace Generator.Database.FileSystem
 {
     public class FileZipFinder : IFinder, IDisposable
     {

@@ -2,7 +2,7 @@
 using NUnit.Framework;
 using System.Linq;
 
-namespace PowerpointGenerator.Tests
+namespace Generator.Tests
 {
     public class InterpreteerLiturgieRuw
     {

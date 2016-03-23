@@ -1,6 +1,6 @@
 ﻿using IDatabase;
 
-namespace PowerpointGenerator.Database.FileSystem
+namespace Generator.Database.FileSystem
 {
     public class FileEngineSetSettings : ISetSettings
     {

@@ -1,19 +1,17 @@
-﻿using ILiturgieDatabase;
+﻿using Generator.Database;
+using Generator.LiturgieInterpretator;
+using Generator.Powerpoint;
+using ILiturgieDatabase;
 using ISettings;
-using PowerpointGenerator.Database;
-using PowerpointGenerator.LiturgieInterpretator;
-using PowerpointGenerator.Powerpoint;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace PowerpointGenerator.Screens
+namespace Generator
 {
-    class HoofdForm
+    public class GeneratieInterface
     {
         private readonly ILiturgieLosOp _liturgieOplosser;
         private readonly IInstellingenFactory _instellingenFactory;
@@ -31,7 +29,7 @@ namespace PowerpointGenerator.Screens
         private GereedMelding _setGereedmelding;
 
 
-        public HoofdForm(ILiturgieLosOp liturgieOplosser, IInstellingenFactory instellingenOplosser, Func<ISlideBuilder.IBuilder> builderResolver)
+        public GeneratieInterface(ILiturgieLosOp liturgieOplosser, IInstellingenFactory instellingenOplosser, Func<ISlideBuilder.IBuilder> builderResolver)
         {
             _liturgieOplosser = liturgieOplosser;
             _instellingenFactory = instellingenOplosser;

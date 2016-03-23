@@ -7,12 +7,12 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 
-namespace PowerpointGenerator.Powerpoint
+namespace Generator.Powerpoint
 {
     /// Powerpoint roepen we aan via een wrapper zodat we de resources goed
     /// kunnen beheren. Dat is namelijk een must voor een goed gebruik van
     /// interop klassen.
-    internal class PpGenerator : IDisposable
+    public class PpGenerator : IDisposable
     {
         private State _huidigeStatus;
         private IEnumerable<ILiturgieRegel> _liturgie;

@@ -1,7 +1,5 @@
 ﻿using ILiturgieDatabase;
 using ISettings;
-using PowerpointGenerator.Powerpoint;
-using PowerpointGenerator.Database;
 using System;
 using System.Diagnostics;
 using System.Drawing;
@@ -9,26 +7,21 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using PowerpointGenerator.Properties;
-using PowerpointGenerator.LiturgieInterpretator;
 
 namespace PowerpointGenerator.Screens
 {
     internal partial class Form1 : Form
     {
-        private readonly ILiturgieLosOp _liturgieOplosser;
         private readonly IInstellingenFactory _instellingenFactory;
-        private readonly Func<ISlideBuilder.IBuilder> _builderResolver;
-        private readonly HoofdForm _funcs;
+        private readonly Generator.GeneratieInterface _funcs;
         private readonly string _startBestand;
 
         //locatie van het programma op de pc
         private string _programDirectory = "";
 
-        public Form1(ILiturgieLosOp liturgieOplosser, IInstellingenFactory instellingenOplosser, Func<ISlideBuilder.IBuilder> builderResolver, HoofdForm funcs, string startBestand)
+        public Form1(IInstellingenFactory instellingenOplosser, Generator.GeneratieInterface funcs, string startBestand)
         {
-            _liturgieOplosser = liturgieOplosser;
             _instellingenFactory = instellingenOplosser;
-            _builderResolver = builderResolver;
             _funcs = funcs;
             _startBestand = startBestand;
             InitializeComponent();
@@ -195,7 +188,7 @@ namespace PowerpointGenerator.Screens
 
         public void StartGenereren()
         {
-            if (_funcs.Status == HoofdForm.GeneratorStatus.Gestopt)
+            if (_funcs.Status == Generator.GeneratieInterface.GeneratorStatus.Gestopt)
             {
                 //sla een back up voor als er iets fout gaat
                 Opslaan_Op_Locatie(_funcs.GetWorkingFile(), _funcs.TempLiturgiePath);
@@ -225,12 +218,12 @@ namespace PowerpointGenerator.Screens
 
                 // Check bestandsnaam
                 var saveStatus = _funcs.CheckFileSavePossibilities(fileName);
-                if (saveStatus == HoofdForm.FileSavePossibility.NotDeleteable)
+                if (saveStatus == Generator.GeneratieInterface.FileSavePossibility.NotDeleteable)
                 {
                     MessageBox.Show("Het geselecteerde bestand kan niet aangepast worden.\n\nControleer of het bestand nog geopend is.", "Bestand niet toegankelijk", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-                if (saveStatus == HoofdForm.FileSavePossibility.NotCreateable)
+                if (saveStatus == Generator.GeneratieInterface.FileSavePossibility.NotCreateable)
                 {
                     MessageBox.Show("Het geselecteerde bestand kan niet aangepast worden.\n\nControleer of het bestand nog geopend is.", "Bestand niet toegankelijk", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;

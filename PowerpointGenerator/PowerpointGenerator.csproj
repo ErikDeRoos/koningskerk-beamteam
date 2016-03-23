@@ -90,8 +90,6 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.DirectoryServices" />
-    <Reference Include="System.IO.Compression" />
-    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -105,16 +103,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Database\FileSystem\ArchiveExtender.cs" />
-    <Compile Include="Database\FileSystem\FileFinder.cs" />
-    <Compile Include="Database\FileSystem\FileZipFinder.cs" />
-    <Compile Include="Database\FileSystem\IZipArchiveDirectory.cs" />
-    <Compile Include="Database\FileSystem\FileEngine.cs" />
-    <Compile Include="Database\FileSystem\FileEngineSetSettings.cs" />
     <Compile Include="Bootstrap.cs" />
-    <Compile Include="LiturgieInterpretator\InterpreteerLiturgieRuw.cs" />
-    <Compile Include="LiturgieOplosser\LiturgieOplosser.cs" />
-    <Compile Include="Powerpoint\RemotePowerpointClient.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -132,7 +121,6 @@
     <Compile Include="Screens\Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="Screens\HoofdForm.cs" />
     <Compile Include="Screens\LiturgieNotFoundFormulier.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -146,7 +134,6 @@
     <Compile Include="Screens\MaskInvoer.Designer.cs">
       <DependentUpon>MaskInvoer.cs</DependentUpon>
     </Compile>
-    <Compile Include="Powerpoint\PPGenerator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Screens\Contactform.resx">
@@ -194,7 +181,6 @@
       <DependentUpon>Instellingenform.cs</DependentUpon>
     </Compile>
     <Compile Include="Settings\SettingsFactory.cs" />
-    <Compile Include="Database\LiturgieDatabase.cs" />
     <None Include="settings.config">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -221,6 +207,10 @@
     <ProjectReference Include="..\ConnectTools\ConnectTools.csproj">
       <Project>{00ef486e-9338-4978-97ef-1a165498e9c8}</Project>
       <Name>ConnectTools</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Generator\Generator.csproj">
+      <Project>{e502aed1-d6cd-4e2b-9524-aa333aa1ac21}</Project>
+      <Name>Generator</Name>
     </ProjectReference>
     <ProjectReference Include="..\Interfaces\IDatabase\IDatabase.csproj">
       <Project>{318647d0-b6bb-410e-a547-628049eadb9d}</Project>

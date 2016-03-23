@@ -6,8 +6,8 @@
     <ProjectGuid>{06D1D7F9-FB24-464B-8EFD-52E93D561E4E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PowerpointGenerator.Tests</RootNamespace>
-    <AssemblyName>PowerpointGenerator.Tests</AssemblyName>
+    <RootNamespace>Generator.Tests</RootNamespace>
+    <AssemblyName>Generator.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -71,6 +71,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Generator\Generator.csproj">
+      <Project>{e502aed1-d6cd-4e2b-9524-aa333aa1ac21}</Project>
+      <Name>Generator</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Interfaces\IDatabase\IDatabase.csproj">
       <Project>{318647d0-b6bb-410e-a547-628049eadb9d}</Project>
       <Name>IDatabase</Name>
@@ -78,10 +82,6 @@
     <ProjectReference Include="..\..\Interfaces\ILiturgieDatabase\ILiturgieDatabase.csproj">
       <Project>{1338d41d-5e66-40f3-845f-170a8dcfb445}</Project>
       <Name>ILiturgieDatabase</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\PowerpointGenerator\PowerpointGenerator.csproj">
-      <Project>{6b51e79c-9bed-457f-bf11-889863ff5baa}</Project>
-      <Name>PowerpointGenerator</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>
