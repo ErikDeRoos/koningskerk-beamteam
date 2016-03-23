@@ -1,13 +1,8 @@
-﻿using FakeItEasy;
-using ILiturgieDatabase;
+﻿using ILiturgieDatabase;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace PowerpointGenerator.Tests
+namespace Generator.Tests
 {
     public class InterpreteerLiturgieRuw
     {
@@ -21,7 +16,7 @@ namespace PowerpointGenerator.Tests
             var optie1 = "Deel4";
 
             var input = $"{benaming} {deel} : {verzen} ({optie1})";
-            var sut = (new Database.InterpreteerLiturgieRuw()) as ILiturgieInterpreteer;
+            var sut = (new LiturgieInterpretator.InterpreteerLiturgieRuw()) as ILiturgieInterpreteer;
 
             var resultaat = sut.VanTekstregel(input);
 

@@ -33,9 +33,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Interfaces", "Interfaces", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IFileSystem", "Interfaces\IFileSystem\IFileSystem.csproj", "{10295C3D-BC8B-4FCA-A6C8-ABC0E1DFE510}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityFactoryInXML", "UnityFactoryInXML\UnityFactoryInXML.csproj", "{EF75E2B7-8CBF-4B8D-9729-D66FA91C7137}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Generator.Tests", "Tests\PowerpointGenerator.Tests\Generator.Tests.csproj", "{06D1D7F9-FB24-464B-8EFD-52E93D561E4E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerpointGenerator.Tests", "Tests\PowerpointGenerator.Tests\PowerpointGenerator.Tests.csproj", "{06D1D7F9-FB24-464B-8EFD-52E93D561E4E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Generator", "Generator\Generator.csproj", "{E502AED1-D6CD-4E2B-9524-AA333AA1AC21}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -122,18 +122,18 @@ Global
 		{10295C3D-BC8B-4FCA-A6C8-ABC0E1DFE510}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{10295C3D-BC8B-4FCA-A6C8-ABC0E1DFE510}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{10295C3D-BC8B-4FCA-A6C8-ABC0E1DFE510}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EF75E2B7-8CBF-4B8D-9729-D66FA91C7137}.Debug PowerpointWrapper|Any CPU.ActiveCfg = Debug|Any CPU
-		{EF75E2B7-8CBF-4B8D-9729-D66FA91C7137}.Debug PowerpointWrapper|Any CPU.Build.0 = Debug|Any CPU
-		{EF75E2B7-8CBF-4B8D-9729-D66FA91C7137}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EF75E2B7-8CBF-4B8D-9729-D66FA91C7137}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EF75E2B7-8CBF-4B8D-9729-D66FA91C7137}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EF75E2B7-8CBF-4B8D-9729-D66FA91C7137}.Release|Any CPU.Build.0 = Release|Any CPU
 		{06D1D7F9-FB24-464B-8EFD-52E93D561E4E}.Debug PowerpointWrapper|Any CPU.ActiveCfg = Debug|Any CPU
 		{06D1D7F9-FB24-464B-8EFD-52E93D561E4E}.Debug PowerpointWrapper|Any CPU.Build.0 = Debug|Any CPU
 		{06D1D7F9-FB24-464B-8EFD-52E93D561E4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{06D1D7F9-FB24-464B-8EFD-52E93D561E4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{06D1D7F9-FB24-464B-8EFD-52E93D561E4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06D1D7F9-FB24-464B-8EFD-52E93D561E4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E502AED1-D6CD-4E2B-9524-AA333AA1AC21}.Debug PowerpointWrapper|Any CPU.ActiveCfg = Debug|Any CPU
+		{E502AED1-D6CD-4E2B-9524-AA333AA1AC21}.Debug PowerpointWrapper|Any CPU.Build.0 = Debug|Any CPU
+		{E502AED1-D6CD-4E2B-9524-AA333AA1AC21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E502AED1-D6CD-4E2B-9524-AA333AA1AC21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E502AED1-D6CD-4E2B-9524-AA333AA1AC21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E502AED1-D6CD-4E2B-9524-AA333AA1AC21}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

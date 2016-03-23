@@ -36,6 +36,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Interpreteren\ILiturgieLosop.cs" />
+    <Compile Include="Interpreteren\ILiturgieDatabase.cs" />
+    <Compile Include="Resultaten\IZoekresultaat.cs" />
     <Compile Include="Resultaten\Helpers\InhoudType.cs" />
     <Compile Include="Resultaten\Helpers\ILiturgieContent.cs" />
     <Compile Include="Resultaten\Helpers\ILiturgieDisplay.cs" />

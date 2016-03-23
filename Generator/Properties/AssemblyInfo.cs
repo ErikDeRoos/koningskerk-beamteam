@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("UnityFactoryInXML")]
+[assembly: AssemblyTitle("Generator")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("UnityFactoryInXML")]
+[assembly: AssemblyProduct("Generator")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("ef75e2b7-8cbf-4b8d-9729-d66fa91c7137")]
+[assembly: Guid("e502aed1-d6cd-4e2b-9524-aa333aa1ac21")]
 
 // Version information for an assembly consists of the following four values:
 //

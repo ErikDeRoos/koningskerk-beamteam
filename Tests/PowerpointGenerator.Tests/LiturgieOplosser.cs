@@ -1,25 +1,22 @@
-﻿using Autofac.Extras.FakeItEasy;
-using FakeItEasy;
-using IDatabase;
+﻿using FakeItEasy;
 using ILiturgieDatabase;
 using NUnit.Framework;
-using PowerpointGenerator.Database;
-using System;
+using Generator.Database.FileSystem;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace PowerpointGenerator.Tests
+namespace Generator.Tests
 {
-    public class LiturgieDatabase
+    public class LiturgieOplosser
     {
+        private static string DefaultEmptyName = "!leeg";
+
         [TestCase("Psalm", "100")]
         public void LosOp_NormaalItem_Gevonden(string onderdeel, string fragment)
         {
             var liturgieItem = FakeInterpretatie(onderdeel, fragment: fragment);
             var database = FakeDatabase(onderdeel, fragment);
-            var sut = (new Database.LiturgieOplosser(database)) as ILiturgieLosOp;
+            var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
 
             var oplossing = sut.LosOp(liturgieItem);
 
@@ -31,7 +28,7 @@ namespace PowerpointGenerator.Tests
         {
             var liturgieItem = FakeInterpretatie(onderdeel);
             var database = FakeDatabase(FileEngineDefaults.CommonFilesSetName, onderdeel);
-            var sut = (new Database.LiturgieOplosser(database)) as ILiturgieLosOp;
+            var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
 
             var oplossing = sut.LosOp(liturgieItem);
 
@@ -44,7 +41,7 @@ namespace PowerpointGenerator.Tests
         {
             var liturgieItem = FakeInterpretatie(onderdeel, fragment: fragment);
             var database = fragment != null ? FakeDatabase(onderdeel, fragment) : FakeDatabase(FileEngineDefaults.CommonFilesSetName, onderdeel);
-            var sut = (new Database.LiturgieOplosser(database)) as ILiturgieLosOp;
+            var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
 
             var oplossing = sut.LosOp(liturgieItem);
 
@@ -56,7 +53,7 @@ namespace PowerpointGenerator.Tests
         {
             var liturgieItem = FakeInterpretatie(onderdeel, fragment: fragment);
             var database = FakeDatabase(onderdeel, fragment, display: display);
-            var sut = (new Database.LiturgieOplosser(database)) as ILiturgieLosOp;
+            var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
 
             var oplossing = sut.LosOp(liturgieItem);
 
@@ -69,7 +66,7 @@ namespace PowerpointGenerator.Tests
             var maskList = FakeMask(maskRealName, maskUseName);
             var liturgieItem = FakeInterpretatie(onderdeel, fragment: fragment);
             var database = FakeDatabase(onderdeel, fragment);
-            var sut = (new Database.LiturgieOplosser(database)) as ILiturgieLosOp;
+            var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
 
             var oplossing = sut.LosOp(liturgieItem, maskList);
 
@@ -82,7 +79,7 @@ namespace PowerpointGenerator.Tests
             var maskList = FakeMask(maskRealName, maskUseName);
             var liturgieItem = FakeInterpretatie(onderdeel);
             var database = FakeDatabase(FileEngineDefaults.CommonFilesSetName, onderdeel);
-            var sut = (new Database.LiturgieOplosser(database)) as ILiturgieLosOp;
+            var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
 
             var oplossing = sut.LosOp(liturgieItem, maskList);
 
@@ -106,14 +103,14 @@ namespace PowerpointGenerator.Tests
             return liturgieItem;
         }
 
-        private static Database.ILiturgieDatabase FakeDatabase(string onderdeel, string fragment, string display = null)
+        private static ILiturgieDatabase.ILiturgieDatabase FakeDatabase(string onderdeel, string fragment, string display = null)
         {
             var zoekresultaat = A.Fake<IZoekresultaat>();
             A.CallTo(() => zoekresultaat.OnderdeelNaam).Returns(onderdeel);
             A.CallTo(() => zoekresultaat.FragmentNaam).Returns(fragment);
             if (display != null)
                 A.CallTo(() => zoekresultaat.OnderdeelDisplayNaam).Returns(display);
-            var database = A.Fake<Database.ILiturgieDatabase>();
+            var database = A.Fake<ILiturgieDatabase.ILiturgieDatabase>();
             A.CallTo(database)
                 .Where(d => d.Method.Name == "ZoekOnderdeel")
                 .WithReturnType<IZoekresultaat>()
