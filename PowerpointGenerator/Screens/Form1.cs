@@ -7,19 +7,20 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using PowerpointGenerator.Properties;
+using Generator;
 
 namespace PowerpointGenerator.Screens
 {
     internal partial class Form1 : Form
     {
         private readonly IInstellingenFactory _instellingenFactory;
-        private readonly Generator.GeneratieInterface _funcs;
+        private readonly GeneratieInterface<CompRegistration> _funcs;
         private readonly string _startBestand;
 
         //locatie van het programma op de pc
         private string _programDirectory = "";
 
-        public Form1(IInstellingenFactory instellingenOplosser, Generator.GeneratieInterface funcs, string startBestand)
+        public Form1(IInstellingenFactory instellingenOplosser, GeneratieInterface<CompRegistration> funcs, string startBestand)
         {
             _instellingenFactory = instellingenOplosser;
             _funcs = funcs;
@@ -39,12 +40,12 @@ namespace PowerpointGenerator.Screens
 
             progressBar1.Visible = false;
 
-            _funcs.Registration.LiturgieLijst = richTextBox1;
-            _funcs.Registration.VoorgangerText = textBox2;
-            _funcs.Registration.Collecte1eText = textBox3;
-            _funcs.Registration.Collecte2eText = textBox4;
-            _funcs.Registration.LezenLijst = textBox1;
-            _funcs.Registration.TekstLijst = textBox5;
+            _funcs.Registration.LiturgieLijstRichTextBox = richTextBox1;
+            _funcs.Registration.VoorgangerTextTextBox = textBox2;
+            _funcs.Registration.Collecte1eTextTextBox = textBox3;
+            _funcs.Registration.Collecte2eTextTextBox = textBox4;
+            _funcs.Registration.LezenLijstRichTextBox = textBox1;
+            _funcs.Registration.TekstLijstRichTextBox = textBox5;
 
             _funcs.Opstarten(_startBestand);
         }
@@ -188,7 +189,7 @@ namespace PowerpointGenerator.Screens
 
         public void StartGenereren()
         {
-            if (_funcs.Status == Generator.GeneratieInterface.GeneratorStatus.Gestopt)
+            if (_funcs.Status == GeneratorStatus.Gestopt)
             {
                 //sla een back up voor als er iets fout gaat
                 Opslaan_Op_Locatie(_funcs.GetWorkingFile(), _funcs.TempLiturgiePath);
@@ -218,12 +219,12 @@ namespace PowerpointGenerator.Screens
 
                 // Check bestandsnaam
                 var saveStatus = _funcs.CheckFileSavePossibilities(fileName);
-                if (saveStatus == Generator.GeneratieInterface.FileSavePossibility.NotDeleteable)
+                if (saveStatus == GeneratieInterface<CompRegistration>.FileSavePossibility.NotDeleteable)
                 {
                     MessageBox.Show("Het geselecteerde bestand kan niet aangepast worden.\n\nControleer of het bestand nog geopend is.", "Bestand niet toegankelijk", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-                if (saveStatus == Generator.GeneratieInterface.FileSavePossibility.NotCreateable)
+                if (saveStatus == GeneratieInterface<CompRegistration>.FileSavePossibility.NotCreateable)
                 {
                     MessageBox.Show("Het geselecteerde bestand kan niet aangepast worden.\n\nControleer of het bestand nog geopend is.", "Bestand niet toegankelijk", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;

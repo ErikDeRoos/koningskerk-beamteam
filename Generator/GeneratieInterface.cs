@@ -7,16 +7,16 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Windows.Forms;
+using Tools;
 
 namespace Generator
 {
-    public class GeneratieInterface
+    public class GeneratieInterface<T> where T : class, ICompRegistration
     {
         private readonly ILiturgieLosOp _liturgieOplosser;
         private readonly IInstellingenFactory _instellingenFactory;
         private readonly Func<ISlideBuilder.IBuilder> _builderResolver;
-        public CompRegistration Registration { get; }
+        public T Registration { get; }
         public string TempLiturgiePath { get; set; }
         public string CurrentFile { get; private set; }
 
@@ -29,13 +29,13 @@ namespace Generator
         private GereedMelding _setGereedmelding;
 
 
-        public GeneratieInterface(ILiturgieLosOp liturgieOplosser, IInstellingenFactory instellingenOplosser, Func<ISlideBuilder.IBuilder> builderResolver)
+        public GeneratieInterface(ILiturgieLosOp liturgieOplosser, IInstellingenFactory instellingenOplosser, Func<ISlideBuilder.IBuilder> builderResolver, ICompRegistration newCompRegistration)
         {
             _liturgieOplosser = liturgieOplosser;
             _instellingenFactory = instellingenOplosser;
             _builderResolver = builderResolver;
             _powerpoint = new PpGenerator(_builderResolver, PresentatieVoortgangCallback, PresentatieGereedmeldingCallback);
-            Registration = new CompRegistration();
+            Registration = newCompRegistration as T;
         }
 
         public void Opstarten(string startBestand)
@@ -97,57 +97,49 @@ namespace Generator
         {
             if (input.Equals(""))
                 return;
-            if (Registration.VoorgangerText != null)
-                Registration.LiturgieLijst.Text = "";
-            var inputstring = new TextBox { Text = input };
+            Registration.LiturgieLijst = "";
+            var inputstring = SplitRegels.Split(input);
             var i = 0;
-            for (; i < inputstring.Lines.Length; i++)
+            for (; i < inputstring.Length; i++)
             {
-                if (inputstring.Lines[i].StartsWith("<"))
+                if (inputstring[i].StartsWith("<"))
                     break;
-                if (!inputstring.Lines[i].Equals("") && Registration.VoorgangerText != null)
-                    Registration.LiturgieLijst.Text += inputstring.Lines[i] + "\n";
+                if (!inputstring[i].Equals(""))
+                    Registration.LiturgieLijst += inputstring[i] + "\n";
             }
-            for (; i < inputstring.Lines.Length; i++)
+            for (; i < inputstring.Length; i++)
             {
-                if (inputstring.Lines[i].Equals("")) continue;
-                var inputstringparts = inputstring.Lines[i].Split('<', '>');
+                if (inputstring[i].Equals("")) continue;
+                var inputstringparts = inputstring[i].Split('<', '>');
                 switch (inputstringparts[1])
                 {
                     case "Voorganger:":
-                        if (Registration.VoorgangerText != null)
-                            Registration.VoorgangerText.Text = inputstringparts[2];
+                        Registration.VoorgangerText = inputstringparts[2];
                         break;
                     case "1e Collecte:":
-                        if (Registration.Collecte1eText != null)
-                            Registration.Collecte1eText.Text = inputstringparts[2];
+                        Registration.Collecte1eText = inputstringparts[2];
                         break;
                     case "2e Collecte:":
-                        if (Registration.Collecte2eText != null)
-                            Registration.Collecte2eText.Text = inputstringparts[2];
+                        Registration.Collecte2eText = inputstringparts[2];
                         break;
                     case "Lezen":
-                        if (Registration.LezenLijst == null)
-                            break;
-                        Registration.LezenLijst.Text = "";
+                        Registration.LezenLijst = "";
                         for (var j = 2; j < inputstringparts.Length; j += 2)
                         {
                             if (j + 2 < inputstringparts.Length)
-                                Registration.LezenLijst.Text += inputstringparts[j] + "\n";
+                                Registration.LezenLijst += inputstringparts[j] + "\n";
                             else
-                                Registration.LezenLijst.Text += inputstringparts[j];
+                                Registration.LezenLijst += inputstringparts[j];
                         }
                         break;
                     case "Tekst":
-                        if (Registration.TekstLijst == null)
-                            break;
-                        Registration.TekstLijst.Text = "";
+                        Registration.TekstLijst = "";
                         for (var j = 2; j < inputstringparts.Length; j += 2)
                         {
                             if (j + 2 < inputstringparts.Length)
-                                Registration.TekstLijst.Text += inputstringparts[j] + "\n";
+                                Registration.TekstLijst += inputstringparts[j] + "\n";
                             else
-                                Registration.TekstLijst.Text += inputstringparts[j];
+                                Registration.TekstLijst += inputstringparts[j];
                         }
                         break;
                 }
@@ -155,13 +147,13 @@ namespace Generator
         }
         public string GetWorkingFile()
         {
-            var output = Registration.LiturgieLijst.Text + "\n";
-            output += "<Voorganger:>" + Registration.VoorgangerText.Text + "\n";
-            output += "<1e Collecte:>" + Registration.Collecte1eText.Text + "\n";
-            output += "<2e Collecte:>" + Registration.Collecte2eText.Text + "\n";
+            var output = Registration.LiturgieLijst + "\n";
+            output += "<Voorganger:>" + Registration.VoorgangerText + "\n";
+            output += "<1e Collecte:>" + Registration.Collecte1eText + "\n";
+            output += "<2e Collecte:>" + Registration.Collecte2eText + "\n";
 
             output += "<Lezen>";
-            var regels = (Registration.LezenLijst.Text ?? "").Split(new[] { "\r\n" }, StringSplitOptions.None);
+            var regels = (Registration.LezenLijst ?? "").Split(new[] { "\r\n" }, StringSplitOptions.None);
             for (var i = 0; i < regels.Length; i++)
             {
                 if (regels[i].Equals("")) continue;
@@ -173,7 +165,7 @@ namespace Generator
             output += "\n";
 
             output += "<Tekst>";
-            regels = (Registration.TekstLijst.Text ?? "").Split(new[] { "\r\n" }, StringSplitOptions.None);
+            regels = (Registration.TekstLijst ?? "").Split(new[] { "\r\n" }, StringSplitOptions.None);
             for (var i = 0; i < regels.Length; i++)
             {
                 if (regels[i].Equals("")) continue;
@@ -231,18 +223,18 @@ namespace Generator
         public void NieuweLiturgie()
         {
             CurrentFile = "";
-            Registration.LiturgieLijst.Text = "";
-            Registration.VoorgangerText.Text = "";
-            Registration.Collecte1eText.Text = "";
-            Registration.Collecte2eText.Text = "";
-            Registration.LezenLijst.Text = "";
-            Registration.TekstLijst.Text = "";
+            Registration.LiturgieLijst = "";
+            Registration.VoorgangerText = "";
+            Registration.Collecte1eText = "";
+            Registration.Collecte2eText = "";
+            Registration.LezenLijst = "";
+            Registration.TekstLijst = "";
         }
 
         public IEnumerable<ILiturgieOplossing> LiturgieOplossingen()
         {
             // Liturgie uit tekstbox omzetten in leesbare items
-            var ruweLiturgie = new InterpreteerLiturgieRuw().VanTekstregels(Registration.LiturgieLijst.Lines);
+            var ruweLiturgie = new InterpreteerLiturgieRuw().VanTekstregels(SplitRegels.Split(Registration.LiturgieLijst));
             // Zoek op het bestandssysteem zo veel mogelijk al op (behalve ppt, die gaan via COM element)
             var masks = MapMasksToLiturgie.Map(_instellingenFactory.LoadFromXmlFile().Masks);
             return _liturgieOplosser.LosOp(ruweLiturgie, masks).ToList();
@@ -251,7 +243,7 @@ namespace Generator
         public PpGenerator.StatusMelding StartGenereren(IEnumerable<ILiturgieOplossing> ingeladenLiturgie, string opslaanAlsBestandsnaam)
         {
             Status = GeneratorStatus.AanHetGenereren;
-            var status = _powerpoint.Initialiseer(ingeladenLiturgie.Select(l => l.Regel).ToList(), Registration.VoorgangerText.Text, Registration.Collecte1eText.Text, Registration.Collecte2eText.Text, Registration.LezenLijst.Text, Registration.TekstLijst.Text, _instellingenFactory.LoadFromXmlFile(), opslaanAlsBestandsnaam);
+            var status = _powerpoint.Initialiseer(ingeladenLiturgie.Select(l => l.Regel).ToList(), Registration.VoorgangerText, Registration.Collecte1eText, Registration.Collecte2eText, Registration.LezenLijst, Registration.TekstLijst, _instellingenFactory.LoadFromXmlFile(), opslaanAlsBestandsnaam);
             if (status.Fout == null)
                 status = _powerpoint.Start();
             // Stop weer als er een fout is geweest
@@ -294,28 +286,11 @@ namespace Generator
             return FileSavePossibility.Possible;
         }
 
-
-        public enum GeneratorStatus
-        {
-            Gestopt,
-            AanHetGenereren
-        }
-
         public enum FileSavePossibility
         {
             Possible,
             NotDeleteable,
             NotCreateable
-        }
-
-        public class CompRegistration
-        {
-            public RichTextBox LiturgieLijst { get; set; }
-            public TextBox VoorgangerText { get; set; }
-            public TextBox Collecte1eText { get; set; }
-            public TextBox Collecte2eText { get; set; }
-            public RichTextBox LezenLijst { get; set; }
-            public RichTextBox TekstLijst { get; set; }
         }
     }
 }

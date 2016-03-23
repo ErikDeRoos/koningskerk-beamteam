@@ -35,7 +35,6 @@
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.ServiceModel" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -52,6 +51,8 @@
     <Compile Include="Database\FileSystem\IZipArchiveDirectory.cs" />
     <Compile Include="Database\LiturgieDatabase.cs" />
     <Compile Include="GeneratieInterface.cs" />
+    <Compile Include="GeneratorStatus.cs" />
+    <Compile Include="ICompRegistration.cs" />
     <Compile Include="LiturgieInterpretator\InterpreteerLiturgieRuw.cs" />
     <Compile Include="LiturgieOplosser\LiturgieOplosser.cs" />
     <Compile Include="Powerpoint\PPGenerator.cs" />

@@ -109,6 +109,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Screens\CompRegistration.cs" />
     <Compile Include="Screens\Contactform.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -204,10 +205,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ConnectTools\ConnectTools.csproj">
-      <Project>{00ef486e-9338-4978-97ef-1a165498e9c8}</Project>
-      <Name>ConnectTools</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Generator\Generator.csproj">
       <Project>{e502aed1-d6cd-4e2b-9524-aa333aa1ac21}</Project>
       <Name>Generator</Name>
