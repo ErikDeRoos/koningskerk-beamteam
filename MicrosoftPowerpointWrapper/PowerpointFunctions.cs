@@ -256,7 +256,7 @@ namespace mppt
         private SlideVuller InvullenLiedTekst(string tempinhoud)
         {
             var returnValue = new SlideVuller();
-            var regels = tempinhoud.Split(new[] { "\r\n" }, StringSplitOptions.None);
+            var regels = SplitRegels.Split(tempinhoud);
 
             // We moeten goed opletten bij het invullen van een liedtekst op een slide:
             // -Het mogen niet te veel regels zijn (instellingen beperken dat)

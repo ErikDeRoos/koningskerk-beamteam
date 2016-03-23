@@ -12,7 +12,7 @@ using System.Threading;
 using Tools;
 using IFileSystem;
 
-namespace PowerpointGenerator.Powerpoint
+namespace Generator.Powerpoint
 {
     class RemotePowerpointClient : IBuilder
     {

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.IO.Compression;
 
-namespace PowerpointGenerator.Database.FileSystem
+namespace Generator.Database.FileSystem
 {
     internal interface IZipArchiveDirectory {
         /// <summary>

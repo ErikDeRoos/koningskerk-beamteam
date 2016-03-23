@@ -1,14 +1,14 @@
-﻿using IDatabase;
+﻿using Generator.Database.FileSystem;
+using IDatabase;
 using ILiturgieDatabase;
 using ISettings;
-using PowerpointGenerator.Database.FileSystem;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using static System.String;
 
-namespace PowerpointGenerator.Database
+namespace Generator.Database
 {
 
     // TODO Stap 1: assistentie bij invullen liturgie
