@@ -12,7 +12,8 @@ namespace PowerpointGenerator
             SetMsPowerpointBuilder(container);
             container.RegisterType<Tools.LocalFileOperations>().As<IFileSystem.IFileOperations>();
             container.RegisterType<Settings.SettingsFactory>().As<ISettings.IInstellingenFactory>().WithParameter("instellingenFileName", Properties.Settings.Default.InstellingenFileName).WithParameter("masksFileName", Properties.Settings.Default.MasksFileName);
-            container.RegisterType<Form1>().As<System.Windows.Forms.Form>().OnActivated(f => f.Instance.Opstarten());
+            container.RegisterType<Screens.HoofdForm>();
+            container.RegisterType<Screens.Form1>().As<System.Windows.Forms.Form>().OnActivated(f => f.Instance.Opstarten());
         }
         private static void SetMsPowerpointBuilder(ContainerBuilder container)
         {

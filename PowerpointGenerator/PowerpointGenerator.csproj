@@ -132,6 +132,7 @@
     <Compile Include="Screens\Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Screens\HoofdForm.cs" />
     <Compile Include="Screens\LiturgieNotFoundFormulier.cs">
       <SubType>Form</SubType>
     </Compile>
