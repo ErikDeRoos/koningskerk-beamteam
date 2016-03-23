@@ -40,12 +40,12 @@ namespace PowerpointGenerator.Screens
 
             progressBar1.Visible = false;
 
-            _funcs.Registration.LiturgieLijstRichTextBox = richTextBox1;
-            _funcs.Registration.VoorgangerTextTextBox = textBox2;
-            _funcs.Registration.Collecte1eTextTextBox = textBox3;
-            _funcs.Registration.Collecte2eTextTextBox = textBox4;
-            _funcs.Registration.LezenLijstRichTextBox = textBox1;
-            _funcs.Registration.TekstLijstRichTextBox = textBox5;
+            _funcs.Registration.LiturgieRichTextBox = richTextBox1;
+            _funcs.Registration.VoorgangerTextBox = textBox2;
+            _funcs.Registration.Collecte1eTextBox = textBox3;
+            _funcs.Registration.Collecte2eTextBox = textBox4;
+            _funcs.Registration.LezenRichTextBox = textBox1;
+            _funcs.Registration.TekstRichTextBox = textBox5;
 
             _funcs.Opstarten(_startBestand);
         }

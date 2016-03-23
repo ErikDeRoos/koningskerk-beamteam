@@ -2,11 +2,11 @@
 {
     public interface ICompRegistration
     {
-        string LiturgieLijst { get; set; }
-        string VoorgangerText { get; set; }
-        string Collecte1eText { get; set; }
-        string Collecte2eText { get; set; }
-        string LezenLijst { get; set; }
-        string TekstLijst { get; set; }
+        string[] Liturgie { get; set; }
+        string Voorganger { get; set; }
+        string Collecte1e { get; set; }
+        string Collecte2e { get; set; }
+        string[] Lezen { get; set; }
+        string[] Tekst { get; set; }
     }
 }

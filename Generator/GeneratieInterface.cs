@@ -97,16 +97,17 @@ namespace Generator
         {
             if (input.Equals(""))
                 return;
-            Registration.LiturgieLijst = "";
             var inputstring = SplitRegels.Split(input);
+            var liturgieLijst = new List<string>();
             var i = 0;
             for (; i < inputstring.Length; i++)
             {
                 if (inputstring[i].StartsWith("<"))
                     break;
                 if (!inputstring[i].Equals(""))
-                    Registration.LiturgieLijst += inputstring[i] + "\n";
+                    liturgieLijst.Add(inputstring[i]);
             }
+            Registration.Liturgie = liturgieLijst.ToArray();
             for (; i < inputstring.Length; i++)
             {
                 if (inputstring[i].Equals("")) continue;
@@ -114,50 +115,46 @@ namespace Generator
                 switch (inputstringparts[1])
                 {
                     case "Voorganger:":
-                        Registration.VoorgangerText = inputstringparts[2];
+                        Registration.Voorganger = inputstringparts[2];
                         break;
                     case "1e Collecte:":
-                        Registration.Collecte1eText = inputstringparts[2];
+                        Registration.Collecte1e = inputstringparts[2];
                         break;
                     case "2e Collecte:":
-                        Registration.Collecte2eText = inputstringparts[2];
+                        Registration.Collecte2e = inputstringparts[2];
                         break;
                     case "Lezen":
-                        Registration.LezenLijst = "";
+                        var lezenLijst = new List<string>();
                         for (var j = 2; j < inputstringparts.Length; j += 2)
                         {
-                            if (j + 2 < inputstringparts.Length)
-                                Registration.LezenLijst += inputstringparts[j] + "\n";
-                            else
-                                Registration.LezenLijst += inputstringparts[j];
+                            lezenLijst.Add(inputstringparts[j]);
                         }
+                        Registration.Lezen = lezenLijst.ToArray();
                         break;
                     case "Tekst":
-                        Registration.TekstLijst = "";
+                        var tekstLijst = new List<string>();
                         for (var j = 2; j < inputstringparts.Length; j += 2)
                         {
-                            if (j + 2 < inputstringparts.Length)
-                                Registration.TekstLijst += inputstringparts[j] + "\n";
-                            else
-                                Registration.TekstLijst += inputstringparts[j];
+                            tekstLijst.Add(inputstringparts[j]);
                         }
+                        Registration.Tekst = tekstLijst.ToArray();
                         break;
                 }
             }
         }
         public string GetWorkingFile()
         {
-            var output = Registration.LiturgieLijst + "\n";
-            output += "<Voorganger:>" + Registration.VoorgangerText + "\n";
-            output += "<1e Collecte:>" + Registration.Collecte1eText + "\n";
-            output += "<2e Collecte:>" + Registration.Collecte2eText + "\n";
+            var output = Registration.Liturgie + "\n";
+            output += "<Voorganger:>" + Registration.Voorganger + "\n";
+            output += "<1e Collecte:>" + Registration.Collecte1e + "\n";
+            output += "<2e Collecte:>" + Registration.Collecte2e + "\n";
 
             output += "<Lezen>";
-            var regels = (Registration.LezenLijst ?? "").Split(new[] { "\r\n" }, StringSplitOptions.None);
-            for (var i = 0; i < regels.Length; i++)
+            var regels = Registration.Lezen.ToList();
+            for (var i = 0; i < regels.Count; i++)
             {
                 if (regels[i].Equals("")) continue;
-                if (i + 1 < regels.Length)
+                if (i + 1 < regels.Count)
                     output += regels[i] + "<n>";
                 else
                     output += regels[i];
@@ -165,11 +162,11 @@ namespace Generator
             output += "\n";
 
             output += "<Tekst>";
-            regels = (Registration.TekstLijst ?? "").Split(new[] { "\r\n" }, StringSplitOptions.None);
-            for (var i = 0; i < regels.Length; i++)
+            regels = Registration.Tekst.ToList();
+            for (var i = 0; i < regels.Count; i++)
             {
                 if (regels[i].Equals("")) continue;
-                if (i + 1 < regels.Length)
+                if (i + 1 < regels.Count)
                     output += regels[i] + "<n>";
                 else
                     output += regels[i];
@@ -223,18 +220,18 @@ namespace Generator
         public void NieuweLiturgie()
         {
             CurrentFile = "";
-            Registration.LiturgieLijst = "";
-            Registration.VoorgangerText = "";
-            Registration.Collecte1eText = "";
-            Registration.Collecte2eText = "";
-            Registration.LezenLijst = "";
-            Registration.TekstLijst = "";
+            Registration.Liturgie = new string[0];
+            Registration.Voorganger = "";
+            Registration.Collecte1e = "";
+            Registration.Collecte2e = "";
+            Registration.Lezen = new string[0];
+            Registration.Tekst = new string[0];
         }
 
         public IEnumerable<ILiturgieOplossing> LiturgieOplossingen()
         {
             // Liturgie uit tekstbox omzetten in leesbare items
-            var ruweLiturgie = new InterpreteerLiturgieRuw().VanTekstregels(SplitRegels.Split(Registration.LiturgieLijst));
+            var ruweLiturgie = new InterpreteerLiturgieRuw().VanTekstregels(Registration.Liturgie);
             // Zoek op het bestandssysteem zo veel mogelijk al op (behalve ppt, die gaan via COM element)
             var masks = MapMasksToLiturgie.Map(_instellingenFactory.LoadFromXmlFile().Masks);
             return _liturgieOplosser.LosOp(ruweLiturgie, masks).ToList();
@@ -243,7 +240,9 @@ namespace Generator
         public PpGenerator.StatusMelding StartGenereren(IEnumerable<ILiturgieOplossing> ingeladenLiturgie, string opslaanAlsBestandsnaam)
         {
             Status = GeneratorStatus.AanHetGenereren;
-            var status = _powerpoint.Initialiseer(ingeladenLiturgie.Select(l => l.Regel).ToList(), Registration.VoorgangerText, Registration.Collecte1eText, Registration.Collecte2eText, Registration.LezenLijst, Registration.TekstLijst, _instellingenFactory.LoadFromXmlFile(), opslaanAlsBestandsnaam);
+            var lezenText = string.Join("\n\r", Registration.Lezen);
+            var tekstText = string.Join("\n\r", Registration.Lezen);
+            var status = _powerpoint.Initialiseer(ingeladenLiturgie.Select(l => l.Regel).ToList(), Registration.Voorganger, Registration.Collecte1e, Registration.Collecte2e, lezenText, tekstText, _instellingenFactory.LoadFromXmlFile(), opslaanAlsBestandsnaam);
             if (status.Fout == null)
                 status = _powerpoint.Start();
             // Stop weer als er een fout is geweest
