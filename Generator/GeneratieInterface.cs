@@ -144,7 +144,7 @@ namespace Generator
         }
         public string GetWorkingFile()
         {
-            var output = Registration.Liturgie + "\n";
+            var output = string.Join("\n", Registration.Liturgie) + "\n";
             output += "<Voorganger:>" + Registration.Voorganger + "\n";
             output += "<1e Collecte:>" + Registration.Collecte1e + "\n";
             output += "<2e Collecte:>" + Registration.Collecte2e + "\n";
