@@ -34,7 +34,7 @@ namespace Generator.Tests
             Assert.That(resultaat, Is.AssignableTo<ILiturgieInterpretatieBijbeltekst>());
         }
 
-        [TestCase("johannes 3: 5, 7, 9 - 8:1, 3, 9: 5 - 10 (als:bijbeltekst)", "johannes", new[] { "3: 5, 7, 9 -", "8:1, 3, ", "9: 5 - 10" })]
+        [TestCase("johannes 3: 5, 7, 9 - 8: 1, 3, 9: 5 - 10 (als:bijbeltekst)", "johannes", new[] { "3: 5, 7, 9 -", "8: 1, 3,", "9: 5 - 10" })]
         public void VanTekstregel_AlsBijbeltekst_Splitsing(string input, string resultaatBenaming, string[] resultaatDelen)
         {
             var sut = (new LiturgieInterpretator.InterpreteerLiturgieRuw()) as ILiturgieInterpreteer;

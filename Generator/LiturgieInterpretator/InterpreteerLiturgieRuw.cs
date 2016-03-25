@@ -93,21 +93,46 @@ namespace Generator.LiturgieInterpretator
             var regel = new InterpretatieBijbeltekst();
             if (voorOpties.Length == 0)
                 return null;
-            var voorBenamingStukken = voorOpties[0].Trim().Split(BenamingScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
-            if (voorBenamingStukken.Length == 0)
+            var benamingStukken = voorOpties[0].Trim().Split(BenamingScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
+            if (benamingStukken.Length == 0)
                 return null;
-            var preBenamingTrimmed = voorBenamingStukken[0].Trim();
-            var voorPreBenamingStukken = preBenamingTrimmed.Split(BenamingDeelScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
-            if (voorPreBenamingStukken.Length > 1)
-                regel.Deel = voorPreBenamingStukken[voorPreBenamingStukken.Length - 1];  // Is altijd laatste deel
-            regel.Benaming = preBenamingTrimmed.Substring(0, preBenamingTrimmed.Length - (regel.Deel ?? "").Length).Trim();
-            // Verzen als '1,2' in 'psalm 110:1,2'
-            regel.VerzenZoalsIngevoerd = voorBenamingStukken.Length > 1 ? voorBenamingStukken[1].Trim() : null;
+            // Opgeknipt moet 'johannes 3: 5, 7, 9 - 8:1, 3, 9: 5 - 10' geven: 'johannes', '3: 5, 7, 9 -', '8:1, 3, ', '9: 5 - 10'
+            var onthouden = string.Empty;
+            var voorBenaming = string.Empty;
+            var deelVersen = new List<ILiturgieInterpretatieBijbeltekstDeel>();
+            for (int teller = 0; teller < benamingStukken.Length; teller++)
+            {
+                var stuk = benamingStukken[teller].Trim();
+                var heeftVolgendStuk = teller + 1 < benamingStukken.Length;
+                if (!heeftVolgendStuk && teller != 0)
+                {
+                    deelVersen.Add(new InterpretatieBijbeltekstDeel() { Deel = onthouden, Versen = stuk, });
+                    break;
+                }
+                var elementen = stuk.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                var laatsteElement = string.Empty;
+                if (elementen.Length >= 2)
+                    laatsteElement = elementen[elementen.Length - 1];
+                var stukZonderLaatsteElement = stuk.Substring(0, stuk.Length - laatsteElement.Length).Trim();
+                if (teller == 0)
+                    voorBenaming = stukZonderLaatsteElement;
+                if (!heeftVolgendStuk && teller == 0)
+                    deelVersen.Add(new InterpretatieBijbeltekstDeel() { Deel = laatsteElement });
+                else if (teller != 0)
+                    deelVersen.Add(new InterpretatieBijbeltekstDeel() { Deel = onthouden, Versen = stukZonderLaatsteElement, });
+                onthouden = laatsteElement;
+            }
+            regel.PerDeelVersen = deelVersen;
+            regel.Benaming = voorBenaming;
+            regel.Opties = opties.ToList();
+
+            // downward compatibility met ILiturgieInterpretatie
+            regel.Deel = deelVersen.FirstOrDefault().Deel;
+            regel.VerzenZoalsIngevoerd = deelVersen.FirstOrDefault().Versen;
             regel.Verzen = (regel.VerzenZoalsIngevoerd ?? "")
               .Split(VersScheidingstekens, StringSplitOptions.RemoveEmptyEntries)
               .Select(v => v.Trim())
               .ToList();
-            regel.Opties = opties.ToList();
             return regel;
         }
 
@@ -130,6 +155,17 @@ namespace Generator.LiturgieInterpretator
         private class InterpretatieBijbeltekst : InterpretatieNormaal, ILiturgieInterpretatieBijbeltekst
         {
             public IEnumerable<ILiturgieInterpretatieBijbeltekstDeel> PerDeelVersen { get; set; }
+        }
+
+        private class InterpretatieBijbeltekstDeel : ILiturgieInterpretatieBijbeltekstDeel
+        {
+            public string Deel { get; set; }
+            public string Versen { get; set; }
+
+            public override string ToString()
+            {
+                return $"{Deel}: {Versen}";
+            }
         }
     }
 }
