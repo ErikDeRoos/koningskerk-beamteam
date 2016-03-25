@@ -18,35 +18,9 @@ namespace Generator.LiturgieInterpretator
         private static readonly char[] OptieEinde = { ')' };
         private static readonly char[] OptieScheidingstekens = { ',' };
 
-        private static Interpretatie SplitTekstregel(string invoer)
-        {
-            var regel = new Interpretatie();
-            var invoerTrimmed = invoer.Trim();
-            var voorOpties = invoerTrimmed.Split(OptieStart, StringSplitOptions.RemoveEmptyEntries);
-            if (voorOpties.Length == 0)
-                return null;
-            var opties = voorOpties.Length > 1 ? voorOpties[1].Split(OptieEinde, StringSplitOptions.RemoveEmptyEntries)[0].Trim() : Empty;
-            var voorBenamingStukken = voorOpties[0].Trim().Split(BenamingScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
-            if (voorBenamingStukken.Length == 0)
-                return null;
-            var preBenamingTrimmed = voorBenamingStukken[0].Trim();
-            // Een benaming kan uit delen bestaan, bijvoorbeeld 'psalm 110' in 'psalm 110:1,2' of 'opwekking 598' in 'opwekking 598'
-            var voorPreBenamingStukken = preBenamingTrimmed.Split(BenamingDeelScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
-            if (voorPreBenamingStukken.Length > 1)
-                regel.Deel = voorPreBenamingStukken[voorPreBenamingStukken.Length - 1];  // Is altijd laatste deel
-            regel.Benaming = preBenamingTrimmed.Substring(0, preBenamingTrimmed.Length - (regel.Deel ?? "").Length).Trim();
-            // Verzen als '1,2' in 'psalm 110:1,2'
-            regel.VerzenZoalsIngevoerd = voorBenamingStukken.Length > 1 ? voorBenamingStukken[1].Trim() : null;
-            regel.Verzen = (regel.VerzenZoalsIngevoerd ?? "")
-              .Split(VersScheidingstekens, StringSplitOptions.RemoveEmptyEntries)
-              .Select(v => v.Trim())
-              .ToList();
-            regel.Opties = (!IsNullOrEmpty(opties) ? opties : "")
-              .Split(OptieScheidingstekens, StringSplitOptions.RemoveEmptyEntries)
-              .Select(v => v.Trim())
-              .ToList();
-            return regel;
-        }
+        private static readonly string AlsCommando = "als";
+        private static readonly char[] AlsScheidingstekens = { ':' };
+        private static readonly string AlsBijbeltekst = "bijbeltekst";
 
         public ILiturgieInterpretatie VanTekstregel(string regels)
         {
@@ -64,6 +38,81 @@ namespace Generator.LiturgieInterpretator
               .Where(r => r != null)
               .ToList();
         }
+
+        private static Interpretatie SplitTekstregel(string invoer)
+        {
+            var regel = new Interpretatie();
+            var invoerTrimmed = invoer.Trim();
+            var voorOpties = invoerTrimmed.Split(OptieStart, StringSplitOptions.RemoveEmptyEntries);
+            var optiesRuw = voorOpties.Length > 1 ? voorOpties[1].Split(OptieEinde, StringSplitOptions.RemoveEmptyEntries)[0].Trim() : Empty;
+            var opties = (!IsNullOrEmpty(optiesRuw) ? optiesRuw : "")
+              .Split(OptieScheidingstekens, StringSplitOptions.RemoveEmptyEntries)
+              .Select(v => v.Trim())
+              .ToList();
+            var als = Als(opties);
+            if ((als ?? "").Equals(AlsBijbeltekst, StringComparison.CurrentCultureIgnoreCase))
+                return VerwerkAlsBijbeltekst(voorOpties, opties);
+            return VerwerkNormaal(voorOpties, opties);
+        }
+
+        private static string Als(IEnumerable<string> voorOpties)
+        {
+            if (voorOpties == null || !voorOpties.Any())
+                return null;
+            return voorOpties.Select(o => o.Split(AlsScheidingstekens))
+                .Where(o => o.Length == 2 && o[0].Trim().Equals(AlsCommando, StringComparison.CurrentCultureIgnoreCase))
+                .Select(o => o[1])
+                .FirstOrDefault();
+        }
+
+        private static Interpretatie VerwerkNormaal(string[] voorOpties, IEnumerable<string> opties)
+        {
+            var regel = new Interpretatie();
+            if (voorOpties.Length == 0)
+                return null;
+            var voorBenamingStukken = voorOpties[0].Trim().Split(BenamingScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
+            if (voorBenamingStukken.Length == 0)
+                return null;
+            var preBenamingTrimmed = voorBenamingStukken[0].Trim();
+            // Een benaming kan uit delen bestaan, bijvoorbeeld 'psalm 110' in 'psalm 110:1,2' of 'opwekking 598' in 'opwekking 598'
+            var voorPreBenamingStukken = preBenamingTrimmed.Split(BenamingDeelScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
+            if (voorPreBenamingStukken.Length > 1)
+                regel.Deel = voorPreBenamingStukken[voorPreBenamingStukken.Length - 1];  // Is altijd laatste deel
+            regel.Benaming = preBenamingTrimmed.Substring(0, preBenamingTrimmed.Length - (regel.Deel ?? "").Length).Trim();
+            // Verzen als '1,2' in 'psalm 110:1,2'
+            regel.VerzenZoalsIngevoerd = voorBenamingStukken.Length > 1 ? voorBenamingStukken[1].Trim() : null;
+            regel.Verzen = (regel.VerzenZoalsIngevoerd ?? "")
+              .Split(VersScheidingstekens, StringSplitOptions.RemoveEmptyEntries)
+              .Select(v => v.Trim())
+              .ToList();
+            regel.Opties = opties.ToList();
+            return regel;
+        }
+
+        private static Interpretatie VerwerkAlsBijbeltekst(string[] voorOpties, IEnumerable<string> opties)
+        {
+            var regel = new Interpretatie();
+            if (voorOpties.Length == 0)
+                return null;
+            var voorBenamingStukken = voorOpties[0].Trim().Split(BenamingScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
+            if (voorBenamingStukken.Length == 0)
+                return null;
+            var preBenamingTrimmed = voorBenamingStukken[0].Trim();
+            // Een benaming kan uit delen bestaan, bijvoorbeeld 'psalm 110' in 'psalm 110:1,2' of 'opwekking 598' in 'opwekking 598'
+            var voorPreBenamingStukken = preBenamingTrimmed.Split(BenamingDeelScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
+            if (voorPreBenamingStukken.Length > 1)
+                regel.Deel = voorPreBenamingStukken[voorPreBenamingStukken.Length - 1];  // Is altijd laatste deel
+            regel.Benaming = preBenamingTrimmed.Substring(0, preBenamingTrimmed.Length - (regel.Deel ?? "").Length).Trim();
+            // Verzen als '1,2' in 'psalm 110:1,2'
+            regel.VerzenZoalsIngevoerd = voorBenamingStukken.Length > 1 ? voorBenamingStukken[1].Trim() : null;
+            regel.Verzen = (regel.VerzenZoalsIngevoerd ?? "")
+              .Split(VersScheidingstekens, StringSplitOptions.RemoveEmptyEntries)
+              .Select(v => v.Trim())
+              .ToList();
+            regel.Opties = opties.ToList();
+            return regel;
+        }
+
 
         private class Interpretatie : ILiturgieInterpretatie
         {
