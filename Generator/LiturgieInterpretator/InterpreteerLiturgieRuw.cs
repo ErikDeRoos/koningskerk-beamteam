@@ -146,10 +146,7 @@ namespace Generator.LiturgieInterpretator
             // downward compatibility met ILiturgieInterpretatie
             regel.Deel = deelVersen.FirstOrDefault().Deel;
             regel.VerzenZoalsIngevoerd = deelVersen.FirstOrDefault().VerzenZoalsIngevoerd;
-            regel.Verzen = (regel.VerzenZoalsIngevoerd ?? "")
-              .Split(VersScheidingstekens, StringSplitOptions.RemoveEmptyEntries)
-              .Select(v => v.Trim())
-              .ToList();
+            regel.Verzen = deelVersen.FirstOrDefault().Verzen;
 
             // visualisatie handmatig regelen
             optieLijst.Add($"{Database.LiturgieDatabaseSettings.OptieAlternatieveNaamOverzicht} {regel}");

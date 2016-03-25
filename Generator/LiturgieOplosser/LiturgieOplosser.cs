@@ -46,16 +46,7 @@ namespace Generator.LiturgieOplosser
             // zoek de regels in de database en pak ook de naamgeving daar uit over
             if (regel.VerwerkenAlsSlide)
             {
-                var setNaam = item.Benaming;
-                var zoekNaam = item.Deel;
-                if (IsNullOrEmpty(item.Deel))
-                {
-                    setNaam = FileEngineDefaults.CommonFilesSetName;
-                    zoekNaam = item.Benaming;
-                    regel.TonenInOverzicht = false;  // TODO tijdelijk default gedrag van het niet tonen van algemene items in het overzicht overgenomen uit de oude situatie
-                }
-                
-                var fout = Aanvullen(regel, setNaam, zoekNaam, item.Verzen.ToList());
+                var fout = Aanvullen(regel, item);
                 if (fout.HasValue)
                     return new Oplossing(fout.Value, item);
             } else
@@ -92,7 +83,22 @@ namespace Generator.LiturgieOplosser
             return new Oplossing(LiturgieOplossingResultaat.Opgelost, item, regel);
         }
 
-        private LiturgieOplossingResultaat? Aanvullen(Regel regel, string setNaam, string zoekNaam, IEnumerable<string> verzen)
+        private LiturgieOplossingResultaat? Aanvullen(Regel regel, ILiturgieInterpretatie item)
+        {
+            var setNaam = item.Benaming;
+            if (item is ILiturgieInterpretatieBijbeltekst)
+                return BijbeltekstAanvuller(regel, setNaam, (item as ILiturgieInterpretatieBijbeltekst).PerDeelVersen.ToList());
+            var zoekNaam = item.Deel;
+            if (IsNullOrEmpty(item.Deel))
+            {
+                setNaam = FileEngineDefaults.CommonFilesSetName;
+                zoekNaam = item.Benaming;
+                regel.TonenInOverzicht = false;  // TODO tijdelijk default gedrag van het niet tonen van algemene items in het overzicht overgenomen uit de oude situatie
+            }
+
+            return NormaleAanvuller(regel, setNaam, zoekNaam, item.Verzen.ToList());
+        }
+        private LiturgieOplossingResultaat? NormaleAanvuller(Regel regel, string setNaam, string zoekNaam, IEnumerable<string> verzen)
         {
             var verzenList = verzen.ToList();
             var resultaat = _database.ZoekOnderdeel(setNaam, zoekNaam, verzenList);
@@ -116,6 +122,33 @@ namespace Generator.LiturgieOplosser
             // bepaal de naamgeving
             if (!IsNullOrWhiteSpace(resultaat.OnderdeelDisplayNaam))
                 regel.DisplayEdit.Naam = resultaat.OnderdeelDisplayNaam.Equals(_defaultSetNameEmpty, StringComparison.CurrentCultureIgnoreCase) ? null : resultaat.OnderdeelDisplayNaam;
+
+            return null;
+        }
+        private LiturgieOplossingResultaat? BijbeltekstAanvuller(Regel regel, string setNaam, IEnumerable<ILiturgieInterpretatieBijbeltekstDeel> versDelen)
+        {
+            //var verzenList = verzen.ToList();
+            //var resultaat = _database.ZoekOnderdeel(setNaam, zoekNaam, verzenList);
+            //if (resultaat.Fout != null)
+            //    return resultaat.Fout;
+
+            //if (resultaat.OnderdeelNaam == FileEngineDefaults.CommonFilesSetName)
+            //{
+            //    regel.DisplayEdit.Naam = resultaat.FragmentNaam;
+            //    regel.DisplayEdit.VersenGebruikDefault = new VersenDefault(string.Empty);  // Expliciet: Common bestanden hebben nooit versen
+            //}
+            //else {
+            //    regel.DisplayEdit.Naam = resultaat.OnderdeelNaam;
+            //    regel.DisplayEdit.SubNaam = resultaat.FragmentNaam;
+            //}
+            //regel.Content = resultaat.Content.ToList();
+            //if (resultaat.ZonderContentSplitsing)
+            //    regel.DisplayEdit.VersenGebruikDefault = new VersenDefault(string.Empty);  // Altijd default gebruiken omdat er altijd maar 1 content is
+            //regel.DisplayEdit.VolledigeContent = !verzenList.Any();
+
+            //// bepaal de naamgeving
+            //if (!IsNullOrWhiteSpace(resultaat.OnderdeelDisplayNaam))
+            //    regel.DisplayEdit.Naam = resultaat.OnderdeelDisplayNaam.Equals(_defaultSetNameEmpty, StringComparison.CurrentCultureIgnoreCase) ? null : resultaat.OnderdeelDisplayNaam;
 
             return null;
         }
