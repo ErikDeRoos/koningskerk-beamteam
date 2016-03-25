@@ -141,7 +141,7 @@ namespace Generator.LiturgieInterpretator
             }
             regel.PerDeelVersen = deelVersen;
             regel.Benaming = voorBenaming;
-            regel.Opties = opties.ToList();
+            var optieLijst = opties.ToList();
 
             // downward compatibility met ILiturgieInterpretatie
             regel.Deel = deelVersen.FirstOrDefault().Deel;
@@ -150,6 +150,13 @@ namespace Generator.LiturgieInterpretator
               .Split(VersScheidingstekens, StringSplitOptions.RemoveEmptyEntries)
               .Select(v => v.Trim())
               .ToList();
+
+            // visualisatie handmatig regelen
+            optieLijst.Add($"{Database.LiturgieDatabaseSettings.OptieAlternatieveNaamOverzicht} {regel}");
+            optieLijst.Add($"{Database.LiturgieDatabaseSettings.OptieAlternatieveNaam} {regel.Deel}");
+
+            // opties toekennen
+            regel.Opties = optieLijst;
             return regel;
         }
 
@@ -172,6 +179,11 @@ namespace Generator.LiturgieInterpretator
         private class InterpretatieBijbeltekst : InterpretatieNormaal, ILiturgieInterpretatieBijbeltekst
         {
             public IEnumerable<ILiturgieInterpretatieBijbeltekstDeel> PerDeelVersen { get; set; }
+
+            public override string ToString()
+            {
+                return $"{Benaming} {string.Join(", ", PerDeelVersen)}";
+            }
         }
 
         private class InterpretatieBijbeltekstDeel : ILiturgieInterpretatieBijbeltekstDeel
