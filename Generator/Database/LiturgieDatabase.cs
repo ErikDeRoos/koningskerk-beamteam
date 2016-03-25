@@ -42,6 +42,10 @@ namespace Generator.Database
 
         public IZoekresultaat ZoekOnderdeel(VerwerkingType alsType, string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen = null)
         {
+            // TODO alsType voor bijbelteksten uit eigen dir halen
+            // TODO alsType voor bijbelteksten bij nummering ondersteuning voor verzen tot einde hoofdstukken bijv '20 -'
+            // TODO alsType voor bijbelteksten in content referentie naar hoofdstuk (of op een andere plaats) zodat hoofdstuk wisseling bepaald kan worden
+
             var set = _database.Where(s => Compare(s.Name, onderdeelNaam, StringComparison.OrdinalIgnoreCase) == 0 || Compare(s.Settings.DisplayName, onderdeelNaam, StringComparison.OrdinalIgnoreCase) == 0).FirstOrDefault();
             if (set == null)
                 return new Zoekresultaat() { Fout = LiturgieOplossingResultaat.SetFout };

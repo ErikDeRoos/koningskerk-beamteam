@@ -83,6 +83,8 @@ namespace mppt
                     // Per onderdeel in de regel moet een sheet komen
                     foreach (var inhoud in regel.Content)
                     {
+                        // TODO bij regel type bijbeltekst eigen template vuller die teksten met nummering plaatst
+
                         if (inhoud.InhoudType == InhoudType.Tekst)
                             InvullenTekstOpTemplate(regel, inhoud, volgende);
                         else
