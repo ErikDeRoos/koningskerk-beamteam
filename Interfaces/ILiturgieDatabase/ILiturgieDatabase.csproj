@@ -35,6 +35,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Interpreteren\Helpers\ILiturgieInterpretatieBijbeltekst.cs" />
     <Compile Include="Interpreteren\ILiturgieLosop.cs" />
     <Compile Include="Interpreteren\ILiturgieDatabase.cs" />
     <Compile Include="Resultaten\IZoekresultaat.cs" />

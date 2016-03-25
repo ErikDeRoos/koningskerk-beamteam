@@ -39,9 +39,8 @@ namespace Generator.LiturgieInterpretator
               .ToList();
         }
 
-        private static Interpretatie SplitTekstregel(string invoer)
+        private static ILiturgieInterpretatie SplitTekstregel(string invoer)
         {
-            var regel = new Interpretatie();
             var invoerTrimmed = invoer.Trim();
             var voorOpties = invoerTrimmed.Split(OptieStart, StringSplitOptions.RemoveEmptyEntries);
             var optiesRuw = voorOpties.Length > 1 ? voorOpties[1].Split(OptieEinde, StringSplitOptions.RemoveEmptyEntries)[0].Trim() : Empty;
@@ -65,9 +64,9 @@ namespace Generator.LiturgieInterpretator
                 .FirstOrDefault();
         }
 
-        private static Interpretatie VerwerkNormaal(string[] voorOpties, IEnumerable<string> opties)
+        private static ILiturgieInterpretatie VerwerkNormaal(string[] voorOpties, IEnumerable<string> opties)
         {
-            var regel = new Interpretatie();
+            var regel = new InterpretatieNormaal();
             if (voorOpties.Length == 0)
                 return null;
             var voorBenamingStukken = voorOpties[0].Trim().Split(BenamingScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
@@ -89,16 +88,15 @@ namespace Generator.LiturgieInterpretator
             return regel;
         }
 
-        private static Interpretatie VerwerkAlsBijbeltekst(string[] voorOpties, IEnumerable<string> opties)
+        private static ILiturgieInterpretatieBijbeltekst VerwerkAlsBijbeltekst(string[] voorOpties, IEnumerable<string> opties)
         {
-            var regel = new Interpretatie();
+            var regel = new InterpretatieBijbeltekst();
             if (voorOpties.Length == 0)
                 return null;
             var voorBenamingStukken = voorOpties[0].Trim().Split(BenamingScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
             if (voorBenamingStukken.Length == 0)
                 return null;
             var preBenamingTrimmed = voorBenamingStukken[0].Trim();
-            // Een benaming kan uit delen bestaan, bijvoorbeeld 'psalm 110' in 'psalm 110:1,2' of 'opwekking 598' in 'opwekking 598'
             var voorPreBenamingStukken = preBenamingTrimmed.Split(BenamingDeelScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
             if (voorPreBenamingStukken.Length > 1)
                 regel.Deel = voorPreBenamingStukken[voorPreBenamingStukken.Length - 1];  // Is altijd laatste deel
@@ -114,7 +112,7 @@ namespace Generator.LiturgieInterpretator
         }
 
 
-        private class Interpretatie : ILiturgieInterpretatie
+        private class InterpretatieNormaal : ILiturgieInterpretatie
         {
             public string Benaming { get; set; }
             public string Deel { get; set; }
@@ -127,6 +125,11 @@ namespace Generator.LiturgieInterpretator
             {
                 return $"{Benaming} {Deel} {VerzenZoalsIngevoerd}";
             }
+        }
+
+        private class InterpretatieBijbeltekst : InterpretatieNormaal, ILiturgieInterpretatieBijbeltekst
+        {
+            public IEnumerable<ILiturgieInterpretatieBijbeltekstDeel> PerDeelVersen { get; set; }
         }
     }
 }
