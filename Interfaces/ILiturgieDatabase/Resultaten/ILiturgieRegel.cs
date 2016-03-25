@@ -23,6 +23,10 @@ namespace ILiturgieDatabase {
         /// Of een voorgaande slide een 'volgende' vermelding moet maken naar deze naam van deze slide
         /// </summary>
         bool TonenInVolgende { get; }
+        /// <summary>
+        /// Of de inhoud van een afwijkend type is
+        /// </summary>
+        VerwerkingType VerwerkenAlsType { get; }
 
         /// <summary>
         /// Inhoud van de regel. 1 of meer. Bij 'VerwerkenAlsSlide' is 'False' dan is er geen content.

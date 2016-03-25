@@ -51,6 +51,7 @@ namespace Generator.LiturgieOplosser
                     return new Oplossing(fout.Value, item);
             } else
             {
+                regel.VerwerkenAlsType = VerwerkingType.nietverwerken;
                 regel.DisplayEdit.VersenGebruikDefault = new VersenDefault(item.VerzenZoalsIngevoerd);
             }
 
@@ -87,7 +88,10 @@ namespace Generator.LiturgieOplosser
         {
             var setNaam = item.Benaming;
             if (item is ILiturgieInterpretatieBijbeltekst)
+            {
+                regel.DisplayEdit.VersenGebruikDefault = new VersenDefault(item.ToString());
                 return BijbeltekstAanvuller(regel, setNaam, (item as ILiturgieInterpretatieBijbeltekst).PerDeelVersen.ToList());
+            }
             var zoekNaam = item.Deel;
             if (IsNullOrEmpty(item.Deel))
             {
@@ -100,6 +104,7 @@ namespace Generator.LiturgieOplosser
         }
         private LiturgieOplossingResultaat? NormaleAanvuller(Regel regel, string setNaam, string zoekNaam, IEnumerable<string> verzen)
         {
+            regel.VerwerkenAlsType = VerwerkingType.normaal;
             var verzenList = verzen.ToList();
             var resultaat = _database.ZoekOnderdeel(setNaam, zoekNaam, verzenList);
             if (resultaat.Fout != null)
@@ -127,29 +132,22 @@ namespace Generator.LiturgieOplosser
         }
         private LiturgieOplossingResultaat? BijbeltekstAanvuller(Regel regel, string setNaam, IEnumerable<ILiturgieInterpretatieBijbeltekstDeel> versDelen)
         {
-            //var verzenList = verzen.ToList();
-            //var resultaat = _database.ZoekOnderdeel(setNaam, zoekNaam, verzenList);
-            //if (resultaat.Fout != null)
-            //    return resultaat.Fout;
-
-            //if (resultaat.OnderdeelNaam == FileEngineDefaults.CommonFilesSetName)
-            //{
-            //    regel.DisplayEdit.Naam = resultaat.FragmentNaam;
-            //    regel.DisplayEdit.VersenGebruikDefault = new VersenDefault(string.Empty);  // Expliciet: Common bestanden hebben nooit versen
-            //}
-            //else {
-            //    regel.DisplayEdit.Naam = resultaat.OnderdeelNaam;
-            //    regel.DisplayEdit.SubNaam = resultaat.FragmentNaam;
-            //}
-            //regel.Content = resultaat.Content.ToList();
-            //if (resultaat.ZonderContentSplitsing)
-            //    regel.DisplayEdit.VersenGebruikDefault = new VersenDefault(string.Empty);  // Altijd default gebruiken omdat er altijd maar 1 content is
-            //regel.DisplayEdit.VolledigeContent = !verzenList.Any();
-
-            //// bepaal de naamgeving
-            //if (!IsNullOrWhiteSpace(resultaat.OnderdeelDisplayNaam))
-            //    regel.DisplayEdit.Naam = resultaat.OnderdeelDisplayNaam.Equals(_defaultSetNameEmpty, StringComparison.CurrentCultureIgnoreCase) ? null : resultaat.OnderdeelDisplayNaam;
-
+            regel.VerwerkenAlsType = VerwerkingType.bijbeltekst;
+            var content = new List<ILiturgieContent>();
+            var versDelenLijst = versDelen.ToList();
+            foreach(var deel in versDelenLijst)
+            {
+                var resultaat = _database.ZoekOnderdeel(setNaam, deel.Deel, deel.Verzen);
+                if (resultaat.Fout != null)
+                    return resultaat.Fout;
+                regel.DisplayEdit.Naam = resultaat.OnderdeelNaam;
+                regel.DisplayEdit.SubNaam = resultaat.FragmentNaam;
+                content.AddRange(resultaat.Content);
+                // bepaal de naamgeving
+                if (!IsNullOrWhiteSpace(resultaat.OnderdeelDisplayNaam))
+                    regel.DisplayEdit.Naam = resultaat.OnderdeelDisplayNaam.Equals(_defaultSetNameEmpty, StringComparison.CurrentCultureIgnoreCase) ? null : resultaat.OnderdeelDisplayNaam;
+            }
+            regel.DisplayEdit.VolledigeContent = versDelenLijst.Count == 1 && !versDelen.FirstOrDefault().Verzen.Any();
             return null;
         }
 
@@ -188,6 +186,7 @@ namespace Generator.LiturgieOplosser
             public bool TonenInOverzicht { get; set; }
             public bool TonenInVolgende { get; set; }
             public bool VerwerkenAlsSlide { get; set; }
+            public VerwerkingType VerwerkenAlsType { get; set; }
 
             public override string ToString()
             {
