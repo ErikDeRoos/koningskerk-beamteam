@@ -106,7 +106,14 @@ namespace Generator.LiturgieInterpretator
                 var heeftVolgendStuk = teller + 1 < benamingStukken.Length;
                 if (!heeftVolgendStuk && teller != 0)
                 {
-                    deelVersen.Add(new InterpretatieBijbeltekstDeel() { Deel = onthouden, Versen = stuk, });
+                    deelVersen.Add(new InterpretatieBijbeltekstDeel() {
+                        Deel = onthouden,
+                        VerzenZoalsIngevoerd = stuk,
+                        Verzen = (stuk ?? "")
+                          .Split(VersScheidingstekens, StringSplitOptions.RemoveEmptyEntries)
+                          .Select(v => v.Trim())
+                          .ToList()
+                    });
                     break;
                 }
                 var elementen = stuk.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
@@ -117,9 +124,19 @@ namespace Generator.LiturgieInterpretator
                 if (teller == 0)
                     voorBenaming = stukZonderLaatsteElement;
                 if (!heeftVolgendStuk && teller == 0)
-                    deelVersen.Add(new InterpretatieBijbeltekstDeel() { Deel = laatsteElement });
+                    deelVersen.Add(new InterpretatieBijbeltekstDeel() {
+                        Deel = laatsteElement,
+                        Verzen = new List<string>()
+                    });
                 else if (teller != 0)
-                    deelVersen.Add(new InterpretatieBijbeltekstDeel() { Deel = onthouden, Versen = stukZonderLaatsteElement, });
+                    deelVersen.Add(new InterpretatieBijbeltekstDeel() {
+                        Deel = onthouden,
+                        VerzenZoalsIngevoerd = stukZonderLaatsteElement,
+                        Verzen = (stukZonderLaatsteElement ?? "")
+                          .Split(VersScheidingstekens, StringSplitOptions.RemoveEmptyEntries)
+                          .Select(v => v.Trim())
+                          .ToList()
+                    });
                 onthouden = laatsteElement;
             }
             regel.PerDeelVersen = deelVersen;
@@ -128,7 +145,7 @@ namespace Generator.LiturgieInterpretator
 
             // downward compatibility met ILiturgieInterpretatie
             regel.Deel = deelVersen.FirstOrDefault().Deel;
-            regel.VerzenZoalsIngevoerd = deelVersen.FirstOrDefault().Versen;
+            regel.VerzenZoalsIngevoerd = deelVersen.FirstOrDefault().VerzenZoalsIngevoerd;
             regel.Verzen = (regel.VerzenZoalsIngevoerd ?? "")
               .Split(VersScheidingstekens, StringSplitOptions.RemoveEmptyEntries)
               .Select(v => v.Trim())
@@ -160,11 +177,12 @@ namespace Generator.LiturgieInterpretator
         private class InterpretatieBijbeltekstDeel : ILiturgieInterpretatieBijbeltekstDeel
         {
             public string Deel { get; set; }
-            public string Versen { get; set; }
+            public IEnumerable<string> Verzen { get; set; }
+            public string VerzenZoalsIngevoerd { get; set; }
 
             public override string ToString()
             {
-                return $"{Deel}: {Versen}";
+                return $"{Deel}: {VerzenZoalsIngevoerd}";
             }
         }
     }

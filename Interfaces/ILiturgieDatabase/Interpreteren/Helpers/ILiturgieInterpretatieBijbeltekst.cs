@@ -12,6 +12,7 @@ namespace ILiturgieDatabase
     public interface ILiturgieInterpretatieBijbeltekstDeel
     {
         string Deel { get; }
-        string Versen { get; }
+        IEnumerable<string> Verzen { get; }
+        string VerzenZoalsIngevoerd { get; }
     }
 }
