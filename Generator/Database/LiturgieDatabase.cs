@@ -37,6 +37,11 @@ namespace Generator.Database
 
         public IZoekresultaat ZoekOnderdeel(string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen = null)
         {
+            return ZoekOnderdeel(VerwerkingType.normaal, onderdeelNaam, fragmentNaam, fragmentDelen);
+        }
+
+        public IZoekresultaat ZoekOnderdeel(VerwerkingType alsType, string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen = null)
+        {
             var set = _database.Where(s => Compare(s.Name, onderdeelNaam, StringComparison.OrdinalIgnoreCase) == 0 || Compare(s.Settings.DisplayName, onderdeelNaam, StringComparison.OrdinalIgnoreCase) == 0).FirstOrDefault();
             if (set == null)
                 return new Zoekresultaat() { Fout = LiturgieOplossingResultaat.SetFout };

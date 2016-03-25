@@ -137,7 +137,7 @@ namespace Generator.LiturgieOplosser
             var versDelenLijst = versDelen.ToList();
             foreach(var deel in versDelenLijst)
             {
-                var resultaat = _database.ZoekOnderdeel(setNaam, deel.Deel, deel.Verzen);
+                var resultaat = _database.ZoekOnderdeel(VerwerkingType.bijbeltekst, setNaam, deel.Deel, deel.Verzen);
                 if (resultaat.Fout != null)
                     return resultaat.Fout;
                 regel.DisplayEdit.Naam = resultaat.OnderdeelNaam;
