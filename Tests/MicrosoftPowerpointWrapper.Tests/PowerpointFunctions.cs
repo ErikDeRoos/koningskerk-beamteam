@@ -1,4 +1,5 @@
-﻿using Autofac.Extras.FakeItEasy;
+﻿// Copyright 2016 door Erik de Roos
+using Autofac.Extras.FakeItEasy;
 using FakeItEasy;
 using mppt.Connect;
 using NUnit.Framework;

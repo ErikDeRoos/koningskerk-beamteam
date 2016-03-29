@@ -1,4 +1,5 @@
-﻿using FakeItEasy;
+﻿// Copyright 2016 door Erik de Roos
+using FakeItEasy;
 using ILiturgieDatabase;
 using NUnit.Framework;
 using Generator.Database.FileSystem;
