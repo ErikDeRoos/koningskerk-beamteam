@@ -1,4 +1,5 @@
-﻿using ISettings;
+﻿// Copyright 2016 door Erik de Roos
+using ISettings;
 using ISettings.CommonImplementation;
 using System;
 

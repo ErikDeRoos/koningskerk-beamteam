@@ -1,4 +1,5 @@
-﻿using ILiturgieDatabase;
+﻿// Copyright 2016 door Remco Veurink en Erik de Roos
+using ILiturgieDatabase;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;

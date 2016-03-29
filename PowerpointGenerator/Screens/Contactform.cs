@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿// Copyright 2016 door Remco Veurink en Erik de Roos
+using System.Windows.Forms;
 
 namespace PowerpointGenerator
 {

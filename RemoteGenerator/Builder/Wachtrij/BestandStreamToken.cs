@@ -1,4 +1,5 @@
-﻿using System;
+﻿// Copyright 2016 door Erik de Roos
+using System;
 
 namespace RemoteGenerator.Builder.Wachtrij
 {

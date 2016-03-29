@@ -1,4 +1,5 @@
-﻿using RemoteGenerator.Builder;
+﻿// Copyright 2016 door Erik de Roos
+using RemoteGenerator.Builder;
 using System;
 using System.Linq;
 using System.Windows.Forms;
