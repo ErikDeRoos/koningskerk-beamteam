@@ -1,4 +1,5 @@
-﻿using Generator.Database;
+﻿// Copyright 2016 door Remco Veurink en Erik de Roos
+using Generator.Database;
 using Generator.LiturgieInterpretator;
 using Generator.Powerpoint;
 using ILiturgieDatabase;
