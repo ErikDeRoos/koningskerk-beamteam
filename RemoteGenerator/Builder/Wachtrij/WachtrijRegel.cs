@@ -1,4 +1,5 @@
-﻿using RemoteGenerator.Builder.Wachtrij;
+﻿// Copyright 2016 door Erik de Roos
+using RemoteGenerator.Builder.Wachtrij;
 using System;
 using System.Collections.Generic;
 

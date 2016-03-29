@@ -1,4 +1,5 @@
-﻿using Generator.Database;
+﻿// Copyright 2016 door Remco Veurink en Erik de Roos
+using Generator.Database;
 using Generator.LiturgieInterpretator;
 using Generator.Powerpoint;
 using ILiturgieDatabase;
@@ -144,7 +145,7 @@ namespace Generator
         }
         public string GetWorkingFile()
         {
-            var output = Registration.Liturgie + "\n";
+            var output = string.Join("\n", Registration.Liturgie) + "\n";
             output += "<Voorganger:>" + Registration.Voorganger + "\n";
             output += "<1e Collecte:>" + Registration.Collecte1e + "\n";
             output += "<2e Collecte:>" + Registration.Collecte2e + "\n";

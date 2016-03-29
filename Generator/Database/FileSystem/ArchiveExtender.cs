@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿// Copyright 2016 door Erik de Roos
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;

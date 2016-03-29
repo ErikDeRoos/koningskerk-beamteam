@@ -9,6 +9,10 @@ De databases bevatten copyright beschermd materiaal in de vorm van liedbundels. 
 In overleg kunnen wij wel onze databases ter beschikking stellen als duidelijk is dat er aan de licentievoorwaarden voldaan is.
 In dat geval kan je contact opnemen met de koningskerk (www.koningskerk.nl) en vragen naar het beamteam.
 
+Dit project bevat ook andere projecten waarmee:
+* Op een andere pc de powerpoint gegenereerd kan worden (onder GPL)
+* Interfaces voor alle onderdelen op basis waarvan je uit kan breiden (onder LGPL)
+
 Copyright (C) 2016. Portions Copyright (C) Remco Veurink, Erik de Roos
 
 Original idea by Remco Veurink. Further worked on by Erik de Roos.

@@ -1,4 +1,5 @@
-﻿using System;
+﻿// Copyright 2016 door Remco Veurink en Erik de Roos
+using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;

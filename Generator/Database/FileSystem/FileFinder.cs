@@ -1,4 +1,5 @@
-﻿using IDatabase;
+﻿// Copyright 2016 door Erik de Roos
+using IDatabase;
 using IFileSystem;
 using System;
 using System.Collections.Generic;

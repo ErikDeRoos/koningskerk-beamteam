@@ -1,4 +1,5 @@
-﻿using ISettings;
+﻿// Copyright 2016 door Remco Veurink en Erik de Roos
+using ISettings;
 
 namespace PowerpointGenerator
 {

@@ -1,4 +1,5 @@
-﻿
+﻿// Copyright 2016 door Remco Veurink en Erik de Roos
+
 namespace ISettings.CommonImplementation
 {
     public class StandaardTeksten : IStandaardTeksten

@@ -1,4 +1,5 @@
-﻿using ConnectTools.Berichten;
+﻿// Copyright 2016 door Erik de Roos
+using ConnectTools.Berichten;
 using IFileSystem;
 using ILiturgieDatabase;
 using ISettings;

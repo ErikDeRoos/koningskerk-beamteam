@@ -1,4 +1,5 @@
-﻿using ConnectTools;
+﻿// Copyright 2016 door Erik de Roos
+using ConnectTools;
 using ISlideBuilder;
 using System.ServiceModel;
 using ILiturgieDatabase;

@@ -1,4 +1,5 @@
-﻿using Generator.Database;
+﻿// Copyright 2016 door Erik de Roos
+using Generator.Database;
 using Generator.Database.FileSystem;
 using ILiturgieDatabase;
 using System;

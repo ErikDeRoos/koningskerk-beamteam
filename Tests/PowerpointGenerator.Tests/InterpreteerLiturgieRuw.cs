@@ -1,4 +1,5 @@
-﻿using ILiturgieDatabase;
+﻿// Copyright 2016 door Erik de Roos
+using ILiturgieDatabase;
 using NUnit.Framework;
 using System.Linq;
 
