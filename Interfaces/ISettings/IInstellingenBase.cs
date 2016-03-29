@@ -1,4 +1,5 @@
-﻿namespace ISettings
+﻿// Copyright 2016 door Erik de Roos
+namespace ISettings
 {
     public interface IInstellingenBase
     {

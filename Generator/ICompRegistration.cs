@@ -1,4 +1,5 @@
-﻿namespace Generator
+﻿// Copyright 2016 door Erik de Roos
+namespace Generator
 {
     public interface ICompRegistration
     {

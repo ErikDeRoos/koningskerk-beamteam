@@ -1,4 +1,5 @@
-﻿
+﻿// Copyright 2016 door Erik de Roos
+
 namespace IDatabase
 {
     public interface ISetSettings

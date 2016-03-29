@@ -1,4 +1,5 @@
-﻿using RemoteGenerator.Builder.Wachtrij.LiturgieRegels;
+﻿// Copyright 2016 door Erik de Roos
+using RemoteGenerator.Builder.Wachtrij.LiturgieRegels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
