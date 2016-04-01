@@ -8,6 +8,7 @@ using System.Xml.Serialization;
 using System.IO;
 using ISettings;
 using IFileSystem;
+using IDatabase.Engine;
 
 namespace Generator.Database.FileSystem
 {
@@ -28,39 +29,41 @@ namespace Generator.Database.FileSystem
 
 
     /// <summary>
-    /// File-system gebaseerde database. Lazy loading. Caching default aan. Read-only.
+    /// File-system gebaseerde database. Lazy loading. Read-only.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class FileEngine<T> : IEngine<T> where T : class, ISetSettings, new()
     {
-        public bool Cached { get; set; }
+        public delegate IEngine<T2> Factory<T2>(string databasePad, bool cached) where T2 : class, ISetSettings, new();
+
+        private bool _cached { get; set; }
         private IEnumerable<IDbSet<T>> _dirCache;
-        private IInstellingenFactory _instellingenFactory;
+        private string _startDir;
         private IFileOperations _fileManager;
 
         /// <param name="cached">
         /// True = cache structure (paths, filetrees and settings), 
         /// content is never cached but combination of on-access loading and lazy loading instead.
         /// </param>
-        public FileEngine(IInstellingenFactory instellingenFactory, IFileOperations fileManager)
+        public FileEngine(IFileOperations fileManager, string databasePad, bool cached)
         {
-            _instellingenFactory = instellingenFactory;
             _fileManager = fileManager;
-            Cached = true;
+            _startDir = databasePad;
+            _cached = cached;
         }
 
         private IEnumerable<FileSet<T>> GetDirs(string startDir, bool askCached)
         {
+            // TODO not existing dir check
             return Directory.GetDirectories(startDir).Select(d => new FileSet<T>(_fileManager, d, askCached)).ToList();
         }
 
         public IEnumerable<IDbSet<T>> Where(Func<IDbSet<T>, bool> query)
         {
-            var startDir = _instellingenFactory.LoadFromXmlFile().FullDatabasePath;  // on-the-fly instellingen benaderen
-            if (!Cached)
-                return GetDirs(startDir, Cached);
+            if (!_cached)
+                return GetDirs(_startDir, _cached);
             if (_dirCache == null)
-                _dirCache = GetDirs(startDir, Cached);
+                _dirCache = GetDirs(_startDir, _cached);
             return _dirCache.Where(query);
         }
     }

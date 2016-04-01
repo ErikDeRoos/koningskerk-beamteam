@@ -30,10 +30,10 @@ namespace Generator.Database
     /// </summary>
     public class LiturgieDatabase : ILiturgieDatabase.ILiturgieDatabase
     {
-        private readonly IEngine<FileEngineSetSettings> _database;
-        public LiturgieDatabase(IEngine<FileEngineSetSettings> database)
+        private readonly IEngineManager<FileEngineSetSettings> _databases;
+        public LiturgieDatabase(IEngineManager<FileEngineSetSettings> database)
         {
-            _database = database;
+            _databases = database;
         }
 
         public IZoekresultaat ZoekOnderdeel(string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen = null)
@@ -47,7 +47,9 @@ namespace Generator.Database
             // TODO alsType voor bijbelteksten bij nummering ondersteuning voor verzen tot einde hoofdstukken bijv '20 -'
             // TODO alsType voor bijbelteksten in content referentie naar hoofdstuk (of op een andere plaats) zodat hoofdstuk wisseling bepaald kan worden
 
-            var set = _database.Where(s => Compare(s.Name, onderdeelNaam, StringComparison.OrdinalIgnoreCase) == 0 || Compare(s.Settings.DisplayName, onderdeelNaam, StringComparison.OrdinalIgnoreCase) == 0).FirstOrDefault();
+            var database = alsType == VerwerkingType.normaal ? _databases.GetDefault() : null;
+
+            var set = database.Engine.Where(s => Compare(s.Name, onderdeelNaam, StringComparison.OrdinalIgnoreCase) == 0 || Compare(s.Settings.DisplayName, onderdeelNaam, StringComparison.OrdinalIgnoreCase) == 0).FirstOrDefault();
             if (set == null)
                 return new Zoekresultaat() { Fout = LiturgieOplossingResultaat.SetFout };
             // Je kunt geen verzen opgeven als we ze niet los hebben.
