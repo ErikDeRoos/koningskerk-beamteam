@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace IDatabase
+namespace IDatabase.Engine
 {
     /// <summary>
     /// Engine

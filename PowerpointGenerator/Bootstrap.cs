@@ -19,7 +19,7 @@ namespace PowerpointGenerator
         {
             container.RegisterType<Generator.Database.LiturgieDatabase>().As<ILiturgieDatabase.ILiturgieDatabase>();
             container.RegisterType<Generator.LiturgieOplosser.LiturgieOplosser>().As<ILiturgieDatabase.ILiturgieLosOp>().WithParameter("defaultSetNameEmpty", Properties.Settings.Default.SetNameEmpty);
-            container.RegisterGeneric(typeof(Generator.Database.FileSystem.FileEngine<>)).As(typeof(IDatabase.IEngine<>));
+            container.RegisterGeneric(typeof(Generator.Database.FileSystem.FileEngine<>)).As(typeof(IDatabase.Engine.IEngine<>));
             SetMsPowerpointBuilder(container);
         }
 
