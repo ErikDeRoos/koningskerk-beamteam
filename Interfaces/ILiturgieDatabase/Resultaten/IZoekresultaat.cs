@@ -5,7 +5,7 @@ namespace ILiturgieDatabase
 {
     public interface IZoekresultaat
     {
-        LiturgieOplossingResultaat? Fout { get; }
+        LiturgieOplossingResultaat Status { get; }
         string OnderdeelNaam { get; }
         string OnderdeelDisplayNaam { get; }
         string FragmentNaam { get; }

@@ -40,15 +40,15 @@ namespace Generator.Database
         {
             var set = _database.Where(s => Compare(s.Name, onderdeelNaam, StringComparison.OrdinalIgnoreCase) == 0 || Compare(s.Settings.DisplayName, onderdeelNaam, StringComparison.OrdinalIgnoreCase) == 0).FirstOrDefault();
             if (set == null)
-                return new Zoekresultaat() { Fout = LiturgieOplossingResultaat.SetFout };
+                return new Zoekresultaat() { Status = LiturgieOplossingResultaat.SetFout };
             // Je kunt geen verzen opgeven als we ze niet los hebben.
             // (Andere kant op kan wel: geen verzen opgeven terwijl ze er wel zijn (wat 'alle verzen' betekend))
             if (fragmentDelen != null && fragmentDelen.Any() && !set.Settings.ItemsHaveSubContent)
-                return new Zoekresultaat() { Fout = LiturgieOplossingResultaat.VersOnderverdelingMismatch };
+                return new Zoekresultaat() { Status = LiturgieOplossingResultaat.VersOnderverdelingMismatch };
             // Kijk of we het specifieke item in de set kunnen vinden (alleen via de op-schijf naam)
             var subSet = set.Where(r => Compare(r.Name, fragmentNaam, StringComparison.OrdinalIgnoreCase) == 0).FirstOrDefault();
             if (subSet == null)
-                return new Zoekresultaat() { Fout = LiturgieOplossingResultaat.SubSetFout };
+                return new Zoekresultaat() { Status = LiturgieOplossingResultaat.SubSetFout };
             var returnValue = new Zoekresultaat()
             {
                 OnderdeelNaam = set.Name,
@@ -63,7 +63,7 @@ namespace Generator.Database
                 {
                     var content = KrijgDirecteContent(subSet.Content, null);
                     if (content == null)
-                        return new Zoekresultaat() { Fout = LiturgieOplossingResultaat.VersOnleesbaar };
+                        return new Zoekresultaat() { Status = LiturgieOplossingResultaat.VersOnleesbaar };
                     returnValue.Content = new List<ILiturgieContent> { content };
                 }
                 // Een item met alle verzen
@@ -86,20 +86,21 @@ namespace Generator.Database
                     .ToList();
                 // Specifieke verzen moeten allemaal gevonden kunnen worden
                 if (preSelect.Any(c => c.SubSet == null))
-                    return new Zoekresultaat() { Fout = LiturgieOplossingResultaat.VersFout };
+                    return new Zoekresultaat() { Status = LiturgieOplossingResultaat.VersFout };
                 returnValue.Content = preSelect
                     .Select(s => KrijgDirecteContent(s.SubSet.Content, s.Naam))
                     .ToList();
                 // Specifieke verzen moeten allemaal interpreteerbaar zijn
                 if (returnValue.Content.Any(c => c == null))
-                    return new Zoekresultaat() { Fout = LiturgieOplossingResultaat.VersOnleesbaar };
+                    return new Zoekresultaat() { Status = LiturgieOplossingResultaat.VersOnleesbaar };
             }
+            returnValue.Status = LiturgieOplossingResultaat.Opgelost;
             return returnValue;
         }
 
         public class Zoekresultaat : IZoekresultaat
         {
-            public LiturgieOplossingResultaat? Fout { get; set; }
+            public LiturgieOplossingResultaat Status { get; set; }
             public string OnderdeelNaam { get; set; }
             public string OnderdeelDisplayNaam { get; set; }
             public string FragmentNaam { get; set; }
