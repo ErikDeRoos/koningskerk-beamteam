@@ -15,14 +15,10 @@ namespace Generator.Database
     // TODO Stap 1: assistentie bij invullen liturgie
     // TODO mask weer ergens toepassen
 
-    static class LiturgieDatabaseSettings
+    public static class LiturgieDatabaseSettings
     {
-        public const string OptieNietVerwerken = "geendb";
-        public const string OptieNietTonenInVolgende = "geenvolg";
-        public const string OptieNietTonenInOverzicht = "geenlt";
-        public const string OptieAlternatieveNaamOverzicht = "altlt";
-        public const string OptieAlternatieveNaam = "altnm";
         public const string VersSamenvoeging = "-";
+        public const string DatabaseNameBijbeltekst = "bijbel";
     }
 
     /// <summary>

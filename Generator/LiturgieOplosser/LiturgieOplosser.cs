@@ -9,6 +9,14 @@ using static System.String;
 
 namespace Generator.LiturgieOplosser
 {
+    public static class LiturgieOplosserSettings
+    {
+        public const string OptieNietVerwerken = "geendb";
+        public const string OptieNietTonenInVolgende = "geenvolg";
+        public const string OptieNietTonenInOverzicht = "geenlt";
+        public const string OptieAlternatieveNaamOverzicht = "altlt";
+        public const string OptieAlternatieveNaam = "altnm";
+    }
 
     /// <summary>
     /// Zoek naar de opgegeven liturgieen.
@@ -35,9 +43,9 @@ namespace Generator.LiturgieOplosser
 
             // verwerk de opties
             var trimmedOpties = item.Opties.Select(o => o.Trim()).ToList();
-            regel.VerwerkenAlsSlide = !trimmedOpties.Any(o => o.StartsWith(LiturgieDatabaseSettings.OptieNietVerwerken, StringComparison.CurrentCultureIgnoreCase));
-            regel.TonenInVolgende = !trimmedOpties.Any(o => o.StartsWith(LiturgieDatabaseSettings.OptieNietTonenInVolgende, StringComparison.CurrentCultureIgnoreCase));
-            regel.TonenInOverzicht = !trimmedOpties.Any(o => o.StartsWith(LiturgieDatabaseSettings.OptieNietTonenInOverzicht, StringComparison.CurrentCultureIgnoreCase));
+            regel.VerwerkenAlsSlide = !trimmedOpties.Any(o => o.StartsWith(LiturgieOplosserSettings.OptieNietVerwerken, StringComparison.CurrentCultureIgnoreCase));
+            regel.TonenInVolgende = !trimmedOpties.Any(o => o.StartsWith(LiturgieOplosserSettings.OptieNietTonenInVolgende, StringComparison.CurrentCultureIgnoreCase));
+            regel.TonenInOverzicht = !trimmedOpties.Any(o => o.StartsWith(LiturgieOplosserSettings.OptieNietTonenInOverzicht, StringComparison.CurrentCultureIgnoreCase));
 
             // regel visualisatie default
             regel.DisplayEdit.Naam = item.Benaming;
@@ -74,10 +82,10 @@ namespace Generator.LiturgieOplosser
             if (IsNullOrEmpty(regel.DisplayEdit.NaamOverzicht))
                 regel.DisplayEdit.NaamOverzicht = regel.DisplayEdit.Naam;
             // kijk of de opties nog iets zeggen over alternatieve naamgeving
-            var optieMetAltNaamOverzicht = GetOptieParam(trimmedOpties, LiturgieDatabaseSettings.OptieAlternatieveNaamOverzicht);
+            var optieMetAltNaamOverzicht = GetOptieParam(trimmedOpties, LiturgieOplosserSettings.OptieAlternatieveNaamOverzicht);
             if (!IsNullOrWhiteSpace(optieMetAltNaamOverzicht))
                 regel.DisplayEdit.NaamOverzicht = optieMetAltNaamOverzicht;
-            var optieMetAltNaamVolgende = GetOptieParam(trimmedOpties, LiturgieDatabaseSettings.OptieAlternatieveNaam);
+            var optieMetAltNaamVolgende = GetOptieParam(trimmedOpties, LiturgieOplosserSettings.OptieAlternatieveNaam);
             if (!IsNullOrWhiteSpace(optieMetAltNaamVolgende))
                 regel.DisplayEdit.Naam = optieMetAltNaamOverzicht;
 
