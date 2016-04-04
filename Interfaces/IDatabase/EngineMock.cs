@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace IDatabase
@@ -63,6 +64,7 @@ namespace IDatabase
         {
             ISetMock AddSet(string name);
             IItemMock AddItem(string name);
+            IItemMock SetContent(string type, string content);
         }
 
         private class SetMock : ISetMock, IDbSet<T>
@@ -129,19 +131,15 @@ namespace IDatabase
             public ItemMutator ItemMutator { get; private set; }
 
             public string Name { get; set; }
+            private ItemContentMock _content;
 
-            public IDbItemContent Content
-            {
-                get
-                {
-                    throw new NotImplementedException();
-                }
-            }
+            public IDbItemContent Content {  get { return _content; } }
 
             public ItemMock(SetMutator sets, ItemMutator items)
             {
                 SetMutator = sets;
                 ItemMutator = items;
+                _content = new ItemContentMock();
             }
 
             public ISetMock AddSet(string name)
@@ -152,6 +150,51 @@ namespace IDatabase
             public IItemMock AddItem(string name)
             {
                 return ItemMutator.AddItem(name);
+            }
+
+            public IItemMock SetContent(string type, string content)
+            {
+                var memStream = new MemoryStream();
+                using (var writer = new StreamWriter(memStream))
+                {
+                    writer.Write(content);
+                    writer.Flush();
+                }
+                _content = new ItemContentMock(type, memStream);
+                return this;
+            }
+
+            private class ItemContentMock : IDbItemContent, IDisposable
+            {
+                public string Type { get; private set; }
+                public Stream Content { get; private set; }
+
+                public string PersistentLink
+                {
+                    get
+                    {
+                        throw new NotImplementedException();
+                    }
+                }
+
+                public IEnumerable<IDbItem> TryAccessSubs()
+                {
+                    throw new NotImplementedException();
+                }
+
+                public ItemContentMock() { }
+                public ItemContentMock(string type, Stream content)
+                {
+                    Type = type;
+                    Content = content;
+                }
+
+                public void Dispose()
+                {
+                    if (Content != null)
+                        Content.Dispose();
+                    Content = null;
+                }
             }
         }
     }
