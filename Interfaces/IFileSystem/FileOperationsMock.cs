@@ -14,6 +14,11 @@ namespace IFileSystem
             throw new NotImplementedException();
         }
 
+        public void Delete(string fileName)
+        {
+            throw new NotImplementedException();
+        }
+
         public virtual bool FileExists(string fileName)
         {
             throw new NotImplementedException();
