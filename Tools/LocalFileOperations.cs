@@ -41,5 +41,10 @@ namespace Tools
         {
             return Path.GetTempFileName();
         }
+
+        public void Delete(string fileName)
+        {
+            File.Delete(fileName);
+        }
     }
 }

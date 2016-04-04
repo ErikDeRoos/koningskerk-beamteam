@@ -13,5 +13,6 @@ namespace IFileSystem
         Stream FileReadStream(string filename);
         Stream FileWriteStream(string filename);
         string GetTempFileName();
+        void Delete(string fileName);
     }
 }
