@@ -13,7 +13,6 @@ namespace Generator.Database
 {
 
     // TODO Stap 1: assistentie bij invullen liturgie
-    // TODO mask weer ergens toepassen
 
     public static class LiturgieDatabaseSettings
     {
