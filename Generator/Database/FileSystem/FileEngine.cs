@@ -55,7 +55,7 @@ namespace Generator.Database.FileSystem
         private IEnumerable<FileSet<T>> GetDirs(string startDir, bool askCached)
         {
             // TODO not existing dir check
-            return Directory.GetDirectories(startDir).Select(d => new FileSet<T>(_fileManager, d, askCached)).ToList();
+            return _fileManager.GetDirectories(startDir).Select(d => new FileSet<T>(_fileManager, d, askCached)).ToList();
         }
 
         public IEnumerable<IDbSet<T>> Where(Func<IDbSet<T>, bool> query)
