@@ -54,7 +54,8 @@ namespace Generator.Database.FileSystem
 
         private IEnumerable<FileSet<T>> GetDirs(string startDir, bool askCached)
         {
-            // TODO not existing dir check
+            if (!_fileManager.DirExists(startDir))
+                return new List<FileSet<T>>();
             return _fileManager.GetDirectories(startDir).Select(d => new FileSet<T>(_fileManager, d, askCached)).ToList();
         }
 

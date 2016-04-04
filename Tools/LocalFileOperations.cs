@@ -12,6 +12,11 @@ namespace Tools
             return Path.Combine(atPath, otherPath);
         }
 
+        public bool DirExists(string atPath)
+        {
+            return Directory.Exists(atPath);
+        }
+
         public bool FileExists(string fileName)
         {
             return File.Exists(fileName);

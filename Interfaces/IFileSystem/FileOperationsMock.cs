@@ -24,6 +24,11 @@ namespace IFileSystem
             throw new NotImplementedException();
         }
 
+        public virtual bool DirExists(string atPath)
+        {
+            throw new NotImplementedException();
+        }
+
         public virtual Stream FileReadStream(string filename)
         {
             throw new NotImplementedException();
