@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace IDatabase
+namespace IDatabase.Engine
 {
     public class EngineMock<T> : IEngine<T> where T : class, ISetSettings, new()
     {

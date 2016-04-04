@@ -1,5 +1,7 @@
-﻿using Generator.Database.FileSystem;
+﻿using FakeItEasy;
+using Generator.Database.FileSystem;
 using IDatabase;
+using IDatabase.Engine;
 using ILiturgieDatabase;
 using NUnit.Framework;
 
@@ -15,11 +17,22 @@ namespace Generator.Tests
                 .AddItem(fragment)
                 .SetContent("txt", "lege reeks")
                 );
-            var sut = (new Generator.Database.LiturgieDatabase(engine)) as ILiturgieDatabase.ILiturgieDatabase;
+            var manager = FakeEngineManager(engine);
+            var sut = (new Generator.Database.LiturgieDatabase(manager)) as ILiturgieDatabase.ILiturgieDatabase;
 
             var oplossing = sut.ZoekOnderdeel(onderdeel, fragment);
 
             Assert.That(oplossing.Status, Is.EqualTo(LiturgieOplossingResultaat.Opgelost));
+        }
+
+        private static IEngineManager<T> FakeEngineManager<T>(IEngine<T> defaultEngine) where T : class, ISetSettings, new()
+        {
+            var manager = A.Fake<IEngineManager<T>>();
+            var defaultReturn = A.Fake<IEngineSelection<T>>();
+            A.CallTo(() => defaultReturn.Engine).Returns(defaultEngine);
+            A.CallTo(() => defaultReturn.Name).Returns("default");
+            A.CallTo(() => manager.GetDefault()).Returns(defaultReturn);
+            return manager;
         }
     }
 }
