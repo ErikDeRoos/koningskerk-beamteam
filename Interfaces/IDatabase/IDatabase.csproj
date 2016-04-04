@@ -44,6 +44,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EngineMock.cs" />
     <Compile Include="Sets\items\IDbItem.cs" />
     <Compile Include="Sets\items\IDbItemContentcs.cs" />
     <Compile Include="Sets\IDbSet.cs" />
