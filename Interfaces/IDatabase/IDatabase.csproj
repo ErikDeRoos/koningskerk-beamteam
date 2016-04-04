@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Engine\IEngineSelection.cs" />
+    <Compile Include="EngineMock.cs" />
     <Compile Include="IEngineManager.cs" />
     <Compile Include="Sets\items\IDbItem.cs" />
     <Compile Include="Sets\items\IDbItemContentcs.cs" />

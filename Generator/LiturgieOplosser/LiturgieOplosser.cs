@@ -108,8 +108,8 @@ namespace Generator.LiturgieOplosser
             regel.VerwerkenAlsType = VerwerkingType.normaal;
             var verzenList = verzen.ToList();
             var resultaat = _database.ZoekOnderdeel(setNaam, zoekNaam, verzenList);
-            if (resultaat.Fout != null)
-                return resultaat.Fout;
+            if (resultaat.Status != LiturgieOplossingResultaat.Opgelost)
+                return resultaat.Status;
 
             if (resultaat.OnderdeelNaam == FileEngineDefaults.CommonFilesSetName)
             {
