@@ -46,6 +46,10 @@
             this.button1 = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.tabStdTeksten = new System.Windows.Forms.TabPage();
+            this.tbLiturgieTekst = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.tbLiturgieLezen = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
             this.tbLiturgie = new System.Windows.Forms.TextBox();
             this.lblLiturgie = new System.Windows.Forms.Label();
             this.tbTekst = new System.Windows.Forms.TextBox();
@@ -62,10 +66,9 @@
             this.lblVolgende = new System.Windows.Forms.Label();
             this.tbVoorganger = new System.Windows.Forms.TextBox();
             this.lblVoorganger = new System.Windows.Forms.Label();
-            this.tbLiturgieLezen = new System.Windows.Forms.TextBox();
-            this.label5 = new System.Windows.Forms.Label();
-            this.tbLiturgieTekst = new System.Windows.Forms.TextBox();
-            this.label6 = new System.Windows.Forms.Label();
+            this.button6 = new System.Windows.Forms.Button();
+            this.textBox5 = new System.Windows.Forms.TextBox();
+            this.label7 = new System.Windows.Forms.Label();
             this.pnlButtons.SuspendLayout();
             this.tabPanel.SuspendLayout();
             this.tabAlgemeen.SuspendLayout();
@@ -123,6 +126,9 @@
             // 
             // tabAlgemeen
             // 
+            this.tabAlgemeen.Controls.Add(this.button6);
+            this.tabAlgemeen.Controls.Add(this.textBox5);
+            this.tabAlgemeen.Controls.Add(this.label7);
             this.tabAlgemeen.Controls.Add(this.textBox4);
             this.tabAlgemeen.Controls.Add(this.label4);
             this.tabAlgemeen.Controls.Add(this.textBox3);
@@ -138,14 +144,14 @@
             this.tabAlgemeen.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tabAlgemeen.Name = "tabAlgemeen";
             this.tabAlgemeen.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tabAlgemeen.Size = new System.Drawing.Size(888, 381);
+            this.tabAlgemeen.Size = new System.Drawing.Size(888, 449);
             this.tabAlgemeen.TabIndex = 0;
             this.tabAlgemeen.Text = "Algemeen";
             this.tabAlgemeen.UseVisualStyleBackColor = true;
             // 
             // textBox4
             // 
-            this.textBox4.Location = new System.Drawing.Point(150, 254);
+            this.textBox4.Location = new System.Drawing.Point(150, 320);
             this.textBox4.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.textBox4.Name = "textBox4";
             this.textBox4.Size = new System.Drawing.Size(194, 26);
@@ -154,7 +160,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(9, 259);
+            this.label4.Location = new System.Drawing.Point(9, 325);
             this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(130, 20);
@@ -290,6 +296,46 @@
             this.tabStdTeksten.TabIndex = 1;
             this.tabStdTeksten.Text = "Standaard teksten";
             this.tabStdTeksten.UseVisualStyleBackColor = true;
+            // 
+            // tbLiturgieTekst
+            // 
+            this.tbLiturgieTekst.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbLiturgieTekst.Location = new System.Drawing.Point(138, 367);
+            this.tbLiturgieTekst.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tbLiturgieTekst.Name = "tbLiturgieTekst";
+            this.tbLiturgieTekst.Size = new System.Drawing.Size(732, 26);
+            this.tbLiturgieTekst.TabIndex = 19;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(12, 372);
+            this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(100, 20);
+            this.label6.TabIndex = 18;
+            this.label6.Text = "Liturgie tekst";
+            // 
+            // tbLiturgieLezen
+            // 
+            this.tbLiturgieLezen.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbLiturgieLezen.Location = new System.Drawing.Point(138, 331);
+            this.tbLiturgieLezen.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tbLiturgieLezen.Name = "tbLiturgieLezen";
+            this.tbLiturgieLezen.Size = new System.Drawing.Size(732, 26);
+            this.tbLiturgieLezen.TabIndex = 17;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(12, 336);
+            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(103, 20);
+            this.label5.TabIndex = 16;
+            this.label5.Text = "Liturgie lezen";
             // 
             // tbLiturgie
             // 
@@ -451,45 +497,38 @@
             this.lblVoorganger.TabIndex = 0;
             this.lblVoorganger.Text = "Voorganger";
             // 
-            // tbLiturgieLezen
+            // button6
             // 
-            this.tbLiturgieLezen.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.button6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button6.Location = new System.Drawing.Point(803, 268);
+            this.button6.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(57, 34);
+            this.button6.TabIndex = 27;
+            this.button6.Text = "...";
+            this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.button6_Click);
+            // 
+            // textBox5
+            // 
+            this.textBox5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbLiturgieLezen.Location = new System.Drawing.Point(138, 331);
-            this.tbLiturgieLezen.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tbLiturgieLezen.Name = "tbLiturgieLezen";
-            this.tbLiturgieLezen.Size = new System.Drawing.Size(732, 26);
-            this.tbLiturgieLezen.TabIndex = 17;
+            this.textBox5.Location = new System.Drawing.Point(15, 269);
+            this.textBox5.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.textBox5.Name = "textBox5";
+            this.textBox5.Size = new System.Drawing.Size(790, 26);
+            this.textBox5.TabIndex = 26;
+            this.textBox5.Text = "Path";
             // 
-            // label5
+            // label7
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(12, 336);
-            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(103, 20);
-            this.label5.TabIndex = 16;
-            this.label5.Text = "Liturgie lezen";
-            // 
-            // tbLiturgieTekst
-            // 
-            this.tbLiturgieTekst.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbLiturgieTekst.Location = new System.Drawing.Point(138, 367);
-            this.tbLiturgieTekst.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tbLiturgieTekst.Name = "tbLiturgieTekst";
-            this.tbLiturgieTekst.Size = new System.Drawing.Size(732, 26);
-            this.tbLiturgieTekst.TabIndex = 19;
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(12, 372);
-            this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(100, 20);
-            this.label6.TabIndex = 18;
-            this.label6.Text = "Liturgie tekst";
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(10, 245);
+            this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(105, 20);
+            this.label7.TabIndex = 25;
+            this.label7.Text = "Bijbel locatie: ";
             // 
             // Instellingenform
             // 
@@ -551,5 +590,8 @@
         private System.Windows.Forms.Label label6;
         public System.Windows.Forms.TextBox tbLiturgieLezen;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label7;
+        public System.Windows.Forms.TextBox textBox5;
+        private System.Windows.Forms.Button button6;
     }
 }

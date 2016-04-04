@@ -128,7 +128,8 @@ namespace PowerpointGenerator.Settings
             return new Instellingen(
                 (@".Resources\Database"),
                 (@".Resources\Database\Template Liederen.pptx"),
-                (@".Resources\Database\Achtergrond.pptx")
+                (@".Resources\Database\Achtergrond.pptx"),
+                (@".Resources\Bijbels\NBV")
             );
         }
     }

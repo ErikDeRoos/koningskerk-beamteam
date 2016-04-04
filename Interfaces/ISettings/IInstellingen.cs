@@ -5,14 +5,16 @@ namespace ISettings
 {
     public interface IInstellingen : IInstellingenBase
     {
-        string Databasepad { get; }
+        string DatabasePad { get; }
         string Templateliederen { get; }
         string Templatetheme { get; }
-        IEnumerable<IMapmask> Masks { get; }
+        string BijbelPad { get; }
 
+        IEnumerable<IMapmask> Masks { get; }
         bool AddMask(IMapmask mask);
         void ClearMasks();
 
         string FullDatabasePath { get; }
+        string FullBijbelPath { get; }
     }
 }

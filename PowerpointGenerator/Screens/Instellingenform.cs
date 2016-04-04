@@ -27,8 +27,9 @@ namespace PowerpointGenerator
 
             textBox1.Text = vanInstellingen.Templateliederen;
             textBox2.Text = vanInstellingen.Templatetheme;
-            textBox3.Text = vanInstellingen.Databasepad;
+            textBox3.Text = vanInstellingen.DatabasePad;
             textBox4.Text = vanInstellingen.Regelsperslide.ToString();
+            textBox5.Text = vanInstellingen.BijbelPad;
 
             tbVolgende.Text = vanInstellingen.StandaardTeksten.Volgende;
             tbVoorganger.Text = vanInstellingen.StandaardTeksten.Voorganger;
@@ -82,6 +83,28 @@ namespace PowerpointGenerator
 
             textBox3.Text = dbPath;
         }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            var applicationPath = AppDomain.CurrentDomain.BaseDirectory;
+
+            //open een open window met bepaalde instellingen
+            var openFolderDialog1 = new FolderBrowserDialog
+            {
+                Description = "Kies map van de Bijbel Database",
+                SelectedPath = applicationPath
+            };
+
+            //return als er word geannuleerd
+            if (openFolderDialog1.ShowDialog() == DialogResult.Cancel)
+                return;
+
+            var dbPath = openFolderDialog1.SelectedPath;
+            if (dbPath.StartsWith(applicationPath))
+                dbPath = dbPath.Replace(applicationPath, ".");
+
+            textBox5.Text = dbPath;
+        }
         #endregion Eventhandlers
 
         #region Functions
@@ -118,7 +141,7 @@ namespace PowerpointGenerator
             int regelsPerSlide;
             if (!TryParse(textBox4.Text, out regelsPerSlide))
                 regelsPerSlide = 6;
-            Instellingen = new Instellingen(textBox3.Text, textBox1.Text, textBox2.Text, regelsPerSlide,
+            Instellingen = new Instellingen(textBox3.Text, textBox1.Text, textBox2.Text, textBox5.Text, regelsPerSlide,
                 new StandaardTeksten
                 {
                     Volgende = tbVolgende.Text,

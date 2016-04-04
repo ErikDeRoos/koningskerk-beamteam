@@ -1,7 +1,6 @@
 ﻿using IDatabase;
 using IDatabase.Engine;
 using ISettings;
-using System;
 using System.Collections.Generic;
 
 namespace PowerpointGenerator.Database
@@ -10,21 +9,20 @@ namespace PowerpointGenerator.Database
     {
         private IEngineSelection<T> _default;
 
+        public IEnumerable<IEngineSelection<T>> Extensions { get; private set; }
+
         public EngineManager(IInstellingenFactory settings, Generator.Database.FileSystem.FileEngine<T>.Factory<T> fac) {
-            var baseDir = settings.LoadFromXmlFile().FullDatabasePath;
             _default = new EngineSelection<T>() {
                 Name = "default",
-                Engine = fac.Invoke(baseDir, true)
+                Engine = fac.Invoke(settings.LoadFromXmlFile().FullDatabasePath, true)
             };
-        }
-
-
-        public IEnumerable<IEngineSelection<T>> Extensions
-        {
-            get
+            Extensions = new List<EngineSelection<T>>()
             {
-                throw new NotImplementedException();
-            }
+                new EngineSelection<T>() {
+                    Name = Generator.Database.LiturgieDatabaseSettings.DatabaseNameBijbeltekst,
+                    Engine = fac.Invoke(settings.LoadFromXmlFile().BijbelPad, true)
+                },
+            };
         }
 
         public IEngineSelection<T> GetDefault()

@@ -7,16 +7,18 @@ namespace ISettings.CommonImplementation
 {
     public class Instellingen : IInstellingen
     {
-        public string Databasepad { get; set; }
+        public string DatabasePad { get; set; }
         public string Templateliederen { get; set; }
         public string Templatetheme { get; set; }
+        public string BijbelPad { get; set; }
         public int Regelsperslide { get; set; }
         private readonly List<IMapmask> _lijstmasks = new List<IMapmask>();
         public StandaardTeksten StandaardTeksten { get; set; }
 
         public Instellingen()
         {
-            Databasepad = "";
+            DatabasePad = "";
+            BijbelPad = "";
             Templateliederen = "";
             Templatetheme = "";
             Regelsperslide = 4;
@@ -37,12 +39,13 @@ namespace ISettings.CommonImplementation
 
         }
 
-        public Instellingen(string databasepad, string templateliederen, string templatetheme, int regelsperslide = 6, StandaardTeksten standaardTeksten = null, IEnumerable<IMapmask> masks = null)
+        public Instellingen(string databasepad, string templateliederen, string templatetheme, string bijbelpad, int regelsperslide = 6, StandaardTeksten standaardTeksten = null, IEnumerable<IMapmask> masks = null)
             : this()
         {
-            Databasepad = databasepad;
+            DatabasePad = databasepad;
             Templateliederen = templateliederen;
             Templatetheme = templatetheme;
+            BijbelPad = bijbelpad;
             Regelsperslide = regelsperslide;
             if (standaardTeksten != null)
                 StandaardTeksten = standaardTeksten;
@@ -60,7 +63,8 @@ namespace ISettings.CommonImplementation
             _lijstmasks.Clear();
         }
 
-        public string FullDatabasePath => Databasepad.StartsWith(".") ? System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Databasepad.Remove(0, 1)) : Databasepad;
+        public string FullDatabasePath => DatabasePad.StartsWith(".") ? System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, DatabasePad.Remove(0, 1)) : DatabasePad;
+        public string FullBijbelPath => BijbelPad.StartsWith(".") ? System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, BijbelPad.Remove(0, 1)) : BijbelPad;
 
         public string FullTemplatetheme => Templatetheme.StartsWith(".") ? System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Templatetheme.Remove(0, 1)) : Templatetheme;
 

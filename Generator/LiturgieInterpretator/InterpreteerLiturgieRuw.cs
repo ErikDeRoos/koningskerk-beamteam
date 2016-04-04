@@ -150,8 +150,8 @@ namespace Generator.LiturgieInterpretator
             regel.Verzen = deelVersen.FirstOrDefault().Verzen;
 
             // visualisatie handmatig regelen
-            optieLijst.Add($"{Database.LiturgieDatabaseSettings.OptieAlternatieveNaamOverzicht} {regel}");
-            optieLijst.Add($"{Database.LiturgieDatabaseSettings.OptieAlternatieveNaam} {regel.Deel}");
+            optieLijst.Add($"{LiturgieOplosser.LiturgieOplosserSettings.OptieAlternatieveNaamOverzicht} {regel}");
+            optieLijst.Add($"{LiturgieOplosser.LiturgieOplosserSettings.OptieAlternatieveNaam} {regel.Deel}");
 
             // opties toekennen
             regel.Opties = optieLijst;
