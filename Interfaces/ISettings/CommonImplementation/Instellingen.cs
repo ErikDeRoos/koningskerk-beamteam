@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿// Copyright 2016 door Remco Veurink en Erik de Roos
+using System.Collections.Generic;
 using System;
 using System.Linq;
 

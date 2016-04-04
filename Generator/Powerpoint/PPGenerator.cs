@@ -1,4 +1,5 @@
-﻿using ILiturgieDatabase;
+﻿// Copyright 2016 door Remco Veurink en Erik de Roos
+using ILiturgieDatabase;
 using ISettings;
 using ISlideBuilder;
 using System;

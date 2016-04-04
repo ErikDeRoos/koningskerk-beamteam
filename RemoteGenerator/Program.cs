@@ -1,4 +1,5 @@
-﻿using Autofac;
+﻿// Copyright 2016 door Erik de Roos
+using Autofac;
 using RemoteGenerator.WCF;
 using System;
 using System.Windows.Forms;
