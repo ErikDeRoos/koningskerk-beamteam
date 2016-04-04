@@ -19,6 +19,11 @@ namespace IDatabase
         {
             _sets = new SetMutator();
         }
+        public EngineMock(Action<EngineMock<T>> addToEngine) : this()
+        {
+            _sets = new SetMutator();
+            addToEngine(this);
+        }
 
         private class SetMutator : IEnumerable<SetMock>
         {
@@ -59,6 +64,7 @@ namespace IDatabase
             ISetMock AddSet(string name);
             IItemMock AddItem(string name);
             T Settings { get; }
+            ISetMock ChangeSettings(T newSettings);
         }
         public interface IItemMock
         {
@@ -93,6 +99,12 @@ namespace IDatabase
             public IItemMock AddItem(string name)
             {
                 return _items.AddItem(name);
+            }
+
+            public ISetMock ChangeSettings(T newSettings)
+            {
+                Settings = newSettings;
+                return this;
             }
         }
 
@@ -155,11 +167,10 @@ namespace IDatabase
             public IItemMock SetContent(string type, string content)
             {
                 var memStream = new MemoryStream();
-                using (var writer = new StreamWriter(memStream))
-                {
-                    writer.Write(content);
-                    writer.Flush();
-                }
+                var writer = new StreamWriter(memStream);
+                writer.Write(content);
+                writer.Flush();
+                memStream.Seek(0, SeekOrigin.Begin);
                 _content = new ItemContentMock(type, memStream);
                 return this;
             }
