@@ -42,7 +42,9 @@ namespace Generator.Database
             // TODO alsType voor bijbelteksten bij nummering ondersteuning voor verzen tot einde hoofdstukken bijv '20 -'
             // TODO alsType voor bijbelteksten in content referentie naar hoofdstuk (of op een andere plaats) zodat hoofdstuk wisseling bepaald kan worden
 
-            var database = alsType == VerwerkingType.normaal ? _databases.GetDefault() : null;
+            var database = alsType == VerwerkingType.normaal ? _databases.GetDefault() : _databases.Extensions.FirstOrDefault(e => e.Name == LiturgieDatabaseSettings.DatabaseNameBijbeltekst);
+            if (database == null)
+                return new Zoekresultaat() { Status = LiturgieOplossingResultaat.DatabaseFout };
 
             var set = database.Engine.Where(s => Compare(s.Name, onderdeelNaam, StringComparison.OrdinalIgnoreCase) == 0 || Compare(s.Settings.DisplayName, onderdeelNaam, StringComparison.OrdinalIgnoreCase) == 0).FirstOrDefault();
             if (set == null)

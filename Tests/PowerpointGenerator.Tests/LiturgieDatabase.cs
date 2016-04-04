@@ -25,6 +25,22 @@ namespace Generator.Tests
             Assert.That(oplossing.Status, Is.EqualTo(LiturgieOplossingResultaat.Opgelost));
         }
 
+        [TestCase("Johannes", "3")]
+        public void ZoekOnderdeel_BijbeltekstItem_Gevonden(string onderdeel, string fragment)
+        {
+            var engine = new EngineMock<FileEngineSetSettings>(f => f
+                .AddSet(onderdeel)
+                .AddItem(fragment)
+                .SetContent("txt", "1 In den beginne 2 was het woord 3 en het woord was")
+                );
+            var manager = FakeEngineManager(Database.LiturgieDatabaseSettings.DatabaseNameBijbeltekst, engine);
+            var sut = (new Generator.Database.LiturgieDatabase(manager)) as ILiturgieDatabase.ILiturgieDatabase;
+
+            var oplossing = sut.ZoekOnderdeel(VerwerkingType.bijbeltekst, onderdeel, fragment);
+
+            Assert.That(oplossing.Status, Is.EqualTo(LiturgieOplossingResultaat.Opgelost));
+        }
+
         private static IEngineManager<T> FakeEngineManager<T>(IEngine<T> defaultEngine) where T : class, ISetSettings, new()
         {
             var manager = A.Fake<IEngineManager<T>>();
@@ -32,6 +48,16 @@ namespace Generator.Tests
             A.CallTo(() => defaultReturn.Engine).Returns(defaultEngine);
             A.CallTo(() => defaultReturn.Name).Returns("default");
             A.CallTo(() => manager.GetDefault()).Returns(defaultReturn);
+            return manager;
+        }
+
+        private static IEngineManager<T> FakeEngineManager<T>(string name, IEngine<T> engine) where T : class, ISetSettings, new()
+        {
+            var manager = A.Fake<IEngineManager<T>>();
+            var defaultReturn = A.Fake<IEngineSelection<T>>();
+            A.CallTo(() => defaultReturn.Engine).Returns(engine);
+            A.CallTo(() => defaultReturn.Name).Returns(name);
+            A.CallTo(() => manager.Extensions).Returns(new[] { defaultReturn });
             return manager;
         }
     }
