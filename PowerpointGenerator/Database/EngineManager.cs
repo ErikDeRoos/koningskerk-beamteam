@@ -20,7 +20,7 @@ namespace PowerpointGenerator.Database
             {
                 new EngineSelection<T>() {
                     Name = Generator.Database.LiturgieDatabaseSettings.DatabaseNameBijbeltekst,
-                    Engine = fac.Invoke(settings.LoadFromXmlFile().BijbelPad, true)
+                    Engine = fac.Invoke(settings.LoadFromXmlFile().FullBijbelPath, true)
                 },
             };
         }
