@@ -19,7 +19,7 @@ namespace Generator.Tests
                 .SetContent("txt", "lege reeks")
                 );
             var manager = FakeEngineManager(engine);
-            var sut = (new Generator.Database.LiturgieDatabase(manager)) as ILiturgieDatabase.ILiturgieDatabase;
+            var sut = (new Database.LiturgieDatabase(manager)) as ILiturgieDatabase.ILiturgieDatabase;
 
             var oplossing = sut.ZoekOnderdeel(onderdeel, fragment);
 
@@ -34,8 +34,8 @@ namespace Generator.Tests
                 .AddItem(fragment)
                 .SetContent("txt", "lege reeks")
                 );
-            var manager = FakeEngineManager(Database.LiturgieDatabaseSettings.DatabaseNameBijbeltekst, engine);
-            var sut = (new Generator.Database.LiturgieDatabase(manager)) as ILiturgieDatabase.ILiturgieDatabase;
+            var manager = FakeEngineManagerExtension(Database.LiturgieDatabaseSettings.DatabaseNameBijbeltekst, engine);
+            var sut = (new Database.LiturgieDatabase(manager)) as ILiturgieDatabase.ILiturgieDatabase;
 
             var oplossing = sut.ZoekOnderdeel(VerwerkingType.bijbeltekst, onderdeel, fragment);
 
@@ -52,9 +52,9 @@ namespace Generator.Tests
                 .AddItem(fragment)
                 .SetContent("txt", inContent)
                 );
-            var manager = FakeEngineManager(Database.LiturgieDatabaseSettings.DatabaseNameBijbeltekst, engine);
+            var manager = FakeEngineManagerExtension(Database.LiturgieDatabaseSettings.DatabaseNameBijbeltekst, engine);
             var delen = new[] { find };
-            var sut = (new Generator.Database.LiturgieDatabase(manager)) as ILiturgieDatabase.ILiturgieDatabase;
+            var sut = (new Database.LiturgieDatabase(manager)) as ILiturgieDatabase.ILiturgieDatabase;
 
             var oplossing = sut.ZoekOnderdeel(VerwerkingType.bijbeltekst, onderdeel, fragment, delen);
 
@@ -71,7 +71,7 @@ namespace Generator.Tests
             return manager;
         }
 
-        private static IEngineManager<T> FakeEngineManager<T>(string name, IEngine<T> engine) where T : class, ISetSettings, new()
+        private static IEngineManager<T> FakeEngineManagerExtension<T>(string name, IEngine<T> engine) where T : class, ISetSettings, new()
         {
             var manager = A.Fake<IEngineManager<T>>();
             var defaultReturn = A.Fake<IEngineSelection<T>>();
