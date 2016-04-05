@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using static System.String;
 
 namespace Generator.Database
@@ -178,7 +179,32 @@ namespace Generator.Database
 
         private static IEnumerable<Content> SplitFile(string fileContent)
         {
-            return null;
+            int bezigMetNummer = 1;
+            int positieInFileContent = 0;
+            var nummerBuilder = new StringBuilder();
+            var nummerFindRegex = new System.Text.RegularExpressions.Regex(@"(^|\s)(\d+)($|\s)", System.Text.RegularExpressions.RegexOptions.Singleline | System.Text.RegularExpressions.RegexOptions.Compiled);
+            while (positieInFileContent < fileContent.Length)
+            {
+                var volgendeNummerMatch = nummerFindRegex.Match(fileContent, positieInFileContent);
+                if (!volgendeNummerMatch.Success)
+                {
+                    nummerBuilder.Append(fileContent, positieInFileContent, fileContent.Length - positieInFileContent);
+                    yield return new Content() { Inhoud = nummerBuilder.ToString().Trim(' '), InhoudType = InhoudType.Tekst, Nummer = bezigMetNummer };
+                    break;
+                }
+
+                var volgendeNummerMatchGroep = volgendeNummerMatch.Groups[2];
+                nummerBuilder.Append(fileContent, positieInFileContent, volgendeNummerMatchGroep.Index - positieInFileContent);
+                positieInFileContent = volgendeNummerMatchGroep.Index + volgendeNummerMatchGroep.Length;
+
+                var volgendNummer = int.Parse(volgendeNummerMatchGroep.Value);
+                if (volgendNummer == bezigMetNummer + 1)
+                {
+                    yield return new Content() { Inhoud = nummerBuilder.ToString().Trim(' '), InhoudType = InhoudType.Tekst, Nummer = bezigMetNummer };
+                    nummerBuilder = new StringBuilder();
+                    bezigMetNummer++;
+                }
+            }
         }
 
         private interface IContentDelayed
