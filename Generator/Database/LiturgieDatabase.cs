@@ -203,6 +203,10 @@ namespace Generator.Database
                     yield return new Content() { Inhoud = nummerBuilder.ToString().Trim(' '), InhoudType = InhoudType.Tekst, Nummer = bezigMetNummer };
                     nummerBuilder = new StringBuilder();
                     bezigMetNummer++;
+                } else
+                if (volgendNummer != bezigMetNummer)
+                {
+                    nummerBuilder.Append(volgendeNummerMatchGroep.Value);
                 }
             }
         }
