@@ -49,10 +49,6 @@ namespace Generator.Database
             var set = database.Engine.Where(s => Compare(s.Name, onderdeelNaam, StringComparison.OrdinalIgnoreCase) == 0 || Compare(s.Settings.DisplayName, onderdeelNaam, StringComparison.OrdinalIgnoreCase) == 0).FirstOrDefault();
             if (set == null)
                 return new Zoekresultaat() { Status = LiturgieOplossingResultaat.SetFout };
-            // Je kunt geen verzen opgeven als we ze niet los hebben.
-            // (Andere kant op kan wel: geen verzen opgeven terwijl ze er wel zijn (wat 'alle verzen' betekend))
-            if (fragmentDelen != null && fragmentDelen.Any() && !set.Settings.ItemsHaveSubContent)
-                return new Zoekresultaat() { Status = LiturgieOplossingResultaat.VersOnderverdelingMismatch };
             // Kijk of we het specifieke item in de set kunnen vinden (alleen via de op-schijf naam)
             var subSet = set.Where(r => Compare(r.Name, fragmentNaam, StringComparison.OrdinalIgnoreCase) == 0).FirstOrDefault();
             if (subSet == null)
@@ -64,10 +60,14 @@ namespace Generator.Database
                 ZonderContentSplitsing = !set.Settings.ItemsHaveSubContent,
                 OnderdeelDisplayNaam = set.Settings.DisplayName,
             };
+            // Je kunt geen verzen opgeven als we ze niet los hebben.
+            // (Andere kant op kan wel: geen verzen opgeven terwijl ze er wel zijn (wat 'alle verzen' betekend))
+            if (fragmentDelen != null && fragmentDelen.Any() && !(set.Settings.ItemsHaveSubContent || set.Settings.ItemIsSubContent))
+                return new Zoekresultaat() { Status = LiturgieOplossingResultaat.VersOnderverdelingMismatch };
             if (fragmentDelen == null || !fragmentDelen.Any())
             {
                 // We hebben geen versenlijst en de set instellingen zeggen zonder verzen te zijn dus hebben we n samengevoegd item
-                if (!set.Settings.ItemsHaveSubContent)
+                if (!(set.Settings.ItemsHaveSubContent || set.Settings.ItemIsSubContent))
                 {
                     var content = KrijgDirecteContent(subSet.Content, null);
                     if (content == null)
@@ -77,8 +77,8 @@ namespace Generator.Database
                 // Een item met alle verzen
                 else
                 {
-                    returnValue.Content = subSet.Content.TryAccessSubs()
-                        .Select(s => KrijgDirecteContent(s.Content, s.Name))
+                    returnValue.Content = KrijgContentDelayed(subSet, set.Settings)
+                        .Select(s => s.GetContent())
                         .Where(s => s != null)  // omdat we alles ophalen kunnen hier dingen in zitten die niet kloppen
                         .OrderBy(s => s.Nummer)  // Op volgorde van nummer
                         .ToList();
@@ -87,16 +87,16 @@ namespace Generator.Database
             else
             {
                 // Specifieke verzen
-                var content = subSet.Content.TryAccessSubs();
+                var delayedContent = KrijgContentDelayed(subSet, set.Settings);
                 var preSelect = InterpreteerNummers(fragmentDelen)  // We houden de volgorde van het opgeven aan omdat die afwijkend kan zijn
                     .Select(n => n.ToString())
-                    .Select(n => new { Naam = n, SubSet = content.FirstOrDefault(c => c.Name == n), })
+                    .Select(n => new { Naam = n, SubSet = delayedContent.FirstOrDefault(c => c.Name == n), })
                     .ToList();
                 // Specifieke verzen moeten allemaal gevonden kunnen worden
                 if (preSelect.Any(c => c.SubSet == null))
                     return new Zoekresultaat() { Status = LiturgieOplossingResultaat.VersFout };
                 returnValue.Content = preSelect
-                    .Select(s => KrijgDirecteContent(s.SubSet.Content, s.Naam))
+                    .Select(s => s.SubSet.GetContent())
                     .ToList();
                 // Specifieke verzen moeten allemaal interpreteerbaar zijn
                 if (returnValue.Content.Any(c => c == null))
@@ -104,42 +104,6 @@ namespace Generator.Database
             }
             returnValue.Status = LiturgieOplossingResultaat.Opgelost;
             return returnValue;
-        }
-
-        public class Zoekresultaat : IZoekresultaat
-        {
-            public LiturgieOplossingResultaat Status { get; set; }
-            public string OnderdeelNaam { get; set; }
-            public string OnderdeelDisplayNaam { get; set; }
-            public string FragmentNaam { get; set; }
-            public IEnumerable<ILiturgieContent> Content { get; set; }
-            public bool ZonderContentSplitsing { get; set; }
-        }
-
-        private static Content KrijgDirecteContent(IDbItemContent metItem, string possibleNummer)
-        {
-            int? nummer = null;
-            int parseNummer;
-            if (int.TryParse(possibleNummer ?? "", out parseNummer))
-                nummer = parseNummer;
-            switch (metItem.Type)
-            {
-                case "txt":
-                    using (var fs = metItem.Content)
-                    {
-                        using (var rdr = new StreamReader(fs))
-                        {
-                            // geef de inhoud als tekst terug
-                            return new Content { Inhoud = rdr.ReadToEnd(), InhoudType = InhoudType.Tekst, Nummer = nummer };
-                        }
-                    }
-                case "ppt":
-                case "pptx":
-                    // geef de inhoud als link terug
-                    return new Content { Inhoud = metItem.PersistentLink, InhoudType = InhoudType.PptLink, Nummer = nummer };
-            }
-            // Geef een leeg item terug als we het niet konden verwerken
-            return null;
         }
 
         private static IEnumerable<int> InterpreteerNummers(IEnumerable<string> nummers)
@@ -171,6 +135,87 @@ namespace Generator.Database
             }
         }
 
+        private static IEnumerable<IContentDelayed> KrijgContentDelayed(IDbItem vanItem, FileEngineSetSettings metSettings)
+        {
+            if (metSettings.ItemsHaveSubContent)
+                return vanItem.Content.TryAccessSubs()
+                    .Select(s => new ContentDelayed(s.Name, s.Content))
+                    .ToList();
+            if (metSettings.ItemIsSubContent) {
+                var content = KrijgDirecteContent(vanItem.Content, null);
+                if (content.InhoudType == InhoudType.Tekst)
+                    return SplitFile(content.Inhoud)
+                        .Select(s => new ContentDirect(s))
+                        .ToList();
+            }
+            return null;
+        }
+
+        private static Content KrijgDirecteContent(IDbItemContent metItem, string possibleNummer)
+        {
+            int? nummer = null;
+            int parseNummer;
+            if (int.TryParse(possibleNummer ?? "", out parseNummer))
+                nummer = parseNummer;
+            switch (metItem.Type)
+            {
+                case "txt":
+                    using (var fs = metItem.Content)
+                    {
+                        using (var rdr = new StreamReader(fs))
+                        {
+                            // geef de inhoud als tekst terug
+                            return new Content { Inhoud = rdr.ReadToEnd(), InhoudType = InhoudType.Tekst, Nummer = nummer };
+                        }
+                    }
+                case "ppt":
+                case "pptx":
+                    // geef de inhoud als link terug
+                    return new Content { Inhoud = metItem.PersistentLink, InhoudType = InhoudType.PptLink, Nummer = nummer };
+            }
+            // Geef een leeg item terug als we het niet konden verwerken
+            return null;
+        }
+
+        private static IEnumerable<Content> SplitFile(string fileContent)
+        {
+            return null;
+        }
+
+        private interface IContentDelayed
+        {
+            string Name { get; }
+            Content GetContent();
+        }
+        private class ContentDelayed : IContentDelayed
+        {
+            public string Name { get; private set; }
+            private IDbItemContent _dbItem;
+            public ContentDelayed(string name, IDbItemContent dbItem)
+            {
+                Name = name;
+                _dbItem = dbItem;
+            }
+            public Content GetContent()
+            {
+                return KrijgDirecteContent(_dbItem, Name);
+            }
+        }
+        private class ContentDirect : IContentDelayed
+        {
+            public string Name { get; private set; }
+            private Content _content;
+            public ContentDirect(Content content)
+            {
+                Name = content.Nummer.ToString();
+                _content = content;
+            }
+            public Content GetContent()
+            {
+                return _content;
+            }
+        }
+
         private class Content : ILiturgieContent
         {
             public string Inhoud { get; set; }
@@ -178,6 +223,16 @@ namespace Generator.Database
             public InhoudType InhoudType { get; set; }
 
             public int? Nummer { get; set; }
+        }
+
+        public class Zoekresultaat : IZoekresultaat
+        {
+            public LiturgieOplossingResultaat Status { get; set; }
+            public string OnderdeelNaam { get; set; }
+            public string OnderdeelDisplayNaam { get; set; }
+            public string FragmentNaam { get; set; }
+            public IEnumerable<ILiturgieContent> Content { get; set; }
+            public bool ZonderContentSplitsing { get; set; }
         }
     }
 
