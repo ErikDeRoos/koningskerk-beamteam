@@ -27,6 +27,8 @@ namespace Generator.Tests
         }
 
         [TestCase("Psalm", "100", "2 - 4", new[] { 2, 3, 4})]
+        [TestCase("Psalm", "100", " - 4", new[] { 1, 2, 3, 4 })]
+        [TestCase("Psalm", "100", "2 - ", new[] { 2, 3 })]
         public void ZoekOnderdeel_NormaalItem_Opgesplitst(string onderdeel, string fragment, string nummer, int[] opgesplitstAls)
         {
             var itemSubContent = string.Join(" ", Enumerable.Range(1, opgesplitstAls.Max()).Select(r => $"{r} Line."));
