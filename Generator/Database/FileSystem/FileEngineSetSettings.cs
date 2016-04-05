@@ -7,8 +7,9 @@ namespace Generator.Database.FileSystem
     {
         public string DisplayName { get; set; }
 
-        public bool ItemsHaveSubContent { get; set; }
-
         public bool UseContainer { get; set; }
+
+        public bool ItemsHaveSubContent { get; set; }
+        public bool ItemIsSubContent { get; set; }
     }
 }
