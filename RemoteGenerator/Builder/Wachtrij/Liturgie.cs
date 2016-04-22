@@ -1,4 +1,5 @@
 ﻿// Copyright 2016 door Erik de Roos
+using ISlideBuilder;
 using RemoteGenerator.Builder.Wachtrij.LiturgieRegels;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Linq;
 
 namespace RemoteGenerator.Builder.Wachtrij
 {
-    class Liturgie
+    class Liturgie : IBuilderBuildSettings
     {
         public IEnumerable<LiturgieRegel> LiturgieRegels { get; set; }
         public string Voorganger { get; set; }

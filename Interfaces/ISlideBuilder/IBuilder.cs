@@ -1,7 +1,6 @@
 ﻿// Copyright 2016 door Erik de Roos
 using System;
 using System.Collections.Generic;
-using ISettings;
 using ILiturgieDatabase;
 
 namespace ISlideBuilder
@@ -11,7 +10,7 @@ namespace ISlideBuilder
         Action<int, int, int> Voortgang { set; }
         Action<Status, string, int?> StatusWijziging { set; }
 
-        void PreparePresentation(IEnumerable<ILiturgieRegel> liturgie, string voorganger, string collecte1, string collecte2, string lezen, string tekst, IInstellingenBase gebruikInstellingen, string opslaanAls);
+        void PreparePresentation(IEnumerable<ILiturgieRegel> liturgie, IBuilderBuildSettings buildSettings, IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, string opslaanAls);
         void GeneratePresentation();
         void Stop();
     }
@@ -22,5 +21,4 @@ namespace ISlideBuilder
         StopFout,
         StopGoed,
     }
-
 }

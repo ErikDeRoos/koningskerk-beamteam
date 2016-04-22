@@ -4,7 +4,6 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using ILiturgieDatabase;
-using ISettings;
 using ISlideBuilder;
 using Tools;
 using mppt.Connect;
@@ -34,7 +33,8 @@ namespace mppt
         private string _collecte2;
         private string _lezen;
         private string _tekst;
-        private IInstellingenBase _instellingen;
+        private IBuilderBuildDefaults _buildDefaults;
+        private IBuilderDependendFiles _dependentFileList;
         private string _opslaanAls;
 
         public Action<int, int, int> Voortgang { get; set; }
@@ -46,17 +46,17 @@ namespace mppt
             _liedFormatter = liedFormatter;
         }
 
-        public void PreparePresentation(IEnumerable<ILiturgieRegel> liturgie, string voorganger, string collecte1, string collecte2, string lezen, string tekst, IInstellingenBase gebruikInstellingen, string opslaanAls)
+        public void PreparePresentation(IEnumerable<ILiturgieRegel> liturgie, IBuilderBuildSettings buildSettings, IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, string opslaanAls)
         {
             _liturgie = liturgie;
-            _voorganger = voorganger;
-            _collecte1 = collecte1;
-            _collecte2 = collecte2;
-            _lezen = lezen;
-            _tekst = tekst;
-            _instellingen = gebruikInstellingen;
+            _voorganger = buildSettings.Voorganger;
+            _collecte1 = buildSettings.Collecte1;
+            _collecte2 = buildSettings.Collecte2;
+            _lezen = buildSettings.Lezen;
+            _tekst = buildSettings.Tekst;
+            _buildDefaults = buildDefaults;
+            _dependentFileList = dependentFileList;
             _opslaanAls = opslaanAls;
-            // Hier GEEN COM calls want dit kan nog in n andere thread zijn
         }
 
         /// <summary>
@@ -66,9 +66,10 @@ namespace mppt
         {
             StatusWijziging?.Invoke(Status.Gestart, null, null);
 
+            // Hier pas COM calls want dit is de juiste thread
             _applicatie = _mppFactory.GetApplication();
             //Creeer een nieuwe lege presentatie volgens de template thema (toon scherm zodat bij fout nog iets te zien is)
-            _presentatie = _applicatie.Open(_instellingen.FullTemplateTheme, metWindow: true);
+            _presentatie = _applicatie.Open(_dependentFileList.FullTemplateTheme, metWindow: true);
             //Minimaliseer scherm
             _applicatie.MinimizeInterface();
 
@@ -147,7 +148,7 @@ namespace mppt
             foreach(var tekst in tekstOmTeRenderenLijst)
             {
                 //regel de template om het lied op af te beelden
-                var presentatie = OpenPps(_instellingen.FullTemplateLied);
+                var presentatie = OpenPps(_dependentFileList.FullTemplateLied);
                 var slide = presentatie.EersteSlide();  //alleen eerste slide gebruiken we
                 //voor elk object op de slides (we zoeken naar de tekst die vervangen moet worden in de template)
                 foreach (var shape in slide.Shapes().Where(s => s is IMppShapeTextbox).Cast<IMppShapeTextbox>())
@@ -165,7 +166,7 @@ namespace mppt
                         //we moeten dan wel al op de laatste slide zitten ('InvullenVolgende' is wel al intelligent maar in het geval van 1
                         //lange tekst over meerdere dia's kan 'InvullenVolgende' niet de juiste keuze maken)
                         var display = IsLaatsteSlide(tekstOmTeRenderenLijst, tekst, regel, inhoud) ? _liedFormatter.Volgende(volgende) : null;
-                        shape.Text = display != null ? $"{_instellingen.StandaardTeksten.Volgende} {display.Display}" : string.Empty;
+                        shape.Text = display != null ? $"{_buildDefaults.LabelVolgende} {display.Display}" : string.Empty;
                     }
                 }
                 //voeg slide in in het grote geheel
@@ -190,34 +191,34 @@ namespace mppt
                     var text = textbox.Text;
                     //als de template de tekst bevat "Voorganger: " moet daar de Voorgangersnaam achter komen
                     if (text.Equals("<Voorganger:>"))
-                        textbox.Text = _instellingen.StandaardTeksten.Voorganger + _voorganger;
+                        textbox.Text = _buildDefaults.LabelVoorganger + _voorganger;
                     //als de template de tekst bevat "Collecte: " moet daar de collectedoel achter komen
                     else if (text.Equals("<Collecte:>"))
-                        textbox.Text = _instellingen.StandaardTeksten.Collecte + _collecte1;
+                        textbox.Text = _buildDefaults.LabelCollecte + _collecte1;
                     //als de template de tekst bevat "1e Collecte: " moet daar de 1e collecte achter komen
                     else if (text.Equals("<1e Collecte:>"))
-                        textbox.Text = _instellingen.StandaardTeksten.Collecte1 + _collecte1;
+                        textbox.Text = _buildDefaults.LabelCollecte1 + _collecte1;
                     //als de template de tekst bevat "2e Collecte: " moet daar de 2e collecte achter komen
                     else if (text.Equals("<2e Collecte:>"))
-                        textbox.Text = _instellingen.StandaardTeksten.Collecte2 + _collecte2;
+                        textbox.Text = _buildDefaults.LabelCollecte2 + _collecte2;
                     //als de template de tekst bevat "Volgende" moet daar _altijd_ de Liturgieregel van de volgende sheet komen
                     //(omdat het hier handmatig bepaald wordt door degene die de slides gemaakt heeft)
                     else if (text.Equals("<Volgende>"))
                     {
                         var display = _liedFormatter.Volgende(volgende);
-                        textbox.Text = display != null ? $"{_instellingen.StandaardTeksten.Volgende} {display.Display}" : string.Empty;
+                        textbox.Text = display != null ? $"{_buildDefaults.LabelVolgende} {display.Display}" : string.Empty;
                     }
                     //als de template de tekst bevat "Volgende" moet daar de te lezen schriftgedeeltes komen
                     else if (text.Equals("<Lezen>"))
-                        textbox.Text = _instellingen.StandaardTeksten.Lezen + _lezen;
+                        textbox.Text = _buildDefaults.LabelLezen + _lezen;
                     else if (text.Equals("<Tekst>"))
-                        textbox.Text = _instellingen.StandaardTeksten.Tekst + _tekst;
+                        textbox.Text = _buildDefaults.LabelTekst + _tekst;
                     else if (text.Equals("<Tekst_Onder>"))
                         textbox.Text = _tekst;
                 }
                 else if (table != null) { 
                     if (table.GetTitel().Equals("<Liturgie>"))
-                        VulLiturgieTabel(table, _mppFactory, _liedFormatter, _liturgie, _lezen, _tekst, _instellingen.StandaardTeksten.LiturgieLezen, _instellingen.StandaardTeksten.LiturgieTekst, _instellingen.StandaardTeksten.Liturgie);
+                        VulLiturgieTabel(table, _mppFactory, _liedFormatter, _liturgie, _lezen, _tekst, _buildDefaults.LabelLiturgieLezen, _buildDefaults.LabelLiturgieTekst, _buildDefaults.LabelLiturgie);
                 }
             }
             //voeg de slides in in het grote geheel
@@ -278,7 +279,7 @@ namespace mppt
 
             // kijk waar we eindigen als we instellinge-aantal tellen vanaf ons startpunt
             var eindIndex = regels.Select((r, i) => new { Regel = r, Index = i })
-              .Where(r => r.Index >= beginIndex && (r.Index - beginIndex) < _instellingen.RegelsPerLiedSlide && r.Regel != NieuweSlideAanduiding)
+              .Where(r => r.Index >= beginIndex && (r.Index - beginIndex) < _buildDefaults.RegelsPerLiedSlide && r.Regel != NieuweSlideAanduiding)
               .Select(r => r.Index)  // eindindex is er altijd als er een begin is
               .LastOrDefault();
 

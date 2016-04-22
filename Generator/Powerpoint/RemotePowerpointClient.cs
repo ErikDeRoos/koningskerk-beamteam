@@ -3,7 +3,6 @@ using ConnectTools;
 using ISlideBuilder;
 using System.ServiceModel;
 using ILiturgieDatabase;
-using ISettings;
 using System;
 using System.Collections.Generic;
 using ConnectTools.Berichten;
@@ -24,7 +23,7 @@ namespace Generator.Powerpoint
         private IWCFServer _proxy;
         private Token _token;
         private string _opslaanAls;
-        private Instellingen _verzendInstellingen;
+        private BuilderData _verzendBuilderData;
         private Liturgie _verzendLiturgie;
         private List<StreamTokenHolder> _streams;
         private IFileOperations _fileManager;
@@ -49,37 +48,34 @@ namespace Generator.Powerpoint
             _proxy = factory.CreateChannel();
         }
 
-        public void PreparePresentation(IEnumerable<ILiturgieRegel> liturgie, string voorganger, string collecte1, string collecte2, string lezen, string tekst, IInstellingenBase gebruikInstellingen, string opslaanAls)
+        public void PreparePresentation(IEnumerable<ILiturgieRegel> liturgie, IBuilderBuildSettings buildSettings, IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, string opslaanAls)
         {
-            _verzendInstellingen = new Instellingen()
+            _verzendBuilderData = new BuilderData()
             {
-                RegelsPerLiedSlide = gebruikInstellingen.RegelsPerLiedSlide,
-                RegelsPerBijbeltekstSlide = gebruikInstellingen.RegelsPerBijbeltekstSlide,
-                TemplateLiedBestand = AddStream(gebruikInstellingen.FullTemplateLied),
-                TemplateThemeBestand = AddStream(gebruikInstellingen.FullTemplateTheme),
-                TemplateBijbeltekstBestand = AddStream(gebruikInstellingen.FullTemplateBijbeltekst),
-                StandaardTeksten = new StandaardTeksten()
-                {
-                    Volgende = gebruikInstellingen.StandaardTeksten.Volgende,
-                    Voorganger = gebruikInstellingen.StandaardTeksten.Voorganger,
-                    Collecte1 = gebruikInstellingen.StandaardTeksten.Collecte1,
-                    Collecte2 = gebruikInstellingen.StandaardTeksten.Collecte2,
-                    Collecte = gebruikInstellingen.StandaardTeksten.Collecte,
-                    Lezen = gebruikInstellingen.StandaardTeksten.Lezen,
-                    Tekst = gebruikInstellingen.StandaardTeksten.Tekst,
-                    Liturgie = gebruikInstellingen.StandaardTeksten.Liturgie,
-                    LiturgieLezen = gebruikInstellingen.StandaardTeksten.LiturgieLezen,
-                    LiturgieTekst = gebruikInstellingen.StandaardTeksten.LiturgieTekst,
-                }
+                RegelsPerLiedSlide = buildDefaults.RegelsPerLiedSlide,
+                RegelsPerBijbeltekstSlide = buildDefaults.RegelsPerBijbeltekstSlide,
+                TemplateLiedBestand = AddStream(dependentFileList.FullTemplateLied),
+                TemplateThemeBestand = AddStream(dependentFileList.FullTemplateTheme),
+                TemplateBijbeltekstBestand = AddStream(dependentFileList.FullTemplateBijbeltekst),
+                LabelVolgende = buildDefaults.LabelVolgende,
+                LabelVoorganger = buildDefaults.LabelVoorganger,
+                LabelCollecte1 = buildDefaults.LabelCollecte1,
+                LabelCollecte2 = buildDefaults.LabelCollecte2,
+                LabelCollecte = buildDefaults.LabelCollecte,
+                LabelLezen = buildDefaults.LabelLezen,
+                LabelTekst = buildDefaults.LabelTekst,
+                LabelLiturgie = buildDefaults.LabelLiturgie,
+                LabelLiturgieLezen = buildDefaults.LabelLiturgieLezen,
+                LabelLiturgieTekst = buildDefaults.LabelLiturgieTekst,
             };
             _opslaanAls = opslaanAls;
             _verzendLiturgie = new Liturgie()
             {
-                Voorganger = voorganger,
-                Lezen = lezen,
-                Tekst = tekst,
-                Collecte1 = collecte1,
-                Collecte2 = collecte2,
+                Voorganger = buildSettings.Voorganger,
+                Lezen = buildSettings.Lezen,
+                Tekst = buildSettings.Tekst,
+                Collecte1 = buildSettings.Collecte1,
+                Collecte2 = buildSettings.Collecte2,
                 Regels = liturgie.Select((r, i) => new LiturgieRegel()
                 {
                     Index = i,
@@ -165,7 +161,7 @@ namespace Generator.Powerpoint
 
         private ConnectieState MaakConnectie()
         {
-            _token = _proxy.StartConnectie(_verzendInstellingen, _verzendLiturgie);
+            _token = _proxy.StartConnectie(_verzendBuilderData, _verzendLiturgie);
             if (_token == null)
             {
                 FoutmeldingSchrijver.Log("Kon connectie niet maken met remote server");

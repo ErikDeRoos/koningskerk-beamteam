@@ -45,16 +45,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IBuilder.cs" />
+    <Compile Include="IBuilderBuildDefaults.cs" />
+    <Compile Include="IBuilderBuildSettings.cs" />
+    <Compile Include="IBuilderDependendFiles.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ILiturgieDatabase\ILiturgieDatabase.csproj">
       <Project>{1338d41d-5e66-40f3-845f-170a8dcfb445}</Project>
       <Name>ILiturgieDatabase</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ISettings\ISettings.csproj">
-      <Project>{76821eaa-462d-4cad-813d-bcff31edad3a}</Project>
-      <Name>ISettings</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

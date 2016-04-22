@@ -17,9 +17,9 @@ namespace RemoteGenerator.WCF
             Host.StaticIoCContainer.InjectProperties(this);  // Dirty, maar WCF ondersteunt geen DI. We gebruiken dus een servicelocator
         }
 
-        public Token StartConnectie(Instellingen gebruikInstellingen, Liturgie metLiturgie)
+        public Token StartConnectie(BuilderData gebruikBuilderData, Liturgie metLiturgie)
         {
-            return Generator.NieuweWachtrijRegel(gebruikInstellingen, metLiturgie).Token;
+            return Generator.NieuweWachtrijRegel(gebruikBuilderData, metLiturgie).Token;
         }
 
         public void ToevoegenBestand(SendFile file)

@@ -17,12 +17,9 @@ namespace Generator.Powerpoint
     {
         private State _huidigeStatus;
         private IEnumerable<ILiturgieRegel> _liturgie;
-        private string _voorganger;
-        private string _collecte1;
-        private string _collecte2;
-        private string _lezen;
-        private string _tekst;
-        private IInstellingen _instellingen;
+        private IBuilderBuildSettings _builderSettings;
+        private IBuilderBuildDefaults _builderDefaults;
+        private IBuilderDependendFiles _builderDependentFileList;
         private string _opslaanAls;
         private readonly Func<IBuilder> _builderResolver;
 
@@ -54,18 +51,18 @@ namespace Generator.Powerpoint
                 if (_huidigeStatus != State.Onbekend && _huidigeStatus != State.Geinitialiseerd)
                     return new StatusMelding(_huidigeStatus, "Kan powerpoint niet initialiseren", "Start het programma opnieuw op");
                 _liturgie = liturgie.ToList();
-                _voorganger = voorganger;
-                _collecte1 = collecte1;
-                _collecte2 = collecte2;
-                _lezen = lezen;
-                _tekst = tekst;
-                _instellingen = instellingen;
+                _builderSettings = new BuilderBuildSettings(voorganger, collecte1, collecte2, lezen, tekst);
+                var defaults = new BuilderDefaults(instellingen);
+                _builderDefaults = defaults;
+                _builderDependentFileList = defaults;
                 _opslaanAls = opslaanAls;
 
-                if (!File.Exists(_instellingen.FullTemplateTheme))
-                    return new StatusMelding(_huidigeStatus, "Het pad naar de achtergrond powerpoint presentatie kan niet worden gevonden", "Stel de achtergrond opnieuw in bij de templates");
-                if (!File.Exists(instellingen.FullTemplateLied))
-                    return new StatusMelding(_huidigeStatus, "Het pad naar de liederen template powerpoint presentatie kan niet worden gevonden", "Stel de achtergrond opnieuw in bij de templates");
+                if (!File.Exists(_builderDependentFileList.FullTemplateTheme))
+                    return new StatusMelding(_huidigeStatus, "Het pad naar de achtergrond powerpoint presentatie kan niet worden gevonden", "Stel de achtergrond opnieuw in");
+                if (!File.Exists(_builderDependentFileList.FullTemplateLied))
+                    return new StatusMelding(_huidigeStatus, "Het pad naar de lied template powerpoint presentatie kan niet worden gevonden", "Stel de lied template opnieuw in");
+                if (!File.Exists(_builderDependentFileList.FullTemplateBijbeltekst))
+                    return new StatusMelding(_huidigeStatus, "Het pad naar de bijbeltekst template powerpoint presentatie kan niet worden gevonden", "Stel de bijbeltekst template opnieuw in");
 
                 _huidigeStatus = State.Geinitialiseerd;
                 return new StatusMelding(_huidigeStatus);
@@ -89,7 +86,7 @@ namespace Generator.Powerpoint
                 _powerpoint.StatusWijziging = PresentatieStatusWijzigingCallback;
                 _powerpoint.Voortgang = PresentatieVoortgangCallback;
                 _gereedMetFout = null;
-                _powerpoint.PreparePresentation(_liturgie, _voorganger, _collecte1, _collecte2, _lezen, _tekst, _instellingen, _opslaanAls);
+                _powerpoint.PreparePresentation(_liturgie, _builderSettings, _builderDefaults, _builderDependentFileList, _opslaanAls);
                 _generatorThread = new Thread(StartThread);
                 _generatorThread.SetApartmentState(ApartmentState.STA);
                 _huidigeStatus = State.Gestart;
@@ -196,6 +193,61 @@ namespace Generator.Powerpoint
             {
                 Melding = melding;
                 Oplossing = oplossing;
+            }
+        }
+
+        private class BuilderBuildSettings : IBuilderBuildSettings
+        {
+            public string Voorganger { get; set; }
+            public string Collecte1 { get; set; }
+            public string Collecte2 { get; set; }
+            public string Lezen { get; set; }
+            public string Tekst { get; set; }
+
+            public BuilderBuildSettings(string voorganger, string collecte1, string collecte2, string lezen, string tekst)
+            {
+                Voorganger = voorganger;
+                Collecte1 = collecte1;
+                Collecte2 = collecte2;
+                Lezen = lezen;
+                Tekst = tekst;
+            }
+        }
+        private class BuilderDefaults : IBuilderBuildDefaults, IBuilderDependendFiles
+        {
+            public int RegelsPerLiedSlide { get; set; }
+            public int RegelsPerBijbeltekstSlide { get; set; }
+            public string FullTemplateTheme { get; set; }
+            public string FullTemplateLied{ get; set; }
+            public string FullTemplateBijbeltekst { get; set; }
+            public string LabelVolgende { get; set; }
+            public string LabelVoorganger { get; set; }
+            public string LabelCollecte1 { get; set; }
+            public string LabelCollecte2 { get; set; }
+            public string LabelCollecte { get; set; }
+            public string LabelLezen { get; set; }
+            public string LabelTekst { get; set; }
+            public string LabelLiturgie { get; set; }
+            public string LabelLiturgieLezen { get; set; }
+            public string LabelLiturgieTekst { get; set; }
+
+            public BuilderDefaults(IInstellingen opBasisVanInstellingen)
+            {
+                RegelsPerLiedSlide = opBasisVanInstellingen.RegelsPerLiedSlide;
+                RegelsPerBijbeltekstSlide = opBasisVanInstellingen.RegelsPerBijbeltekstSlide;
+                LabelVolgende = opBasisVanInstellingen.StandaardTeksten.Voorganger;
+                LabelVoorganger = opBasisVanInstellingen.StandaardTeksten.Voorganger;
+                LabelCollecte1 = opBasisVanInstellingen.StandaardTeksten.Collecte1;
+                LabelCollecte2 = opBasisVanInstellingen.StandaardTeksten.Collecte2;
+                LabelCollecte = opBasisVanInstellingen.StandaardTeksten.Collecte;
+                LabelLezen = opBasisVanInstellingen.StandaardTeksten.Lezen;
+                LabelTekst = opBasisVanInstellingen.StandaardTeksten.Tekst;
+                LabelLiturgie = opBasisVanInstellingen.StandaardTeksten.Liturgie;
+                LabelLiturgieLezen = opBasisVanInstellingen.StandaardTeksten.LiturgieLezen;
+                LabelLiturgieTekst = opBasisVanInstellingen.StandaardTeksten.LiturgieTekst;
+                FullTemplateTheme = opBasisVanInstellingen.FullTemplateTheme;
+                FullTemplateLied = opBasisVanInstellingen.FullTemplateLied;
+                FullTemplateBijbeltekst = opBasisVanInstellingen.FullTemplateBijbeltekst;
             }
         }
     }

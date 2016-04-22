@@ -2,7 +2,6 @@
 using ConnectTools.Berichten;
 using IFileSystem;
 using ILiturgieDatabase;
-using ISettings;
 using ISlideBuilder;
 using RemoteGenerator.Builder.Wachtrij;
 using System;
@@ -20,12 +19,9 @@ namespace RemoteGenerator.Builder
     {
         private State _huidigeStatus;
         private IEnumerable<ILiturgieRegel> _liturgie;
-        private string _voorganger;
-        private string _collecte1;
-        private string _collecte2;
-        private string _lezen;
-        private string _tekst;
-        private IInstellingenBase _instellingen;
+        private IBuilderBuildSettings _builderSettings;
+        private IBuilderBuildDefaults _builderDefaults;
+        private IBuilderDependendFiles _builderFiles;
         private string _opslaanAls;
         private IFileOperations _fileManager;
         private readonly Func<IBuilder> _builderResolver;
@@ -55,7 +51,7 @@ namespace RemoteGenerator.Builder
             _startThread.Start();
         }
 
-        public WachtrijRegel NieuweWachtrijRegel(ConnectTools.Berichten.Instellingen metInstellingen, ConnectTools.Berichten.Liturgie metLiturgie)
+        public WachtrijRegel NieuweWachtrijRegel(ConnectTools.Berichten.BuilderData metBuilderData, ConnectTools.Berichten.Liturgie metLiturgie)
         {
             var regel = new WachtrijRegel()
             {
@@ -65,7 +61,7 @@ namespace RemoteGenerator.Builder
                 Bestanden = new List<BestandStreamToken>()
             };
             regel.Liturgie = new Wachtrij.Liturgie(metLiturgie, (new PrepareSaveToFileFactory(regel)).MaakBestandStreamToken);
-            regel.Instellingen = new Wachtrij.Instellingen(metInstellingen, (new PrepareSaveToFileFactory(regel)).MaakBestandStreamToken);
+            regel.WrappedBuilderData = new Wachtrij.BuilderData(metBuilderData, (new PrepareSaveToFileFactory(regel)).MaakBestandStreamToken);
             lock (this)
             {
                 regel.Index = _wachtrij.Count() > 0 ? _wachtrij.Max(w => w.Index) + 1 : 1;
@@ -130,7 +126,7 @@ namespace RemoteGenerator.Builder
         private static bool IsRegelCompleet(WachtrijRegel regel)
         {
             return regel != null
-                && regel.Instellingen != null
+                && regel.WrappedBuilderData != null
                 && regel.Liturgie != null
                 && regel.Bestanden.All(b => b.Ontvangen);
         }
@@ -144,8 +140,7 @@ namespace RemoteGenerator.Builder
         private void Start(WachtrijRegel regel)
         {
             var opslaanAlsBestandsnaam = Path.GetTempFileName();
-            Initialiseer(regel.Liturgie.LiturgieRegels, regel.Liturgie.Voorganger, regel.Liturgie.Collecte1, regel.Liturgie.Collecte2,
-                regel.Liturgie.Lezen, regel.Liturgie.Tekst, regel.Instellingen, opslaanAlsBestandsnaam);
+            Initialiseer(regel.Liturgie.LiturgieRegels, regel.Liturgie, regel.WrappedBuilderData, regel.WrappedBuilderData, opslaanAlsBestandsnaam);
             Start();
         }
 
@@ -161,18 +156,15 @@ namespace RemoteGenerator.Builder
             return fileName;
         }
 
-        private StatusMelding Initialiseer(IEnumerable<ILiturgieRegel> liturgie, string voorganger, string collecte1, string collecte2, string lezen,
-          string tekst, IInstellingenBase instellingen, string opslaanAls)
+        private StatusMelding Initialiseer(IEnumerable<ILiturgieRegel> liturgie, IBuilderBuildSettings builderSettings, IBuilderBuildDefaults builderDefaults, 
+            IBuilderDependendFiles builderDependendFileList, string opslaanAls)
         {
             lock (this)
             {
                 _liturgie = liturgie.ToList();
-                _voorganger = voorganger;
-                _collecte1 = collecte1;
-                _collecte2 = collecte2;
-                _lezen = lezen;
-                _tekst = tekst;
-                _instellingen = instellingen;
+                _builderSettings = builderSettings;
+                _builderDefaults = builderDefaults;
+                _builderFiles = builderDependendFileList;
                 _opslaanAls = opslaanAls;
                 _huidigeStatus = State.Geinitialiseerd;
                 return new StatusMelding(_huidigeStatus);
@@ -189,7 +181,7 @@ namespace RemoteGenerator.Builder
                 _powerpoint.StatusWijziging = PresentatieStatusWijzigingCallback;
                 _powerpoint.Voortgang = PresentatieVoortgangCallback;
                 _gereedMetFout = null;
-                _powerpoint.PreparePresentation(_liturgie, _voorganger, _collecte1, _collecte2, _lezen, _tekst, _instellingen, _opslaanAls);
+                _powerpoint.PreparePresentation(_liturgie, _builderSettings, _builderDefaults, _builderFiles, _opslaanAls);
                 _generatorThread = new Thread(StartThread);
                 _generatorThread.SetApartmentState(ApartmentState.STA);
                 _huidigeStatus = State.Gestart;

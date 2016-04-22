@@ -9,7 +9,7 @@ namespace ConnectTools
     public interface IWCFServer
     {
         [OperationContract]
-        Token StartConnectie(Instellingen gebruikInstellingen, Liturgie metLiturgie);
+        Token StartConnectie(BuilderData gebruikBuilderData, Liturgie metLiturgie);
 
         [OperationContract]
         void ToevoegenBestand(SendFile file);
