@@ -62,9 +62,9 @@ namespace Generator.Powerpoint
                 _instellingen = instellingen;
                 _opslaanAls = opslaanAls;
 
-                if (!File.Exists(_instellingen.FullTemplatetheme))
+                if (!File.Exists(_instellingen.FullTemplateTheme))
                     return new StatusMelding(_huidigeStatus, "Het pad naar de achtergrond powerpoint presentatie kan niet worden gevonden", "Stel de achtergrond opnieuw in bij de templates");
-                if (!File.Exists(instellingen.FullTemplateliederen))
+                if (!File.Exists(instellingen.FullTemplateLied))
                     return new StatusMelding(_huidigeStatus, "Het pad naar de liederen template powerpoint presentatie kan niet worden gevonden", "Stel de achtergrond opnieuw in bij de templates");
 
                 _huidigeStatus = State.Geinitialiseerd;

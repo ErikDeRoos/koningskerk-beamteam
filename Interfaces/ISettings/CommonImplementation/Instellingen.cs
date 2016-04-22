@@ -8,10 +8,12 @@ namespace ISettings.CommonImplementation
     public class Instellingen : IInstellingen
     {
         public string DatabasePad { get; set; }
-        public string Templateliederen { get; set; }
-        public string Templatetheme { get; set; }
         public string BijbelPad { get; set; }
-        public int Regelsperslide { get; set; }
+        public string TemplateTheme { get; set; }
+        public string TemplateLied { get; set; }
+        public string TemplateBijbeltekst { get; set; }
+        public int RegelsPerLiedSlide { get; set; }
+        public int RegelsPerBijbeltekstSlide { get; set; }
         private readonly List<IMapmask> _lijstmasks = new List<IMapmask>();
         public StandaardTeksten StandaardTeksten { get; set; }
 
@@ -19,9 +21,9 @@ namespace ISettings.CommonImplementation
         {
             DatabasePad = "";
             BijbelPad = "";
-            Templateliederen = "";
-            Templatetheme = "";
-            Regelsperslide = 4;
+            TemplateLied = "";
+            TemplateTheme = "";
+            RegelsPerLiedSlide = 4;
 
             StandaardTeksten = new StandaardTeksten()
             {
@@ -39,14 +41,16 @@ namespace ISettings.CommonImplementation
 
         }
 
-        public Instellingen(string databasepad, string templateliederen, string templatetheme, string bijbelpad, int regelsperslide = 6, StandaardTeksten standaardTeksten = null, IEnumerable<IMapmask> masks = null)
+        public Instellingen(string databasepad, string bijbelpad, string templatetheme, string templateliederen, string templatebijbeltekst, int regelsperslide = 6, int regelsperbijbeltekstslide = 9, StandaardTeksten standaardTeksten = null, IEnumerable<IMapmask> masks = null)
             : this()
         {
             DatabasePad = databasepad;
-            Templateliederen = templateliederen;
-            Templatetheme = templatetheme;
             BijbelPad = bijbelpad;
-            Regelsperslide = regelsperslide;
+            TemplateTheme = templatetheme;
+            TemplateLied = templateliederen;
+            TemplateBijbeltekst = templatebijbeltekst;
+            RegelsPerLiedSlide = regelsperslide;
+            RegelsPerBijbeltekstSlide = regelsperbijbeltekstslide;
             if (standaardTeksten != null)
                 StandaardTeksten = standaardTeksten;
             masks?.ToList().ForEach(m => AddMask(m));
@@ -65,10 +69,9 @@ namespace ISettings.CommonImplementation
 
         public string FullDatabasePath => DatabasePad.StartsWith(".") ? System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, DatabasePad.Remove(0, 1)) : DatabasePad;
         public string FullBijbelPath => BijbelPad.StartsWith(".") ? System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, BijbelPad.Remove(0, 1)) : BijbelPad;
-
-        public string FullTemplatetheme => Templatetheme.StartsWith(".") ? System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Templatetheme.Remove(0, 1)) : Templatetheme;
-
-        public string FullTemplateliederen => Templateliederen.StartsWith(".") ? System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Templateliederen.Remove(0, 1)) : Templateliederen;
+        public string FullTemplateTheme => TemplateTheme.StartsWith(".") ? System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, TemplateTheme.Remove(0, 1)) : TemplateTheme;
+        public string FullTemplateLied => TemplateLied.StartsWith(".") ? System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, TemplateLied.Remove(0, 1)) : TemplateLied;
+        public string FullTemplateBijbeltekst => TemplateBijbeltekst.StartsWith(".") ? System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, TemplateBijbeltekst.Remove(0, 1)) : TemplateBijbeltekst;
 
         public IEnumerable<IMapmask> Masks => _lijstmasks;
 
@@ -76,7 +79,7 @@ namespace ISettings.CommonImplementation
         public override string ToString()
         {
             return
-                $"databasepad: {FullDatabasePath}\n templateliederen: {FullTemplateliederen}\n templatetheme: {FullTemplatetheme}\n regels per slide: {Regelsperslide}\n";
+                $"databasepad: {FullDatabasePath}\n templateliederen: {FullTemplateLied}\n templatetheme: {FullTemplateTheme}\n regels per slide: {RegelsPerLiedSlide}\n";
         }
     }
 }

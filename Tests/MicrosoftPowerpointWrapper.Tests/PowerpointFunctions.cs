@@ -23,7 +23,7 @@ namespace MicrosoftPowerpointWrapper.Tests
 
                 sut.GeneratePresentation();
 
-                A.CallTo(() => app.Open(DefaultInstellingen.FullTemplatetheme, true)).MustHaveHappened();
+                A.CallTo(() => app.Open(DefaultInstellingen.FullTemplateTheme, true)).MustHaveHappened();
             }
         }
 
@@ -32,7 +32,7 @@ namespace MicrosoftPowerpointWrapper.Tests
         {
             using (var fake = new AutoFake())
             {
-                var pres = PreparePresentation(fake, DefaultInstellingen.FullTemplatetheme);
+                var pres = PreparePresentation(fake, DefaultInstellingen.FullTemplateTheme);
                 var sut = fake.Resolve<mppt.PowerpointFunctions>();
                 sut.PreparePresentation(GetEmptyLiturgie(), null, null, null, null, null, DefaultInstellingen, saveAsFileName);
 

@@ -6,9 +6,10 @@ namespace ISettings
     public interface IInstellingen : IInstellingenBase
     {
         string DatabasePad { get; }
-        string Templateliederen { get; }
-        string Templatetheme { get; }
         string BijbelPad { get; }
+        string TemplateLied { get; }
+        string TemplateTheme { get; }
+        string TemplateBijbeltekst { get; }
 
         IEnumerable<IMapmask> Masks { get; }
         bool AddMask(IMapmask mask);

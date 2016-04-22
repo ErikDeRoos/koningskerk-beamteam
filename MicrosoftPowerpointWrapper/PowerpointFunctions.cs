@@ -68,7 +68,7 @@ namespace mppt
 
             _applicatie = _mppFactory.GetApplication();
             //Creeer een nieuwe lege presentatie volgens de template thema (toon scherm zodat bij fout nog iets te zien is)
-            _presentatie = _applicatie.Open(_instellingen.FullTemplatetheme, metWindow: true);
+            _presentatie = _applicatie.Open(_instellingen.FullTemplateTheme, metWindow: true);
             //Minimaliseer scherm
             _applicatie.MinimizeInterface();
 
@@ -147,7 +147,7 @@ namespace mppt
             foreach(var tekst in tekstOmTeRenderenLijst)
             {
                 //regel de template om het lied op af te beelden
-                var presentatie = OpenPps(_instellingen.FullTemplateliederen);
+                var presentatie = OpenPps(_instellingen.FullTemplateLied);
                 var slide = presentatie.EersteSlide();  //alleen eerste slide gebruiken we
                 //voor elk object op de slides (we zoeken naar de tekst die vervangen moet worden in de template)
                 foreach (var shape in slide.Shapes().Where(s => s is IMppShapeTextbox).Cast<IMppShapeTextbox>())
@@ -278,7 +278,7 @@ namespace mppt
 
             // kijk waar we eindigen als we instellinge-aantal tellen vanaf ons startpunt
             var eindIndex = regels.Select((r, i) => new { Regel = r, Index = i })
-              .Where(r => r.Index >= beginIndex && (r.Index - beginIndex) < _instellingen.Regelsperslide && r.Regel != NieuweSlideAanduiding)
+              .Where(r => r.Index >= beginIndex && (r.Index - beginIndex) < _instellingen.RegelsPerLiedSlide && r.Regel != NieuweSlideAanduiding)
               .Select(r => r.Index)  // eindindex is er altijd als er een begin is
               .LastOrDefault();
 

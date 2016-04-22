@@ -1,15 +1,14 @@
 ﻿// Copyright 2016 door Erik de Roos
-using System.Collections.Generic;
-using System.IO;
 
 namespace ConnectTools.Berichten
 {
     public class Instellingen
     {
-        public int Regelsperslide { get; set; }
+        public int RegelsPerLiedSlide { get; set; }
+        public int RegelsPerBijbeltekstSlide { get; set; }
         public StandaardTeksten StandaardTeksten { get; set; }
         public StreamToken TemplateThemeBestand { get; set; }
-        public StreamToken TemplateLiederenBestand { get; set; }
-
+        public StreamToken TemplateLiedBestand { get; set; }
+        public StreamToken TemplateBijbeltekstBestand { get; set; }
     }
 }

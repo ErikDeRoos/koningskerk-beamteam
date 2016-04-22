@@ -25,11 +25,13 @@ namespace PowerpointGenerator
         {
             var vanInstellingen = _instellingenFactory.LoadFromXmlFile();
 
-            textBox1.Text = vanInstellingen.Templateliederen;
-            textBox2.Text = vanInstellingen.Templatetheme;
             textBox3.Text = vanInstellingen.DatabasePad;
-            textBox4.Text = vanInstellingen.Regelsperslide.ToString();
             textBox5.Text = vanInstellingen.BijbelPad;
+            textBox2.Text = vanInstellingen.TemplateTheme;
+            textBox1.Text = vanInstellingen.TemplateLied;
+            textBox6.Text = vanInstellingen.TemplateBijbeltekst;
+            textBox4.Text = vanInstellingen.RegelsPerLiedSlide.ToString();
+            textBox7.Text = vanInstellingen.RegelsPerBijbeltekstSlide.ToString();
 
             tbVolgende.Text = vanInstellingen.StandaardTeksten.Volgende;
             tbVoorganger.Text = vanInstellingen.StandaardTeksten.Voorganger;
@@ -141,8 +143,13 @@ namespace PowerpointGenerator
             int regelsPerSlide;
             if (!TryParse(textBox4.Text, out regelsPerSlide))
                 regelsPerSlide = 6;
-            Instellingen = new Instellingen(textBox3.Text, textBox1.Text, textBox2.Text, textBox5.Text, regelsPerSlide,
-                new StandaardTeksten
+            int regelsPerBijbeltekstSlide;
+            if (!TryParse(textBox7.Text, out regelsPerBijbeltekstSlide))
+                regelsPerSlide = 9;
+            Instellingen = new Instellingen(textBox3.Text, textBox5.Text, 
+                textBox2.Text, textBox1.Text, textBox6.Text, 
+                regelsperslide: regelsPerSlide, regelsperbijbeltekstslide: regelsPerBijbeltekstSlide,
+                standaardTeksten: new StandaardTeksten
                 {
                     Volgende = tbVolgende.Text,
                     Voorganger = tbVoorganger.Text,
@@ -155,7 +162,7 @@ namespace PowerpointGenerator
                     LiturgieLezen = tbLiturgieLezen.Text,
                     LiturgieTekst = tbLiturgieTekst.Text
                 },
-                _masks
+                masks: _masks
             );
         }
     }

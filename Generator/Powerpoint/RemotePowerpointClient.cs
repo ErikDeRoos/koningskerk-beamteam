@@ -53,9 +53,11 @@ namespace Generator.Powerpoint
         {
             _verzendInstellingen = new Instellingen()
             {
-                Regelsperslide = gebruikInstellingen.Regelsperslide,
-                TemplateLiederenBestand = AddStream(gebruikInstellingen.FullTemplateliederen),
-                TemplateThemeBestand = AddStream(gebruikInstellingen.FullTemplatetheme),
+                RegelsPerLiedSlide = gebruikInstellingen.RegelsPerLiedSlide,
+                RegelsPerBijbeltekstSlide = gebruikInstellingen.RegelsPerBijbeltekstSlide,
+                TemplateLiedBestand = AddStream(gebruikInstellingen.FullTemplateLied),
+                TemplateThemeBestand = AddStream(gebruikInstellingen.FullTemplateTheme),
+                TemplateBijbeltekstBestand = AddStream(gebruikInstellingen.FullTemplateBijbeltekst),
                 StandaardTeksten = new StandaardTeksten()
                 {
                     Volgende = gebruikInstellingen.StandaardTeksten.Volgende,

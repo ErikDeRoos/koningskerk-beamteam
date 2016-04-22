@@ -7,17 +7,21 @@ namespace RemoteGenerator.Builder.Wachtrij
 {
     class Instellingen : IInstellingenBase
     {
-        public int Regelsperslide { get; set; }
+        public int RegelsPerLiedSlide { get; set; }
+        public int RegelsPerBijbeltekstSlide { get; set; }
         public StandaardTeksten StandaardTeksten { get; set; }
-        public string FullTemplatetheme { get { return TemplateThemeBestand.LinkOpFilesysteem; } }
-        public string FullTemplateliederen { get { return TemplateLiederenBestand.LinkOpFilesysteem; } }
+        public string FullTemplateTheme { get { return TemplateThemeBestand.LinkOpFilesysteem; } }
+        public string FullTemplateLied { get { return TemplateLiedBestand.LinkOpFilesysteem; } }
+        public string FullTemplateBijbeltekst { get { return TemplateBijbeltekstBestand.LinkOpFilesysteem; } }
 
         public BestandStreamToken TemplateThemeBestand { get; set; }
-        public BestandStreamToken TemplateLiederenBestand { get; set; }
+        public BestandStreamToken TemplateLiedBestand { get; set; }
+        public BestandStreamToken TemplateBijbeltekstBestand { get; set; }
 
         public Instellingen(ConnectTools.Berichten.Instellingen vanInstellingen, Func<ConnectTools.Berichten.StreamToken, BestandStreamToken> bestandStreamTokenFactory)
         {
-            Regelsperslide = vanInstellingen.Regelsperslide;
+            RegelsPerLiedSlide = vanInstellingen.RegelsPerLiedSlide;
+            RegelsPerBijbeltekstSlide = vanInstellingen.RegelsPerBijbeltekstSlide;
             StandaardTeksten = StandaardTeksten = new StandaardTeksten()
             {
                 Volgende = vanInstellingen.StandaardTeksten.Volgende,
@@ -32,7 +36,8 @@ namespace RemoteGenerator.Builder.Wachtrij
                 LiturgieTekst = vanInstellingen.StandaardTeksten.LiturgieTekst,
             };
             TemplateThemeBestand = bestandStreamTokenFactory(vanInstellingen.TemplateThemeBestand);
-            TemplateLiederenBestand = bestandStreamTokenFactory(vanInstellingen.TemplateLiederenBestand);
+            TemplateLiedBestand = bestandStreamTokenFactory(vanInstellingen.TemplateLiedBestand);
+            TemplateBijbeltekstBestand = bestandStreamTokenFactory(vanInstellingen.TemplateBijbeltekstBestand);
         }
     }
 }
