@@ -88,7 +88,7 @@ namespace Generator.Database
             {
                 // Specifieke verzen
                 var delayedContent = KrijgContentDelayed(subSet, set.Settings);
-                var preSelect = InterpreteerNummers(fragmentDelen)  // We houden de volgorde van het opgeven aan omdat die afwijkend kan zijn
+                var preSelect = InterpreteerNummers(fragmentDelen, delayedContent.Select(c => c.Name))  // We houden de volgorde van het opgeven aan omdat die afwijkend kan zijn
                     .Select(n => n.ToString())
                     .Select(n => new { Naam = n, SubSet = delayedContent.FirstOrDefault(c => c.Name == n), })
                     .ToList();
@@ -106,32 +106,48 @@ namespace Generator.Database
             return returnValue;
         }
 
-        private static IEnumerable<int> InterpreteerNummers(IEnumerable<string> nummers)
+        private static IEnumerable<int> InterpreteerNummers(IEnumerable<string> nummerSets, IEnumerable<string> avaliableNummers)
         {
-            foreach (var nummer in nummers)
+            int parseAvaliableNummer = 0;
+            var avaliableList = avaliableNummers.Where(s => int.TryParse(s, out parseAvaliableNummer)).Select(s => parseAvaliableNummer).ToList();
+            foreach (var nummerSet in nummerSets)
             {
-                var safeNummer = (nummer ?? "").Trim();
-                int parseNummer;
-                if (int.TryParse(safeNummer, out parseNummer))
+                var safeNummerSet = (nummerSet ?? "").Trim();
+                int singleNummer = 0;
+                if (int.TryParse(safeNummerSet, out singleNummer))
                 {
-                    yield return parseNummer;
+                    yield return singleNummer;
                     continue;
                 }
-                if (safeNummer.Contains(LiturgieDatabaseSettings.VersSamenvoeging))
+                if (safeNummerSet.Contains(LiturgieDatabaseSettings.VersSamenvoeging))
                 {
-                    var split = safeNummer.Split(new[] { LiturgieDatabaseSettings.VersSamenvoeging }, StringSplitOptions.RemoveEmptyEntries);
+                    int vanNummer = 0;
+                    int totEnMetNummer = 0;
+                    var doRun = false;
+                    var split = safeNummerSet.Split(new[] { LiturgieDatabaseSettings.VersSamenvoeging }, StringSplitOptions.RemoveEmptyEntries);
                     if (split.Length == 2)
+                        doRun = int.TryParse(split[0].Trim(), out vanNummer) && int.TryParse(split[1].Trim(), out totEnMetNummer);
+                    else
                     {
-                        int vanNummer;
-                        int totEnMetNummer;
-                        if (int.TryParse(split[0].Trim(), out vanNummer) && int.TryParse(split[1].Trim(), out totEnMetNummer))
+                        split = safeNummerSet.Split(new[] { LiturgieDatabaseSettings.VersSamenvoeging }, StringSplitOptions.None);
+                        if (split.Length == 2)
                         {
-                            foreach (var teller in Enumerable.Range(vanNummer, totEnMetNummer - vanNummer + 1))
-                                yield return teller;
+                            if (!string.IsNullOrWhiteSpace(split[0]))
+                            {
+                                doRun = int.TryParse(split[0].Trim(), out vanNummer);
+                                totEnMetNummer = avaliableList.Any() ? avaliableList.Max() : 0;
+                            }
+                            else if (!string.IsNullOrWhiteSpace(split[1]))
+                            {
+                                doRun = int.TryParse(split[1].Trim(), out totEnMetNummer);
+                                vanNummer = 1;
+                            }
                         }
                     }
+                    if (doRun)
+                        foreach (var teller in Enumerable.Range(vanNummer, totEnMetNummer - vanNummer + 1).Where(r => avaliableList.Contains(r)))
+                            yield return teller;
                 }
-                // TODO fout, hoe naar buiten laten komen?
             }
         }
 
@@ -148,7 +164,7 @@ namespace Generator.Database
                         .Select(s => new ContentDirect(s))
                         .ToList();
             }
-            return null;
+            return new List<IContentDelayed>();
         }
 
         private static Content KrijgDirecteContent(IDbItemContent metItem, string possibleNummer)
