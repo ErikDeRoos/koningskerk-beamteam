@@ -39,9 +39,6 @@ namespace Generator.Database
 
         public IZoekresultaat ZoekOnderdeel(VerwerkingType alsType, string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen = null)
         {
-            // TODO alsType voor bijbelteksten bij nummering ondersteuning voor verzen tot einde hoofdstukken bijv '20 -'
-            // TODO alsType voor bijbelteksten in content referentie naar hoofdstuk (of op een andere plaats) zodat hoofdstuk wisseling bepaald kan worden
-
             var database = alsType == VerwerkingType.normaal ? _databases.GetDefault() : _databases.Extensions.FirstOrDefault(e => e.Name == LiturgieDatabaseSettings.DatabaseNameBijbeltekst);
             if (database == null)
                 return new Zoekresultaat() { Status = LiturgieOplossingResultaat.DatabaseFout };
