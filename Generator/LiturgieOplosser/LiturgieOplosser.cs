@@ -156,6 +156,7 @@ namespace Generator.LiturgieOplosser
                 if (!IsNullOrWhiteSpace(resultaat.OnderdeelDisplayNaam))
                     regel.DisplayEdit.Naam = resultaat.OnderdeelDisplayNaam.Equals(_defaultSetNameEmpty, StringComparison.CurrentCultureIgnoreCase) ? null : resultaat.OnderdeelDisplayNaam;
             }
+            regel.Content = content.ToList();
             regel.DisplayEdit.VolledigeContent = versDelenLijst.Count == 1 && !versDelen.FirstOrDefault().Verzen.Any();
             return null;
         }
