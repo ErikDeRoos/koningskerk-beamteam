@@ -247,6 +247,15 @@ namespace mppt.RegelVerwerking
                 return string.IsNullOrWhiteSpace(regel) || regel == NieuweSlideAanduiding;
             }
 
+            /// Een 'volgende' tekst is alleen relevant om te tonen op de laatste pagina binnen een item voordat 
+            /// een nieuw item komt.
+            /// Je kunt er echter ook voor kiezen dat een volgende item gewoon niet aangekondigd wordt. Dat gaat
+            /// via 'TonenInVolgende'.
+            protected static bool IsLaatsteSlide(IEnumerable<string> tekstOmTeRenderen, string huidigeTekst, ILiturgieRegel regel, ILiturgieContent deel)
+            {
+                return tekstOmTeRenderen.Last() == huidigeTekst && regel.Content.Last() == deel;
+            }
+
             private class SlideVuller
             {
                 public string Invullen { get; set; }

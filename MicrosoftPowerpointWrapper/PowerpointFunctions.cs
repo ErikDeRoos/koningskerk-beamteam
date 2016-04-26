@@ -38,7 +38,7 @@ namespace mppt
             _liedFormatter = liedFormatter;
             _regelVerwerker = new Dictionary<VerwerkingType, IVerwerkFactory>();
             _regelVerwerker.Add(VerwerkingType.normaal, new VerwerkerNormaal());
-            //_regelVerwerker.Add(VerwerkingType.bijbeltekst, new VerwerkerBijbeltekst());
+            _regelVerwerker.Add(VerwerkingType.bijbeltekst, new VerwerkerBijbeltekst());
         }
 
         public void PreparePresentation(IEnumerable<ILiturgieRegel> liturgie, IBuilderBuildSettings buildSettings, IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, string opslaanAls)
