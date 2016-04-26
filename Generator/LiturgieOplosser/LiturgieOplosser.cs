@@ -84,10 +84,16 @@ namespace Generator.LiturgieOplosser
             // kijk of de opties nog iets zeggen over alternatieve naamgeving
             var optieMetAltNaamOverzicht = GetOptieParam(trimmedOpties, LiturgieOplosserSettings.OptieAlternatieveNaamOverzicht);
             if (!IsNullOrWhiteSpace(optieMetAltNaamOverzicht))
+            {
                 regel.DisplayEdit.NaamOverzicht = optieMetAltNaamOverzicht;
+                regel.DisplayEdit.SubNaam = null;
+            }
             var optieMetAltNaamVolgende = GetOptieParam(trimmedOpties, LiturgieOplosserSettings.OptieAlternatieveNaam);
             if (!IsNullOrWhiteSpace(optieMetAltNaamVolgende))
+            {
                 regel.DisplayEdit.Naam = optieMetAltNaamOverzicht;
+                regel.DisplayEdit.SubNaam = null;
+            }
 
             // geef de oplossing terug
             return new Oplossing(LiturgieOplossingResultaat.Opgelost, item, regel);
@@ -98,7 +104,7 @@ namespace Generator.LiturgieOplosser
             var setNaam = item.Benaming;
             if (item is ILiturgieInterpretatieBijbeltekst)
             {
-                regel.DisplayEdit.VersenGebruikDefault = new VersenDefault(item.ToString());
+                regel.DisplayEdit.VersenGebruikDefault = new VersenDefault(string.Empty);
                 return BijbeltekstAanvuller(regel, setNaam, (item as ILiturgieInterpretatieBijbeltekst).PerDeelVersen.ToList());
             }
             var zoekNaam = item.Deel;
@@ -149,12 +155,8 @@ namespace Generator.LiturgieOplosser
                 var resultaat = _database.ZoekOnderdeel(VerwerkingType.bijbeltekst, setNaam, deel.Deel, deel.Verzen);
                 if (resultaat.Status != LiturgieOplossingResultaat.Opgelost)
                     return resultaat.Status;
-                regel.DisplayEdit.Naam = resultaat.OnderdeelNaam;
-                regel.DisplayEdit.SubNaam = resultaat.FragmentNaam;
                 content.AddRange(resultaat.Content);
-                // bepaal de naamgeving
-                if (!IsNullOrWhiteSpace(resultaat.OnderdeelDisplayNaam))
-                    regel.DisplayEdit.Naam = resultaat.OnderdeelDisplayNaam.Equals(_defaultSetNameEmpty, StringComparison.CurrentCultureIgnoreCase) ? null : resultaat.OnderdeelDisplayNaam;
+                // let op, naamgeving wordt buitenom geregeld
             }
             regel.Content = content.ToList();
             regel.DisplayEdit.VolledigeContent = versDelenLijst.Count == 1 && !versDelen.FirstOrDefault().Verzen.Any();

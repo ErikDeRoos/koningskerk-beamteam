@@ -151,7 +151,7 @@ namespace Generator.LiturgieInterpretator
 
             // visualisatie handmatig regelen
             optieLijst.Add($"{LiturgieOplosser.LiturgieOplosserSettings.OptieAlternatieveNaamOverzicht} {regel}");
-            optieLijst.Add($"{LiturgieOplosser.LiturgieOplosserSettings.OptieAlternatieveNaam} {regel.Deel}");
+            optieLijst.Add($"{LiturgieOplosser.LiturgieOplosserSettings.OptieAlternatieveNaam} {regel.Benaming} {regel.Deel}");
 
             // opties toekennen
             regel.Opties = optieLijst;
@@ -192,7 +192,9 @@ namespace Generator.LiturgieInterpretator
 
             public override string ToString()
             {
-                return $"{Deel}: {VerzenZoalsIngevoerd}";
+                if (!string.IsNullOrWhiteSpace(VerzenZoalsIngevoerd))
+                    return $"{Deel}: {VerzenZoalsIngevoerd}";
+                return Deel;
             }
         }
     }
