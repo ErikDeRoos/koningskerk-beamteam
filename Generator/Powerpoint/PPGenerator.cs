@@ -235,7 +235,7 @@ namespace Generator.Powerpoint
             {
                 RegelsPerLiedSlide = opBasisVanInstellingen.RegelsPerLiedSlide;
                 RegelsPerBijbeltekstSlide = opBasisVanInstellingen.RegelsPerBijbeltekstSlide;
-                LabelVolgende = opBasisVanInstellingen.StandaardTeksten.Voorganger;
+                LabelVolgende = opBasisVanInstellingen.StandaardTeksten.Volgende;
                 LabelVoorganger = opBasisVanInstellingen.StandaardTeksten.Voorganger;
                 LabelCollecte1 = opBasisVanInstellingen.StandaardTeksten.Collecte1;
                 LabelCollecte2 = opBasisVanInstellingen.StandaardTeksten.Collecte2;
