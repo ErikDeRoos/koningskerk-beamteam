@@ -15,6 +15,7 @@ namespace Generator.LiturgieInterpretator
         private static readonly char[] BenamingScheidingstekens = { ':' };
         private static readonly char[] BenamingDeelScheidingstekens = { ' ' };
         private static readonly char[] VersScheidingstekens = { ',' };
+        private static readonly char[] VersKoppeltekens = { '-' };
         private static readonly char[] OptieStart = { '(' };
         private static readonly char[] OptieEinde = { ')' };
         private static readonly char[] OptieScheidingstekens = { ',' };
@@ -97,13 +98,19 @@ namespace Generator.LiturgieInterpretator
             var benamingStukken = voorOpties[0].Trim().Split(BenamingScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
             if (benamingStukken.Length == 0)
                 return null;
+            // Opknippen zodat hoofdstukken bij verzen blijven
             // Opgeknipt moet 'johannes 3: 5, 7, 9 - 8:1, 3, 9: 5 - 10' geven: 'johannes', '3: 5, 7, 9 -', '8:1, 3, ', '9: 5 - 10'
+            // Opknippen ook zodat koppeltekens doorgegeven worden
+            // Opgeknipt moet 'johannes 3: 5 - 8:10' geven: 'johannes', '3: 5 -', '8: - 10'
             var onthouden = string.Empty;
+            var onthoudenVoorLaatsteElementIsKoppelteken = false;
             var voorBenaming = string.Empty;
             var deelVersen = new List<ILiturgieInterpretatieBijbeltekstDeel>();
             for (int teller = 0; teller < benamingStukken.Length; teller++)
             {
                 var stuk = benamingStukken[teller].Trim();
+                if (onthoudenVoorLaatsteElementIsKoppelteken)
+                    stuk = $"{VersKoppeltekens[0]} {stuk}";
                 var heeftVolgendStuk = teller + 1 < benamingStukken.Length;
                 if (!heeftVolgendStuk && teller != 0)
                 {
@@ -117,10 +124,14 @@ namespace Generator.LiturgieInterpretator
                     });
                     break;
                 }
-                var elementen = stuk.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                var elementen = teller == 0 ?
+                    stuk.Split(BenamingDeelScheidingstekens, StringSplitOptions.RemoveEmptyEntries)
+                    : stuk.Replace("-", " - ").Split(BenamingDeelScheidingstekens.Union(VersScheidingstekens).ToArray(), StringSplitOptions.RemoveEmptyEntries);
                 var laatsteElement = string.Empty;
                 if (elementen.Length >= 2)
                     laatsteElement = elementen[elementen.Length - 1];
+                var voorLaatsteElementIsKoppelteken = elementen.Length >= 3 && VersKoppeltekens.Contains(elementen[elementen.Length - 2][0]);
                 var stukZonderLaatsteElement = stuk.Substring(0, stuk.Length - laatsteElement.Length).Trim();
                 if (teller == 0)
                     voorBenaming = stukZonderLaatsteElement;
@@ -139,6 +150,7 @@ namespace Generator.LiturgieInterpretator
                           .ToList()
                     });
                 onthouden = laatsteElement;
+                onthoudenVoorLaatsteElementIsKoppelteken = voorLaatsteElementIsKoppelteken;
             }
             regel.PerDeelVersen = deelVersen;
             regel.Benaming = voorBenaming;
@@ -150,8 +162,8 @@ namespace Generator.LiturgieInterpretator
             regel.Verzen = deelVersen.FirstOrDefault().Verzen;
 
             // visualisatie handmatig regelen
-            optieLijst.Add($"{LiturgieOplosser.LiturgieOplosserSettings.OptieAlternatieveNaamOverzicht} {regel}");
-            optieLijst.Add($"{LiturgieOplosser.LiturgieOplosserSettings.OptieAlternatieveNaam} {regel.Benaming} {regel.Deel}");
+            optieLijst.Add($"{LiturgieOplosser.LiturgieOplosserSettings.OptieAlternatieveNaamOverzicht} {voorOpties[0]}");
+            optieLijst.Add($"{LiturgieOplosser.LiturgieOplosserSettings.OptieAlternatieveNaam} {voorOpties[0]}");
 
             // opties toekennen
             regel.Opties = optieLijst;

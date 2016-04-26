@@ -35,7 +35,22 @@ namespace Generator.Tests
             Assert.That(resultaat, Is.AssignableTo<ILiturgieInterpretatieBijbeltekst>());
         }
 
-        [TestCase("johannes 3: 5, 7, 9 - 8: 1, 3, 9: 5 - 10 (als:bijbeltekst)", "johannes", new[] { "3: 5, 7, 9 -", "8: 1, 3,", "9: 5 - 10" })]
+        [TestCase("johannes 3: 5, 6 - 8: 3, 9: 3 (als:bijbeltekst)", "johannes", new[] { "3: 5, 6 -", "8: - 3,", "9: 3" })]
+        [TestCase("johannes 3:5,6-8:3,9:3 (als:bijbeltekst)", "johannes", new[] { "3: 5,6-", "8: - 3,", "9: 3" })]
+        public void VanTekstregel_AlsBijbeltekst_SplitsingMetEnZonderSpaties(string input, string resultaatBenaming, string[] resultaatDelen)
+        {
+            var sut = (new LiturgieInterpretator.InterpreteerLiturgieRuw()) as ILiturgieInterpreteer;
+
+            var resultaat = sut.VanTekstregel(input) as ILiturgieInterpretatieBijbeltekst;
+            var alleDelenGenummerd = resultaat.PerDeelVersen.Select((deelEnVers, i) => new { deelEnVers, i }).ToList();
+
+            Assert.That(resultaat.Benaming, Is.EqualTo(resultaatBenaming));
+            Assert.That(alleDelenGenummerd.Count(), Is.EqualTo(resultaatDelen.Count()));
+            alleDelenGenummerd.ForEach((a) => Assert.That(a.deelEnVers.ToString(), Is.EqualTo(resultaatDelen[a.i])));
+        }
+
+        [TestCase("johannes 3: 5, 8: 1, 9: 3 (als:bijbeltekst)", "johannes", new[] { "3: 5,", "8: 1,", "9: 3" })]
+        [TestCase("johannes 3: 5, 7 - 8: 3 (als:bijbeltekst)", "johannes", new[] { "3: 5, 7 -", "8: - 3" })]
         public void VanTekstregel_AlsBijbeltekst_Splitsing(string input, string resultaatBenaming, string[] resultaatDelen)
         {
             var sut = (new LiturgieInterpretator.InterpreteerLiturgieRuw()) as ILiturgieInterpreteer;
