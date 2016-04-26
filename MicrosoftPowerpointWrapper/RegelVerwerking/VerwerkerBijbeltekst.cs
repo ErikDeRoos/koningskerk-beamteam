@@ -117,7 +117,7 @@ namespace mppt.RegelVerwerking
                         {
                             if (nogOver.Length > 0)
                                 verzameldeRegels.Add(nogOver);
-                            yield return new SlideData() { Regels = verzameldeRegels };
+                            yield return new SlideData() { Regels = verzameldeRegels.Select(r => r.Trim()).ToList() };
                             verzameldeRegels = new List<string>();
                             var result = DoAdd(string.Empty, regelWoorden, lengteBerekenaar);
                             verzameldeRegels.AddRange(result.AddRows);
@@ -131,7 +131,7 @@ namespace mppt.RegelVerwerking
                     // Blok einde. Check of een witregel nog past.
                     if (verzameldeRegels.Count + 1 >= regelsPerSlide)
                     {
-                        yield return new SlideData() { Regels = verzameldeRegels };
+                        yield return new SlideData() { Regels = verzameldeRegels.Select(r => r.Trim()).ToList() };
                         verzameldeRegels = new List<string>();
                     }
                     else
@@ -141,7 +141,7 @@ namespace mppt.RegelVerwerking
                 }
                 // Laatste restje verzamelde regels naar een nieuwe slide sturen
                 if (verzameldeRegels.Any())
-                    yield return new SlideData() { Regels = verzameldeRegels };
+                    yield return new SlideData() { Regels = verzameldeRegels.Select(r => r.Trim()).ToList() };
             }
 
             private static bool CouldAdd(int slideRegelCount, float nogOverPercentage, IEnumerable<string> regelWoorden, int regelsPerSlide, ILengteBerekenaar lengteBerekenaar)
@@ -244,7 +244,7 @@ namespace mppt.RegelVerwerking
                 public IEnumerable<string> Regels { get; set; }
                 public override string ToString()
                 {
-                    return string.Join("\n", Regels);
+                    return string.Join("\r\n", Regels);
                 }
             }
 
