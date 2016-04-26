@@ -158,11 +158,15 @@ namespace mppt.RegelVerwerking
                     if (slideRegelCount + verzameldeLengte > regelsPerSlide)
                         return false;
                 }
+                if (regelBuildLengte > 0 && slideRegelCount + verzameldeLengte + 1 > regelsPerSlide)
+                    return false;
                 return true;
             }
             private static AddReturnValue DoAdd(string nogOver, IEnumerable<string> regelWoorden, int lettersPerRegel)
             {
-                var builder = new StringBuilder(nogOver).Append(" ");
+                var builder = new StringBuilder(nogOver);
+                if (builder.Length > 0)
+                    builder.Append(" ");
                 var verzameldeRegels = new List<string>();
                 foreach (var woord in regelWoorden)
                 {
