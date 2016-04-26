@@ -175,7 +175,7 @@ namespace Generator.Database
                 case "txt":
                     using (var fs = metItem.Content)
                     {
-                        using (var rdr = new StreamReader(fs))
+                        using (var rdr = new StreamReader(fs, Encoding.Default))
                         {
                             // geef de inhoud als tekst terug
                             return new Content { Inhoud = rdr.ReadToEnd(), InhoudType = InhoudType.Tekst, Nummer = nummer };
