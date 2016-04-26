@@ -64,6 +64,14 @@ namespace PowerpointGenerator
                 textBox2.Text = temp;
         }
 
+        private void button7_Click(object sender, EventArgs e)
+        {
+            //kies een bestand en sla het pad op
+            var temp = KiesFile();
+            if (!temp.Equals(""))
+                textBox6.Text = temp;
+        }
+
         private void button5_Click(object sender, EventArgs e)
         {
             var applicationPath = AppDomain.CurrentDomain.BaseDirectory;
