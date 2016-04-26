@@ -57,7 +57,7 @@ namespace mppt.RegelVerwerking
 
             private void InvullenTekstOpTemplate(ILiturgieRegel regel, ILiturgieRegel volgende)
             {
-                var lengteBerekenaar = new LengteBerekenaar(35, "Verdana", 32);
+                var lengteBerekenaar = new LengteBerekenaar(34, "Verdana", 32);
                 var tekstPerSlide = OpdelenPerSlide(TekstOpknippen(regel.Content), _buildDefaults.RegelsPerBijbeltekstSlide, lengteBerekenaar);
 
                 //zolang er nog iets is in te voegen in sheets
@@ -107,7 +107,7 @@ namespace mppt.RegelVerwerking
                     foreach (var regel in blok.Regels)
                     {
                         var regelWoorden = KnipInWoorden(regel).ToList();
-                        if (CouldAdd(verzameldeRegels.Count, lengteBerekenaar.VerbruiktPercentageVanRegel(nogOver), regelWoorden, regelsPerSlide, lengteBerekenaar))
+                        if (CouldAdd(verzameldeRegels.Count, lengteBerekenaar.VerbruiktPercentageVanRegel(nogOver, true), regelWoorden, regelsPerSlide, lengteBerekenaar))
                         {
                             var result = DoAdd(nogOver, regelWoorden, lengteBerekenaar);
                             verzameldeRegels.AddRange(result.AddRows);
@@ -146,17 +146,17 @@ namespace mppt.RegelVerwerking
 
             private static bool CouldAdd(int slideRegelCount, float nogOverPercentage, IEnumerable<string> regelWoorden, int regelsPerSlide, ILengteBerekenaar lengteBerekenaar)
             {
-                var regelBuildPercentage = nogOverPercentage + lengteBerekenaar.VerbruiktPercentageVanRegel(" ");
+                var regelBuildPercentage = nogOverPercentage + lengteBerekenaar.VerbruiktPercentageVanRegel(" ", false);
                 var verzameldeLengte = 0;
                 foreach (var woord in regelWoorden)
                 {
-                    var woordVerbruikPercentage = lengteBerekenaar.VerbruiktPercentageVanRegel(woord);
+                    var woordVerbruikPercentage = lengteBerekenaar.VerbruiktPercentageVanRegel(woord, false);
                     if (regelBuildPercentage + woordVerbruikPercentage < 100)
                     {
                         regelBuildPercentage += woordVerbruikPercentage;
                         continue;
                     }
-                    else if (regelBuildPercentage + lengteBerekenaar.VerbruiktPercentageVanRegel(woord.Trim()) < 100)
+                    else if (regelBuildPercentage + lengteBerekenaar.VerbruiktPercentageVanRegel(woord.Trim(), true) < 100)
                     {
                         regelBuildPercentage += woordVerbruikPercentage;
                         continue;
@@ -175,18 +175,18 @@ namespace mppt.RegelVerwerking
                 var builder = new StringBuilder(nogOver);
                 if (builder.Length > 0)
                     builder.Append(" ");
-                var regelBuildPercentage = lengteBerekenaar.VerbruiktPercentageVanRegel(builder.ToString());
+                var regelBuildPercentage = lengteBerekenaar.VerbruiktPercentageVanRegel(builder.ToString(), true);
                 var verzameldeRegels = new List<string>();
                 foreach (var woord in regelWoorden)
                 {
-                    var woordVerbruikPercentage = lengteBerekenaar.VerbruiktPercentageVanRegel(woord);
+                    var woordVerbruikPercentage = lengteBerekenaar.VerbruiktPercentageVanRegel(woord, false);
                     if (regelBuildPercentage + woordVerbruikPercentage < 100)
                     {
                         regelBuildPercentage += woordVerbruikPercentage;
                         builder.Append(woord);
                         continue;
                     }
-                    else if (regelBuildPercentage + lengteBerekenaar.VerbruiktPercentageVanRegel(woord.Trim()) < 100)
+                    else if (regelBuildPercentage + lengteBerekenaar.VerbruiktPercentageVanRegel(woord.Trim(), true) < 100)
                     {
                         regelBuildPercentage += woordVerbruikPercentage;
                         builder.Append(woord.Trim());
@@ -271,26 +271,34 @@ namespace mppt.RegelVerwerking
 
             private interface ILengteBerekenaar
             {
-                float VerbruiktPercentageVanRegel(string tekst);
+                float VerbruiktPercentageVanRegel(string tekst, bool needsPad);
             }
             private class LengteBerekenaar : ILengteBerekenaar
             {
                 private System.Drawing.Font _font { get; }
                 private System.Drawing.Size _baseSize { get; }
+                private int _padSize { get; }
 
                 public LengteBerekenaar(int lettersaOpEenRegel, string vanLettertype, float metPuntGrootte)
                 {
                     var initString = new string(Enumerable.Repeat('a', lettersaOpEenRegel).ToArray());
                     _font = new System.Drawing.Font(vanLettertype, metPuntGrootte);
                     _baseSize = TextRenderer.MeasureText(initString, _font);
+
+                    var longSize = TextRenderer.MeasureText(new string(Enumerable.Repeat('a', 16).ToArray()), _font).Width;
+                    var shortSize = TextRenderer.MeasureText(new string(Enumerable.Repeat('a', 8).ToArray()), _font).Width;
+                    _padSize = ((shortSize * 2) - longSize) / 2;
                 }
 
-                public float VerbruiktPercentageVanRegel(string tekst)
+                public float VerbruiktPercentageVanRegel(string tekst, bool needsPad)
                 {
-                    var size = TextRenderer.MeasureText(tekst, _font);
+                    var size = TextRenderer.MeasureText(tekst, _font, new System.Drawing.Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding | TextFormatFlags.NoClipping);
                     if (size.IsEmpty)
                         return 0;
-                    return (float)size.Width * 100 / _baseSize.Width;
+                    var correctedSize = size.Width - (2 * _padSize);
+                    if (needsPad)
+                        correctedSize += _padSize;
+                    return (float)correctedSize * 100 / _baseSize.Width;
                 }
             }
         }
