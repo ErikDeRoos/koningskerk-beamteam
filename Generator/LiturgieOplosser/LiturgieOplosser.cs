@@ -9,6 +9,14 @@ using static System.String;
 
 namespace Generator.LiturgieOplosser
 {
+    public static class LiturgieOplosserSettings
+    {
+        public const string OptieNietVerwerken = "geendb";
+        public const string OptieNietTonenInVolgende = "geenvolg";
+        public const string OptieNietTonenInOverzicht = "geenlt";
+        public const string OptieAlternatieveNaamOverzicht = "altlt";
+        public const string OptieAlternatieveNaam = "altnm";
+    }
 
     /// <summary>
     /// Zoek naar de opgegeven liturgieen.
@@ -35,9 +43,9 @@ namespace Generator.LiturgieOplosser
 
             // verwerk de opties
             var trimmedOpties = item.Opties.Select(o => o.Trim()).ToList();
-            regel.VerwerkenAlsSlide = !trimmedOpties.Any(o => o.StartsWith(LiturgieDatabaseSettings.OptieNietVerwerken, StringComparison.CurrentCultureIgnoreCase));
-            regel.TonenInVolgende = !trimmedOpties.Any(o => o.StartsWith(LiturgieDatabaseSettings.OptieNietTonenInVolgende, StringComparison.CurrentCultureIgnoreCase));
-            regel.TonenInOverzicht = !trimmedOpties.Any(o => o.StartsWith(LiturgieDatabaseSettings.OptieNietTonenInOverzicht, StringComparison.CurrentCultureIgnoreCase));
+            regel.VerwerkenAlsSlide = !trimmedOpties.Any(o => o.StartsWith(LiturgieOplosserSettings.OptieNietVerwerken, StringComparison.CurrentCultureIgnoreCase));
+            regel.TonenInVolgende = !trimmedOpties.Any(o => o.StartsWith(LiturgieOplosserSettings.OptieNietTonenInVolgende, StringComparison.CurrentCultureIgnoreCase));
+            regel.TonenInOverzicht = !trimmedOpties.Any(o => o.StartsWith(LiturgieOplosserSettings.OptieNietTonenInOverzicht, StringComparison.CurrentCultureIgnoreCase));
 
             // regel visualisatie default
             regel.DisplayEdit.Naam = item.Benaming;
@@ -47,20 +55,12 @@ namespace Generator.LiturgieOplosser
             // zoek de regels in de database en pak ook de naamgeving daar uit over
             if (regel.VerwerkenAlsSlide)
             {
-                var setNaam = item.Benaming;
-                var zoekNaam = item.Deel;
-                if (IsNullOrEmpty(item.Deel))
-                {
-                    setNaam = FileEngineDefaults.CommonFilesSetName;
-                    zoekNaam = item.Benaming;
-                    regel.TonenInOverzicht = false;  // TODO tijdelijk default gedrag van het niet tonen van algemene items in het overzicht overgenomen uit de oude situatie
-                }
-                
-                var fout = Aanvullen(regel, setNaam, zoekNaam, item.Verzen.ToList());
+                var fout = Aanvullen(regel, item);
                 if (fout.HasValue)
                     return new Oplossing(fout.Value, item);
             } else
             {
+                regel.VerwerkenAlsType = VerwerkingType.nietverwerken;
                 regel.DisplayEdit.VersenGebruikDefault = new VersenDefault(item.VerzenZoalsIngevoerd);
             }
 
@@ -82,19 +82,44 @@ namespace Generator.LiturgieOplosser
             if (IsNullOrEmpty(regel.DisplayEdit.NaamOverzicht))
                 regel.DisplayEdit.NaamOverzicht = regel.DisplayEdit.Naam;
             // kijk of de opties nog iets zeggen over alternatieve naamgeving
-            var optieMetAltNaamOverzicht = GetOptieParam(trimmedOpties, LiturgieDatabaseSettings.OptieAlternatieveNaamOverzicht);
+            var optieMetAltNaamOverzicht = GetOptieParam(trimmedOpties, LiturgieOplosserSettings.OptieAlternatieveNaamOverzicht);
             if (!IsNullOrWhiteSpace(optieMetAltNaamOverzicht))
+            {
                 regel.DisplayEdit.NaamOverzicht = optieMetAltNaamOverzicht;
-            var optieMetAltNaamVolgende = GetOptieParam(trimmedOpties, LiturgieDatabaseSettings.OptieAlternatieveNaam);
+                regel.DisplayEdit.SubNaam = null;
+            }
+            var optieMetAltNaamVolgende = GetOptieParam(trimmedOpties, LiturgieOplosserSettings.OptieAlternatieveNaam);
             if (!IsNullOrWhiteSpace(optieMetAltNaamVolgende))
+            {
                 regel.DisplayEdit.Naam = optieMetAltNaamOverzicht;
+                regel.DisplayEdit.SubNaam = null;
+            }
 
             // geef de oplossing terug
             return new Oplossing(LiturgieOplossingResultaat.Opgelost, item, regel);
         }
 
-        private LiturgieOplossingResultaat? Aanvullen(Regel regel, string setNaam, string zoekNaam, IEnumerable<string> verzen)
+        private LiturgieOplossingResultaat? Aanvullen(Regel regel, ILiturgieInterpretatie item)
         {
+            var setNaam = item.Benaming;
+            if (item is ILiturgieInterpretatieBijbeltekst)
+            {
+                regel.DisplayEdit.VersenGebruikDefault = new VersenDefault(string.Empty);
+                return BijbeltekstAanvuller(regel, setNaam, (item as ILiturgieInterpretatieBijbeltekst).PerDeelVersen.ToList());
+            }
+            var zoekNaam = item.Deel;
+            if (IsNullOrEmpty(item.Deel))
+            {
+                setNaam = FileEngineDefaults.CommonFilesSetName;
+                zoekNaam = item.Benaming;
+                regel.TonenInOverzicht = false;  // TODO tijdelijk default gedrag van het niet tonen van algemene items in het overzicht overgenomen uit de oude situatie
+            }
+
+            return NormaleAanvuller(regel, setNaam, zoekNaam, item.Verzen.ToList());
+        }
+        private LiturgieOplossingResultaat? NormaleAanvuller(Regel regel, string setNaam, string zoekNaam, IEnumerable<string> verzen)
+        {
+            regel.VerwerkenAlsType = VerwerkingType.normaal;
             var verzenList = verzen.ToList();
             var resultaat = _database.ZoekOnderdeel(setNaam, zoekNaam, verzenList);
             if (resultaat.Status != LiturgieOplossingResultaat.Opgelost)
@@ -118,6 +143,23 @@ namespace Generator.LiturgieOplosser
             if (!IsNullOrWhiteSpace(resultaat.OnderdeelDisplayNaam))
                 regel.DisplayEdit.Naam = resultaat.OnderdeelDisplayNaam.Equals(_defaultSetNameEmpty, StringComparison.CurrentCultureIgnoreCase) ? null : resultaat.OnderdeelDisplayNaam;
 
+            return null;
+        }
+        private LiturgieOplossingResultaat? BijbeltekstAanvuller(Regel regel, string setNaam, IEnumerable<ILiturgieInterpretatieBijbeltekstDeel> versDelen)
+        {
+            regel.VerwerkenAlsType = VerwerkingType.bijbeltekst;
+            var content = new List<ILiturgieContent>();
+            var versDelenLijst = versDelen.ToList();
+            foreach(var deel in versDelenLijst)
+            {
+                var resultaat = _database.ZoekOnderdeel(VerwerkingType.bijbeltekst, setNaam, deel.Deel, deel.Verzen);
+                if (resultaat.Status != LiturgieOplossingResultaat.Opgelost)
+                    return resultaat.Status;
+                content.AddRange(resultaat.Content);
+                // let op, naamgeving wordt buitenom geregeld
+            }
+            regel.Content = content.ToList();
+            regel.DisplayEdit.VolledigeContent = versDelenLijst.Count == 1 && !versDelen.FirstOrDefault().Verzen.Any();
             return null;
         }
 
@@ -156,6 +198,7 @@ namespace Generator.LiturgieOplosser
             public bool TonenInOverzicht { get; set; }
             public bool TonenInVolgende { get; set; }
             public bool VerwerkenAlsSlide { get; set; }
+            public VerwerkingType VerwerkenAlsType { get; set; }
 
             public override string ToString()
             {

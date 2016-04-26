@@ -18,6 +18,8 @@ namespace RemoteGenerator.Builder.Wachtrij.LiturgieRegels
 
         public bool VerwerkenAlsSlide { get; set; }
 
+        public VerwerkingType VerwerkenAlsType { get; set; }
+
         public LiturgieRegel(ConnectTools.Berichten.LiturgieRegel vanRegel, Func<ConnectTools.Berichten.StreamToken, BestandStreamToken> bestandStreamTokenFactory)
         {
             Content = vanRegel.Content?.Select(c => new LiturgieContent(c, bestandStreamTokenFactory)).ToList();

@@ -3,11 +3,12 @@ namespace ISettings
 {
     public interface IInstellingenBase
     {
-        int Regelsperslide { get; }
+        int RegelsPerLiedSlide { get; }
+        int RegelsPerBijbeltekstSlide { get; }
         CommonImplementation.StandaardTeksten StandaardTeksten { get; }
 
-        string FullTemplatetheme { get; }
-
-        string FullTemplateliederen { get; }
+        string FullTemplateTheme { get; }
+        string FullTemplateLied { get; }
+        string FullTemplateBijbeltekst { get; }
     }
 }

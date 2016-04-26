@@ -1,6 +1,7 @@
 ﻿// Copyright 2016 door Erik de Roos
 using Autofac.Extras.FakeItEasy;
 using FakeItEasy;
+using ISlideBuilder;
 using mppt.Connect;
 using NUnit.Framework;
 using System.Collections.Generic;
@@ -9,8 +10,6 @@ namespace MicrosoftPowerpointWrapper.Tests
 {
     public class PowerpointFunctions
     {
-        public ISettings.IInstellingen DefaultInstellingen = new ISettings.CommonImplementation.Instellingen();
-
         [Test]
         public void GeneratePresentation_Application_Opened()
         {
@@ -19,11 +18,13 @@ namespace MicrosoftPowerpointWrapper.Tests
                 var app = fake.Resolve<IMppApplication>();
                 A.CallTo(() => fake.Resolve<IMppFactory>().GetApplication()).Returns(app);
                 var sut = fake.Resolve<mppt.PowerpointFunctions>();
-                sut.PreparePresentation(GetEmptyLiturgie(), null, null, null, null, null, DefaultInstellingen, null);
+                var dependendFiles = A.Fake<IBuilderDependendFiles>();
+                A.CallTo(() => dependendFiles.FullTemplateTheme).Returns("\testbestand.ppt");
+                sut.PreparePresentation(GetEmptyLiturgie(), A.Fake<IBuilderBuildSettings>(), A.Fake<IBuilderBuildDefaults>(), dependendFiles, null);
 
                 sut.GeneratePresentation();
 
-                A.CallTo(() => app.Open(DefaultInstellingen.FullTemplatetheme, true)).MustHaveHappened();
+                A.CallTo(() => app.Open(dependendFiles.FullTemplateTheme, true)).MustHaveHappened();
             }
         }
 
@@ -32,9 +33,11 @@ namespace MicrosoftPowerpointWrapper.Tests
         {
             using (var fake = new AutoFake())
             {
-                var pres = PreparePresentation(fake, DefaultInstellingen.FullTemplatetheme);
+                var dependendFiles = A.Fake<IBuilderDependendFiles>();
+                A.CallTo(() => dependendFiles.FullTemplateTheme).Returns("\testbestand.ppt");
+                var pres = PreparePresentation(fake, dependendFiles.FullTemplateTheme);
                 var sut = fake.Resolve<mppt.PowerpointFunctions>();
-                sut.PreparePresentation(GetEmptyLiturgie(), null, null, null, null, null, DefaultInstellingen, saveAsFileName);
+                sut.PreparePresentation(GetEmptyLiturgie(), A.Fake<IBuilderBuildSettings>(), A.Fake<IBuilderBuildDefaults>(), dependendFiles, saveAsFileName);
 
                 sut.GeneratePresentation();
 

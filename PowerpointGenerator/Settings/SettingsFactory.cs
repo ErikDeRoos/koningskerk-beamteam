@@ -127,8 +127,10 @@ namespace PowerpointGenerator.Settings
         {
             return new Instellingen(
                 (@".Resources\Database"),
+                (@".Resources\Bijbels\NBV"),
+                (@".Resources\Database\Achtergrond.pptx"),
                 (@".Resources\Database\Template Liederen.pptx"),
-                (@".Resources\Database\Achtergrond.pptx")
+                (@".Resources\Database\Template Bijbeltekst.pptx")
             );
         }
     }

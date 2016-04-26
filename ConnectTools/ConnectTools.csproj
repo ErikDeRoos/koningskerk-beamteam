@@ -43,7 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Berichten\InhoudType.cs" />
-    <Compile Include="Berichten\Instellingen.cs" />
+    <Compile Include="Berichten\BuilderData.cs" />
     <Compile Include="Berichten\Liturgie.cs" />
     <Compile Include="Berichten\LiturgieRegel.cs" />
     <Compile Include="Berichten\LiturgieRegelContent.cs" />
@@ -53,7 +53,6 @@
     <Compile Include="Berichten\SendFile.cs" />
     <Compile Include="Berichten\StreamToken.cs" />
     <Compile Include="Berichten\Voortgang.cs" />
-    <Compile Include="Berichten\StandaardTeksten.cs" />
     <Compile Include="Berichten\Token.cs" />
     <Compile Include="IWCFServer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

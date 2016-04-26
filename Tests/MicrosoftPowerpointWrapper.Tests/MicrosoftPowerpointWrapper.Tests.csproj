@@ -79,9 +79,9 @@
       <Project>{1338d41d-5e66-40f3-845f-170a8dcfb445}</Project>
       <Name>ILiturgieDatabase</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Interfaces\ISettings\ISettings.csproj">
-      <Project>{76821eaa-462d-4cad-813d-bcff31edad3a}</Project>
-      <Name>ISettings</Name>
+    <ProjectReference Include="..\..\Interfaces\ISlideBuilder\ISlideBuilder.csproj">
+      <Project>{4ce33a64-db90-489b-9d01-99a88f24f2f7}</Project>
+      <Name>ISlideBuilder</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\MicrosoftPowerpointWrapper\MicrosoftPowerpointWrapper.csproj">
       <Project>{d65aa3ef-0086-4ca5-802e-a2bb2e3bed20}</Project>

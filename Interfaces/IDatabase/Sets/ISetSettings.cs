@@ -16,5 +16,9 @@ namespace IDatabase
         /// Als de items niet de content bevatten maar eerst subitems waaronder pas de content zit
         /// </summary>
         bool ItemsHaveSubContent { get; }
+        /// <summary>
+        /// Als de inhoud van het item bestaat uit subcontent, gescheiden door opvolgende nummering. Werkt alleen voor txt.
+        /// </summary>
+        bool ItemIsSubContent { get; }
     }
 }
