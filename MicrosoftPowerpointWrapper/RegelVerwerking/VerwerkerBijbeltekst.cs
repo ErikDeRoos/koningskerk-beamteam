@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Tools;
 
 namespace mppt.RegelVerwerking
@@ -56,7 +57,8 @@ namespace mppt.RegelVerwerking
 
             private void InvullenTekstOpTemplate(ILiturgieRegel regel, ILiturgieRegel volgende)
             {
-                var tekstPerSlide = OpdelenPerSlide(TekstOpknippen(regel.Content), _buildDefaults.RegelsPerBijbeltekstSlide, (int)(34 * 1.12));  // 34 letters a per regel -> 38
+                var lengteBerekenaar = new LengteBerekenaar(34, "Verdana", 32);
+                var tekstPerSlide = OpdelenPerSlide(TekstOpknippen(regel.Content), _buildDefaults.RegelsPerBijbeltekstSlide, lengteBerekenaar);
 
                 //zolang er nog iets is in te voegen in sheets
                 foreach (var tekst in tekstPerSlide)
@@ -90,7 +92,7 @@ namespace mppt.RegelVerwerking
                 }
             }
 
-            private static IEnumerable<SlideData> OpdelenPerSlide(IEnumerable<TekstBlok> tekst, int regelsPerSlide, int lettersPerRegel)
+            private static IEnumerable<SlideData> OpdelenPerSlide(IEnumerable<TekstBlok> tekst, int regelsPerSlide, ILengteBerekenaar lengteBerekenaar)
             {
                 // We moeten goed opletten bij het invullen van een liedtekst op een slide:
                 // -Het mogen niet te veel regels zijn (instellingen beperken dat)
@@ -105,9 +107,9 @@ namespace mppt.RegelVerwerking
                     foreach (var regel in blok.Regels)
                     {
                         var regelWoorden = KnipInWoorden(regel).ToList();
-                        if (CouldAdd(verzameldeRegels.Count, nogOver.Length, regelWoorden, regelsPerSlide, lettersPerRegel))
+                        if (CouldAdd(verzameldeRegels.Count, lengteBerekenaar.VerbruiktPercentageVanRegel(nogOver, true), regelWoorden, regelsPerSlide, lengteBerekenaar))
                         {
-                            var result = DoAdd(nogOver, regelWoorden, lettersPerRegel);
+                            var result = DoAdd(nogOver, regelWoorden, lengteBerekenaar);
                             verzameldeRegels.AddRange(result.AddRows);
                             nogOver = result.Over;
                         }
@@ -115,9 +117,9 @@ namespace mppt.RegelVerwerking
                         {
                             if (nogOver.Length > 0)
                                 verzameldeRegels.Add(nogOver);
-                            yield return new SlideData() { Regels = verzameldeRegels };
+                            yield return new SlideData() { Regels = verzameldeRegels.Select(r => r.Trim()).ToList() };
                             verzameldeRegels = new List<string>();
-                            var result = DoAdd(string.Empty, regelWoorden, lettersPerRegel);
+                            var result = DoAdd(string.Empty, regelWoorden, lengteBerekenaar);
                             verzameldeRegels.AddRange(result.AddRows);
                             nogOver = result.Over;
                         }
@@ -129,7 +131,7 @@ namespace mppt.RegelVerwerking
                     // Blok einde. Check of een witregel nog past.
                     if (verzameldeRegels.Count + 1 >= regelsPerSlide)
                     {
-                        yield return new SlideData() { Regels = verzameldeRegels };
+                        yield return new SlideData() { Regels = verzameldeRegels.Select(r => r.Trim()).ToList() };
                         verzameldeRegels = new List<string>();
                     }
                     else
@@ -139,42 +141,58 @@ namespace mppt.RegelVerwerking
                 }
                 // Laatste restje verzamelde regels naar een nieuwe slide sturen
                 if (verzameldeRegels.Any())
-                    yield return new SlideData() { Regels = verzameldeRegels };
+                    yield return new SlideData() { Regels = verzameldeRegels.Select(r => r.Trim()).ToList() };
             }
 
-            private static bool CouldAdd(int slideRegelCount, int nogOverLengte, IEnumerable<string> regelWoorden, int regelsPerSlide, int lettersPerRegel)
+            private static bool CouldAdd(int slideRegelCount, float nogOverPercentage, IEnumerable<string> regelWoorden, int regelsPerSlide, ILengteBerekenaar lengteBerekenaar)
             {
-                var regelBuildLengte = nogOverLengte + 1;
+                var regelBuildPercentage = nogOverPercentage + lengteBerekenaar.VerbruiktPercentageVanRegel(" ", false);
                 var verzameldeLengte = 0;
                 foreach (var woord in regelWoorden)
                 {
-                    if (regelBuildLengte + woord.Length < lettersPerRegel)
+                    var woordVerbruikPercentage = lengteBerekenaar.VerbruiktPercentageVanRegel(woord, false);
+                    if (regelBuildPercentage + woordVerbruikPercentage < 100)
                     {
-                        regelBuildLengte += woord.Length;
+                        regelBuildPercentage += woordVerbruikPercentage;
+                        continue;
+                    }
+                    else if (regelBuildPercentage + lengteBerekenaar.VerbruiktPercentageVanRegel(woord.Trim(), true) < 100)
+                    {
+                        regelBuildPercentage += woordVerbruikPercentage;
                         continue;
                     }
                     verzameldeLengte++;
-                    regelBuildLengte = 0;
+                    regelBuildPercentage = woordVerbruikPercentage;
                     if (slideRegelCount + verzameldeLengte > regelsPerSlide)
                         return false;
                 }
-                if (regelBuildLengte > 0 && slideRegelCount + verzameldeLengte + 1 > regelsPerSlide)
+                if (regelBuildPercentage > 0 && slideRegelCount + verzameldeLengte + 1 > regelsPerSlide)
                     return false;
                 return true;
             }
-            private static AddReturnValue DoAdd(string nogOver, IEnumerable<string> regelWoorden, int lettersPerRegel)
+            private static AddReturnValue DoAdd(string nogOver, IEnumerable<string> regelWoorden, ILengteBerekenaar lengteBerekenaar)
             {
                 var builder = new StringBuilder(nogOver);
                 if (builder.Length > 0)
                     builder.Append(" ");
+                var regelBuildPercentage = lengteBerekenaar.VerbruiktPercentageVanRegel(builder.ToString(), true);
                 var verzameldeRegels = new List<string>();
                 foreach (var woord in regelWoorden)
                 {
-                    if (builder.Length + woord.Length < lettersPerRegel)
+                    var woordVerbruikPercentage = lengteBerekenaar.VerbruiktPercentageVanRegel(woord, false);
+                    if (regelBuildPercentage + woordVerbruikPercentage < 100)
                     {
+                        regelBuildPercentage += woordVerbruikPercentage;
                         builder.Append(woord);
                         continue;
                     }
+                    else if (regelBuildPercentage + lengteBerekenaar.VerbruiktPercentageVanRegel(woord.Trim(), true) < 100)
+                    {
+                        regelBuildPercentage += woordVerbruikPercentage;
+                        builder.Append(woord.Trim());
+                        continue;
+                    }
+                    regelBuildPercentage = woordVerbruikPercentage;
                     verzameldeRegels.Add(builder.ToString());
                     builder = new StringBuilder(woord);
                 }
@@ -226,7 +244,7 @@ namespace mppt.RegelVerwerking
                 public IEnumerable<string> Regels { get; set; }
                 public override string ToString()
                 {
-                    return string.Join("\n", Regels);
+                    return string.Join("\r\n", Regels);
                 }
             }
 
@@ -249,6 +267,39 @@ namespace mppt.RegelVerwerking
             {
                 public IEnumerable<string> AddRows { get; set; }
                 public string Over { get; set; }
+            }
+
+            private interface ILengteBerekenaar
+            {
+                float VerbruiktPercentageVanRegel(string tekst, bool needsPad);
+            }
+            private class LengteBerekenaar : ILengteBerekenaar
+            {
+                private System.Drawing.Font _font { get; }
+                private System.Drawing.Size _baseSize { get; }
+                private int _padSize { get; }
+
+                public LengteBerekenaar(int lettersaOpEenRegel, string vanLettertype, float metPuntGrootte)
+                {
+                    var initString = new string(Enumerable.Repeat('a', lettersaOpEenRegel).ToArray());
+                    _font = new System.Drawing.Font(vanLettertype, metPuntGrootte);
+                    _baseSize = TextRenderer.MeasureText(initString, _font);
+
+                    var longSize = TextRenderer.MeasureText(new string(Enumerable.Repeat('a', 16).ToArray()), _font).Width;
+                    var shortSize = TextRenderer.MeasureText(new string(Enumerable.Repeat('a', 8).ToArray()), _font).Width;
+                    _padSize = ((shortSize * 2) - longSize) / 2;
+                }
+
+                public float VerbruiktPercentageVanRegel(string tekst, bool needsPad)
+                {
+                    var size = TextRenderer.MeasureText(tekst, _font, new System.Drawing.Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding | TextFormatFlags.NoClipping);
+                    if (size.IsEmpty)
+                        return 0;
+                    var correctedSize = size.Width - (2 * _padSize);
+                    if (needsPad)
+                        correctedSize += _padSize;
+                    return (float)correctedSize * 100 / _baseSize.Width;
+                }
             }
         }
     }
