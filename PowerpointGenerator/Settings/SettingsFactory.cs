@@ -37,6 +37,10 @@ namespace PowerpointGenerator.Settings
         {
             try
             {
+                // verwijder oude bestand (zelfde effect als overschreven worden)
+                if (fileManager.FileExists(instellingenFile))
+                    fileManager.Delete(instellingenFile);
+
                 //schrijf instellingen weg
                 var serializer = new XmlSerializer(typeof(Instellingen));
                 using (var sw = new StreamWriter(fileManager.FileWriteStream(instellingenFile)))
