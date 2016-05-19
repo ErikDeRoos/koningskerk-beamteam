@@ -51,7 +51,7 @@ namespace Generator.LiturgieInterpretator
               .Select(v => v.Trim())
               .ToList();
             var als = Als(opties);
-            if ((als ?? "").Equals(AlsBijbeltekst, StringComparison.CurrentCultureIgnoreCase))
+            if ((als ?? "").Trim().Equals(AlsBijbeltekst, StringComparison.CurrentCultureIgnoreCase))
                 return VerwerkAlsBijbeltekst(voorOpties, opties);
             return VerwerkNormaal(voorOpties, opties);
         }

@@ -91,7 +91,7 @@ namespace Generator.LiturgieOplosser
             var optieMetAltNaamVolgende = GetOptieParam(trimmedOpties, LiturgieOplosserSettings.OptieAlternatieveNaam);
             if (!IsNullOrWhiteSpace(optieMetAltNaamVolgende))
             {
-                regel.DisplayEdit.Naam = optieMetAltNaamOverzicht;
+                regel.DisplayEdit.Naam = optieMetAltNaamVolgende;
                 regel.DisplayEdit.SubNaam = null;
             }
 
@@ -166,7 +166,9 @@ namespace Generator.LiturgieOplosser
         private static string GetOptieParam(IEnumerable<string> opties, string optie)
         {
             var optieMetParam = opties.FirstOrDefault(o => o.StartsWith(optie, StringComparison.CurrentCultureIgnoreCase));
-            return optieMetParam?.Substring(optie.Length).Trim();
+            if (optieMetParam == null || optieMetParam.Length == optie.Length)
+                return string.Empty;
+            return optieMetParam.Substring(optie.Length + 1).Trim();
         }
 
         public IEnumerable<ILiturgieOplossing> LosOp(IEnumerable<ILiturgieInterpretatie> items, IEnumerable<ILiturgieMapmaskArg> masks)
