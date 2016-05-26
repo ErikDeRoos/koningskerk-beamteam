@@ -66,6 +66,9 @@ namespace Generator.Tests
 
         [TestCase("Johannes", "3", "2", "1 In den beginne 2 was het woord 3 en het woord was", 2, "was het woord")]
         [TestCase("Deutronomium", "10", "1", "1 Jakob nam 5 mannen mee. 2 Zij gingen een stukje lopen", 1, "Jakob nam 5 mannen mee.")]
+        [TestCase("Deutronomium", "10", "1", "1 Jakob nam 5-7 mannen mee. 2 Zij gingen een stukje lopen", 1, "Jakob nam 5-7 mannen mee.")]
+        [TestCase("Deutronomium", "10", "2", "1 Jakob nam 5 mannen mee. 2-3 Zij gingen een stukje lopen", 2, "Zij gingen een stukje lopen")]
+        [TestCase("Deutronomium", "10", "4", "1 Jakob nam 5 mannen mee. 2-3 Zij gingen een stukje lopen, 4 het was fijn.", 4, "het was fijn.")]
         public void ZoekOnderdeel_BijbeltekstItem_ItemIsSubcontent(string onderdeel, string fragment, string find, string inContent, int foundNumber, string foundContent)
         {
             var engine = new EngineMock<FileEngineSetSettings>(f => f

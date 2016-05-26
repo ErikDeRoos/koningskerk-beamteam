@@ -193,9 +193,10 @@ namespace Generator.Database
         private static IEnumerable<Content> SplitFile(string fileContent)
         {
             int bezigMetNummer = 1;
+            int? skipNaarVolgendNummer = null;
             int positieInFileContent = 0;
             var nummerBuilder = new StringBuilder();
-            var nummerFindRegex = new System.Text.RegularExpressions.Regex(@"(^|\s)(\d+)($|\s)", System.Text.RegularExpressions.RegexOptions.Singleline | System.Text.RegularExpressions.RegexOptions.Compiled);
+            var nummerFindRegex = new System.Text.RegularExpressions.Regex(@"(^|\s)(\d+)([ -]+\d+)?($|\s)", System.Text.RegularExpressions.RegexOptions.Singleline | System.Text.RegularExpressions.RegexOptions.Compiled);
             while (positieInFileContent < fileContent.Length)
             {
                 var volgendeNummerMatch = nummerFindRegex.Match(fileContent, positieInFileContent);
@@ -206,9 +207,24 @@ namespace Generator.Database
                     break;
                 }
 
+                if (skipNaarVolgendNummer.HasValue && skipNaarVolgendNummer > bezigMetNummer)
+                {
+                    bezigMetNummer = skipNaarVolgendNummer.Value;
+                    skipNaarVolgendNummer = null;
+                }
+
                 var volgendeNummerMatchGroep = volgendeNummerMatch.Groups[2];
                 nummerBuilder.Append(fileContent, positieInFileContent, volgendeNummerMatchGroep.Index - positieInFileContent);
                 positieInFileContent = volgendeNummerMatchGroep.Index + volgendeNummerMatchGroep.Length;
+                var toevoegenAlsGeenMatch = volgendeNummerMatchGroep.Value;
+
+                if (volgendeNummerMatch.Groups[3].Success)
+                {
+                    var meerdereNummers = volgendeNummerMatch.Groups[3].Value.Split(new[] { '-' }, StringSplitOptions.RemoveEmptyEntries);
+                    skipNaarVolgendNummer = int.Parse(meerdereNummers[0]);
+                    positieInFileContent += volgendeNummerMatch.Groups[3].Length;
+                    toevoegenAlsGeenMatch += volgendeNummerMatch.Groups[3].Value;
+                }
 
                 var volgendNummer = int.Parse(volgendeNummerMatchGroep.Value);
                 if (volgendNummer == bezigMetNummer + 1)
@@ -219,7 +235,8 @@ namespace Generator.Database
                 } else
                 if (volgendNummer != bezigMetNummer)
                 {
-                    nummerBuilder.Append(volgendeNummerMatchGroep.Value);
+                    nummerBuilder.Append(toevoegenAlsGeenMatch);
+                    skipNaarVolgendNummer = null;
                 }
             }
         }
