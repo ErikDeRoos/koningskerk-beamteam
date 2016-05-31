@@ -165,6 +165,8 @@ namespace mppt.RegelVerwerking
                 {
                     var display = liedFormatter.Liturgie(liturgieItem);
                     var kolom1 = display.Naam;
+                    if (liturgieItem.VerwerkenAlsType == VerwerkingType.bijbeltekst)
+                        kolom1 = $"{instellingenLezen}{kolom1}";
                     var kolom2 = display.SubNaam;
                     var kolom3 = display.Verzen;
                     if (!string.IsNullOrWhiteSpace(kolom3))
