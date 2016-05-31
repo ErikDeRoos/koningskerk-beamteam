@@ -165,11 +165,16 @@ namespace mppt.RegelVerwerking
                 {
                     var display = liedFormatter.Liturgie(liturgieItem);
                     var kolom1 = display.Naam;
+                    if (liturgieItem.VerwerkenAlsType == VerwerkingType.bijbeltekst)
+                        kolom1 = $"{instellingenLezen}{kolom1}";
                     var kolom2 = display.SubNaam;
                     var kolom3 = display.Verzen;
                     if (!string.IsNullOrWhiteSpace(kolom3))
                         kolom3 = $": {kolom3}";
-                    toonLijst.Add(mppFactory.GetMppShapeTableContent3Column(toonLijst.Count, kolom1, kolom2, kolom3));
+                    if (!string.IsNullOrWhiteSpace(kolom2) || !string.IsNullOrWhiteSpace(kolom3))
+                        toonLijst.Add(mppFactory.GetMppShapeTableContent3Column(toonLijst.Count, kolom1, kolom2, kolom3));
+                    else
+                        toonLijst.Add(mppFactory.GetMppShapeTableContent1Column(toonLijst.Count, kolom1, true));
                 }
                 if (!string.IsNullOrWhiteSpace(lezen))
                     toonLijst.Add(mppFactory.GetMppShapeTableContent1Column(toonLijst.Count, $"{instellingenLezen}{lezen}", true));

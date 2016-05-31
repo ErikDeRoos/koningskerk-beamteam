@@ -212,6 +212,11 @@ namespace mppt.Connect
                 if (column3 != null)
                 {
                     inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = column3.Column1;
+                    if (string.IsNullOrWhiteSpace(column3.Column3) && !string.IsNullOrWhiteSpace(column3.Column2) && IsColumnThatSuitsARowMoreBetter(column3.Column2))
+                    {
+                        inTabel.Rows[index].Cells[2].Merge(inTabel.Rows[index].Cells[3]);  // row 3 has (probably) better aligning
+                        inTabel.Rows[index].Cells[2].Shape.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignLeft;
+                    }
                     if (!string.IsNullOrWhiteSpace(column3.Column2))
                         inTabel.Rows[index].Cells[2].Shape.TextFrame.TextRange.Text = column3.Column2;
                     if (!string.IsNullOrWhiteSpace(column3.Column3))
@@ -229,6 +234,12 @@ namespace mppt.Connect
                     inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignLeft;
                 }
             }
+        }
+        
+        private bool IsColumnThatSuitsARowMoreBetter(string column2)
+        {
+            var testValue = (column2 ?? "").Trim();
+            return testValue.Contains(" ") || testValue.Length > 5;
         } 
     }
 
