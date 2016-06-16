@@ -8,83 +8,92 @@ using System.Linq;
 
 namespace Generator.Tests
 {
-    public class LiturgieOplosser
+    public class LiturgieOplosserTests
     {
         private static string DefaultEmptyName = "!leeg";
 
-        [TestCase("Psalm", "100")]
-        public void LosOp_NormaalItem_Gevonden(string onderdeel, string fragment)
+        [OneTimeSetUp]
+        public void Initialise()
         {
-            var liturgieItem = FakeInterpretatie(onderdeel, fragment: fragment);
-            var database = FakeDatabase(onderdeel, fragment);
-            var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
-
-            var oplossing = sut.LosOp(liturgieItem);
-
-            Assert.That(oplossing.Resultaat, Is.EqualTo(LiturgieOplossingResultaat.Opgelost));
         }
 
-        [TestCase("Welkom")]
-        public void LosOp_CommonItem_Gevonden(string onderdeel)
+        [TestFixture]
+        public class LosOpMethod : LiturgieOplosserTests
         {
-            var liturgieItem = FakeInterpretatie(onderdeel);
-            var database = FakeDatabase(FileEngineDefaults.CommonFilesSetName, onderdeel);
-            var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
+            [TestCase("Psalm", "100")]
+            public void NormaalItem_Gevonden(string onderdeel, string fragment)
+            {
+                var liturgieItem = FakeInterpretatie(onderdeel, fragment: fragment);
+                var database = FakeDatabase(onderdeel, fragment);
+                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
 
-            var oplossing = sut.LosOp(liturgieItem);
+                var oplossing = sut.LosOp(liturgieItem);
 
-            Assert.That(oplossing.Resultaat, Is.EqualTo(LiturgieOplossingResultaat.Opgelost));
-        }
+                Assert.That(oplossing.Resultaat, Is.EqualTo(LiturgieOplossingResultaat.Opgelost));
+            }
 
-        [TestCase("Psalm", "100")]
-        [TestCase("Welkom", null)]
-        public void LosOp_AlleItems_GebruikStandaardNaam(string onderdeel, string fragment)
-        {
-            var liturgieItem = FakeInterpretatie(onderdeel, fragment: fragment);
-            var database = fragment != null ? FakeDatabase(onderdeel, fragment) : FakeDatabase(FileEngineDefaults.CommonFilesSetName, onderdeel);
-            var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
+            [TestCase("Welkom")]
+            public void CommonItem_Gevonden(string onderdeel)
+            {
+                var liturgieItem = FakeInterpretatie(onderdeel);
+                var database = FakeDatabase(FileEngineDefaults.CommonFilesSetName, onderdeel);
+                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
 
-            var oplossing = sut.LosOp(liturgieItem);
+                var oplossing = sut.LosOp(liturgieItem);
 
-            Assert.That(oplossing.Regel.Display.Naam, Is.EqualTo(onderdeel));
-        }
+                Assert.That(oplossing.Resultaat, Is.EqualTo(LiturgieOplossingResultaat.Opgelost));
+            }
 
-        [TestCase("Psalm2", "100", "Psalm")]
-        public void LosOp_NormaalItem_GebruikDisplay(string onderdeel, string fragment, string display)
-        {
-            var liturgieItem = FakeInterpretatie(onderdeel, fragment: fragment);
-            var database = FakeDatabase(onderdeel, fragment, display: display);
-            var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
+            [TestCase("Psalm", "100")]
+            [TestCase("Welkom", null)]
+            public void AlleItems_GebruikStandaardNaam(string onderdeel, string fragment)
+            {
+                var liturgieItem = FakeInterpretatie(onderdeel, fragment: fragment);
+                var database = fragment != null ? FakeDatabase(onderdeel, fragment) : FakeDatabase(FileEngineDefaults.CommonFilesSetName, onderdeel);
+                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
 
-            var oplossing = sut.LosOp(liturgieItem);
+                var oplossing = sut.LosOp(liturgieItem);
 
-            Assert.That(oplossing.Regel.Display.Naam, Is.EqualTo(display));
-        }
+                Assert.That(oplossing.Regel.Display.Naam, Is.EqualTo(onderdeel));
+            }
 
-        [TestCase("Psalm2", "100", "psalm2", "Psalm")]
-        public void LosOp_NormaalItem_GebruikMask(string onderdeel, string fragment, string maskRealName, string maskUseName)
-        {
-            var maskList = FakeMask(maskRealName, maskUseName);
-            var liturgieItem = FakeInterpretatie(onderdeel, fragment: fragment);
-            var database = FakeDatabase(onderdeel, fragment);
-            var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
+            [TestCase("Psalm2", "100", "Psalm")]
+            public void NormaalItem_GebruikDisplay(string onderdeel, string fragment, string display)
+            {
+                var liturgieItem = FakeInterpretatie(onderdeel, fragment: fragment);
+                var database = FakeDatabase(onderdeel, fragment, display: display);
+                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
 
-            var oplossing = sut.LosOp(liturgieItem, maskList);
+                var oplossing = sut.LosOp(liturgieItem);
 
-            Assert.That(oplossing.Regel.Display.Naam, Is.EqualTo(maskUseName));
-        }
+                Assert.That(oplossing.Regel.Display.Naam, Is.EqualTo(display));
+            }
 
-        [TestCase("Welkom_groot", "Welkom_groot", "Welkom")]
-        public void LosOp_CommonItem_GebruikMask(string onderdeel, string maskRealName, string maskUseName)
-        {
-            var maskList = FakeMask(maskRealName, maskUseName);
-            var liturgieItem = FakeInterpretatie(onderdeel);
-            var database = FakeDatabase(FileEngineDefaults.CommonFilesSetName, onderdeel);
-            var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
+            [TestCase("Psalm2", "100", "psalm2", "Psalm")]
+            public void NormaalItem_GebruikMask(string onderdeel, string fragment, string maskRealName, string maskUseName)
+            {
+                var maskList = FakeMask(maskRealName, maskUseName);
+                var liturgieItem = FakeInterpretatie(onderdeel, fragment: fragment);
+                var database = FakeDatabase(onderdeel, fragment);
+                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
 
-            var oplossing = sut.LosOp(liturgieItem, maskList);
+                var oplossing = sut.LosOp(liturgieItem, maskList);
 
-            Assert.That(oplossing.Regel.Display.Naam, Is.EqualTo(maskUseName));
+                Assert.That(oplossing.Regel.Display.Naam, Is.EqualTo(maskUseName));
+            }
+
+            [TestCase("Welkom_groot", "Welkom_groot", "Welkom")]
+            public void CommonItem_GebruikMask(string onderdeel, string maskRealName, string maskUseName)
+            {
+                var maskList = FakeMask(maskRealName, maskUseName);
+                var liturgieItem = FakeInterpretatie(onderdeel);
+                var database = FakeDatabase(FileEngineDefaults.CommonFilesSetName, onderdeel);
+                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
+
+                var oplossing = sut.LosOp(liturgieItem, maskList);
+
+                Assert.That(oplossing.Regel.Display.Naam, Is.EqualTo(maskUseName));
+            }
         }
 
         private static IEnumerable<ILiturgieMapmaskArg> FakeMask(string maskRealName, string maskUseName)
