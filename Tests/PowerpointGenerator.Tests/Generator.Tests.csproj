@@ -70,9 +70,9 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
-    <Compile Include="InterpreteerLiturgieRuw.cs" />
-    <Compile Include="LiturgieDatabase.cs" />
-    <Compile Include="LiturgieOplosser.cs" />
+    <Compile Include="InterpreteerLiturgieRuwTests.cs" />
+    <Compile Include="LiturgieDatabaseTests.cs" />
+    <Compile Include="LiturgieOplosserTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
