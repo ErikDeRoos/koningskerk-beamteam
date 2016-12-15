@@ -241,10 +241,12 @@ namespace mppt.RegelVerwerking
 
             private class SlideData
             {
+                private const bool TekstForcerenPerRegel = false;
+
                 public IEnumerable<string> Regels { get; set; }
                 public override string ToString()
                 {
-                    return string.Join("\r\n", Regels);
+                    return TekstForcerenPerRegel ? string.Join("\r\n", Regels) : string.Join(" ", Regels);
                 }
             }
 
