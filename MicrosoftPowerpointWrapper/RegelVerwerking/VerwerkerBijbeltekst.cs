@@ -24,6 +24,8 @@ namespace mppt.RegelVerwerking
 
         private class Verwerker : VerwerkBase, IVerwerk
         {
+            private const int LettersaOpEenRegelInVerdana24 = 46;
+
             private IMppPresentatie _presentatie { get; }
             private IMppFactory _mppFactory { get; }
             private ILiedFormatter _liedFormatter { get; }
@@ -57,7 +59,7 @@ namespace mppt.RegelVerwerking
 
             private void InvullenTekstOpTemplate(ILiturgieRegel regel, ILiturgieRegel volgende)
             {
-                var lengteBerekenaar = new LengteBerekenaar(34, "Verdana", 32);
+                var lengteBerekenaar = new LengteBerekenaar(LettersaOpEenRegelInVerdana24, "Verdana", 24);
                 var tekstPerSlide = OpdelenPerSlide(TekstOpknippen(regel.Content), _buildDefaults.RegelsPerBijbeltekstSlide, lengteBerekenaar);
 
                 //zolang er nog iets is in te voegen in sheets
