@@ -1,4 +1,4 @@
-﻿// Copyright 2016 door Remco Veurink en Erik de Roos
+﻿// Copyright 2017 door Remco Veurink en Erik de Roos
 using ILiturgieDatabase;
 using ISettings;
 using System;

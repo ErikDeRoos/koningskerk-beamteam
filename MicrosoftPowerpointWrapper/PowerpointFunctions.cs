@@ -19,6 +19,7 @@ namespace mppt
     {
         private IMppFactory _mppFactory { get; }
         private ILiedFormatter _liedFormatter { get; }
+        private ILengteBerekenaar _lengteBerekenaar { get; }
         private Dictionary<VerwerkingType, IVerwerkFactory> _regelVerwerker { get; }
 
         private bool _stop;
@@ -32,10 +33,11 @@ namespace mppt
         public Action<int, int, int> Voortgang { get; set; }
         public Action<Status, string, int?> StatusWijziging { get; set; }
 
-        public PowerpointFunctions(IMppFactory mppFactory, ILiedFormatter liedFormatter)
+        public PowerpointFunctions(IMppFactory mppFactory, ILiedFormatter liedFormatter, ILengteBerekenaar lengteBerekenaar)
         {
             _mppFactory = mppFactory;
             _liedFormatter = liedFormatter;
+            _lengteBerekenaar = lengteBerekenaar;
             _regelVerwerker = new Dictionary<VerwerkingType, IVerwerkFactory>();
             _regelVerwerker.Add(VerwerkingType.normaal, new VerwerkerNormaal());
             _regelVerwerker.Add(VerwerkingType.bijbeltekst, new VerwerkerBijbeltekst());
@@ -73,7 +75,7 @@ namespace mppt
                 foreach (var regel in hardeLijst)
                 {
                     var resultaat = _regelVerwerker[regel.VerwerkenAlsType]
-                        .Init(applicatie, presentatie, _mppFactory, _liedFormatter, _buildSettings, _buildDefaults, _dependentFileList, _liturgie)
+                        .Init(applicatie, presentatie, _mppFactory, _liedFormatter, _buildSettings, _buildDefaults, _dependentFileList, _liturgie, _lengteBerekenaar)
                         .Verwerk(regel, Volgende(_liturgie, regel));
                     slidesGemist += resultaat.SlidesGemist;
 

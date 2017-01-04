@@ -25,12 +25,12 @@ namespace PowerpointGenerator.Settings
 
         public bool WriteToXmlFile(IInstellingen instellingen)
         {
-            return WriteToXmlFile(_fileManager, _fileManager.CombineDirectories(_baseDir, _instellingenFileName), _fileManager.CombineDirectories(_baseDir, _masksFileName), (instellingen as Instellingen) ?? GetDefault(_baseDir));
+            return WriteToXmlFile(_fileManager, _fileManager.CombineDirectories(_baseDir, _instellingenFileName), _fileManager.CombineDirectories(_baseDir, _masksFileName), (instellingen as Instellingen) ?? GetDefault());
         }
 
         public IInstellingen LoadFromXmlFile()
         {
-            return LoadFromXmlFile(_fileManager, _fileManager.CombineDirectories(_baseDir, _instellingenFileName), _fileManager.CombineDirectories(_baseDir, _masksFileName)) ?? GetDefault(_baseDir);
+            return LoadFromXmlFile(_fileManager, _fileManager.CombineDirectories(_baseDir, _instellingenFileName), _fileManager.CombineDirectories(_baseDir, _masksFileName)) ?? GetDefault();
         }
 
         private static bool WriteToXmlFile(IFileOperations fileManager, string instellingenFile, string maskFile, Instellingen instellingen)
@@ -123,15 +123,15 @@ namespace PowerpointGenerator.Settings
             return instellingen;
         }
 
-        private static Instellingen GetDefault(string baseDir)
+        private static Instellingen GetDefault()
         {
-            return new Instellingen(
-                (@".Resources\Database"),
-                (@".Resources\Bijbels\NBV"),
-                (@".Resources\Database\Achtergrond.pptx"),
-                (@".Resources\Database\Template Liederen.pptx"),
-                (@".Resources\Database\Template Bijbeltekst.pptx")
-            );
+            return new Instellingen() {
+                DatabasePad = @".Resources\Database",
+                BijbelPad = @".Resources\Bijbels\NBV",
+                TemplateTheme = @".Resources\Database\Achtergrond.pptx",
+                TemplateLied = @".Resources\Database\Template Liederen.pptx",
+                TemplateBijbeltekst = @".Resources\Database\Template Bijbeltekst.pptx",
+            };
         }
     }
 }

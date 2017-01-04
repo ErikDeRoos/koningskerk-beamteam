@@ -3,13 +3,9 @@ using ILiturgieDatabase;
 using ISlideBuilder;
 using mppt.Connect;
 using mppt.LiedPresentator;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using Tools;
 
 namespace mppt.RegelVerwerking
@@ -17,9 +13,9 @@ namespace mppt.RegelVerwerking
     class VerwerkerBijbeltekst : IVerwerkFactory
     {
         public IVerwerk Init(IMppApplication metApplicatie, IMppPresentatie toevoegenAanPresentatie, IMppFactory metFactory, ILiedFormatter gebruikLiedFormatter, IBuilderBuildSettings buildSettings,
-                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ILiturgieRegel> volledigeLiturgieOpVolgorde)
+                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ILiturgieRegel> volledigeLiturgieOpVolgorde, ILengteBerekenaar lengteBerekenaar)
         {
-            return new Verwerker(metApplicatie, toevoegenAanPresentatie, metFactory, gebruikLiedFormatter, buildSettings, buildDefaults, dependentFileList, volledigeLiturgieOpVolgorde);
+            return new Verwerker(metApplicatie, toevoegenAanPresentatie, metFactory, gebruikLiedFormatter, buildSettings, buildDefaults, dependentFileList, volledigeLiturgieOpVolgorde, lengteBerekenaar);
         }
 
         private class Verwerker : VerwerkBase, IVerwerk
@@ -31,10 +27,11 @@ namespace mppt.RegelVerwerking
             private IBuilderBuildDefaults _buildDefaults { get; }
             private IBuilderDependendFiles _dependentFileList { get; }
             private IEnumerable<ILiturgieRegel> _liturgie { get; }
+            private ILengteBerekenaar _lengteBerekenaar { get; }
             private int _slidesGemist = 0;
 
             public Verwerker(IMppApplication metApplicatie, IMppPresentatie toevoegenAanPresentatie, IMppFactory metFactory, ILiedFormatter gebruikLiedFormatter, IBuilderBuildSettings buildSettings,
-                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ILiturgieRegel> volledigeLiturgieOpVolgorde) : base(metApplicatie)
+                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ILiturgieRegel> volledigeLiturgieOpVolgorde, ILengteBerekenaar lengteBerekenaar) : base(metApplicatie)
             {
                 _presentatie = toevoegenAanPresentatie;
                 _mppFactory = metFactory;
@@ -43,6 +40,7 @@ namespace mppt.RegelVerwerking
                 _buildDefaults = buildDefaults;
                 _dependentFileList = dependentFileList;
                 _liturgie = volledigeLiturgieOpVolgorde;
+                _lengteBerekenaar = lengteBerekenaar;
             }
 
             public IVerwerkResultaat Verwerk(ILiturgieRegel regel, ILiturgieRegel volgende)
@@ -57,8 +55,7 @@ namespace mppt.RegelVerwerking
 
             private void InvullenTekstOpTemplate(ILiturgieRegel regel, ILiturgieRegel volgende)
             {
-                var lengteBerekenaar = new LengteBerekenaar(34, "Verdana", 32);
-                var tekstPerSlide = OpdelenPerSlide(TekstOpknippen(regel.Content), _buildDefaults.RegelsPerBijbeltekstSlide, lengteBerekenaar);
+                var tekstPerSlide = OpdelenPerSlide(TekstOpknippen(regel.Content), _buildDefaults.RegelsPerBijbeltekstSlide, _lengteBerekenaar);
 
                 //zolang er nog iets is in te voegen in sheets
                 foreach (var tekst in tekstPerSlide)
@@ -241,10 +238,12 @@ namespace mppt.RegelVerwerking
 
             private class SlideData
             {
+                private const bool TekstForcerenPerRegel = false;
+
                 public IEnumerable<string> Regels { get; set; }
                 public override string ToString()
                 {
-                    return string.Join("\r\n", Regels);
+                    return TekstForcerenPerRegel ? string.Join("\r\n", Regels) : string.Join(" ", Regels);
                 }
             }
 
@@ -267,39 +266,6 @@ namespace mppt.RegelVerwerking
             {
                 public IEnumerable<string> AddRows { get; set; }
                 public string Over { get; set; }
-            }
-
-            private interface ILengteBerekenaar
-            {
-                float VerbruiktPercentageVanRegel(string tekst, bool needsPad);
-            }
-            private class LengteBerekenaar : ILengteBerekenaar
-            {
-                private System.Drawing.Font _font { get; }
-                private System.Drawing.Size _baseSize { get; }
-                private int _padSize { get; }
-
-                public LengteBerekenaar(int lettersaOpEenRegel, string vanLettertype, float metPuntGrootte)
-                {
-                    var initString = new string(Enumerable.Repeat('a', lettersaOpEenRegel).ToArray());
-                    _font = new System.Drawing.Font(vanLettertype, metPuntGrootte);
-                    _baseSize = TextRenderer.MeasureText(initString, _font);
-
-                    var longSize = TextRenderer.MeasureText(new string(Enumerable.Repeat('a', 16).ToArray()), _font).Width;
-                    var shortSize = TextRenderer.MeasureText(new string(Enumerable.Repeat('a', 8).ToArray()), _font).Width;
-                    _padSize = ((shortSize * 2) - longSize) / 2;
-                }
-
-                public float VerbruiktPercentageVanRegel(string tekst, bool needsPad)
-                {
-                    var size = TextRenderer.MeasureText(tekst, _font, new System.Drawing.Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding | TextFormatFlags.NoClipping);
-                    if (size.IsEmpty)
-                        return 0;
-                    var correctedSize = size.Width - (2 * _padSize);
-                    if (needsPad)
-                        correctedSize += _padSize;
-                    return (float)correctedSize * 100 / _baseSize.Width;
-                }
             }
         }
     }
