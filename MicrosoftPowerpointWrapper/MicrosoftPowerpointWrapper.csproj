@@ -70,6 +70,7 @@
     <Compile Include="Connect\MppFactory.cs" />
     <Compile Include="Connect\MppImplement.cs" />
     <Compile Include="Connect\MppInterface.cs" />
+    <Compile Include="ISettings.cs" />
     <Compile Include="LiedPresentator\ILiedFormatter.cs" />
     <Compile Include="LiedPresentator\LiedFormatResult.cs" />
     <Compile Include="LiedPresentator\LiedFormatter.cs" />
@@ -78,6 +79,7 @@
     <Compile Include="RegelVerwerking\IVerwerk.cs" />
     <Compile Include="RegelVerwerking\IVerwerkFactory.cs" />
     <Compile Include="RegelVerwerking\IVerwerkResultaat.cs" />
+    <Compile Include="RegelVerwerking\LengteBerekenaar.cs" />
     <Compile Include="RegelVerwerking\VerwerkerBase.cs" />
     <Compile Include="RegelVerwerking\VerwerkerBijbeltekst.cs" />
     <Compile Include="RegelVerwerking\VerwerkerNormaal.cs" />

@@ -7,11 +7,20 @@ namespace ISettings.CommonImplementation
 {
     public class Instellingen : IInstellingen
     {
+        private const int DefaultRegelsperslide = 6;
+        private const int DefaultRegelsperbijbeltekstslide = 9;
+        private const int DefaultTekstChar_a_OnARow = 41;
+        private const string DefaultTekstFontName = "Verdana";
+        private const float DefaultTekstFontPointSize = 28;
+
         public string DatabasePad { get; set; }
         public string BijbelPad { get; set; }
         public string TemplateTheme { get; set; }
         public string TemplateLied { get; set; }
         public string TemplateBijbeltekst { get; set; }
+        public int TekstChar_a_OnARow { get; set; }
+        public string TekstFontName { get; set; }
+        public float TekstFontPointSize { get; set; }
         public int RegelsPerLiedSlide { get; set; }
         public int RegelsPerBijbeltekstSlide { get; set; }
         private readonly List<IMapmask> _lijstmasks = new List<IMapmask>();
@@ -23,7 +32,11 @@ namespace ISettings.CommonImplementation
             BijbelPad = "";
             TemplateLied = "";
             TemplateTheme = "";
-            RegelsPerLiedSlide = 4;
+            TekstChar_a_OnARow = DefaultTekstChar_a_OnARow;
+            TekstFontName = DefaultTekstFontName;
+            TekstFontPointSize = DefaultTekstFontPointSize;
+            RegelsPerLiedSlide = DefaultRegelsperslide;
+            RegelsPerBijbeltekstSlide = DefaultRegelsperbijbeltekstslide;
 
             StandaardTeksten = new StandaardTeksten()
             {
@@ -41,16 +54,9 @@ namespace ISettings.CommonImplementation
 
         }
 
-        public Instellingen(string databasepad, string bijbelpad, string templatetheme, string templateliederen, string templatebijbeltekst, int regelsperslide = 6, int regelsperbijbeltekstslide = 9, StandaardTeksten standaardTeksten = null, IEnumerable<IMapmask> masks = null)
+        public Instellingen(StandaardTeksten standaardTeksten = null, IEnumerable<IMapmask> masks = null)
             : this()
         {
-            DatabasePad = databasepad;
-            BijbelPad = bijbelpad;
-            TemplateTheme = templatetheme;
-            TemplateLied = templateliederen;
-            TemplateBijbeltekst = templatebijbeltekst;
-            RegelsPerLiedSlide = regelsperslide;
-            RegelsPerBijbeltekstSlide = regelsperbijbeltekstslide;
             if (standaardTeksten != null)
                 StandaardTeksten = standaardTeksten;
             masks?.ToList().ForEach(m => AddMask(m));
@@ -74,7 +80,6 @@ namespace ISettings.CommonImplementation
         public string FullTemplateBijbeltekst => TemplateBijbeltekst.StartsWith(".") ? System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, TemplateBijbeltekst.Remove(0, 1)) : TemplateBijbeltekst;
 
         public IEnumerable<IMapmask> Masks => _lijstmasks;
-
 
         public override string ToString()
         {

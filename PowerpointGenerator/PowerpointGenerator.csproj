@@ -182,6 +182,7 @@
     <Compile Include="Screens\Instellingenform.Designer.cs">
       <DependentUpon>Instellingenform.cs</DependentUpon>
     </Compile>
+    <Compile Include="Settings\MicrosoftPowerpointWrapperSettings.cs" />
     <Compile Include="Settings\SettingsFactory.cs" />
     <None Include="README.md" />
     <None Include="settings.config">

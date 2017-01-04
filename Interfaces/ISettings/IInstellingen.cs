@@ -10,6 +10,9 @@ namespace ISettings
         string TemplateLied { get; }
         string TemplateTheme { get; }
         string TemplateBijbeltekst { get; }
+        int TekstChar_a_OnARow { get; }
+        string TekstFontName { get; }
+        float TekstFontPointSize { get; }
 
         IEnumerable<IMapmask> Masks { get; }
         bool AddMask(IMapmask mask);

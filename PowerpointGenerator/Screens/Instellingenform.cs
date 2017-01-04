@@ -32,6 +32,9 @@ namespace PowerpointGenerator
             textBox6.Text = vanInstellingen.TemplateBijbeltekst;
             textBox4.Text = vanInstellingen.RegelsPerLiedSlide.ToString();
             textBox7.Text = vanInstellingen.RegelsPerBijbeltekstSlide.ToString();
+            textBox8.Text = vanInstellingen.TekstFontName;
+            textBox9.Text = vanInstellingen.TekstFontPointSize.ToString();
+            textBox10.Text = vanInstellingen.TekstChar_a_OnARow.ToString();
 
             tbVolgende.Text = vanInstellingen.StandaardTeksten.Volgende;
             tbVoorganger.Text = vanInstellingen.StandaardTeksten.Voorganger;
@@ -148,15 +151,7 @@ namespace PowerpointGenerator
 
         private void button2_Click(object sender, EventArgs e)
         {
-            int regelsPerSlide;
-            if (!TryParse(textBox4.Text, out regelsPerSlide))
-                regelsPerSlide = 6;
-            int regelsPerBijbeltekstSlide;
-            if (!TryParse(textBox7.Text, out regelsPerBijbeltekstSlide))
-                regelsPerSlide = 9;
-            Instellingen = new Instellingen(textBox3.Text, textBox5.Text, 
-                textBox2.Text, textBox1.Text, textBox6.Text, 
-                regelsperslide: regelsPerSlide, regelsperbijbeltekstslide: regelsPerBijbeltekstSlide,
+            var instellingen = new Instellingen(
                 standaardTeksten: new StandaardTeksten
                 {
                     Volgende = tbVolgende.Text,
@@ -171,7 +166,29 @@ namespace PowerpointGenerator
                     LiturgieTekst = tbLiturgieTekst.Text
                 },
                 masks: _masks
-            );
+            )
+            {
+                DatabasePad = textBox3.Text,
+                BijbelPad = textBox5.Text,
+                TemplateTheme = textBox2.Text,
+                TemplateLied = textBox1.Text,
+                TemplateBijbeltekst = textBox6.Text,
+                TekstFontName = textBox8.Text,
+            };
+            int regelsPerSlide;
+            if (TryParse(textBox4.Text, out regelsPerSlide))
+                instellingen.RegelsPerLiedSlide = regelsPerSlide;
+            int regelsPerBijbeltekstSlide;
+            if (TryParse(textBox7.Text, out regelsPerBijbeltekstSlide))
+                instellingen.RegelsPerBijbeltekstSlide = regelsPerBijbeltekstSlide;
+            int fontPointSize;
+            if (TryParse(textBox9.Text, out fontPointSize))
+                instellingen.TekstFontPointSize = fontPointSize;
+            int char_a_OnARow;
+            if (TryParse(textBox10.Text, out char_a_OnARow))
+                instellingen.TekstChar_a_OnARow = char_a_OnARow;
+
+            Instellingen = instellingen;
         }
     }
 }

@@ -12,9 +12,9 @@ namespace mppt.RegelVerwerking
     class VerwerkerNormaal : IVerwerkFactory
     {
         public IVerwerk Init(IMppApplication metApplicatie, IMppPresentatie toevoegenAanPresentatie, IMppFactory metFactory, ILiedFormatter gebruikLiedFormatter, IBuilderBuildSettings buildSettings,
-                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ILiturgieRegel> volledigeLiturgieOpVolgorde)
+                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ILiturgieRegel> volledigeLiturgieOpVolgorde, ILengteBerekenaar lengteBerekenaar)
         {
-            return new Verwerker(metApplicatie, toevoegenAanPresentatie, metFactory, gebruikLiedFormatter, buildSettings, buildDefaults, dependentFileList, volledigeLiturgieOpVolgorde);
+            return new Verwerker(metApplicatie, toevoegenAanPresentatie, metFactory, gebruikLiedFormatter, buildSettings, buildDefaults, dependentFileList, volledigeLiturgieOpVolgorde, lengteBerekenaar);
         }
 
         private class Verwerker : VerwerkBase, IVerwerk
@@ -28,10 +28,11 @@ namespace mppt.RegelVerwerking
             private IBuilderBuildDefaults _buildDefaults { get; }
             private IBuilderDependendFiles _dependentFileList { get; }
             private IEnumerable<ILiturgieRegel> _liturgie { get; }
+            private ILengteBerekenaar _lengteBerekenaar { get; }
             private int _slidesGemist = 0;
 
             public Verwerker(IMppApplication metApplicatie, IMppPresentatie toevoegenAanPresentatie, IMppFactory metFactory, ILiedFormatter gebruikLiedFormatter, IBuilderBuildSettings buildSettings,
-                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ILiturgieRegel> volledigeLiturgieOpVolgorde) : base (metApplicatie)
+                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ILiturgieRegel> volledigeLiturgieOpVolgorde, ILengteBerekenaar lengteBerekenaar) : base (metApplicatie)
             {
                 _presentatie = toevoegenAanPresentatie;
                 _mppFactory = metFactory;
@@ -40,6 +41,7 @@ namespace mppt.RegelVerwerking
                 _buildDefaults = buildDefaults;
                 _dependentFileList = dependentFileList;
                 _liturgie = volledigeLiturgieOpVolgorde;
+                _lengteBerekenaar = lengteBerekenaar;
             }
 
             public IVerwerkResultaat Verwerk(ILiturgieRegel regel, ILiturgieRegel volgende)
