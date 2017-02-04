@@ -113,7 +113,10 @@ namespace mppt.RegelVerwerking
                         else
                         {
                             if (nogOver.Length > 0)
+                            {
                                 verzameldeRegels.Add(nogOver);
+                                nogOver = string.Empty;
+                            }
                             yield return new SlideData() { Regels = verzameldeRegels.Select(r => r.Trim()).ToList() };
                             verzameldeRegels = new List<string>();
                             var result = DoAdd(string.Empty, regelWoorden, lengteBerekenaar);
@@ -123,7 +126,10 @@ namespace mppt.RegelVerwerking
                     }
                     // Laatste restje van het blok nog toevoegen
                     if (nogOver.Length > 0)
+                    {
                         verzameldeRegels.Add(nogOver);
+                        nogOver = string.Empty;
+                    }
                     
                     // Blok einde. Check of een witregel nog past.
                     if (verzameldeRegels.Count + 1 >= regelsPerSlide)
