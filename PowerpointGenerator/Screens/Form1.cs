@@ -251,9 +251,6 @@ namespace PowerpointGenerator.Screens
             }
         }
 
-        #region functies
-        #region Algemene functies
-
         /// <summary>
         /// Uitlezen van een file die gekozen word aan de hand van openfiledialog
         /// </summary>
@@ -403,8 +400,51 @@ namespace PowerpointGenerator.Screens
             Invoke(actie);
         }
 
-        #endregion Algemene functies
+        #region DragDrop_Test
 
-        #endregion functies
+        private DraggableItem ItemWatKlaarStaat = new DraggableItem();
+
+
+        private void panel1_MouseDown(object sender, MouseEventArgs e)
+        {
+            var text = ItemWatKlaarStaat.ToString();
+            panel1.DoDragDrop(text, DragDropEffects.Copy);
+        }
+
+        private void flowLayoutPanel1_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.StringFormat))
+            {
+                e.Effect = DragDropEffects.Copy;
+            }
+            else
+            {
+                e.Effect = DragDropEffects.None;
+            }
+        }
+
+        private void flowLayoutPanel1_DragDrop(object sender, DragEventArgs e)
+        {
+            var newPanel = new Panel();
+            newPanel.Height = 30;
+            newPanel.BorderStyle = BorderStyle.FixedSingle;
+            var tekst = new Label();
+            tekst.Text = e.Data.GetData(DataFormats.StringFormat) as string;
+            newPanel.Controls.Add(tekst);
+
+            flowLayoutPanel1.Controls.Add(newPanel);
+        }
+
+
+        class DraggableItem
+        {
+
+            public override string ToString()
+            {
+                return "Nieuw item";
+            }
+        }
+
+        #endregion DragDrop_Test
     }
 }
