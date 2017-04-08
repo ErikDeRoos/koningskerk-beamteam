@@ -1,4 +1,4 @@
-﻿// Copyright 2016 door Erik de Roos
+﻿// Copyright 2017 door Erik de Roos
 using System;
 using System.Collections.Generic;
 
@@ -11,16 +11,24 @@ namespace IDatabase
     public interface IDbSet<T> where T : class, ISetSettings, new()
     {
         /// <summary>
-        /// Zoek in een set
-        /// </summary>
-        IEnumerable<IDbItem> Where(Func<IDbItem, bool> query);
-        /// <summary>
         /// Naam van de dataset zoals deze voorkomt op de server (meestal directory naam, case sensitive)
         /// </summary>
         string Name { get; }
+
         /// <summary>
         /// Toegang tot de set-specifieke settings (lezen/schrijven)
         /// </summary>
         T Settings { get; set; }
+
+        /// <summary>
+        /// Zoek in een set
+        /// </summary>
+        IEnumerable<IDbItem> Where(Func<IDbItem, bool> query);
+
+        /// <summary>
+        /// Krijg alle beschikbare fragment namen
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<string> GetAllNames();
     }
 }

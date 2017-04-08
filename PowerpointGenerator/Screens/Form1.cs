@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using PowerpointGenerator.Properties;
 using Generator;
 using System.Collections.Generic;
+using Generator.Database;
 
 namespace PowerpointGenerator.Screens
 {
@@ -18,6 +19,7 @@ namespace PowerpointGenerator.Screens
         private readonly IInstellingenFactory _instellingenFactory;
         private readonly GeneratieInterface<CompRegistration> _funcs;
         private readonly ILiturgieLosOp _liturgieOplosser;
+        private readonly ILiturgieInterpreteer _liturgieInterperator;
         private readonly string _startBestand;
 
         //locatie van het programma op de pc
@@ -25,12 +27,14 @@ namespace PowerpointGenerator.Screens
 
         // huidige zoekresultaat voor autocomplete
         private IVrijZoekresultaat _huidigZoekresultaat;
+        private object _dropdownLocker = new object();
 
-        public Form1(IInstellingenFactory instellingenOplosser, GeneratieInterface<CompRegistration> funcs, ILiturgieLosOp liturgieOplosser, string startBestand)
+        public Form1(IInstellingenFactory instellingenOplosser, GeneratieInterface<CompRegistration> funcs, ILiturgieLosOp liturgieOplosser, ILiturgieInterpreteer liturgieInterperator, string startBestand)
         {
             _instellingenFactory = instellingenOplosser;
             _funcs = funcs;
             _liturgieOplosser = liturgieOplosser;
+            _liturgieInterperator = liturgieInterperator;
             _startBestand = startBestand;
             InitializeComponent();
         }
@@ -55,6 +59,9 @@ namespace PowerpointGenerator.Screens
             _funcs.Registration.TekstRichTextBox = textBox5;
 
             _funcs.Opstarten(_startBestand);
+
+            // TODO test
+            _liturgieOplosser.VrijZoeken("psalm ", _liturgieInterperator, _huidigZoekresultaat);
 
             TriggerZoeklijstVeranderd();
         }
@@ -212,15 +219,15 @@ namespace PowerpointGenerator.Screens
 
         private void TriggerZoeklijstVeranderd()
         {
-            _huidigZoekresultaat = _liturgieOplosser.VrijZoeken(textBox6.Text, _huidigZoekresultaat);
+            _huidigZoekresultaat = _liturgieOplosser.VrijZoeken(textBox6.Text, _liturgieInterperator, _huidigZoekresultaat);
             if (_huidigZoekresultaat.ZoeklijstAanpassing == VrijZoekresultaatAanpassingType.Geen)
                 return;
 
             // We gaan kijken wat de verandering is.
             // Dit moet wat slimmer dan gewoon verwijderen/toevoegen omdat deze lijst zich instabiel gedraagt
-            try
+            textBox6.SuspendLayout();
+            lock(_dropdownLocker)  // Lock om te voorkomen dat werk nog niet af is als we er nog een x in komen (lijkt namelijk te gebeuren)
             {
-                textBox6.SuspendLayout();
                 if (textBox6.AutoCompleteCustomSource == null)
                 {
                     textBox6.AutoCompleteCustomSource = new AutoCompleteStringCollection();
@@ -240,12 +247,9 @@ namespace PowerpointGenerator.Screens
                     }
                 }
             }
-            catch { }  // Helaas, kunnen we niets mee
-            finally
-            {
-                textBox6.ResumeLayout();
-            }
+            textBox6.ResumeLayout();
         }
+
         private void HuidigeTekstInvoegen()
         {
             var liturgie = richTextBox1.Lines.ToList();

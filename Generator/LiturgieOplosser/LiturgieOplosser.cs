@@ -1,5 +1,4 @@
-﻿// Copyright 2016 door Erik de Roos
-using Generator.Database;
+﻿// Copyright 2017 door Erik de Roos
 using Generator.Database.FileSystem;
 using ILiturgieDatabase;
 using System;
@@ -25,6 +24,7 @@ namespace Generator.LiturgieOplosser
     {
         private readonly ILiturgieDatabase.ILiturgieDatabase _database;
         private readonly string _defaultSetNameEmpty;
+        private IEnumerable<string> _onderdelenLijstCache;
 
         public LiturgieOplosser(ILiturgieDatabase.ILiturgieDatabase database, string defaultSetNameEmpty)
         {
@@ -176,49 +176,93 @@ namespace Generator.LiturgieOplosser
             return items.Select(i => LosOp(i, masks)).ToList();
         }
 
-        // TODO in database zoeken
-        // TODO in masks zoeken
-        // TODO efficienter omgaan met zoekresources
-        public IVrijZoekresultaat VrijZoeken(string zoekTekst, IVrijZoekresultaat vorigResultaat = null)
+        // TODO oplossen dat logica om regel weer samen te stellen uit gaat van vaste waarden
+        // TODO efficienter omgaan met zoekresources (verschillende lijsten opslaan in zoekresultaat en alleen wijzigingen veranderen)
+        public IVrijZoekresultaat VrijZoeken(string zoekTekst, ILiturgieInterpreteer liturgieInterperator, IVrijZoekresultaat vorigResultaat = null)
         {
-            var zoekLijst = new List<string>();
+            var veiligeZoekTekst = (zoekTekst ?? "").TrimStart();
+            var veranderingGemaakt = false;
+
+            var onderdeelLijst = KrijgBasisDatabaseLijst(true);
+            var fragmentLijst = Enumerable.Empty<string>();
+            var vorigeZoektermSplit = liturgieInterperator.VanTekstregel(vorigResultaat == null ? "" : vorigResultaat.ZoekTerm);
+            var huidigeZoektermSplit = liturgieInterperator.VanTekstregel(veiligeZoekTekst);
+
+            if ((zoekTekst.Length > 0 && LiturgieInterpretator.InterpreteerLiturgieRuw.BenamingDeelScheidingstekens.Contains(zoekTekst.Last())) || (string.IsNullOrWhiteSpace(vorigeZoektermSplit.Deel) && !string.IsNullOrWhiteSpace(huidigeZoektermSplit.Deel)))
+            {
+                // Fragment is er bij gekomen
+                veranderingGemaakt = true;
+                fragmentLijst = ZoekVerdieping(huidigeZoektermSplit.Benaming).Select(t => $"{huidigeZoektermSplit.Benaming} {t}").ToList();
+            }
+            else if (!string.IsNullOrWhiteSpace(vorigeZoektermSplit.Deel) && string.IsNullOrWhiteSpace(huidigeZoektermSplit.Deel) && (zoekTekst.Length == 0 || !LiturgieInterpretator.InterpreteerLiturgieRuw.BenamingDeelScheidingstekens.Contains(zoekTekst.Last())))
+            {
+                // Fragment is weer weg gehaald
+                veranderingGemaakt = true;
+            }
+            else if (vorigResultaat == null)
+            {
+                veranderingGemaakt = true;
+            }
+
+            return ZoekresultaatSamenstellen(veiligeZoekTekst, vorigResultaat, onderdeelLijst.Union(fragmentLijst), veranderingGemaakt);
+        }
+
+        private IEnumerable<string> KrijgBasisDatabaseLijst(bool cached)
+        {
+            if (!cached)
+                return ZoekBasisDatabaseLijst();
+            else
+            {
+                if (_onderdelenLijstCache == null)
+                    _onderdelenLijstCache = ZoekBasisDatabaseLijst();
+                return _onderdelenLijstCache;
+            }
+        }
+        private IList<string> ZoekBasisDatabaseLijst()
+        {
+            return _database.KrijgAlleOnderdelen()  // Alle onderdelen (psalmen, gezangen, bijbelboeken, etc)
+                .Union(ZoekVerdieping(FileEngineDefaults.CommonFilesSetName))  // Alle slide templates zoals amen, votum, bidden etc)
+                .Distinct().ToList();
+        }
+        private IEnumerable<string> ZoekVerdieping(string vanOnderdeelNaam)
+        {
+            return _database.KrijgAlleFragmenten(vanOnderdeelNaam);
+        }
+
+        private Zoekresultaat ZoekresultaatSamenstellen(string zoekTekst, IVrijZoekresultaat vorigResultaat, IEnumerable<string> lijst, bool lijstIsGewijzigd)
+        {
+            var zoekLijst = Enumerable.Empty<string>();
             var zoekLijstDeltaToegevoegd = Enumerable.Empty<string>();
             var zoekLijstDeltaVerwijderd = Enumerable.Empty<string>();
-            var basisLijst = new[] { "Psalm", "PS", "Lucas" };
-            var veiligeZoekTekst = zoekTekst ?? "";
             var aanpassing = VrijZoekresultaatAanpassingType.Alles;
 
-            if (vorigResultaat == null || (vorigResultaat.ZoekTerm.Length > veiligeZoekTekst.Length && veiligeZoekTekst.Length == 5))
+            if (!lijstIsGewijzigd && vorigResultaat != null)
             {
-                zoekLijst.AddRange(basisLijst);
-            }
-            else if (veiligeZoekTekst.Length >= 6)
-            {
-                zoekLijst.AddRange(basisLijst);
-                zoekLijst.AddRange(new[] { "Psalm 3", "Psalm 50" });
+                aanpassing = VrijZoekresultaatAanpassingType.Geen;
+                zoekLijst = vorigResultaat.AlleMogelijkheden;
             }
             else
             {
-                zoekLijst.AddRange(vorigResultaat.AlleMogelijkheden);
-                aanpassing = VrijZoekresultaatAanpassingType.Geen;
-            }
-            if (aanpassing == VrijZoekresultaatAanpassingType.Alles && vorigResultaat != null)
-            {
-                zoekLijstDeltaToegevoegd = zoekLijst.Where(z => !vorigResultaat.AlleMogelijkheden.Contains(z)).ToList();
-                zoekLijstDeltaVerwijderd = vorigResultaat.AlleMogelijkheden.Where(z => !zoekLijst.Contains(z)).ToList();
-                if (zoekLijstDeltaVerwijderd.Count() != vorigResultaat.AlleMogelijkheden.Count())
-                    aanpassing = VrijZoekresultaatAanpassingType.Deel;
+                zoekLijst = lijst.Distinct().OrderBy(name => name).ToList();
+                if (aanpassing == VrijZoekresultaatAanpassingType.Alles && vorigResultaat != null)
+                {
+                    zoekLijstDeltaToegevoegd = zoekLijst.Where(z => !vorigResultaat.AlleMogelijkheden.Contains(z)).ToList();
+                    zoekLijstDeltaVerwijderd = vorigResultaat.AlleMogelijkheden.Where(z => !zoekLijst.Contains(z)).ToList();
+                    if (zoekLijstDeltaVerwijderd.Count() != vorigResultaat.AlleMogelijkheden.Count())
+                        aanpassing = VrijZoekresultaatAanpassingType.Deel;
+                }
             }
 
             return new Zoekresultaat()
             {
-                ZoekTerm = veiligeZoekTekst,
-                AlleMogelijkheden = zoekLijst.Distinct().ToList(),
+                ZoekTerm = zoekTekst,
+                AlleMogelijkheden = zoekLijst.ToList(),
                 DeltaMogelijkhedenToegevoegd = zoekLijstDeltaToegevoegd,
                 DeltaMogelijkhedenVerwijderd = zoekLijstDeltaVerwijderd,
                 ZoeklijstAanpassing = aanpassing,
             };
         }
+
 
         private class Oplossing : ILiturgieOplossing
         {

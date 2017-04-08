@@ -31,6 +31,6 @@ namespace ILiturgieDatabase {
         /// <summary>
         /// Zoek in alle databases naar de opgegeven tekst
         /// </summary>
-        IVrijZoekresultaat VrijZoeken(string zoekTekst, IVrijZoekresultaat vorigResultaat = null);
+        IVrijZoekresultaat VrijZoeken(string zoekTekst, ILiturgieInterpreteer liturgieInterperator, IVrijZoekresultaat vorigResultaat = null);
     }
 }

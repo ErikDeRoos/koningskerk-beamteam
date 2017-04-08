@@ -1,4 +1,4 @@
-﻿// Copyright 2016 door Erik de Roos
+﻿// Copyright 2017 door Erik de Roos
 using ILiturgieDatabase;
 using System;
 using System.Collections.Generic;
@@ -12,8 +12,8 @@ namespace Generator.LiturgieInterpretator
     /// </summary>
     public class InterpreteerLiturgieRuw : ILiturgieInterpreteer
     {
-        private static readonly char[] BenamingScheidingstekens = { ':' };
-        private static readonly char[] BenamingDeelScheidingstekens = { ' ' };
+        public static readonly char[] BenamingScheidingstekens = { ':' };
+        public static readonly char[] BenamingDeelScheidingstekens = { ' ' };
         private static readonly char[] VersScheidingstekens = { ',' };
         private static readonly char[] VersKoppeltekens = { '-' };
         private static readonly char[] OptieStart = { '(' };
@@ -70,10 +70,10 @@ namespace Generator.LiturgieInterpretator
         {
             var regel = new InterpretatieNormaal();
             if (voorOpties.Length == 0)
-                return null;
+                return InterpretatieNormaal.Empty;
             var voorBenamingStukken = voorOpties[0].Trim().Split(BenamingScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
             if (voorBenamingStukken.Length == 0)
-                return null;
+                return InterpretatieNormaal.Empty;
             var preBenamingTrimmed = voorBenamingStukken[0].Trim();
             // Een benaming kan uit delen bestaan, bijvoorbeeld 'psalm 110' in 'psalm 110:1,2' of 'opwekking 598' in 'opwekking 598'
             var voorPreBenamingStukken = preBenamingTrimmed.Split(BenamingDeelScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
@@ -94,10 +94,10 @@ namespace Generator.LiturgieInterpretator
         {
             var regel = new InterpretatieBijbeltekst();
             if (voorOpties.Length == 0)
-                return null;
+                return InterpretatieBijbeltekst.Empty;
             var benamingStukken = voorOpties[0].Trim().Split(BenamingScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
             if (benamingStukken.Length == 0)
-                return null;
+                return InterpretatieBijbeltekst.Empty;
             // Opknippen zodat hoofdstukken bij verzen blijven
             // Opgeknipt moet 'johannes 3: 5, 7, 9 - 8:1, 3, 9: 5 - 10' geven: 'johannes', '3: 5, 7, 9 -', '8:1, 3, ', '9: 5 - 10'
             // Opknippen ook zodat koppeltekens doorgegeven worden
@@ -173,6 +173,8 @@ namespace Generator.LiturgieInterpretator
 
         private class InterpretatieNormaal : ILiturgieInterpretatie
         {
+            public static readonly InterpretatieNormaal Empty = new InterpretatieNormaal();
+
             public string Benaming { get; set; }
             public string Deel { get; set; }
 
@@ -188,6 +190,8 @@ namespace Generator.LiturgieInterpretator
 
         private class InterpretatieBijbeltekst : InterpretatieNormaal, ILiturgieInterpretatieBijbeltekst
         {
+            new public static readonly InterpretatieBijbeltekst Empty = new InterpretatieBijbeltekst();
+
             public IEnumerable<ILiturgieInterpretatieBijbeltekstDeel> PerDeelVersen { get; set; }
 
             public override string ToString()
