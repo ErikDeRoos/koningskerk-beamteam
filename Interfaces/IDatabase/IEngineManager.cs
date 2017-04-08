@@ -5,7 +5,8 @@ using System.Collections.Generic;
 namespace IDatabase
 {
     /// <summary>
-    /// Engine wrapper voor toegang tot andere engines
+    /// Engine wrapper voor toegang tot andere engines.
+    /// Aanname is dat alle engines ingeladen zijn bij het aanmaken van de interface.
     /// </summary>
     public interface IEngineManager<T> where T : class, ISetSettings, new()
     {

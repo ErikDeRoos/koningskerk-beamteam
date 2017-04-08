@@ -1,4 +1,4 @@
-﻿// Copyright 2016 door Erik de Roos
+﻿// Copyright 2017 door Erik de Roos
 using System.Collections.Generic;
 
 namespace ILiturgieDatabase
@@ -14,5 +14,4 @@ namespace ILiturgieDatabase
         string VerzenZoalsIngevoerd { get; }
         IEnumerable<string> Opties { get; }
     }
-
 }

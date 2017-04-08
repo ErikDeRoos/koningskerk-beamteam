@@ -1,4 +1,4 @@
-﻿// Copyright 2016 door Remco Veurink en Erik de Roos
+﻿// Copyright 2017 door Remco Veurink en Erik de Roos
 using Generator.Database;
 using Generator.LiturgieInterpretator;
 using Generator.Powerpoint;
@@ -15,6 +15,7 @@ namespace Generator
     public class GeneratieInterface<T> where T : class, ICompRegistration
     {
         private readonly ILiturgieLosOp _liturgieOplosser;
+        private readonly ILiturgieInterpreteer _liturgieInterpreteer;
         private readonly IInstellingenFactory _instellingenFactory;
         private readonly Func<ISlideBuilder.IBuilder> _builderResolver;
         public T Registration { get; }
@@ -30,9 +31,10 @@ namespace Generator
         private GereedMelding _setGereedmelding;
 
 
-        public GeneratieInterface(ILiturgieLosOp liturgieOplosser, IInstellingenFactory instellingenOplosser, Func<ISlideBuilder.IBuilder> builderResolver, ICompRegistration newCompRegistration)
+        public GeneratieInterface(ILiturgieLosOp liturgieOplosser, IInstellingenFactory instellingenOplosser, ILiturgieInterpreteer liturgieInterpreteer, Func<ISlideBuilder.IBuilder> builderResolver, ICompRegistration newCompRegistration)
         {
             _liturgieOplosser = liturgieOplosser;
+            _liturgieInterpreteer = liturgieInterpreteer;
             _instellingenFactory = instellingenOplosser;
             _builderResolver = builderResolver;
             _powerpoint = new PpGenerator(_builderResolver, PresentatieVoortgangCallback, PresentatieGereedmeldingCallback);
@@ -232,7 +234,7 @@ namespace Generator
         public IEnumerable<ILiturgieOplossing> LiturgieOplossingen()
         {
             // Liturgie uit tekstbox omzetten in leesbare items
-            var ruweLiturgie = new InterpreteerLiturgieRuw().VanTekstregels(Registration.Liturgie);
+            var ruweLiturgie = _liturgieInterpreteer.VanTekstregels(Registration.Liturgie);
             // Zoek op het bestandssysteem zo veel mogelijk al op (behalve ppt, die gaan via COM element)
             var masks = MapMasksToLiturgie.Map(_instellingenFactory.LoadFromXmlFile().Masks);
             return _liturgieOplosser.LosOp(ruweLiturgie, masks).ToList();

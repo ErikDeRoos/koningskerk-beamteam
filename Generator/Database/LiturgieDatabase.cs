@@ -1,4 +1,4 @@
-﻿// Copyright 2016 door Erik de Roos
+﻿// Copyright 2017 door Erik de Roos
 using Generator.Database.FileSystem;
 using IDatabase;
 using ILiturgieDatabase;
@@ -12,8 +12,6 @@ using static System.String;
 
 namespace Generator.Database
 {
-
-    // TODO Stap 1: assistentie bij invullen liturgie
 
     public static class LiturgieDatabaseSettings
     {
@@ -43,7 +41,7 @@ namespace Generator.Database
             if (database == null)
                 return new Zoekresultaat() { Status = LiturgieOplossingResultaat.DatabaseFout };
 
-            var set = database.Engine.Where(s => Compare(s.Name, onderdeelNaam, StringComparison.OrdinalIgnoreCase) == 0 || Compare(s.Settings.DisplayName, onderdeelNaam, StringComparison.OrdinalIgnoreCase) == 0).FirstOrDefault();
+            var set = database.Engine.Where(s => string.Equals(s.Name, onderdeelNaam, StringComparison.OrdinalIgnoreCase) || string.Equals(s.Settings.DisplayName, onderdeelNaam, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
             if (set == null)
                 return new Zoekresultaat() { Status = LiturgieOplossingResultaat.SetFout };
             // Kijk of we het specifieke item in de set kunnen vinden (alleen via de op-schijf naam)
@@ -241,6 +239,21 @@ namespace Generator.Database
             }
         }
 
+        public IEnumerable<string> KrijgAlleOnderdelen()
+        {
+            return _databases.Extensions
+                .SelectMany(de => de.Engine.GetAllNames());
+        }
+
+        public IEnumerable<string> KrijgAlleFragmenten(string onderdeelNaam)
+        {
+            return _databases.Extensions.SelectMany(de => 
+                de.Engine
+                .Where(s => string.Equals(s.Name, onderdeelNaam, StringComparison.OrdinalIgnoreCase) || string.Equals(s.Settings.DisplayName, onderdeelNaam, StringComparison.OrdinalIgnoreCase))
+                .SelectMany(set => set.GetAllNames())
+            );
+        }
+
         private interface IContentDelayed
         {
             string Name { get; }
@@ -295,7 +308,7 @@ namespace Generator.Database
         }
     }
 
-    static class MapMasksToLiturgie
+    public static class MapMasksToLiturgie
     {
         public static IEnumerable<ILiturgieMapmaskArg> Map(IEnumerable<IMapmask> masks)
         {
