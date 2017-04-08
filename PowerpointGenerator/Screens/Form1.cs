@@ -9,6 +9,7 @@ using System.Linq;
 using System.Windows.Forms;
 using PowerpointGenerator.Properties;
 using Generator;
+using System.Collections.Generic;
 
 namespace PowerpointGenerator.Screens
 {
@@ -16,15 +17,20 @@ namespace PowerpointGenerator.Screens
     {
         private readonly IInstellingenFactory _instellingenFactory;
         private readonly GeneratieInterface<CompRegistration> _funcs;
+        private readonly ILiturgieLosOp _liturgieOplosser;
         private readonly string _startBestand;
 
         //locatie van het programma op de pc
         private string _programDirectory = "";
 
-        public Form1(IInstellingenFactory instellingenOplosser, GeneratieInterface<CompRegistration> funcs, string startBestand)
+        // huidige zoekresultaat voor autocomplete
+        private IVrijZoekresultaat _huidigZoekresultaat;
+
+        public Form1(IInstellingenFactory instellingenOplosser, GeneratieInterface<CompRegistration> funcs, ILiturgieLosOp liturgieOplosser, string startBestand)
         {
             _instellingenFactory = instellingenOplosser;
             _funcs = funcs;
+            _liturgieOplosser = liturgieOplosser;
             _startBestand = startBestand;
             InitializeComponent();
         }
@@ -49,6 +55,9 @@ namespace PowerpointGenerator.Screens
             _funcs.Registration.TekstRichTextBox = textBox5;
 
             _funcs.Opstarten(_startBestand);
+
+            textBox6.AutoCompleteCustomSource = new AutoCompleteStringCollection();
+            textBox6.AutoCompleteCustomSource.AddRange(PasZoeklijstAan("").ToArray());
         }
 
         #region Eventhandlers
@@ -185,8 +194,18 @@ namespace PowerpointGenerator.Screens
             Help.ShowHelp(this, "help.chm", HelpNavigator.TopicId, "20");
             hlpevent.Handled = true;
         }
+        private void comboBox1_TextChanged(object sender, EventArgs e)
+        {
+            //comboBox1.DataSource = PasZoeklijstAan(comboBox1.Text);
+        }
         #endregion formulier eventhandlers
         #endregion Eventhandlers
+
+        private IEnumerable<string> PasZoeklijstAan(string nieuweZoekterm)
+        {
+            _huidigZoekresultaat = _liturgieOplosser.VrijZoeken(nieuweZoekterm, _huidigZoekresultaat);
+            return _huidigZoekresultaat.Mogelijkheden;
+        }
 
         public void StartGenereren()
         {
@@ -411,7 +430,7 @@ namespace PowerpointGenerator.Screens
             panel1.DoDragDrop(text, DragDropEffects.Copy);
         }
 
-        private void flowLayoutPanel1_DragEnter(object sender, DragEventArgs e)
+        private void panel2_DragEnter(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.StringFormat))
             {
@@ -423,16 +442,17 @@ namespace PowerpointGenerator.Screens
             }
         }
 
-        private void flowLayoutPanel1_DragDrop(object sender, DragEventArgs e)
+        private void panel2_DragDrop(object sender, DragEventArgs e)
         {
             var newPanel = new Panel();
             newPanel.Height = 30;
             newPanel.BorderStyle = BorderStyle.FixedSingle;
+            
             var tekst = new Label();
-            tekst.Text = e.Data.GetData(DataFormats.StringFormat) as string;
+            tekst.Text = e.Data.GetData(DataFormats.StringFormat) as string + panel2.Controls.Count;
             newPanel.Controls.Add(tekst);
 
-            flowLayoutPanel1.Controls.Add(newPanel);
+            panel2.Controls.Add(newPanel);
         }
 
 
@@ -446,5 +466,11 @@ namespace PowerpointGenerator.Screens
         }
 
         #endregion DragDrop_Test
+
+        private void textBox6_TextChanged(object sender, EventArgs e)
+        {
+            textBox6.AutoCompleteCustomSource.Clear();
+            textBox6.AutoCompleteCustomSource.AddRange(PasZoeklijstAan(textBox6.Text).ToArray());
+        }
     }
 }

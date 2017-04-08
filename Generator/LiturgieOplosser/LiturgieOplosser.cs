@@ -176,6 +176,35 @@ namespace Generator.LiturgieOplosser
             return items.Select(i => LosOp(i, masks)).ToList();
         }
 
+        // TODO in database zoeken
+        // TODO in masks zoeken
+        // TODO efficienter omgaan met zoekresources
+        public IVrijZoekresultaat VrijZoeken(string zoekTekst, IVrijZoekresultaat vorigResultaat = null)
+        {
+            var zoekLijst = new List<string>();
+            var basisLijst = new[] { "Psalm", "PS", "Lucas" };
+            var veiligeZoekTekst = zoekTekst ?? "";
+
+            if (vorigResultaat == null || (vorigResultaat.ZoekTerm.Length > veiligeZoekTekst.Length && veiligeZoekTekst.Length == 5))
+            {
+                zoekLijst.AddRange(basisLijst);
+            }
+            else if (veiligeZoekTekst.Length >= 6)
+            {
+                zoekLijst.AddRange(basisLijst);
+                zoekLijst.AddRange(new[] { "Psalm 3", "Psalm 50" });
+            }
+            else
+            {
+                zoekLijst.AddRange(vorigResultaat.Mogelijkheden);
+            }
+
+            return new Zoekresultaat()
+            {
+                ZoekTerm = veiligeZoekTekst,
+                Mogelijkheden = zoekLijst,
+            };
+        }
 
         private class Oplossing : ILiturgieOplossing
         {
@@ -229,6 +258,13 @@ namespace Generator.LiturgieOplosser
 
             public bool Gebruik { get; set; }
             public string Tekst { get; set; }
+        }
+
+        private class Zoekresultaat : IVrijZoekresultaat
+        {
+            public IEnumerable<string> Mogelijkheden { get; set; }
+
+            public string ZoekTerm { get; set; }
         }
     }
 }
