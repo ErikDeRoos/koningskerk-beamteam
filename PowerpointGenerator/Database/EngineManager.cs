@@ -16,8 +16,9 @@ namespace PowerpointGenerator.Database
                 Name = "default",
                 Engine = fac.Invoke(settings.LoadFromXmlFile().FullDatabasePath, true)
             };
-            Extensions = new List<EngineSelection<T>>()
+            Extensions = new List<IEngineSelection<T>>()
             {
+                _default,
                 new EngineSelection<T>() {
                     Name = Generator.Database.LiturgieDatabaseSettings.DatabaseNameBijbeltekst,
                     Engine = fac.Invoke(settings.LoadFromXmlFile().FullBijbelPath, true)

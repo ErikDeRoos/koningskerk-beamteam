@@ -1,4 +1,4 @@
-﻿// Copyright 2016 door Erik de Roos
+﻿// Copyright 2017 door Erik de Roos
 using IDatabase;
 using System;
 using System.Collections.Generic;
@@ -6,7 +6,6 @@ using System.Linq;
 using System.Xml;
 using System.Xml.Serialization;
 using System.IO;
-using ISettings;
 using IFileSystem;
 using IDatabase.Engine;
 
@@ -59,13 +58,30 @@ namespace Generator.Database.FileSystem
             return _fileManager.GetDirectories(startDir).Select(d => new FileSet<T>(_fileManager, d, askCached)).ToList();
         }
 
-        public IEnumerable<IDbSet<T>> Where(Func<IDbSet<T>, bool> query)
+        private IEnumerable<IDbSet<T>> GetDbSet()
         {
             if (!_cached)
                 return GetDirs(_startDir, _cached);
             if (_dirCache == null)
                 _dirCache = GetDirs(_startDir, _cached);
-            return _dirCache.Where(query);
+            return _dirCache;
+        }
+
+        public IEnumerable<IDbSet<T>> Where(Func<IDbSet<T>, bool> query)
+        {
+            return GetDbSet().Where(query);
+        }
+
+        public IEnumerable<string> GetAllNames()
+        {
+            var dbSet = GetDbSet();
+            return dbSet
+                .Select(db => db.Name)
+                .Union(
+                    dbSet
+                    .Select(db => db.Settings.DisplayName)
+                    .Where(name => !string.IsNullOrWhiteSpace(name))
+                ).ToList();
         }
     }
 
@@ -104,13 +120,18 @@ namespace Generator.Database.FileSystem
             return finder;
         }
 
-        public IEnumerable<IDbItem> Where(Func<IDbItem, bool> query)
+        private IEnumerable<IDbItem> GetItemSet()
         {
             if (!_cached)
                 return GetFinder().GetItems();
             if (_itemCache == null)
                 _itemCache = GetFinder().GetItems();
-            return _itemCache.Where(query);
+            return _itemCache;
+        }
+
+        public IEnumerable<IDbItem> Where(Func<IDbItem, bool> query)
+        {
+            return GetItemSet().Where(query);
         }
 
         private T GetSettings(bool cached)
@@ -160,6 +181,12 @@ namespace Generator.Database.FileSystem
                 if (cached)
                     _settingsCached = newSettings;
             }
+        }
+
+        public IEnumerable<string> GetAllNames()
+        {
+            return GetItemSet()
+                .Select(db => db.Name);
         }
     }
 

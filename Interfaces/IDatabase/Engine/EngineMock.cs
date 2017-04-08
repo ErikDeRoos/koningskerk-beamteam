@@ -59,6 +59,11 @@ namespace IDatabase.Engine
             return _sets.AddSet(name);
         }
 
+        public IEnumerable<string> GetAllNames()
+        {
+            throw new NotImplementedException();
+        }
+
         public interface ISetMock
         {
             ISetMock AddSet(string name);
@@ -105,6 +110,11 @@ namespace IDatabase.Engine
             {
                 Settings = newSettings;
                 return this;
+            }
+
+            public IEnumerable<string> GetAllNames()
+            {
+                throw new NotImplementedException();
             }
         }
 

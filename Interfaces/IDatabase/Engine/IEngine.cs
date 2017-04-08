@@ -1,4 +1,4 @@
-﻿// Copyright 2016 door Erik de Roos
+﻿// Copyright 2017 door Erik de Roos
 using System;
 using System.Collections.Generic;
 
@@ -13,5 +13,11 @@ namespace IDatabase.Engine
         /// Krijg de beschikbare sets
         /// </summary>
         IEnumerable<IDbSet<T>> Where(Func<IDbSet<T>, bool> query);
+
+        /// <summary>
+        /// Krijg alle beschikbare onderdeel namen
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<string> GetAllNames();
     }
 }
