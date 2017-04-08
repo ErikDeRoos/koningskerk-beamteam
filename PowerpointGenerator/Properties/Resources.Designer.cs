@@ -125,5 +125,15 @@ namespace PowerpointGenerator.Properties {
                 return ResourceManager.GetString("License", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Powerpoint_Overlay_icon {
+            get {
+                object obj = ResourceManager.GetObject("Powerpoint_Overlay_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

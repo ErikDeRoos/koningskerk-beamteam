@@ -68,7 +68,8 @@
     <SignManifests>false</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>Powerpoint-Overlay-icon.ico</ApplicationIcon>
+    <ApplicationIcon>
+    </ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug PowerpointWrapper|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -241,11 +242,9 @@
       <Name>Tools</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <None Include="Powerpoint-Overlay-icon.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Resources\" />
+    <None Include="Powerpoint-Overlay-icon.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

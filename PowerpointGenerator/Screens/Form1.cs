@@ -37,6 +37,7 @@ namespace PowerpointGenerator.Screens
             _liturgieInterperator = liturgieInterperator;
             _startBestand = startBestand;
             InitializeComponent();
+            this.Icon = Icon.FromHandle(Resources.Powerpoint_Overlay_icon.GetHicon());
         }
 
         public void Opstarten()
