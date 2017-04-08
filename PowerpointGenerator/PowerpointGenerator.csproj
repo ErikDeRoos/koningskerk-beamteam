@@ -242,9 +242,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Powerpoint-Overlay-icon.ico">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <None Include="Powerpoint-Overlay-icon.ico" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
