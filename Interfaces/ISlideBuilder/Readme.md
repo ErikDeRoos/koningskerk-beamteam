@@ -3,7 +3,7 @@
 Koppeling met slide bouwer.
 Een liturgie gaat er in, een presentatie bestand komt er uit.
 
-Copyright 2016 door Erik de Roos
+Copyright 2017 door Erik de Roos
 
 Uitgebracht onder licentie van:
 GNU LESSER GENERAL PUBLIC LICENSE

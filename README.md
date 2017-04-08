@@ -1,19 +1,17 @@
 # Kerkdienst liturgie generator
-Kerkdienst liturgie generator op basis van ms powerpoint (excl. database)
-Gebruikt windows forms, gemaakt met visual studio 2013 en draait icm alle windows en office versies.
+Kerkdienst liturgie generator op basis van ms powerpoint 
+Gebruikt windows forms, gemaakt met visual studio 2015 en draait icm alle windows en office versies.
 
-Deze generator is overgenomen van Emmeloord met de gedachte dat de basisfunctionaliteit blijft maar dat we wat verbeteringen toe kunnen voegen.
-De code is ook bedoeld om af en toe terug te kunnen naar Emmeloord.
+In de release bundels zijn databases aanwezig die copyright beschermd materiaal bevatten.
+Je bent verplicht licentieafspraken te hebben met de betreffende partijen wil je de gegenereerde presentaties in kunnen zetten in een kerkdienst.
 
-De databases bevatten copyright beschermd materiaal in de vorm van liedbundels. Deze zijn daarom niet toegevoegd.
-In overleg kunnen wij wel onze databases ter beschikking stellen als duidelijk is dat er aan de licentievoorwaarden voldaan is.
-In dat geval kan je contact opnemen met de koningskerk (www.koningskerk.nl) en vragen naar het beamteam.
+Voor vragen en aanbevelingen kan je contact opnemen met de koningskerk (www.koningskerk.nl) en vragen naar het beamteam.
 
 Dit project bevat ook andere projecten waarmee:
 * Op een andere pc de powerpoint gegenereerd kan worden (onder GPL)
 * Interfaces voor alle onderdelen op basis waarvan je uit kan breiden (onder LGPL)
 
-Copyright (C) 2016. Portions Copyright (C) Remco Veurink, Erik de Roos
+Copyright (C) 2017 by Erik de Roos.
 
 Original idea by Remco Veurink. Further worked on by Erik de Roos.
 

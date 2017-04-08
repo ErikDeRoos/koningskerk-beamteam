@@ -2,7 +2,7 @@
 
 Koppeling voor een eenvoudige bundels-gebaseerde database waarbij per bundel instellingen mogelijk zijn.
 
-Copyright 2016 door Erik de Roos
+Copyright 2017 door Erik de Roos
 
 Uitgebracht onder licentie van:
 GNU LESSER GENERAL PUBLIC LICENSE
