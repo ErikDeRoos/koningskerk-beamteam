@@ -182,8 +182,11 @@ namespace Generator.LiturgieOplosser
         public IVrijZoekresultaat VrijZoeken(string zoekTekst, IVrijZoekresultaat vorigResultaat = null)
         {
             var zoekLijst = new List<string>();
+            var zoekLijstDeltaToegevoegd = Enumerable.Empty<string>();
+            var zoekLijstDeltaVerwijderd = Enumerable.Empty<string>();
             var basisLijst = new[] { "Psalm", "PS", "Lucas" };
             var veiligeZoekTekst = zoekTekst ?? "";
+            var aanpassing = VrijZoekresultaatAanpassingType.Alles;
 
             if (vorigResultaat == null || (vorigResultaat.ZoekTerm.Length > veiligeZoekTekst.Length && veiligeZoekTekst.Length == 5))
             {
@@ -196,13 +199,24 @@ namespace Generator.LiturgieOplosser
             }
             else
             {
-                zoekLijst.AddRange(vorigResultaat.Mogelijkheden);
+                zoekLijst.AddRange(vorigResultaat.AlleMogelijkheden);
+                aanpassing = VrijZoekresultaatAanpassingType.Geen;
+            }
+            if (aanpassing == VrijZoekresultaatAanpassingType.Alles && vorigResultaat != null)
+            {
+                zoekLijstDeltaToegevoegd = zoekLijst.Where(z => !vorigResultaat.AlleMogelijkheden.Contains(z)).ToList();
+                zoekLijstDeltaVerwijderd = vorigResultaat.AlleMogelijkheden.Where(z => !zoekLijst.Contains(z)).ToList();
+                if (zoekLijstDeltaVerwijderd.Count() != vorigResultaat.AlleMogelijkheden.Count())
+                    aanpassing = VrijZoekresultaatAanpassingType.Deel;
             }
 
             return new Zoekresultaat()
             {
                 ZoekTerm = veiligeZoekTekst,
-                Mogelijkheden = zoekLijst,
+                AlleMogelijkheden = zoekLijst.Distinct().ToList(),
+                DeltaMogelijkhedenToegevoegd = zoekLijstDeltaToegevoegd,
+                DeltaMogelijkhedenVerwijderd = zoekLijstDeltaVerwijderd,
+                ZoeklijstAanpassing = aanpassing,
             };
         }
 
@@ -262,7 +276,11 @@ namespace Generator.LiturgieOplosser
 
         private class Zoekresultaat : IVrijZoekresultaat
         {
-            public IEnumerable<string> Mogelijkheden { get; set; }
+            public IEnumerable<string> AlleMogelijkheden { get; set; }
+            public IEnumerable<string> DeltaMogelijkhedenToegevoegd { get; set; }
+            public IEnumerable<string> DeltaMogelijkhedenVerwijderd { get; set; }
+
+            public VrijZoekresultaatAanpassingType ZoeklijstAanpassing { get; set; }
 
             public string ZoekTerm { get; set; }
         }

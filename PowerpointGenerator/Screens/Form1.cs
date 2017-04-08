@@ -56,8 +56,7 @@ namespace PowerpointGenerator.Screens
 
             _funcs.Opstarten(_startBestand);
 
-            textBox6.AutoCompleteCustomSource = new AutoCompleteStringCollection();
-            textBox6.AutoCompleteCustomSource.AddRange(PasZoeklijstAan("").ToArray());
+            TriggerZoeklijstVeranderd();
         }
 
         #region Eventhandlers
@@ -194,17 +193,65 @@ namespace PowerpointGenerator.Screens
             Help.ShowHelp(this, "help.chm", HelpNavigator.TopicId, "20");
             hlpevent.Handled = true;
         }
-        private void comboBox1_TextChanged(object sender, EventArgs e)
+        private void textBox6_TextChanged(object sender, EventArgs e)
         {
-            //comboBox1.DataSource = PasZoeklijstAan(comboBox1.Text);
+            TriggerZoeklijstVeranderd();
+        }
+        private void textBox6_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyData == Keys.Enter)
+                HuidigeTekstInvoegen();
+        }
+        private void button2_Click(object sender, EventArgs e)
+        {
+            HuidigeTekstInvoegen();
         }
         #endregion formulier eventhandlers
         #endregion Eventhandlers
 
-        private IEnumerable<string> PasZoeklijstAan(string nieuweZoekterm)
+
+        private void TriggerZoeklijstVeranderd()
         {
-            _huidigZoekresultaat = _liturgieOplosser.VrijZoeken(nieuweZoekterm, _huidigZoekresultaat);
-            return _huidigZoekresultaat.Mogelijkheden;
+            _huidigZoekresultaat = _liturgieOplosser.VrijZoeken(textBox6.Text, _huidigZoekresultaat);
+            if (_huidigZoekresultaat.ZoeklijstAanpassing == VrijZoekresultaatAanpassingType.Geen)
+                return;
+
+            // We gaan kijken wat de verandering is.
+            // Dit moet wat slimmer dan gewoon verwijderen/toevoegen omdat deze lijst zich instabiel gedraagt
+            try
+            {
+                textBox6.SuspendLayout();
+                if (textBox6.AutoCompleteCustomSource == null)
+                {
+                    textBox6.AutoCompleteCustomSource = new AutoCompleteStringCollection();
+                    textBox6.AutoCompleteCustomSource.AddRange(_huidigZoekresultaat.AlleMogelijkheden.ToArray());
+                }
+                else if (_huidigZoekresultaat.ZoeklijstAanpassing == VrijZoekresultaatAanpassingType.Alles)
+                {
+                    textBox6.AutoCompleteCustomSource.Clear();
+                    textBox6.AutoCompleteCustomSource.AddRange(_huidigZoekresultaat.AlleMogelijkheden.ToArray());
+                }
+                else if (_huidigZoekresultaat.ZoeklijstAanpassing == VrijZoekresultaatAanpassingType.Deel)
+                {
+                    textBox6.AutoCompleteCustomSource.AddRange(_huidigZoekresultaat.DeltaMogelijkhedenToegevoegd.ToArray());
+                    foreach (var item in _huidigZoekresultaat.DeltaMogelijkhedenVerwijderd)
+                    {
+                        textBox6.AutoCompleteCustomSource.Remove(item);
+                    }
+                }
+            }
+            catch { }  // Helaas, kunnen we niets mee
+            finally
+            {
+                textBox6.ResumeLayout();
+            }
+        }
+        private void HuidigeTekstInvoegen()
+        {
+            var liturgie = richTextBox1.Lines.ToList();
+            liturgie.Add(textBox6.Text);
+            richTextBox1.Lines = liturgie.ToArray();
+            textBox6.Text = null;
         }
 
         public void StartGenereren()
@@ -417,60 +464,6 @@ namespace PowerpointGenerator.Screens
                     MessageBox.Show(foutmelding, "Fout", MessageBoxButtons.OK, MessageBoxIcon.Error);
             });
             Invoke(actie);
-        }
-
-        #region DragDrop_Test
-
-        private DraggableItem ItemWatKlaarStaat = new DraggableItem();
-
-
-        private void panel1_MouseDown(object sender, MouseEventArgs e)
-        {
-            var text = ItemWatKlaarStaat.ToString();
-            panel1.DoDragDrop(text, DragDropEffects.Copy);
-        }
-
-        private void panel2_DragEnter(object sender, DragEventArgs e)
-        {
-            if (e.Data.GetDataPresent(DataFormats.StringFormat))
-            {
-                e.Effect = DragDropEffects.Copy;
-            }
-            else
-            {
-                e.Effect = DragDropEffects.None;
-            }
-        }
-
-        private void panel2_DragDrop(object sender, DragEventArgs e)
-        {
-            var newPanel = new Panel();
-            newPanel.Height = 30;
-            newPanel.BorderStyle = BorderStyle.FixedSingle;
-            
-            var tekst = new Label();
-            tekst.Text = e.Data.GetData(DataFormats.StringFormat) as string + panel2.Controls.Count;
-            newPanel.Controls.Add(tekst);
-
-            panel2.Controls.Add(newPanel);
-        }
-
-
-        class DraggableItem
-        {
-
-            public override string ToString()
-            {
-                return "Nieuw item";
-            }
-        }
-
-        #endregion DragDrop_Test
-
-        private void textBox6_TextChanged(object sender, EventArgs e)
-        {
-            textBox6.AutoCompleteCustomSource.Clear();
-            textBox6.AutoCompleteCustomSource.AddRange(PasZoeklijstAan(textBox6.Text).ToArray());
         }
     }
 }
