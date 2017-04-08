@@ -181,10 +181,6 @@ namespace PowerpointGenerator.Screens
             var form = new Contactform();
             form.Show();
         }
-        private void helpToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OnHelpRequested(new HelpEventArgs(new Point(0, 0)));
-        }
         #endregion menu eventhandlers
         #region formulier eventhandlers
         private void button1_Click(object sender, EventArgs e)

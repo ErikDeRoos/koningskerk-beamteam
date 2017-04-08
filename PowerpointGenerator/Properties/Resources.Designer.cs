@@ -125,15 +125,5 @@ namespace PowerpointGenerator.Properties {
                 return ResourceManager.GetString("License", resourceCulture);
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap visitekaartje {
-            get {
-                object obj = ResourceManager.GetObject("visitekaartje", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
     }
 }

@@ -163,9 +163,6 @@
       <DependentUpon>Instellingenform.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
-    <Content Include="Help.chm">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <None Include="LICENSE.md">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -248,7 +245,6 @@
     <Content Include="Powerpoint-Overlay-icon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="Screens\visitekaartje.JPG" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
