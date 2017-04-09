@@ -1,4 +1,4 @@
-﻿// Copyright 2016 door Erik de Roos
+﻿// Copyright 2017 door Erik de Roos
 using ILiturgieDatabase;
 using ISlideBuilder;
 using mppt.Connect;
@@ -14,7 +14,10 @@ namespace mppt
     /// <summary>
     /// 
     /// </summary>
-    /// <remarks>Zit hard op het file systeem! (powerpoint heeft geen ondersteuning voor streams)</remarks>
+    /// <remarks>
+    /// Presentatie slides worden hard vanaf het file systeem verwerkt! 
+    /// (powerpoint heeft geen ondersteuning voor streams)
+    /// </remarks>
     public class PowerpointFunctions : IBuilder
     {
         private IMppFactory _mppFactory { get; }
@@ -107,11 +110,11 @@ namespace mppt
         /// <summary>
         /// Uitzoeken wat de volgende is
         /// </summary>
-        private static ILiturgieRegel Volgende(IEnumerable<ILiturgieRegel> volledigeLiturgie, ILiturgieRegel huidig)
+        private static IEnumerable<ILiturgieRegel> Volgende(IEnumerable<ILiturgieRegel> volledigeLiturgie, ILiturgieRegel huidig)
         {
             var lijst = volledigeLiturgie.ToList();
             var huidigeItemIndex = lijst.IndexOf(huidig);
-            return lijst.Skip(huidigeItemIndex + 1).FirstOrDefault();
+            return lijst.Skip(huidigeItemIndex + 1);
         }
 
 

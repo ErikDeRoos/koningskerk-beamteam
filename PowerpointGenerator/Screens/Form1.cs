@@ -35,6 +35,7 @@ namespace PowerpointGenerator.Screens
             _liturgieOplosser = liturgieOplosser;
             _startBestand = startBestand;
             InitializeComponent();
+            this.Icon = Icon.FromHandle(Resources.Powerpoint_Overlay_icon.GetHicon());
         }
 
         public void Opstarten()
@@ -178,10 +179,6 @@ namespace PowerpointGenerator.Screens
         {
             var form = new Contactform();
             form.Show();
-        }
-        private void helpToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OnHelpRequested(new HelpEventArgs(new Point(0, 0)));
         }
         #endregion menu eventhandlers
         #region formulier eventhandlers

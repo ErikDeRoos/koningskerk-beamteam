@@ -56,7 +56,6 @@
             this.textBox4 = new System.Windows.Forms.TextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.contactToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.label1 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
@@ -70,6 +69,7 @@
             this.textBox6 = new System.Windows.Forms.TextBox();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -202,10 +202,11 @@
             // optiesToolStripMenuItem
             // 
             this.optiesToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.bekijkDatabaseToolStripMenuItem1,
-            this.stopPowerpointToolStripMenuItem,
             this.templatesToolStripMenuItem1,
-            this.invoerenMasksToolStripMenuItem});
+            this.invoerenMasksToolStripMenuItem,
+            this.bekijkDatabaseToolStripMenuItem1,
+            this.toolStripSeparator1,
+            this.stopPowerpointToolStripMenuItem});
             this.optiesToolStripMenuItem.Name = "optiesToolStripMenuItem";
             this.optiesToolStripMenuItem.Size = new System.Drawing.Size(53, 20);
             this.optiesToolStripMenuItem.Text = "Opties";
@@ -213,28 +214,28 @@
             // bekijkDatabaseToolStripMenuItem1
             // 
             this.bekijkDatabaseToolStripMenuItem1.Name = "bekijkDatabaseToolStripMenuItem1";
-            this.bekijkDatabaseToolStripMenuItem1.Size = new System.Drawing.Size(162, 22);
+            this.bekijkDatabaseToolStripMenuItem1.Size = new System.Drawing.Size(184, 22);
             this.bekijkDatabaseToolStripMenuItem1.Text = "Bekijk Database";
             this.bekijkDatabaseToolStripMenuItem1.Click += new System.EventHandler(this.bekijkDatabaseToolStripMenuItem1_Click);
             // 
             // stopPowerpointToolStripMenuItem
             // 
             this.stopPowerpointToolStripMenuItem.Name = "stopPowerpointToolStripMenuItem";
-            this.stopPowerpointToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
-            this.stopPowerpointToolStripMenuItem.Text = "Stop powerpoint";
+            this.stopPowerpointToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
+            this.stopPowerpointToolStripMenuItem.Text = "Repareer powerpoint";
             this.stopPowerpointToolStripMenuItem.Click += new System.EventHandler(this.stopPowerpointToolStripMenuItem_Click);
             // 
             // templatesToolStripMenuItem1
             // 
             this.templatesToolStripMenuItem1.Name = "templatesToolStripMenuItem1";
-            this.templatesToolStripMenuItem1.Size = new System.Drawing.Size(162, 22);
+            this.templatesToolStripMenuItem1.Size = new System.Drawing.Size(184, 22);
             this.templatesToolStripMenuItem1.Text = "Instellingen";
             this.templatesToolStripMenuItem1.Click += new System.EventHandler(this.templatesToolStripMenuItem1_Click);
             // 
             // invoerenMasksToolStripMenuItem
             // 
             this.invoerenMasksToolStripMenuItem.Name = "invoerenMasksToolStripMenuItem";
-            this.invoerenMasksToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.invoerenMasksToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
             this.invoerenMasksToolStripMenuItem.Text = "Invoeren Masks";
             this.invoerenMasksToolStripMenuItem.Click += new System.EventHandler(this.invoerenMasksToolStripMenuItem_Click);
             // 
@@ -298,8 +299,7 @@
             this.bestandToolStripMenuItem,
             this.bewerkenToolStripMenuItem,
             this.optiesToolStripMenuItem,
-            this.contactToolStripMenuItem,
-            this.helpToolStripMenuItem});
+            this.contactToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(710, 24);
@@ -312,13 +312,6 @@
             this.contactToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.contactToolStripMenuItem.Text = "Contact";
             this.contactToolStripMenuItem.Click += new System.EventHandler(this.contactToolStripMenuItem_Click);
-            // 
-            // helpToolStripMenuItem
-            // 
-            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
-            this.helpToolStripMenuItem.Text = "Help";
-            this.helpToolStripMenuItem.Click += new System.EventHandler(this.helpToolStripMenuItem_Click);
             // 
             // progressBar1
             // 
@@ -489,6 +482,11 @@
             this.splitContainer2.SplitterDistance = 561;
             this.splitContainer2.TabIndex = 0;
             // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(181, 6);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -496,7 +494,6 @@
             this.ClientSize = new System.Drawing.Size(710, 639);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.menuStrip1);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
@@ -557,7 +554,6 @@
         private System.Windows.Forms.ToolStripMenuItem contactToolStripMenuItem;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.ToolStripMenuItem bekijkDatabaseToolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem invoerenMasksToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem stopPowerpointToolStripMenuItem;
         private System.Windows.Forms.SplitContainer splitContainer1;
@@ -567,6 +563,7 @@
         private System.Windows.Forms.SplitContainer splitContainer4;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
     }
 }
 

@@ -1,4 +1,4 @@
-﻿// Copyright 2016 door Remco Veurink en Erik de Roos
+﻿// Copyright 2017 door Erik de Roos
 using System.Windows.Forms;
 
 namespace PowerpointGenerator
@@ -8,11 +8,6 @@ namespace PowerpointGenerator
         public Contactform()
         {
             InitializeComponent();
-        }
-
-        private void button1_Click(object sender, System.EventArgs e)
-        {
-            Help.ShowHelp(this, "help.chm", HelpNavigator.TopicId, "20");
         }
     }
 }
