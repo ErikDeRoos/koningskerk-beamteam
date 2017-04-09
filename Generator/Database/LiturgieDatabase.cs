@@ -306,7 +306,7 @@ namespace Generator.Database
             public IEnumerable<ILiturgieContent> Content { get; set; }
             public bool ZonderContentSplitsing { get; set; }
 
-            public Zoekresultaat()
+            public Oplossing()
             {
                 Status = LiturgieOplossingResultaat.Onbekend;
             }
