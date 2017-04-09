@@ -38,21 +38,22 @@
     <Compile Include="Interpreteren\Helpers\ILiturgieInterpretatieBijbeltekst.cs" />
     <Compile Include="Interpreteren\ILengteBerekenaar.cs" />
     <Compile Include="Interpreteren\ILiturgieLosop.cs" />
-    <Compile Include="Interpreteren\ILiturgieDatabase.cs" />
+    <Compile Include="ILiturgieDatabase.cs" />
     <Compile Include="Interpreteren\Helpers\IVrijZoekresultaat.cs" />
-    <Compile Include="Resultaten\IZoekresultaat.cs" />
-    <Compile Include="Resultaten\Helpers\InhoudType.cs" />
-    <Compile Include="Resultaten\Helpers\ILiturgieContent.cs" />
-    <Compile Include="Resultaten\Helpers\ILiturgieDisplay.cs" />
+    <Compile Include="Oplossen\IOplossing.cs" />
+    <Compile Include="Oplossen\Helpers\InhoudType.cs" />
+    <Compile Include="Oplossen\Helpers\ILiturgieContent.cs" />
+    <Compile Include="Oplossen\Helpers\ILiturgieDisplay.cs" />
     <Compile Include="Interpreteren\Helpers\ILiturgieOplossing.cs" />
     <Compile Include="Interpreteren\Helpers\ILiturgieInterpretatie.cs" />
     <Compile Include="Interpreteren\Helpers\ILiturgieMapmaskArg.cs" />
     <Compile Include="Interpreteren\ILiturgieInterpreteer.cs" />
     <Compile Include="Interpreteren\Helpers\LiturgieOplossingResultaat.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Resultaten\Helpers\IVersenDefault.cs" />
-    <Compile Include="Resultaten\ILiturgieRegel.cs" />
-    <Compile Include="Resultaten\VerwerkingType.cs" />
+    <Compile Include="Oplossen\Helpers\IVersenDefault.cs" />
+    <Compile Include="Oplossen\ILiturgieRegel.cs" />
+    <Compile Include="Oplossen\VerwerkingType.cs" />
+    <Compile Include="Zoeken\IZoekresultaat.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="LICENSE.md">

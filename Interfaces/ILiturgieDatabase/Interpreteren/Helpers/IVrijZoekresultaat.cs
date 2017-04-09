@@ -1,4 +1,5 @@
 ﻿// Copyright 2017 door Erik de Roos
+using System;
 using System.Collections.Generic;
 
 namespace ILiturgieDatabase
@@ -6,10 +7,10 @@ namespace ILiturgieDatabase
     public interface IVrijZoekresultaat
     {
         string ZoekTerm { get; }
-        IEnumerable<string> AlleMogelijkheden { get; }
+        IEnumerable<IVrijZoekresultaatMogelijkheid> AlleMogelijkheden { get; }
         VrijZoekresultaatAanpassingType ZoeklijstAanpassing { get; }
-        IEnumerable<string> DeltaMogelijkhedenVerwijderd { get; }
-        IEnumerable<string> DeltaMogelijkhedenToegevoegd { get; }
+        IEnumerable<IVrijZoekresultaatMogelijkheid> DeltaMogelijkhedenVerwijderd { get; }
+        IEnumerable<IVrijZoekresultaatMogelijkheid> DeltaMogelijkhedenToegevoegd { get; }
     }
 
     public enum VrijZoekresultaatAanpassingType
@@ -17,5 +18,11 @@ namespace ILiturgieDatabase
         Geen,
         Alles,
         Deel
+    }
+
+    public interface IVrijZoekresultaatMogelijkheid : IComparable<IVrijZoekresultaatMogelijkheid>, IEqualityComparer<IVrijZoekresultaatMogelijkheid>
+    {
+        string Weergave { get; }
+        string UitDatabase { get; }
     }
 }

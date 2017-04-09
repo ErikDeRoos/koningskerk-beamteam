@@ -24,12 +24,14 @@ namespace Generator.LiturgieOplosser
     {
         private readonly ILiturgieDatabase.ILiturgieDatabase _database;
         private readonly string _defaultSetNameEmpty;
-        private IEnumerable<string> _onderdelenLijstCache;
+        private IEnumerable<IVrijZoekresultaatMogelijkheid> _onderdelenLijstCache;
+        private readonly ILiturgieInterpreteer _liturgieInterperator;
 
-        public LiturgieOplosser(ILiturgieDatabase.ILiturgieDatabase database, string defaultSetNameEmpty)
+        public LiturgieOplosser(ILiturgieDatabase.ILiturgieDatabase database, ILiturgieInterpreteer liturgieInterperator, string defaultSetNameEmpty)
         {
             _database = database;
             _defaultSetNameEmpty = defaultSetNameEmpty;
+            _liturgieInterperator = liturgieInterperator;
         }
 
 
@@ -178,21 +180,25 @@ namespace Generator.LiturgieOplosser
 
         // TODO oplossen dat logica om regel weer samen te stellen uit gaat van vaste waarden
         // TODO efficienter omgaan met zoekresources (verschillende lijsten opslaan in zoekresultaat en alleen wijzigingen veranderen)
-        public IVrijZoekresultaat VrijZoeken(string zoekTekst, ILiturgieInterpreteer liturgieInterperator, IVrijZoekresultaat vorigResultaat = null)
+        public IVrijZoekresultaat VrijZoeken(string zoekTekst, IVrijZoekresultaat vorigResultaat = null)
         {
             var veiligeZoekTekst = (zoekTekst ?? "").TrimStart();
             var veranderingGemaakt = false;
 
             var onderdeelLijst = KrijgBasisDatabaseLijst(true);
-            var fragmentLijst = Enumerable.Empty<string>();
-            var vorigeZoektermSplit = liturgieInterperator.VanTekstregel(vorigResultaat == null ? "" : vorigResultaat.ZoekTerm);
-            var huidigeZoektermSplit = liturgieInterperator.VanTekstregel(veiligeZoekTekst);
+            var fragmentLijst = Enumerable.Empty<IVrijZoekresultaatMogelijkheid>();
+            var vorigeZoektermSplit = _liturgieInterperator.VanTekstregel(vorigResultaat == null ? "" : vorigResultaat.ZoekTerm);
+            var huidigeZoektermSplit = _liturgieInterperator.VanTekstregel(veiligeZoekTekst);
 
             if ((zoekTekst.Length > 0 && LiturgieInterpretator.InterpreteerLiturgieRuw.BenamingDeelScheidingstekens.Contains(zoekTekst.Last())) || (string.IsNullOrWhiteSpace(vorigeZoektermSplit.Deel) && !string.IsNullOrWhiteSpace(huidigeZoektermSplit.Deel)))
             {
                 // Fragment is er bij gekomen
                 veranderingGemaakt = true;
-                fragmentLijst = ZoekVerdieping(huidigeZoektermSplit.Benaming).Select(t => $"{huidigeZoektermSplit.Benaming} {t}").ToList();
+                fragmentLijst = ZoekVerdieping(huidigeZoektermSplit.Benaming).Select(t => new ZoekresultaatItem()
+                {
+                    Weergave = $"{huidigeZoektermSplit.Benaming} {t.Resultaat}",
+                    UitDatabase = t.Database,
+                }).ToList();
             }
             else if (!string.IsNullOrWhiteSpace(vorigeZoektermSplit.Deel) && string.IsNullOrWhiteSpace(huidigeZoektermSplit.Deel) && (zoekTekst.Length == 0 || !LiturgieInterpretator.InterpreteerLiturgieRuw.BenamingDeelScheidingstekens.Contains(zoekTekst.Last())))
             {
@@ -207,33 +213,44 @@ namespace Generator.LiturgieOplosser
             return ZoekresultaatSamenstellen(veiligeZoekTekst, vorigResultaat, onderdeelLijst.Union(fragmentLijst), veranderingGemaakt);
         }
 
-        private IEnumerable<string> KrijgBasisDatabaseLijst(bool cached)
+        private IEnumerable<IVrijZoekresultaatMogelijkheid> KrijgBasisDatabaseLijst(bool cached)
         {
             if (!cached)
-                return ZoekBasisDatabaseLijst();
+                return ZoekBasisDatabaseLijst()
+                    .Select(t => new ZoekresultaatItem()
+                    {
+                        Weergave = t.Resultaat,
+                        UitDatabase = t.Database,
+                    });
             else
             {
                 if (_onderdelenLijstCache == null)
-                    _onderdelenLijstCache = ZoekBasisDatabaseLijst();
+                    _onderdelenLijstCache = ZoekBasisDatabaseLijst()
+                        .Select(t => new ZoekresultaatItem()
+                        {
+                            Weergave = t.Resultaat,
+                            UitDatabase = t.Database,
+                        })
+                        .ToList();
                 return _onderdelenLijstCache;
             }
         }
-        private IList<string> ZoekBasisDatabaseLijst()
+        private IList<IZoekresultaat> ZoekBasisDatabaseLijst()
         {
             return _database.KrijgAlleOnderdelen()  // Alle onderdelen (psalmen, gezangen, bijbelboeken, etc)
                 .Union(ZoekVerdieping(FileEngineDefaults.CommonFilesSetName))  // Alle slide templates zoals amen, votum, bidden etc)
                 .Distinct().ToList();
         }
-        private IEnumerable<string> ZoekVerdieping(string vanOnderdeelNaam)
+        private IEnumerable<IZoekresultaat> ZoekVerdieping(string vanOnderdeelNaam)
         {
             return _database.KrijgAlleFragmenten(vanOnderdeelNaam);
         }
 
-        private Zoekresultaat ZoekresultaatSamenstellen(string zoekTekst, IVrijZoekresultaat vorigResultaat, IEnumerable<string> lijst, bool lijstIsGewijzigd)
+        private Zoekresultaat ZoekresultaatSamenstellen(string zoekTekst, IVrijZoekresultaat vorigResultaat, IEnumerable<IVrijZoekresultaatMogelijkheid> lijst, bool lijstIsGewijzigd)
         {
-            var zoekLijst = Enumerable.Empty<string>();
-            var zoekLijstDeltaToegevoegd = Enumerable.Empty<string>();
-            var zoekLijstDeltaVerwijderd = Enumerable.Empty<string>();
+            var zoekLijst = Enumerable.Empty<IVrijZoekresultaatMogelijkheid>();
+            var zoekLijstDeltaToegevoegd = Enumerable.Empty<IVrijZoekresultaatMogelijkheid>();
+            var zoekLijstDeltaVerwijderd = Enumerable.Empty<IVrijZoekresultaatMogelijkheid>();
             var aanpassing = VrijZoekresultaatAanpassingType.Alles;
 
             if (!lijstIsGewijzigd && vorigResultaat != null)
@@ -243,7 +260,7 @@ namespace Generator.LiturgieOplosser
             }
             else
             {
-                zoekLijst = lijst.Distinct().OrderBy(name => name).ToList();
+                zoekLijst = lijst.Distinct().OrderBy(z => z).ToList();
                 if (aanpassing == VrijZoekresultaatAanpassingType.Alles && vorigResultaat != null)
                 {
                     zoekLijstDeltaToegevoegd = zoekLijst.Where(z => !vorigResultaat.AlleMogelijkheden.Contains(z)).ToList();
@@ -263,6 +280,20 @@ namespace Generator.LiturgieOplosser
             };
         }
 
+        // TODO samenstellen tekst om op te zoeken staat op meerder plekken
+        public string MaakLiturgieregelVanZoekresultaat(string invoerTekst, IVrijZoekresultaat zoekresultaat)
+        {
+            if (zoekresultaat == null || invoerTekst == null)
+                return invoerTekst;
+            var invoerTekstSplitsing = _liturgieInterperator.VanTekstregel(invoerTekst);
+            var teZoekenTekst = $"{invoerTekstSplitsing.Benaming} {invoerTekstSplitsing.Deel}";
+            var itemInZoeklijst = zoekresultaat.AlleMogelijkheden.FirstOrDefault(z => z.Weergave == teZoekenTekst);
+            if (itemInZoeklijst == null)
+                return invoerTekst;
+            if (itemInZoeklijst.UitDatabase == Database.LiturgieDatabaseSettings.DatabaseNameBijbeltekst)
+                return $"{invoerTekst} (als:bijbeltekst)";
+            return invoerTekst;
+        }
 
         private class Oplossing : ILiturgieOplossing
         {
@@ -320,13 +351,43 @@ namespace Generator.LiturgieOplosser
 
         private class Zoekresultaat : IVrijZoekresultaat
         {
-            public IEnumerable<string> AlleMogelijkheden { get; set; }
-            public IEnumerable<string> DeltaMogelijkhedenToegevoegd { get; set; }
-            public IEnumerable<string> DeltaMogelijkhedenVerwijderd { get; set; }
+            public IEnumerable<IVrijZoekresultaatMogelijkheid> AlleMogelijkheden { get; set; }
+            public IEnumerable<IVrijZoekresultaatMogelijkheid> DeltaMogelijkhedenToegevoegd { get; set; }
+            public IEnumerable<IVrijZoekresultaatMogelijkheid> DeltaMogelijkhedenVerwijderd { get; set; }
 
             public VrijZoekresultaatAanpassingType ZoeklijstAanpassing { get; set; }
 
             public string ZoekTerm { get; set; }
+        }
+
+        private class ZoekresultaatItem : IVrijZoekresultaatMogelijkheid
+        {
+            public string Weergave { get; set; }
+            public string UitDatabase { get; set; }
+
+            public int CompareTo(IVrijZoekresultaatMogelijkheid other)
+            {
+                if (other == null)
+                    return -1;
+                return Weergave.CompareTo(other.Weergave);
+            }
+
+            public bool Equals(IVrijZoekresultaatMogelijkheid x, IVrijZoekresultaatMogelijkheid y)
+            {
+                if (x == null || y == null)
+                    return false;
+                return x.Weergave == y.Weergave;
+            }
+
+            public int GetHashCode(IVrijZoekresultaatMogelijkheid obj)
+            {
+                return obj.Weergave.GetHashCode();
+            }
+
+            public override string ToString()
+            {
+                return Weergave;
+            }
         }
     }
 }

@@ -19,7 +19,6 @@ namespace PowerpointGenerator.Screens
         private readonly IInstellingenFactory _instellingenFactory;
         private readonly GeneratieInterface<CompRegistration> _funcs;
         private readonly ILiturgieLosOp _liturgieOplosser;
-        private readonly ILiturgieInterpreteer _liturgieInterperator;
         private readonly string _startBestand;
 
         //locatie van het programma op de pc
@@ -29,12 +28,11 @@ namespace PowerpointGenerator.Screens
         private IVrijZoekresultaat _huidigZoekresultaat;
         private object _dropdownLocker = new object();
 
-        public Form1(IInstellingenFactory instellingenOplosser, GeneratieInterface<CompRegistration> funcs, ILiturgieLosOp liturgieOplosser, ILiturgieInterpreteer liturgieInterperator, string startBestand)
+        public Form1(IInstellingenFactory instellingenOplosser, GeneratieInterface<CompRegistration> funcs, ILiturgieLosOp liturgieOplosser, string startBestand)
         {
             _instellingenFactory = instellingenOplosser;
             _funcs = funcs;
             _liturgieOplosser = liturgieOplosser;
-            _liturgieInterperator = liturgieInterperator;
             _startBestand = startBestand;
             InitializeComponent();
         }
@@ -61,7 +59,7 @@ namespace PowerpointGenerator.Screens
             _funcs.Opstarten(_startBestand);
 
             // TODO test
-            _liturgieOplosser.VrijZoeken("psalm ", _liturgieInterperator, _huidigZoekresultaat);
+            _liturgieOplosser.VrijZoeken("psalm ", _huidigZoekresultaat);
 
             TriggerZoeklijstVeranderd();
         }
@@ -216,10 +214,10 @@ namespace PowerpointGenerator.Screens
         #endregion formulier eventhandlers
         #endregion Eventhandlers
 
-
+        #region Liturgie editor
         private void TriggerZoeklijstVeranderd()
         {
-            _huidigZoekresultaat = _liturgieOplosser.VrijZoeken(textBox6.Text, _liturgieInterperator, _huidigZoekresultaat);
+            _huidigZoekresultaat = _liturgieOplosser.VrijZoeken(textBox6.Text, _huidigZoekresultaat);
             if (_huidigZoekresultaat.ZoeklijstAanpassing == VrijZoekresultaatAanpassingType.Geen)
                 return;
 
@@ -231,19 +229,19 @@ namespace PowerpointGenerator.Screens
                 if (textBox6.AutoCompleteCustomSource == null)
                 {
                     textBox6.AutoCompleteCustomSource = new AutoCompleteStringCollection();
-                    textBox6.AutoCompleteCustomSource.AddRange(_huidigZoekresultaat.AlleMogelijkheden.ToArray());
+                    textBox6.AutoCompleteCustomSource.AddRange(_huidigZoekresultaat.AlleMogelijkheden.Select(m => m.Weergave).ToArray());
                 }
                 else if (_huidigZoekresultaat.ZoeklijstAanpassing == VrijZoekresultaatAanpassingType.Alles)
                 {
                     textBox6.AutoCompleteCustomSource.Clear();
-                    textBox6.AutoCompleteCustomSource.AddRange(_huidigZoekresultaat.AlleMogelijkheden.ToArray());
+                    textBox6.AutoCompleteCustomSource.AddRange(_huidigZoekresultaat.AlleMogelijkheden.Select(m => m.Weergave).ToArray());
                 }
                 else if (_huidigZoekresultaat.ZoeklijstAanpassing == VrijZoekresultaatAanpassingType.Deel)
                 {
-                    textBox6.AutoCompleteCustomSource.AddRange(_huidigZoekresultaat.DeltaMogelijkhedenToegevoegd.ToArray());
+                    textBox6.AutoCompleteCustomSource.AddRange(_huidigZoekresultaat.DeltaMogelijkhedenToegevoegd.Select(m => m.Weergave).ToArray());
                     foreach (var item in _huidigZoekresultaat.DeltaMogelijkhedenVerwijderd)
                     {
-                        textBox6.AutoCompleteCustomSource.Remove(item);
+                        textBox6.AutoCompleteCustomSource.Remove(item.Weergave);
                     }
                 }
             }
@@ -252,11 +250,13 @@ namespace PowerpointGenerator.Screens
 
         private void HuidigeTekstInvoegen()
         {
+            var toeTeVoegenTekst = _liturgieOplosser.MaakLiturgieregelVanZoekresultaat(textBox6.Text, _huidigZoekresultaat);
             var liturgie = richTextBox1.Lines.ToList();
-            liturgie.Add(textBox6.Text);
+            liturgie.Add(toeTeVoegenTekst);
             richTextBox1.Lines = liturgie.ToArray();
             textBox6.Text = null;
         }
+        #endregion Liturgie editor
 
         public void StartGenereren()
         {

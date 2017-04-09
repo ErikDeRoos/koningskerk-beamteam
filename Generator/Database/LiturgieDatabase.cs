@@ -30,25 +30,25 @@ namespace Generator.Database
             _databases = database;
         }
 
-        public IZoekresultaat ZoekOnderdeel(string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen = null)
+        public IOplossing ZoekOnderdeel(string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen = null)
         {
             return ZoekOnderdeel(VerwerkingType.normaal, onderdeelNaam, fragmentNaam, fragmentDelen);
         }
 
-        public IZoekresultaat ZoekOnderdeel(VerwerkingType alsType, string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen = null)
+        public IOplossing ZoekOnderdeel(VerwerkingType alsType, string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen = null)
         {
             var database = alsType == VerwerkingType.normaal ? _databases.GetDefault() : _databases.Extensions.FirstOrDefault(e => e.Name == LiturgieDatabaseSettings.DatabaseNameBijbeltekst);
             if (database == null)
-                return new Zoekresultaat() { Status = LiturgieOplossingResultaat.DatabaseFout };
+                return new Oplossing() { Status = LiturgieOplossingResultaat.DatabaseFout };
 
             var set = database.Engine.Where(s => string.Equals(s.Name, onderdeelNaam, StringComparison.OrdinalIgnoreCase) || string.Equals(s.Settings.DisplayName, onderdeelNaam, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
             if (set == null)
-                return new Zoekresultaat() { Status = LiturgieOplossingResultaat.SetFout };
+                return new Oplossing() { Status = LiturgieOplossingResultaat.SetFout };
             // Kijk of we het specifieke item in de set kunnen vinden (alleen via de op-schijf naam)
             var subSet = set.Where(r => Compare(r.Name, fragmentNaam, StringComparison.OrdinalIgnoreCase) == 0).FirstOrDefault();
             if (subSet == null)
-                return new Zoekresultaat() { Status = LiturgieOplossingResultaat.SubSetFout };
-            var returnValue = new Zoekresultaat()
+                return new Oplossing() { Status = LiturgieOplossingResultaat.SubSetFout };
+            var returnValue = new Oplossing()
             {
                 OnderdeelNaam = set.Name,
                 FragmentNaam = subSet.Name,
@@ -58,7 +58,7 @@ namespace Generator.Database
             // Je kunt geen verzen opgeven als we ze niet los hebben.
             // (Andere kant op kan wel: geen verzen opgeven terwijl ze er wel zijn (wat 'alle verzen' betekend))
             if (fragmentDelen != null && fragmentDelen.Any() && !(set.Settings.ItemsHaveSubContent || set.Settings.ItemIsSubContent))
-                return new Zoekresultaat() { Status = LiturgieOplossingResultaat.VersOnderverdelingMismatch };
+                return new Oplossing() { Status = LiturgieOplossingResultaat.VersOnderverdelingMismatch };
             if (fragmentDelen == null || !fragmentDelen.Any())
             {
                 // We hebben geen versenlijst en de set instellingen zeggen zonder verzen te zijn dus hebben we n samengevoegd item
@@ -66,7 +66,7 @@ namespace Generator.Database
                 {
                     var content = KrijgDirecteContent(subSet.Content, null);
                     if (content == null)
-                        return new Zoekresultaat() { Status = LiturgieOplossingResultaat.VersOnleesbaar };
+                        return new Oplossing() { Status = LiturgieOplossingResultaat.VersOnleesbaar };
                     returnValue.Content = new List<ILiturgieContent> { content };
                 }
                 // Een item met alle verzen
@@ -89,13 +89,13 @@ namespace Generator.Database
                     .ToList();
                 // Specifieke verzen moeten allemaal gevonden kunnen worden
                 if (preSelect.Any(c => c.SubSet == null))
-                    return new Zoekresultaat() { Status = LiturgieOplossingResultaat.VersFout };
+                    return new Oplossing() { Status = LiturgieOplossingResultaat.VersFout };
                 returnValue.Content = preSelect
                     .Select(s => s.SubSet.GetContent())
                     .ToList();
                 // Specifieke verzen moeten allemaal interpreteerbaar zijn
                 if (returnValue.Content.Any(c => c == null))
-                    return new Zoekresultaat() { Status = LiturgieOplossingResultaat.VersOnleesbaar };
+                    return new Oplossing() { Status = LiturgieOplossingResultaat.VersOnleesbaar };
             }
             returnValue.Status = LiturgieOplossingResultaat.Opgelost;
             return returnValue;
@@ -239,18 +239,18 @@ namespace Generator.Database
             }
         }
 
-        public IEnumerable<string> KrijgAlleOnderdelen()
+        public IEnumerable<IZoekresultaat> KrijgAlleOnderdelen()
         {
             return _databases.Extensions
-                .SelectMany(de => de.Engine.GetAllNames());
+                .SelectMany(de => de.Engine.GetAllNames().Select(n => new Zoekresultaat() { Database = de.Name, Resultaat = n }));
         }
 
-        public IEnumerable<string> KrijgAlleFragmenten(string onderdeelNaam)
+        public IEnumerable<IZoekresultaat> KrijgAlleFragmenten(string onderdeelNaam)
         {
             return _databases.Extensions.SelectMany(de => 
                 de.Engine
                 .Where(s => string.Equals(s.Name, onderdeelNaam, StringComparison.OrdinalIgnoreCase) || string.Equals(s.Settings.DisplayName, onderdeelNaam, StringComparison.OrdinalIgnoreCase))
-                .SelectMany(set => set.GetAllNames())
+                .SelectMany(set => set.GetAllNames().Select(n => new Zoekresultaat() { Database = de.Name, Resultaat = n }))
             );
         }
 
@@ -297,7 +297,7 @@ namespace Generator.Database
             public int? Nummer { get; set; }
         }
 
-        public class Zoekresultaat : IZoekresultaat
+        public class Oplossing : IOplossing
         {
             public LiturgieOplossingResultaat Status { get; set; }
             public string OnderdeelNaam { get; set; }
@@ -305,6 +305,12 @@ namespace Generator.Database
             public string FragmentNaam { get; set; }
             public IEnumerable<ILiturgieContent> Content { get; set; }
             public bool ZonderContentSplitsing { get; set; }
+        }
+
+        private class Zoekresultaat : IZoekresultaat
+        {
+            public string Database { get; set; }
+            public string Resultaat { get; set; }
         }
     }
 
