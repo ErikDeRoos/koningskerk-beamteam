@@ -1,4 +1,6 @@
-﻿// Copyright 2016 door Remco Veurink en Erik de Roos
+﻿// Copyright 2017 Erik de Roos
+// Van Remco Veurink is het idee van 'liturgie regels' die zich vertalen naar 'templates' met vervangteksten.
+// Van Remco Veurink is het idee van een bestandsdatabase waarvan liedteksten op een template ingevuld worden.
 using ILiturgieDatabase;
 using ISlideBuilder;
 using mppt.Connect;
@@ -9,6 +11,11 @@ using Tools;
 
 namespace mppt.RegelVerwerking
 {
+    /// <summary>
+    /// Deze klasse implementeert de logica die nodig is om de aangeleverde content (liturgie) voor een
+    /// niet-bijbeltekst slide te combineren met slides. Dat kan een lied template slide zijn maar ook
+    /// een normale slide waarop wat template teksten vervangen moeten worden.
+    /// </summary>
     class VerwerkerNormaal : IVerwerkFactory
     {
         public IVerwerk Init(IMppApplication metApplicatie, IMppPresentatie toevoegenAanPresentatie, IMppFactory metFactory, ILiedFormatter gebruikLiedFormatter, IBuilderBuildSettings buildSettings,
@@ -61,6 +68,9 @@ namespace mppt.RegelVerwerking
                 };
             }
 
+            /// <summary>
+            /// Lied in template plaatsen
+            /// </summary>
             private void InvullenTekstOpTemplate(ILiturgieRegel regel, ILiturgieContent inhoud, ILiturgieRegel volgende)
             {
                 var tekstOmTeRenderen = inhoud.Inhoud;
@@ -106,6 +116,9 @@ namespace mppt.RegelVerwerking
                 }
             }
 
+            /// <summary>
+            /// Algemene slide waarop we alleen template teksten moeten vervangen
+            /// </summary>
             private void ToevoegenSlides(ILiturgieRegel regel, ILiturgieContent inhoud, ILiturgieRegel volgende)
             {
                 //open de presentatie met de sheets erin
@@ -139,7 +152,12 @@ namespace mppt.RegelVerwerking
                             var display = _liedFormatter.Volgende(volgende);
                             textbox.Text = display != null ? $"{_buildDefaults.LabelVolgende} {display.Display}" : string.Empty;
                         }
-                        //als de template de tekst bevat "Volgende" moet daar de te lezen schriftgedeeltes komen
+                        //verkorte versie van "Volgende"
+                        else if (text.Equals("<Volgende_kort>"))
+                        {
+                            var display = _liedFormatter.Volgende(volgende);
+                            textbox.Text = display != null ? display.Display : string.Empty;
+                        }
                         else if (text.Equals("<Lezen>"))
                             textbox.Text = _buildDefaults.LabelLezen + _buildSettings.Lezen;
                         else if (text.Equals("<Tekst>"))

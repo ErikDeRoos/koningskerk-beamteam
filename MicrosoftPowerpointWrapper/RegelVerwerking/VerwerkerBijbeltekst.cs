@@ -1,4 +1,4 @@
-﻿// Copyright 2016 door Erik de Roos
+﻿// Copyright 2017 door Erik de Roos
 using ILiturgieDatabase;
 using ISlideBuilder;
 using mppt.Connect;
@@ -10,6 +10,10 @@ using Tools;
 
 namespace mppt.RegelVerwerking
 {
+    /// <summary>
+    /// Deze klasse implementeert de logica die nodig is om de aangeleverde content (liturgie) voor een
+    /// bijbeltekst slide te combineren met de bijbeltekst template
+    /// </summary>
     class VerwerkerBijbeltekst : IVerwerkFactory
     {
         public IVerwerk Init(IMppApplication metApplicatie, IMppPresentatie toevoegenAanPresentatie, IMppFactory metFactory, ILiedFormatter gebruikLiedFormatter, IBuilderBuildSettings buildSettings,

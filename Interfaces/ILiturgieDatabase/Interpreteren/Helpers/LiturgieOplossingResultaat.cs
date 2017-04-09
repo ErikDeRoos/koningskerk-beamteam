@@ -4,13 +4,14 @@ namespace ILiturgieDatabase
 {
     public enum LiturgieOplossingResultaat
     {
-        Opgelost = 0,
-        DatabaseFout = 1,
-        SetFout = 2,
-        SubSetFout = 3,
-        VersFout = 4,  // Vers niet gevonden
-        VersOnderverdelingMismatch = 5,  // Als er wel versen gevraagd worden maar de set geen versen ondersteund
-        VersOnleesbaar = 6,  // Vers data type probleem
+        Onbekend = 0,
+        Opgelost = 1,
+        DatabaseFout = 2,
+        SetFout = 3,
+        SubSetFout = 4,
+        VersFout = 5,  // Vers niet gevonden
+        VersOnderverdelingMismatch = 6,  // Als er wel versen gevraagd worden maar de set geen versen ondersteund
+        VersOnleesbaar = 7,  // Vers data type probleem
     }
 
 }

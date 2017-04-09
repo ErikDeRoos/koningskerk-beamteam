@@ -1,4 +1,4 @@
-﻿// Copyright 2016 door Erik de Roos
+﻿// Copyright 2017 door Erik de Roos
 using ILiturgieDatabase;
 using ISlideBuilder;
 using mppt.Connect;
@@ -14,7 +14,10 @@ namespace mppt
     /// <summary>
     /// 
     /// </summary>
-    /// <remarks>Zit hard op het file systeem! (powerpoint heeft geen ondersteuning voor streams)</remarks>
+    /// <remarks>
+    /// Presentatie slides worden hard vanaf het file systeem verwerkt! 
+    /// (powerpoint heeft geen ondersteuning voor streams)
+    /// </remarks>
     public class PowerpointFunctions : IBuilder
     {
         private IMppFactory _mppFactory { get; }

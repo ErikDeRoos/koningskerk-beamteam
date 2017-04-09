@@ -305,6 +305,11 @@ namespace Generator.Database
             public string FragmentNaam { get; set; }
             public IEnumerable<ILiturgieContent> Content { get; set; }
             public bool ZonderContentSplitsing { get; set; }
+
+            public Zoekresultaat()
+            {
+                Status = LiturgieOplossingResultaat.Onbekend;
+            }
         }
     }
 
