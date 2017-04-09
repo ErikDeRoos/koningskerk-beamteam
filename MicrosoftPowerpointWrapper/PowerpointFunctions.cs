@@ -110,11 +110,11 @@ namespace mppt
         /// <summary>
         /// Uitzoeken wat de volgende is
         /// </summary>
-        private static ILiturgieRegel Volgende(IEnumerable<ILiturgieRegel> volledigeLiturgie, ILiturgieRegel huidig)
+        private static IEnumerable<ILiturgieRegel> Volgende(IEnumerable<ILiturgieRegel> volledigeLiturgie, ILiturgieRegel huidig)
         {
             var lijst = volledigeLiturgie.ToList();
             var huidigeItemIndex = lijst.IndexOf(huidig);
-            return lijst.Skip(huidigeItemIndex + 1).FirstOrDefault();
+            return lijst.Skip(huidigeItemIndex + 1);
         }
 
 

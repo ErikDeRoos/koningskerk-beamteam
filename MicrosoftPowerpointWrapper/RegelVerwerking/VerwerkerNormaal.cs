@@ -51,15 +51,15 @@ namespace mppt.RegelVerwerking
                 _lengteBerekenaar = lengteBerekenaar;
             }
 
-            public IVerwerkResultaat Verwerk(ILiturgieRegel regel, ILiturgieRegel volgende)
+            public IVerwerkResultaat Verwerk(ILiturgieRegel regel, IEnumerable<ILiturgieRegel> volgenden)
             {
                 // Per onderdeel in de regel moet een sheet komen
                 foreach (var inhoud in regel.Content)
                 {
                     if (inhoud.InhoudType == InhoudType.Tekst)
-                        InvullenTekstOpTemplate(regel, inhoud, volgende);
+                        InvullenTekstOpTemplate(regel, inhoud, volgenden);
                     else
-                        ToevoegenSlides(regel, inhoud, volgende);
+                        ToevoegenSlides(regel, inhoud, volgenden);
                 }
 
                 return new VerwerkResultaat()
@@ -71,7 +71,7 @@ namespace mppt.RegelVerwerking
             /// <summary>
             /// Lied in template plaatsen
             /// </summary>
-            private void InvullenTekstOpTemplate(ILiturgieRegel regel, ILiturgieContent inhoud, ILiturgieRegel volgende)
+            private void InvullenTekstOpTemplate(ILiturgieRegel regel, ILiturgieContent inhoud, IEnumerable<ILiturgieRegel> volgenden)
             {
                 var tekstOmTeRenderen = inhoud.Inhoud;
                 var tekstOmTeRenderenLijst = new List<string>();
@@ -105,7 +105,7 @@ namespace mppt.RegelVerwerking
                         {
                             //we moeten dan wel al op de laatste slide zitten ('InvullenVolgende' is wel al intelligent maar in het geval van 1
                             //lange tekst over meerdere dia's kan 'InvullenVolgende' niet de juiste keuze maken)
-                            var display = IsLaatsteSlide(tekstOmTeRenderenLijst, tekst, regel, inhoud) ? _liedFormatter.Volgende(volgende) : null;
+                            var display = IsLaatsteSlide(tekstOmTeRenderenLijst, tekst, regel, inhoud) ? _liedFormatter.Volgende(volgenden) : null;
                             shape.Text = display != null ? $"{_buildDefaults.LabelVolgende} {display.Display}" : string.Empty;
                         }
                     }
@@ -119,7 +119,7 @@ namespace mppt.RegelVerwerking
             /// <summary>
             /// Algemene slide waarop we alleen template teksten moeten vervangen
             /// </summary>
-            private void ToevoegenSlides(ILiturgieRegel regel, ILiturgieContent inhoud, ILiturgieRegel volgende)
+            private void ToevoegenSlides(ILiturgieRegel regel, ILiturgieContent inhoud, IEnumerable<ILiturgieRegel> volgenden)
             {
                 //open de presentatie met de sheets erin
                 var presentatie = OpenPps(inhoud.Inhoud);
@@ -145,18 +145,30 @@ namespace mppt.RegelVerwerking
                         //als de template de tekst bevat "2e Collecte: " moet daar de 2e collecte achter komen
                         else if (text.Equals("<2e Collecte:>"))
                             textbox.Text = _buildDefaults.LabelCollecte2 + _buildSettings.Collecte2;
-                        //als de template de tekst bevat "Volgende" moet daar _altijd_ de Liturgieregel van de volgende sheet komen
-                        //(omdat het hier handmatig bepaald wordt door degene die de slides gemaakt heeft)
+                        //als de template de tekst bevat "Volgende" moet daar de Liturgieregel van de volgende sheet komen
                         else if (text.Equals("<Volgende>"))
                         {
-                            var display = _liedFormatter.Volgende(volgende);
+                            var display = _liedFormatter.Volgende(volgenden);
                             textbox.Text = display != null ? $"{_buildDefaults.LabelVolgende} {display.Display}" : string.Empty;
                         }
                         //verkorte versie van "Volgende"
                         else if (text.Equals("<Volgende_kort>"))
                         {
-                            var display = _liedFormatter.Volgende(volgende);
+                            var display = _liedFormatter.Volgende(volgenden);
                             textbox.Text = display != null ? display.Display : string.Empty;
+                        }
+                        //een "Volgende" waarbij je kan bepalen dat je iets verder kijkt
+                        else if (text.StartsWith("<Volgende_over_") && text.EndsWith(">"))
+                        {
+                            var aantalOverslaanStr = text.Substring("<Volgende_over_".Length, text.Length - "<Volgende_over_>".Length);
+                            int aantalOverslaan = 0;
+                            if (int.TryParse(aantalOverslaanStr, out aantalOverslaan))
+                            {
+                                var display = _liedFormatter.Volgende(volgenden, aantalOverslaan);
+                                textbox.Text = display != null ? $"{_buildDefaults.LabelVolgende} {display.Display}" : string.Empty;
+                            }
+                            else
+                                textbox.Text = string.Empty;
                         }
                         else if (text.Equals("<Lezen>"))
                             textbox.Text = _buildDefaults.LabelLezen + _buildSettings.Lezen;
