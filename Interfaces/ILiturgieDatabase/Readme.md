@@ -3,7 +3,7 @@
 Koppeling voor interpreteren tekstuele liturgie regels naar tussenformaat.
 Koppeling voor het omzetten van een tussenformaat naar liturgie regels, geschikt voor communicatie, die de volledige content bevatten.
 
-Copyright 2016 door Erik de Roos
+Copyright 2017 door Erik de Roos
 
 Uitgebracht onder licentie van:
 GNU LESSER GENERAL PUBLIC LICENSE
