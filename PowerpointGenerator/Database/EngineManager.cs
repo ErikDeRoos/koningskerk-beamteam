@@ -7,28 +7,45 @@ namespace PowerpointGenerator.Database
 {
     class EngineManager<T> : IEngineManager<T> where T : class, ISetSettings, new()
     {
-        private IEngineSelection<T> _default;
+        private readonly IInstellingenFactory _settings;
+        private readonly Generator.Database.FileSystem.FileEngine<T>.Factory<T> _fac;
 
-        public IEnumerable<IEngineSelection<T>> Extensions { get; private set; }
+        private IEngineSelection<T> _default;
+        private IEngineSelection<T> _bijbeltekst;
+
+        public IEnumerable<IEngineSelection<T>> Extensions {
+            get
+            {
+                yield return GetDefault();
+                yield return GetBijbeltekst();
+            }
+        }
 
         public EngineManager(IInstellingenFactory settings, Generator.Database.FileSystem.FileEngine<T>.Factory<T> fac) {
-            _default = new EngineSelection<T>() {
-                Name = "default",
-                Engine = fac.Invoke(settings.LoadFromXmlFile().FullDatabasePath, true)
-            };
-            Extensions = new List<IEngineSelection<T>>()
-            {
-                _default,
-                new EngineSelection<T>() {
-                    Name = Generator.Database.LiturgieDatabaseSettings.DatabaseNameBijbeltekst,
-                    Engine = fac.Invoke(settings.LoadFromXmlFile().FullBijbelPath, true)
-                },
-            };
+            _settings = settings;
+            _fac = fac;
         }
 
         public IEngineSelection<T> GetDefault()
         {
+            if (_default == null)
+                _default = new EngineSelection<T>()
+                {
+                    Name = "default",
+                    Engine = _fac.Invoke(_settings.LoadFromXmlFile().FullDatabasePath, true)
+                };
             return _default;
+        }
+
+        private IEngineSelection<T> GetBijbeltekst()
+        {
+            if (_bijbeltekst == null)
+                _bijbeltekst = new EngineSelection<T>()
+                {
+                    Name = Generator.Database.LiturgieDatabaseSettings.DatabaseNameBijbeltekst,
+                    Engine = _fac.Invoke(_settings.LoadFromXmlFile().FullBijbelPath, true)
+                };
+            return _bijbeltekst;
         }
 
         class EngineSelection<T2> : IEngineSelection<T2> where T2 : class, ISetSettings, new()

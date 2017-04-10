@@ -20,7 +20,7 @@ namespace ILiturgieDatabase
         Deel
     }
 
-    public interface IVrijZoekresultaatMogelijkheid : IComparable<IVrijZoekresultaatMogelijkheid>, IEqualityComparer<IVrijZoekresultaatMogelijkheid>
+    public interface IVrijZoekresultaatMogelijkheid : IEqualityComparer<IVrijZoekresultaatMogelijkheid>
     {
         string Weergave { get; }
         string UitDatabase { get; }

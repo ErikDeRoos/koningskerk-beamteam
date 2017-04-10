@@ -22,7 +22,8 @@ namespace PowerpointGenerator
         {
             container.RegisterType<Generator.Database.LiturgieDatabase>().As<ILiturgieDatabase.ILiturgieDatabase>();
             container.RegisterType<Generator.LiturgieOplosser.LiturgieOplosser>().As<ILiturgieDatabase.ILiturgieLosOp>()
-                .WithParameter("defaultSetNameEmpty", Properties.Settings.Default.SetNameEmpty);
+                .WithParameter("defaultSetNameEmpty", Properties.Settings.Default.SetNameEmpty)
+                .InstancePerLifetimeScope();
             container.RegisterType<mppt.RegelVerwerking.LengteBerekenaar>().As<ILiturgieDatabase.ILengteBerekenaar>();
             container.RegisterType<Generator.LiturgieInterpretator.InterpreteerLiturgieRuw>().As<ILiturgieDatabase.ILiturgieInterpreteer>();
             container.RegisterGeneric(typeof(Generator.Database.FileSystem.FileEngine<>)).As(typeof(IDatabase.Engine.IEngine<>));

@@ -59,9 +59,6 @@ namespace PowerpointGenerator.Screens
 
             _funcs.Opstarten(_startBestand);
 
-            // TODO test
-            _liturgieOplosser.VrijZoeken("psalm ", _huidigZoekresultaat);
-
             TriggerZoeklijstVeranderd();
         }
 
@@ -228,7 +225,7 @@ namespace PowerpointGenerator.Screens
                     textBox6.AutoCompleteCustomSource = new AutoCompleteStringCollection();
                     textBox6.AutoCompleteCustomSource.AddRange(_huidigZoekresultaat.AlleMogelijkheden.Select(m => m.Weergave).ToArray());
                 }
-                else if (_huidigZoekresultaat.ZoeklijstAanpassing == VrijZoekresultaatAanpassingType.Alles)
+                else if (_huidigZoekresultaat.ZoeklijstAanpassing == VrijZoekresultaatAanpassingType.Alles || _huidigZoekresultaat.DeltaMogelijkhedenVerwijderd.Count() > 50)
                 {
                     textBox6.AutoCompleteCustomSource.Clear();
                     textBox6.AutoCompleteCustomSource.AddRange(_huidigZoekresultaat.AlleMogelijkheden.Select(m => m.Weergave).ToArray());

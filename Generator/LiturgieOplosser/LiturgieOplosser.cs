@@ -256,11 +256,11 @@ namespace Generator.LiturgieOplosser
             if (!lijstIsGewijzigd && vorigResultaat != null)
             {
                 aanpassing = VrijZoekresultaatAanpassingType.Geen;
-                zoekLijst = vorigResultaat.AlleMogelijkheden;
+                zoekLijst = vorigResultaat.AlleMogelijkheden.ToList();
             }
             else
             {
-                zoekLijst = lijst.Distinct().OrderBy(z => z).ToList();
+                zoekLijst = lijst.Distinct().OrderBy(z => z.Weergave).ToList();
                 if (aanpassing == VrijZoekresultaatAanpassingType.Alles && vorigResultaat != null)
                 {
                     zoekLijstDeltaToegevoegd = zoekLijst.Where(z => !vorigResultaat.AlleMogelijkheden.Contains(z)).ToList();
@@ -364,13 +364,6 @@ namespace Generator.LiturgieOplosser
         {
             public string Weergave { get; set; }
             public string UitDatabase { get; set; }
-
-            public int CompareTo(IVrijZoekresultaatMogelijkheid other)
-            {
-                if (other == null)
-                    return -1;
-                return Weergave.CompareTo(other.Weergave);
-            }
 
             public bool Equals(IVrijZoekresultaatMogelijkheid x, IVrijZoekresultaatMogelijkheid y)
             {
