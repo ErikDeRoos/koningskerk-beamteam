@@ -2,7 +2,7 @@
 
 Toolset voor een connectie tussen een lokale en een remote slide builder
 
-Copyright 2016 door Erik de Roos
+Copyright 2017 door Erik de Roos
 
 Uitgebracht onder licentie van:
 GNU LESSER GENERAL PUBLIC LICENSE
