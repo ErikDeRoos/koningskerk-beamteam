@@ -35,6 +35,7 @@ namespace PowerpointGenerator.Screens
             _liturgieOplosser = liturgieOplosser;
             _startBestand = startBestand;
             InitializeComponent();
+            textBox6.AutoCompleteCustomSource = new AutoCompleteStringCollection();
             this.Icon = Icon.FromHandle(Resources.Powerpoint_Overlay_icon.GetHicon());
         }
 
@@ -209,6 +210,9 @@ namespace PowerpointGenerator.Screens
         #endregion Eventhandlers
 
         #region Liturgie editor
+        // TODO de werkwijze van het aanpassen van de autocomplete source veroorzaakt soms een access violation. Bijv. snel typen na opstarten.
+        // TODO soms triggert de autoselect en wordt je tekst vanzelf geselecteerd, dat is irritant.
+        // TODO er lijkt een memoryleak te zijn. Geheugengebruik loopt op als je snel wisselt tussen bijv. 'psalmen ' en 'psalmen 1'. Vermoedelijk de database.
         private void TriggerZoeklijstVeranderd()
         {
             _huidigZoekresultaat = _liturgieOplosser.VrijZoeken(textBox6.Text, _huidigZoekresultaat);
@@ -220,12 +224,7 @@ namespace PowerpointGenerator.Screens
             textBox6.SuspendLayout();
             lock(_dropdownLocker)  // Lock om te voorkomen dat werk nog niet af is als we er nog een x in komen (lijkt namelijk te gebeuren)
             {
-                if (textBox6.AutoCompleteCustomSource == null)
-                {
-                    textBox6.AutoCompleteCustomSource = new AutoCompleteStringCollection();
-                    textBox6.AutoCompleteCustomSource.AddRange(_huidigZoekresultaat.AlleMogelijkheden.Select(m => m.Weergave).ToArray());
-                }
-                else if (_huidigZoekresultaat.ZoeklijstAanpassing == VrijZoekresultaatAanpassingType.Alles || _huidigZoekresultaat.DeltaMogelijkhedenVerwijderd.Count() > 50)
+                if (_huidigZoekresultaat == null || _huidigZoekresultaat.ZoeklijstAanpassing == VrijZoekresultaatAanpassingType.Alles || _huidigZoekresultaat.DeltaMogelijkhedenVerwijderd.Count() > 50)
                 {
                     textBox6.AutoCompleteCustomSource.Clear();
                     textBox6.AutoCompleteCustomSource.AddRange(_huidigZoekresultaat.AlleMogelijkheden.Select(m => m.Weergave).ToArray());
