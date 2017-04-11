@@ -217,8 +217,8 @@
             this.toolStripSeparator1,
             this.stopPowerpointToolStripMenuItem});
             this.optiesToolStripMenuItem.Name = "optiesToolStripMenuItem";
-            this.optiesToolStripMenuItem.Size = new System.Drawing.Size(53, 20);
-            this.optiesToolStripMenuItem.Text = "Opties";
+            this.optiesToolStripMenuItem.Size = new System.Drawing.Size(55, 20);
+            this.optiesToolStripMenuItem.Text = "Beheer";
             // 
             // templatesToolStripMenuItem1
             // 
