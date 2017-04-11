@@ -8,6 +8,7 @@ using System.Linq;
 
 namespace PowerpointGenerator.Settings
 {
+    // TODO settings definieeren in een key-value array zodat je meer op kan slaan met minder risico's op incombatibiliteit
     public class SettingsFactory : IInstellingenFactory
     {
         private readonly string _baseDir;
@@ -44,20 +45,36 @@ namespace PowerpointGenerator.Settings
                 if (fileManager.FileExists(instellingenFile))
                     fileManager.Delete(instellingenFile);
 
+                var saveInstellingen = new SaveInstellingen()
+                {
+                    DatabasePad = instellingen.DatabasePad,
+                    BijbelPad = instellingen.BijbelPad,
+                    TemplateTheme = instellingen.TemplateTheme,
+                    TemplateLied = instellingen.TemplateLied,
+                    TemplateBijbeltekst = instellingen.TemplateBijbeltekst,
+                    TekstChar_a_OnARow = instellingen.TekstChar_a_OnARow,
+                    TekstFontName = instellingen.TekstFontName,
+                    TekstFontPointSize = instellingen.TekstFontPointSize,
+                    RegelsPerLiedSlide = instellingen.RegelsPerLiedSlide,
+                    RegelsPerBijbeltekstSlide = instellingen.RegelsPerBijbeltekstSlide,
+                    StandaardTeksten = instellingen.StandaardTeksten,
+                };
+
                 //schrijf instellingen weg
                 using (var sw = new StreamWriter(fileManager.FileWriteStream(instellingenFile)))
                 {
                     var serializer = new JsonSerializer();
-                    serializer.Serialize(sw, instellingen);
+                    serializer.Serialize(sw, saveInstellingen);
                     sw.Flush();
                 }
 
+                var saveMasks = instellingen.Masks.Select(m => new SaveMask() { Name = m.Name, RealName = m.RealName }).ToArray();
+                
                 //schrijf Masks weg
                 using (var sw = new StreamWriter(fileManager.FileWriteStream(maskFile)))
                 {
                     var serializer = new JsonSerializer();
-                    var maskArray = instellingen.Masks.Select(m => new Mask() { Name = m.Name, RealName = m.RealName }).ToArray();
-                    serializer.Serialize(sw, maskArray);
+                    serializer.Serialize(sw, saveMasks);
                     sw.Flush();
                 }
 
@@ -71,7 +88,7 @@ namespace PowerpointGenerator.Settings
 
         private static Instellingen LoadFromJsonFile(IFileOperations fileManager, string instellingenFile, string maskFile)
         {
-            Instellingen instellingen;
+            SaveInstellingen saveInstellingen;
 
             if (!fileManager.FileExists(instellingenFile))
                 return null;
@@ -79,10 +96,24 @@ namespace PowerpointGenerator.Settings
             using (var file = new StreamReader(fileManager.FileReadStream(instellingenFile)))
             {
                 var serializer = new JsonSerializer();
-                instellingen = (Instellingen)serializer.Deserialize(file, typeof(Instellingen));
+                saveInstellingen = (SaveInstellingen)serializer.Deserialize(file, typeof(SaveInstellingen));
             }
-            if (instellingen == null)
+            if (saveInstellingen == null)
                 return null;
+            var instellingen = new Instellingen()
+            {
+                DatabasePad = saveInstellingen.DatabasePad,
+                BijbelPad = saveInstellingen.BijbelPad,
+                TemplateTheme = saveInstellingen.TemplateTheme,
+                TemplateLied = saveInstellingen.TemplateLied,
+                TemplateBijbeltekst = saveInstellingen.TemplateBijbeltekst,
+                TekstChar_a_OnARow = saveInstellingen.TekstChar_a_OnARow,
+                TekstFontName = saveInstellingen.TekstFontName,
+                TekstFontPointSize = saveInstellingen.TekstFontPointSize,
+                RegelsPerLiedSlide = saveInstellingen.RegelsPerLiedSlide,
+                RegelsPerBijbeltekstSlide = saveInstellingen.RegelsPerBijbeltekstSlide,
+                StandaardTeksten = saveInstellingen.StandaardTeksten,
+            };
 
             if (!fileManager.FileExists(maskFile))
                 return instellingen;
@@ -90,7 +121,7 @@ namespace PowerpointGenerator.Settings
             using (var file = new StreamReader(fileManager.FileReadStream(maskFile)))
             {
                 var serializer = new JsonSerializer();
-                foreach (var mask in (Mask[])serializer.Deserialize(file, typeof(Mask[])))
+                foreach (var mask in (SaveMask[])serializer.Deserialize(file, typeof(SaveMask[])))
                 {
                     instellingen.AddMask(new Mapmask(mask.Name, mask.RealName));
                 }
@@ -110,10 +141,25 @@ namespace PowerpointGenerator.Settings
             };
         }
 
-        private class Mask
+        private class SaveMask
         {
             public string Name { get; set; }
             public string RealName { get; set; }
+        }
+
+        private class SaveInstellingen
+        {
+            public string DatabasePad { get; set; }
+            public string BijbelPad { get; set; }
+            public string TemplateTheme { get; set; }
+            public string TemplateLied { get; set; }
+            public string TemplateBijbeltekst { get; set; }
+            public int TekstChar_a_OnARow { get; set; }
+            public string TekstFontName { get; set; }
+            public float TekstFontPointSize { get; set; }
+            public int RegelsPerLiedSlide { get; set; }
+            public int RegelsPerBijbeltekstSlide { get; set; }
+            public StandaardTeksten StandaardTeksten { get; set; }
         }
     }
 }
