@@ -27,7 +27,7 @@ namespace PowerpointGenerator.Screens
         // huidige zoekresultaat voor autocomplete
         private IVrijZoekresultaat _huidigZoekresultaat;
         private object _dropdownLocker = new object();
-        private ILiturgieOptiesGebruiker _huidigeOpties;
+        private ILiturgieOptiesGebruiker _huidigeOptiesBijZoeken;
 
         public Form1(IInstellingenFactory instellingenOplosser, GeneratieInterface<CompRegistration> funcs, ILiturgieLosOp liturgieOplosser, string startBestand)
         {
@@ -52,7 +52,7 @@ namespace PowerpointGenerator.Screens
 
             progressBar1.Visible = false;
 
-            _funcs.Registration.LiturgieRichTextBox = richTextBox1;
+            _funcs.Registration.LiturgieRichTextBox = textBox7;
             _funcs.Registration.VoorgangerTextBox = textBox2;
             _funcs.Registration.Collecte1eTextBox = textBox3;
             _funcs.Registration.Collecte2eTextBox = textBox4;
@@ -116,27 +116,43 @@ namespace PowerpointGenerator.Screens
         }
         private void toolStripMenuItem4_Click(object sender, EventArgs e)
         {
-            richTextBox1.Redo();
+            // TODO betere redo functionaleit (via een stack array?)
+            //textBox7.();
         }
         private void toolStripMenuItem3_Click(object sender, EventArgs e)
         {
-            richTextBox1.Undo();
+            textBox7.Undo();
         }
         private void toolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            richTextBox1.SelectAll();
+            textBox7.SelectAll();
         }
         private void plakkenToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            richTextBox1.Paste();
+            textBox7.Paste();
         }
         private void kopierenToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            richTextBox1.Copy();
+            textBox7.Copy();
         }
         private void knippenToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            richTextBox1.Cut();
+            textBox7.Cut();
+        }
+        private void toolStripMenuItem5_Click(object sender, EventArgs e)
+        {
+            var postion = textBox7.SelectionStart;
+            var atLineNumber = 0;
+            var searchPosition = 0;
+            foreach(var row in textBox7.Lines)
+            {
+                searchPosition += row.Length;
+                if (postion < searchPosition)
+                    break;
+                atLineNumber++;
+            }
+            TriggerWijzigRegel(atLineNumber);
+            textBox7.SelectionStart = postion;
         }
         #endregion bewerken
         #region opties
@@ -209,8 +225,7 @@ namespace PowerpointGenerator.Screens
         }
         private void button3_Click(object sender, EventArgs e)
         {
-            var nieuweOpties = ToonAanpassenOpties();
-            VerwerkAanpassenOpties(nieuweOpties);
+            TriggerAanpassenOptiesBijZoeken();
         }
         #endregion formulier eventhandlers
         #endregion Eventhandlers
@@ -249,36 +264,81 @@ namespace PowerpointGenerator.Screens
 
         private void HuidigeTekstInvoegenEnInvoerLegen()
         {
-            var geinterpreteerdeOpties = KrijgStandaardOpties();
+            var geinterpreteerdeOpties = KrijgOptiesBijZoeken();
             var toeTeVoegenTekst = _liturgieOplosser.MaakTotTekst(textBox6.Text, geinterpreteerdeOpties);
-            var liturgie = richTextBox1.Lines.ToList();
+            var liturgie = textBox7.Lines.ToList();
             liturgie.Add(toeTeVoegenTekst);
-            richTextBox1.Lines = liturgie.ToArray();
+            textBox7.Lines = liturgie.ToArray();
             textBox6.Text = null;
-            _huidigeOpties = null;
+            _huidigeOptiesBijZoeken = null;
             _huidigZoekresultaat = null;
         }
 
-        private ILiturgieOptiesGebruiker KrijgStandaardOpties()
+        private void TriggerAanpassenOptiesBijZoeken()
         {
-            if (_huidigeOpties == null)
-                _huidigeOpties = _liturgieOplosser.ZoekStandaardOptiesUitZoekresultaat(textBox6.Text, _huidigZoekresultaat);
-            return _huidigeOpties;
+            var nieuweOpties = ToonAanpassenOptiesBijZoeken();
+            if (nieuweOpties != null)
+                VerwerkAanpassenOptiesBijZoeken(nieuweOpties);
         }
 
-        private ILiturgieOptiesGebruiker ToonAanpassenOpties()
+        private ILiturgieOptiesGebruiker KrijgOptiesBijZoeken()
+        {
+            if (_huidigeOptiesBijZoeken == null)
+                _huidigeOptiesBijZoeken = _liturgieOplosser.ZoekStandaardOptiesUitZoekresultaat(textBox6.Text, _huidigZoekresultaat);
+            return _huidigeOptiesBijZoeken;
+        }
+
+        private ILiturgieOptiesGebruiker ToonAanpassenOptiesBijZoeken()
         {
             var optiesFormulier = new WijzigOpties();
-            optiesFormulier.Initialise(KrijgStandaardOpties());
+            optiesFormulier.Initialise(KrijgOptiesBijZoeken());
             if (optiesFormulier.ShowDialog() != DialogResult.OK)
                 return null;
             return optiesFormulier.GetOpties();
         }
 
-        private void VerwerkAanpassenOpties(ILiturgieOptiesGebruiker opties)
+        private void VerwerkAanpassenOptiesBijZoeken(ILiturgieOptiesGebruiker opties)
         {
             if (opties != null)
-                _huidigeOpties = opties;
+                _huidigeOptiesBijZoeken = opties;
+        }
+
+        private void TriggerWijzigRegel(int regelnummer)
+        {
+            // Zoek de regel op die we gaan wijzigen
+            var textLines = textBox7.Lines;
+            if (regelnummer < 0 || regelnummer >= textLines.Length)
+                return;
+            var regel = textLines[regelnummer];
+            // Zoek de opties in deze regel
+            var opsplitsing = _liturgieOplosser.SplitsVoorOpties(regel);
+            ILiturgieOptiesGebruiker opties = null;
+            var liturgieRegel = string.Empty;
+            if (opsplitsing.Length == 1)
+                opties = _liturgieOplosser.ToonOpties(opsplitsing[0]);
+            else if (opsplitsing.Length == 2)
+            {
+                liturgieRegel = opsplitsing[0];
+                opties = _liturgieOplosser.ToonOpties(opsplitsing[1]);
+            }
+            else
+            {
+                liturgieRegel = regel;
+                opties = _liturgieOplosser.ZoekStandaardOptiesUitZoekresultaat(regel, null);
+            }
+            // Laat de gebruiker de wijzigingen doorvoeren
+            var optiesFormulier = new WijzigOpties();
+            optiesFormulier.Initialise(opties);
+            if (optiesFormulier.ShowDialog() != DialogResult.OK)
+                return;
+            opties = optiesFormulier.GetOpties();
+            // Verwerk de opties weer in de tekst
+            var nieuweTekst = _liturgieOplosser.MaakTotTekst(liturgieRegel, opties);
+            textBox7.Lines = textLines
+                .Take(regelnummer)
+                .Union(new[] { nieuweTekst })
+                .Union(textLines.Skip(regelnummer + 1))
+                .ToArray();
         }
         #endregion Liturgie editor
 

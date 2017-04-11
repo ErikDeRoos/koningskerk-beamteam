@@ -282,13 +282,24 @@ namespace Generator.LiturgieOplosser
                 if (itemInZoeklijst != null)
                     databaseNaam = itemInZoeklijst.UitDatabase;
             }
-            return _liturgieInterperator.BepaalOptiesTekstinvoer(invoerTekst, databaseNaam);
+            return _liturgieInterperator.BepaalBasisOptiesTekstinvoer(invoerTekst, databaseNaam);
         }
+
+        public ILiturgieOptiesGebruiker ToonOpties(string optiesInTekst)
+        {
+            return _liturgieInterperator.BepaalOptiesTekstinvoer(optiesInTekst);
+        }
+
 
         public string MaakTotTekst(string invoerTekst, ILiturgieOptiesGebruiker opties)
         {
             var tekstUitOpties = _liturgieInterperator.MaakTekstVanOpties(opties);
-            return $"{invoerTekst} {tekstUitOpties}".Trim();
+            return $"{invoerTekst.Trim()} {tekstUitOpties.Trim()}".Trim();
+        }
+
+        public string[] SplitsVoorOpties(string liturgieRegel)
+        {
+            return _liturgieInterperator.SplitsVoorOpties(liturgieRegel);
         }
 
         private class Oplossing : ILiturgieOplossing

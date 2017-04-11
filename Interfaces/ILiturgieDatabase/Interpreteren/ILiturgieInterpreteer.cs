@@ -6,7 +6,9 @@ namespace ILiturgieDatabase {
     {
         ILiturgieInterpretatie VanTekstregel(string regels);
         IEnumerable<ILiturgieInterpretatie> VanTekstregels(string[] regels);
-        ILiturgieOptiesGebruiker BepaalOptiesTekstinvoer(string invoerTekst, string uitDatabase);
+        ILiturgieOptiesGebruiker BepaalBasisOptiesTekstinvoer(string invoerTekst, string uitDatabase);
         string MaakTekstVanOpties(ILiturgieOptiesGebruiker opties);
+        string[] SplitsVoorOpties(string liturgieRegel);
+        ILiturgieOptiesGebruiker BepaalOptiesTekstinvoer(string optiesTekst);
     }
 }

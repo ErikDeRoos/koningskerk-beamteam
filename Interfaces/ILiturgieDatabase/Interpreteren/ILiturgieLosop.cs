@@ -39,8 +39,18 @@ namespace ILiturgieDatabase {
         ILiturgieOptiesGebruiker ZoekStandaardOptiesUitZoekresultaat(string invoerTekst, IVrijZoekresultaat zoekresultaat);
 
         /// <summary>
+        /// Lees alle opties uit
+        /// </summary>
+        ILiturgieOptiesGebruiker ToonOpties(string invoerTekst);
+
+        /// <summary>
         /// Zet de geinterpreteerde opties weer om naar een tekst
         /// </summary>
         string MaakTotTekst(string invoerTekst, ILiturgieOptiesGebruiker opties);
+
+        /// <summary>
+        /// Splits de tekst op tussen een liturgie stuk en een opties stuk
+        /// </summary>
+        string[] SplitsVoorOpties(string liturgieRegel);
     }
 }

@@ -50,7 +50,7 @@ namespace Generator.LiturgieInterpretator
               .ToList();
         }
 
-        public ILiturgieOptiesGebruiker BepaalOptiesTekstinvoer(string invoerTekst, string uitDatabase)
+        public ILiturgieOptiesGebruiker BepaalBasisOptiesTekstinvoer(string invoerTekst, string uitDatabase)
         {
             var returnValue = new LiturgieOpties();
             returnValue.NietVerwerkenViaDatabase = String.IsNullOrWhiteSpace(invoerTekst);
@@ -101,6 +101,29 @@ namespace Generator.LiturgieInterpretator
             optiesReeks.Remove(optiesReeks.Length - 1, 1); // laatste ',' verwijderen
             return $"{OptieStart.First()}{optiesReeks}{OptieEinde.First()}";
         }
+
+        public string[] SplitsVoorOpties(string liturgieRegel)
+        {
+            if (String.IsNullOrWhiteSpace(liturgieRegel))
+                return new string[0];
+            var startOp = liturgieRegel.IndexOfAny(OptieStart);
+            if (startOp < 0)
+                return new string[0];
+            return new string[]
+            {
+                liturgieRegel.Substring(0, startOp),
+                liturgieRegel.Substring(startOp),
+            };
+        }
+
+        public ILiturgieOptiesGebruiker BepaalOptiesTekstinvoer(string optiesTekst)
+        {
+            var heeftOpties = optiesTekst.IndexOfAny(OptieStart) >= 0 && optiesTekst.IndexOfAny(OptieEinde) >= 0;
+            var voorOpties = optiesTekst.Split(OptieStart, StringSplitOptions.RemoveEmptyEntries);
+            var optiesRuw = heeftOpties && voorOpties.Length >= 1 ? voorOpties.Last().Split(OptieEinde, StringSplitOptions.RemoveEmptyEntries)[0].Trim() : Empty;
+            return InterpreteerOpties(optiesRuw);
+        }
+
 
         private static ILiturgieInterpretatie SplitTekstregel(string invoer)
         {
