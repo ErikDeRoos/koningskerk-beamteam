@@ -11,7 +11,7 @@ namespace PowerpointGenerator.Settings
 
         public MicrosoftPowerpointWrapperSettings(IInstellingenFactory instellingenOplosser)
         {
-            var settings = instellingenOplosser.LoadFromXmlFile();
+            var settings = instellingenOplosser.LoadFromFile();
             LengteBerekenaarChar_a_OnARow = settings.TekstChar_a_OnARow;
             LengteBerekenaarFontName = settings.TekstFontName;
             LengteBerekenaarFontPointSize = settings.TekstFontPointSize;

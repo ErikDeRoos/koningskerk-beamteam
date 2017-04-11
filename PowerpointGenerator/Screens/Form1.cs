@@ -149,13 +149,13 @@ namespace PowerpointGenerator.Screens
             formulier.Opstarten();
             if (formulier.ShowDialog() == DialogResult.Yes && formulier.Instellingen != null)
             {
-                if (!_instellingenFactory.WriteToXmlFile(formulier.Instellingen))
+                if (!_instellingenFactory.WriteToFile(formulier.Instellingen))
                     MessageBox.Show(Resources.Form1_Niet_opgeslagen_wegens_te_lang_pad);
             }
         }
         private void bekijkDatabaseToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            Process.Start("explorer.exe", "/root, \"" + _instellingenFactory.LoadFromXmlFile().FullDatabasePath + "\"");
+            Process.Start("explorer.exe", "/root, \"" + _instellingenFactory.LoadFromFile().FullDatabasePath + "\"");
         }
         private void stopPowerpointToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -163,16 +163,16 @@ namespace PowerpointGenerator.Screens
         }
         private void invoerenMasksToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var formulier = new MaskInvoer(_instellingenFactory.LoadFromXmlFile().Masks);
+            var formulier = new MaskInvoer(_instellingenFactory.LoadFromFile().Masks);
             if (formulier.ShowDialog() == DialogResult.OK)
             {
-                var instellingen = _instellingenFactory.LoadFromXmlFile();
+                var instellingen = _instellingenFactory.LoadFromFile();
                 instellingen.ClearMasks();
                 foreach (var mask in formulier.Masks)
                 {
                     instellingen.AddMask(mask);
                 }
-                if (!_instellingenFactory.WriteToXmlFile(instellingen))
+                if (!_instellingenFactory.WriteToFile(instellingen))
                     MessageBox.Show(Resources.Form1_Niet_opgeslagen_wegens_te_lang_pad);
             }
         }

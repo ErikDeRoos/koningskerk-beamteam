@@ -236,7 +236,7 @@ namespace Generator
             // Liturgie uit tekstbox omzetten in leesbare items
             var ruweLiturgie = _liturgieInterpreteer.VanTekstregels(Registration.Liturgie);
             // Zoek op het bestandssysteem zo veel mogelijk al op (behalve ppt, die gaan via COM element)
-            var masks = MapMasksToLiturgie.Map(_instellingenFactory.LoadFromXmlFile().Masks);
+            var masks = MapMasksToLiturgie.Map(_instellingenFactory.LoadFromFile().Masks);
             return _liturgieOplosser.LosOp(ruweLiturgie, masks).ToList();
         }
 
@@ -245,7 +245,7 @@ namespace Generator
             Status = GeneratorStatus.AanHetGenereren;
             var lezenText = string.Join("\n\r", Registration.Lezen);
             var tekstText = string.Join("\n\r", Registration.Tekst);
-            var status = _powerpoint.Initialiseer(ingeladenLiturgie.Select(l => l.Regel).ToList(), Registration.Voorganger, Registration.Collecte1e, Registration.Collecte2e, lezenText, tekstText, _instellingenFactory.LoadFromXmlFile(), opslaanAlsBestandsnaam);
+            var status = _powerpoint.Initialiseer(ingeladenLiturgie.Select(l => l.Regel).ToList(), Registration.Voorganger, Registration.Collecte1e, Registration.Collecte2e, lezenText, tekstText, _instellingenFactory.LoadFromFile(), opslaanAlsBestandsnaam);
             if (status.Fout == null)
                 status = _powerpoint.Start();
             // Stop weer als er een fout is geweest

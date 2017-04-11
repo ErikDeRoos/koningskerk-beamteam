@@ -23,7 +23,7 @@ namespace PowerpointGenerator
 
         public void Opstarten()
         {
-            var vanInstellingen = _instellingenFactory.LoadFromXmlFile();
+            var vanInstellingen = _instellingenFactory.LoadFromFile();
 
             textBox3.Text = vanInstellingen.DatabasePad;
             textBox5.Text = vanInstellingen.BijbelPad;

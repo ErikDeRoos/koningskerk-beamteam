@@ -14,14 +14,14 @@ namespace PowerpointGenerator.Database
         public EngineManager(IInstellingenFactory settings, Generator.Database.FileSystem.FileEngine<T>.Factory<T> fac) {
             _default = new EngineSelection<T>() {
                 Name = "default",
-                Engine = fac.Invoke(settings.LoadFromXmlFile().FullDatabasePath, true)
+                Engine = fac.Invoke(settings.LoadFromFile().FullDatabasePath, true)
             };
             Extensions = new List<IEngineSelection<T>>()
             {
                 _default,
                 new EngineSelection<T>() {
                     Name = Generator.Database.LiturgieDatabaseSettings.DatabaseNameBijbeltekst,
-                    Engine = fac.Invoke(settings.LoadFromXmlFile().FullBijbelPath, true)
+                    Engine = fac.Invoke(settings.LoadFromFile().FullBijbelPath, true)
                 },
             };
         }
