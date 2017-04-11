@@ -8,15 +8,6 @@ using static System.String;
 
 namespace Generator.LiturgieOplosser
 {
-    public static class LiturgieOplosserSettings
-    {
-        public const string OptieNietVerwerken = "geendb";
-        public const string OptieNietTonenInVolgende = "geenvolg";
-        public const string OptieNietTonenInOverzicht = "geenlt";
-        public const string OptieAlternatieveNaamOverzicht = "altlt";
-        public const string OptieAlternatieveNaam = "altnm";
-    }
-
     /// <summary>
     /// Zoek naar de opgegeven liturgieen.
     /// </summary>
@@ -44,10 +35,9 @@ namespace Generator.LiturgieOplosser
             var regel = new Regel {DisplayEdit = new RegelDisplay()};
 
             // verwerk de opties
-            var trimmedOpties = item.Opties.Select(o => o.Trim()).ToList();
-            regel.VerwerkenAlsSlide = !trimmedOpties.Any(o => o.StartsWith(LiturgieOplosserSettings.OptieNietVerwerken, StringComparison.CurrentCultureIgnoreCase));
-            regel.TonenInVolgende = !trimmedOpties.Any(o => o.StartsWith(LiturgieOplosserSettings.OptieNietTonenInVolgende, StringComparison.CurrentCultureIgnoreCase));
-            regel.TonenInOverzicht = !trimmedOpties.Any(o => o.StartsWith(LiturgieOplosserSettings.OptieNietTonenInOverzicht, StringComparison.CurrentCultureIgnoreCase));
+            regel.VerwerkenAlsSlide = !item.OptiesGebruiker.NietVerwerkenViaDatabase;
+            regel.TonenInOverzicht = item.OptiesGebruiker.ToonInOverzicht;
+            regel.TonenInVolgende = item.OptiesGebruiker.ToonInVolgende;
 
             // regel visualisatie default
             regel.DisplayEdit.Naam = item.Benaming;
@@ -83,17 +73,26 @@ namespace Generator.LiturgieOplosser
             // regel visualisatie na bewerking
             if (IsNullOrEmpty(regel.DisplayEdit.NaamOverzicht))
                 regel.DisplayEdit.NaamOverzicht = regel.DisplayEdit.Naam;
-            // kijk of de opties nog iets zeggen over alternatieve naamgeving
-            var optieMetAltNaamOverzicht = GetOptieParam(trimmedOpties, LiturgieOplosserSettings.OptieAlternatieveNaamOverzicht);
-            if (!IsNullOrWhiteSpace(optieMetAltNaamOverzicht))
+            // kijk of de systeem opties nog iets zeggen over alternatieve naamgeving
+            if (!IsNullOrWhiteSpace(item.TeTonenNaamOpOverzicht))
             {
-                regel.DisplayEdit.NaamOverzicht = optieMetAltNaamOverzicht;
+                regel.DisplayEdit.NaamOverzicht = item.TeTonenNaamOpOverzicht;
                 regel.DisplayEdit.SubNaam = null;
             }
-            var optieMetAltNaamVolgende = GetOptieParam(trimmedOpties, LiturgieOplosserSettings.OptieAlternatieveNaam);
-            if (!IsNullOrWhiteSpace(optieMetAltNaamVolgende))
+            if (!IsNullOrWhiteSpace(item.OptiesGebruiker.AlternatieveNaamOverzicht))
             {
-                regel.DisplayEdit.Naam = optieMetAltNaamVolgende;
+                regel.DisplayEdit.NaamOverzicht = item.OptiesGebruiker.AlternatieveNaamOverzicht;
+                regel.DisplayEdit.SubNaam = null;
+            }
+            // kijk of de gebruiker opties nog iets zeggen over alternatieve naamgeving
+            if (!IsNullOrWhiteSpace(item.TeTonenNaam))
+            {
+                regel.DisplayEdit.Naam = item.TeTonenNaam;
+                regel.DisplayEdit.SubNaam = null;
+            }
+            if (!IsNullOrWhiteSpace(item.OptiesGebruiker.AlternatieveNaam))
+            {
+                regel.DisplayEdit.Naam = item.OptiesGebruiker.AlternatieveNaam;
                 regel.DisplayEdit.SubNaam = null;
             }
 
@@ -163,14 +162,6 @@ namespace Generator.LiturgieOplosser
             regel.Content = content.ToList();
             regel.DisplayEdit.VolledigeContent = versDelenLijst.Count == 1 && !versDelen.FirstOrDefault().Verzen.Any();
             return null;
-        }
-
-        private static string GetOptieParam(IEnumerable<string> opties, string optie)
-        {
-            var optieMetParam = opties.FirstOrDefault(o => o.StartsWith(optie, StringComparison.CurrentCultureIgnoreCase));
-            if (optieMetParam == null || optieMetParam.Length == optie.Length)
-                return string.Empty;
-            return optieMetParam.Substring(optie.Length + 1).Trim();
         }
 
         public IEnumerable<ILiturgieOplossing> LosOp(IEnumerable<ILiturgieInterpretatie> items, IEnumerable<ILiturgieMapmaskArg> masks)
@@ -280,19 +271,24 @@ namespace Generator.LiturgieOplosser
             };
         }
 
-        // TODO samenstellen tekst om op te zoeken staat op meerder plekken
-        public string MaakLiturgieregelVanZoekresultaat(string invoerTekst, IVrijZoekresultaat zoekresultaat)
+        public ILiturgieOptiesGebruiker ZoekStandaardOptiesUitZoekresultaat(string invoerTekst, IVrijZoekresultaat zoekresultaat)
         {
-            if (zoekresultaat == null || invoerTekst == null)
-                return invoerTekst;
-            var invoerTekstSplitsing = _liturgieInterperator.VanTekstregel(invoerTekst);
-            var teZoekenTekst = $"{invoerTekstSplitsing.Benaming} {invoerTekstSplitsing.Deel}";
-            var itemInZoeklijst = zoekresultaat.AlleMogelijkheden.FirstOrDefault(z => z.Weergave == teZoekenTekst);
-            if (itemInZoeklijst == null)
-                return invoerTekst;
-            if (itemInZoeklijst.UitDatabase == Database.LiturgieDatabaseSettings.DatabaseNameBijbeltekst)
-                return $"{invoerTekst} (als:bijbeltekst)";
-            return invoerTekst;
+            var databaseNaam = string.Empty;
+            if (zoekresultaat != null && invoerTekst != null)
+            {
+                var invoerTekstSplitsing = _liturgieInterperator.VanTekstregel(invoerTekst);
+                var teZoekenTekst = $"{invoerTekstSplitsing.Benaming} {invoerTekstSplitsing.Deel}";
+                var itemInZoeklijst = zoekresultaat.AlleMogelijkheden.FirstOrDefault(z => z.Weergave == teZoekenTekst);
+                if (itemInZoeklijst != null)
+                    databaseNaam = itemInZoeklijst.UitDatabase;
+            }
+            return _liturgieInterperator.BepaalOptiesTekstinvoer(invoerTekst, databaseNaam);
+        }
+
+        public string MaakTotTekst(string invoerTekst, ILiturgieOptiesGebruiker opties)
+        {
+            var tekstUitOpties = _liturgieInterperator.MaakTekstVanOpties(opties);
+            return $"{invoerTekst} {tekstUitOpties}".Trim();
         }
 
         private class Oplossing : ILiturgieOplossing

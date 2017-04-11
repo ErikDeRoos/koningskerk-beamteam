@@ -34,8 +34,13 @@ namespace ILiturgieDatabase {
         IVrijZoekresultaat VrijZoeken(string zoekTekst, IVrijZoekresultaat vorigResultaat = null);
 
         /// <summary>
-        /// Zet het opgegeven zoekresultaat om in een tekstreeks die een valide liturgieregel is
+        /// Verschaft een basis inzicht van de opties op basis van het zoekresultaat
         /// </summary>
-        string MaakLiturgieregelVanZoekresultaat(string invoerTekst, IVrijZoekresultaat zoekresultaat);
+        ILiturgieOptiesGebruiker ZoekStandaardOptiesUitZoekresultaat(string invoerTekst, IVrijZoekresultaat zoekresultaat);
+
+        /// <summary>
+        /// Zet de geinterpreteerde opties weer om naar een tekst
+        /// </summary>
+        string MaakTotTekst(string invoerTekst, ILiturgieOptiesGebruiker opties);
     }
 }

@@ -18,20 +18,20 @@ namespace Generator.Tests
         [TestFixture]
         public class VanTekstregelMethod : InterpreteerLiturgieRuwTests
         {
-            [TestCase("Deel1 Deel2: Deel3 (Deel4)", new[] { "Deel1", "Deel2", "Deel3", "Deel4" })]
+            [TestCase("Deel1 Deel2: Deel3 (als:bijbeltekst)", new[] { "Deel1", "Deel2", "Deel3" })]
             public void Splitsing_Basis(string input, string[] resultaten)
             {
                 var benaming = resultaten[0];
                 var deel = resultaten[1];
                 var verzen = resultaten[2];
-                var optie1 = resultaten[3];
+                var alsBijbeltekst = true;
 
                 var resultaat = sut.VanTekstregel(input);
 
                 Assert.That(resultaat.Benaming, Is.EqualTo(benaming));
                 Assert.That(resultaat.Deel, Is.EqualTo(deel));
                 Assert.That(resultaat.VerzenZoalsIngevoerd, Is.EqualTo(verzen));
-                Assert.That(resultaat.Opties.First(), Is.EqualTo(optie1));
+                Assert.That(resultaat.OptiesGebruiker.AlsBijbeltekst, Is.EqualTo(alsBijbeltekst));
             }
 
             [TestCase("johannes 3: 5 (als:bijbeltekst)")]

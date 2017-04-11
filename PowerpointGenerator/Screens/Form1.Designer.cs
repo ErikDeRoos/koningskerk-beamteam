@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.button1 = new System.Windows.Forms.Button();
             this.bestandToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.nieuweLiturgieToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -44,10 +43,11 @@
             this.plakkenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.optiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.bekijkDatabaseToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.stopPowerpointToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.templatesToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.invoerenMasksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.bekijkDatabaseToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.stopPowerpointToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label2 = new System.Windows.Forms.Label();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
@@ -69,7 +69,7 @@
             this.textBox6 = new System.Windows.Forms.TextBox();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.button3 = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -211,20 +211,6 @@
             this.optiesToolStripMenuItem.Size = new System.Drawing.Size(53, 20);
             this.optiesToolStripMenuItem.Text = "Opties";
             // 
-            // bekijkDatabaseToolStripMenuItem1
-            // 
-            this.bekijkDatabaseToolStripMenuItem1.Name = "bekijkDatabaseToolStripMenuItem1";
-            this.bekijkDatabaseToolStripMenuItem1.Size = new System.Drawing.Size(184, 22);
-            this.bekijkDatabaseToolStripMenuItem1.Text = "Bekijk Database";
-            this.bekijkDatabaseToolStripMenuItem1.Click += new System.EventHandler(this.bekijkDatabaseToolStripMenuItem1_Click);
-            // 
-            // stopPowerpointToolStripMenuItem
-            // 
-            this.stopPowerpointToolStripMenuItem.Name = "stopPowerpointToolStripMenuItem";
-            this.stopPowerpointToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
-            this.stopPowerpointToolStripMenuItem.Text = "Repareer powerpoint";
-            this.stopPowerpointToolStripMenuItem.Click += new System.EventHandler(this.stopPowerpointToolStripMenuItem_Click);
-            // 
             // templatesToolStripMenuItem1
             // 
             this.templatesToolStripMenuItem1.Name = "templatesToolStripMenuItem1";
@@ -238,6 +224,25 @@
             this.invoerenMasksToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
             this.invoerenMasksToolStripMenuItem.Text = "Invoeren Masks";
             this.invoerenMasksToolStripMenuItem.Click += new System.EventHandler(this.invoerenMasksToolStripMenuItem_Click);
+            // 
+            // bekijkDatabaseToolStripMenuItem1
+            // 
+            this.bekijkDatabaseToolStripMenuItem1.Name = "bekijkDatabaseToolStripMenuItem1";
+            this.bekijkDatabaseToolStripMenuItem1.Size = new System.Drawing.Size(184, 22);
+            this.bekijkDatabaseToolStripMenuItem1.Text = "Bekijk Database";
+            this.bekijkDatabaseToolStripMenuItem1.Click += new System.EventHandler(this.bekijkDatabaseToolStripMenuItem1_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(181, 6);
+            // 
+            // stopPowerpointToolStripMenuItem
+            // 
+            this.stopPowerpointToolStripMenuItem.Name = "stopPowerpointToolStripMenuItem";
+            this.stopPowerpointToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
+            this.stopPowerpointToolStripMenuItem.Text = "Repareer powerpoint";
+            this.stopPowerpointToolStripMenuItem.Click += new System.EventHandler(this.stopPowerpointToolStripMenuItem_Click);
             // 
             // label2
             // 
@@ -412,6 +417,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.button3);
             this.groupBox1.Controls.Add(this.button2);
             this.groupBox1.Controls.Add(this.textBox6);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -424,7 +430,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(283, 17);
+            this.button2.Location = new System.Drawing.Point(311, 17);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(75, 23);
             this.button2.TabIndex = 2;
@@ -438,7 +444,7 @@
             this.textBox6.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
             this.textBox6.Location = new System.Drawing.Point(12, 19);
             this.textBox6.Name = "textBox6";
-            this.textBox6.Size = new System.Drawing.Size(265, 20);
+            this.textBox6.Size = new System.Drawing.Size(293, 20);
             this.textBox6.TabIndex = 1;
             this.textBox6.TextChanged += new System.EventHandler(this.textBox6_TextChanged);
             this.textBox6.KeyUp += new System.Windows.Forms.KeyEventHandler(this.textBox6_KeyUp);
@@ -482,10 +488,15 @@
             this.splitContainer2.SplitterDistance = 561;
             this.splitContainer2.TabIndex = 0;
             // 
-            // toolStripSeparator1
+            // button3
             // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(181, 6);
+            this.button3.Location = new System.Drawing.Point(392, 17);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(75, 23);
+            this.button3.TabIndex = 3;
+            this.button3.Text = "Wijzig opties";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // Form1
             // 
@@ -496,6 +507,7 @@
             this.Controls.Add(this.menuStrip1);
             this.KeyPreview = true;
             this.MainMenuStrip = this.menuStrip1;
+            this.MinimumSize = new System.Drawing.Size(726, 500);
             this.Name = "Form1";
             this.Text = "Powerpoint Generator";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
@@ -564,6 +576,7 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.Button button3;
     }
 }
 

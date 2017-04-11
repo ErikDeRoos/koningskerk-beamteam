@@ -27,6 +27,7 @@ namespace PowerpointGenerator.Screens
         // huidige zoekresultaat voor autocomplete
         private IVrijZoekresultaat _huidigZoekresultaat;
         private object _dropdownLocker = new object();
+        private ILiturgieOptiesGebruiker _huidigeOpties;
 
         public Form1(IInstellingenFactory instellingenOplosser, GeneratieInterface<CompRegistration> funcs, ILiturgieLosOp liturgieOplosser, string startBestand)
         {
@@ -200,11 +201,16 @@ namespace PowerpointGenerator.Screens
         private void textBox6_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.KeyData == Keys.Enter)
-                HuidigeTekstInvoegen();
+                HuidigeTekstInvoegenEnInvoerLegen();
         }
         private void button2_Click(object sender, EventArgs e)
         {
-            HuidigeTekstInvoegen();
+            HuidigeTekstInvoegenEnInvoerLegen();
+        }
+        private void button3_Click(object sender, EventArgs e)
+        {
+            var nieuweOpties = ToonAanpassenOpties();
+            VerwerkAanpassenOpties(nieuweOpties);
         }
         #endregion formulier eventhandlers
         #endregion Eventhandlers
@@ -241,13 +247,38 @@ namespace PowerpointGenerator.Screens
             textBox6.ResumeLayout();
         }
 
-        private void HuidigeTekstInvoegen()
+        private void HuidigeTekstInvoegenEnInvoerLegen()
         {
-            var toeTeVoegenTekst = _liturgieOplosser.MaakLiturgieregelVanZoekresultaat(textBox6.Text, _huidigZoekresultaat);
+            var geinterpreteerdeOpties = KrijgStandaardOpties();
+            var toeTeVoegenTekst = _liturgieOplosser.MaakTotTekst(textBox6.Text, geinterpreteerdeOpties);
             var liturgie = richTextBox1.Lines.ToList();
             liturgie.Add(toeTeVoegenTekst);
             richTextBox1.Lines = liturgie.ToArray();
             textBox6.Text = null;
+            _huidigeOpties = null;
+            _huidigZoekresultaat = null;
+        }
+
+        private ILiturgieOptiesGebruiker KrijgStandaardOpties()
+        {
+            if (_huidigeOpties == null)
+                _huidigeOpties = _liturgieOplosser.ZoekStandaardOptiesUitZoekresultaat(textBox6.Text, _huidigZoekresultaat);
+            return _huidigeOpties;
+        }
+
+        private ILiturgieOptiesGebruiker ToonAanpassenOpties()
+        {
+            var optiesFormulier = new WijzigOpties();
+            optiesFormulier.Initialise(KrijgStandaardOpties());
+            if (optiesFormulier.ShowDialog() != DialogResult.OK)
+                return null;
+            return optiesFormulier.GetOpties();
+        }
+
+        private void VerwerkAanpassenOpties(ILiturgieOptiesGebruiker opties)
+        {
+            if (opties != null)
+                _huidigeOpties = opties;
         }
         #endregion Liturgie editor
 
@@ -265,7 +296,7 @@ namespace PowerpointGenerator.Screens
                 if (ingeladenLiturgie.Any(l => l.Resultaat != LiturgieOplossingResultaat.Opgelost))
                 {
                     var errorformulier = new LiturgieNotFoundFormulier(ingeladenLiturgie.Where(l => l.Resultaat != LiturgieOplossingResultaat.Opgelost));
-                    if (errorformulier.ShowDialog() == DialogResult.Cancel)
+                    if (errorformulier.ShowDialog() != DialogResult.OK)
                         return;
                     ingeladenLiturgie = ingeladenLiturgie.Where(l => l.Resultaat == LiturgieOplossingResultaat.Opgelost).ToList();
                 }

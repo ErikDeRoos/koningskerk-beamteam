@@ -40,6 +40,7 @@
     <Compile Include="Interpreteren\ILiturgieLosop.cs" />
     <Compile Include="ILiturgieDatabase.cs" />
     <Compile Include="Interpreteren\Helpers\IVrijZoekresultaat.cs" />
+    <Compile Include="Interpreteren\ILiturgieOptiesGebruiker.cs" />
     <Compile Include="Oplossen\IOplossing.cs" />
     <Compile Include="Oplossen\Helpers\InhoudType.cs" />
     <Compile Include="Oplossen\Helpers\ILiturgieContent.cs" />
