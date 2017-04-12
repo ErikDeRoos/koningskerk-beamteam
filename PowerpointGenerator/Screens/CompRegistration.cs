@@ -7,12 +7,12 @@ namespace PowerpointGenerator.Screens
 
     class CompRegistration : ICompRegistration
     {
-        public RichTextBox LiturgieRichTextBox { get; set; }
+        public TextBox LiturgieRichTextBox { get; set; }
         public TextBox VoorgangerTextBox { get; set; }
         public TextBox Collecte1eTextBox { get; set; }
         public TextBox Collecte2eTextBox { get; set; }
-        public RichTextBox LezenRichTextBox { get; set; }
-        public RichTextBox TekstRichTextBox { get; set; }
+        public TextBox LezenRichTextBox { get; set; }
+        public TextBox TekstRichTextBox { get; set; }
 
         public string[] Liturgie { get { return LiturgieRichTextBox?.Lines; } set { if (LiturgieRichTextBox != null) LiturgieRichTextBox.Lines = value; }  }
         public string Voorganger { get { return VoorgangerTextBox?.Text; } set { if (VoorgangerTextBox != null) VoorgangerTextBox.Text = value; } }

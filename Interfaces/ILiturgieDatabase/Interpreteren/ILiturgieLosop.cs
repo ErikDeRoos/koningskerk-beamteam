@@ -31,6 +31,26 @@ namespace ILiturgieDatabase {
         /// <summary>
         /// Zoek in alle databases naar de opgegeven tekst
         /// </summary>
-        IVrijZoekresultaat VrijZoeken(string zoekTekst, ILiturgieInterpreteer liturgieInterperator, IVrijZoekresultaat vorigResultaat = null);
+        IVrijZoekresultaat VrijZoeken(string zoekTekst, IVrijZoekresultaat vorigResultaat = null);
+
+        /// <summary>
+        /// Verschaft een basis inzicht van de opties op basis van het zoekresultaat
+        /// </summary>
+        ILiturgieOptiesGebruiker ZoekStandaardOptiesUitZoekresultaat(string invoerTekst, IVrijZoekresultaat zoekresultaat);
+
+        /// <summary>
+        /// Lees alle opties uit
+        /// </summary>
+        ILiturgieOptiesGebruiker ToonOpties(string invoerTekst);
+
+        /// <summary>
+        /// Zet de geinterpreteerde opties weer om naar een tekst
+        /// </summary>
+        string MaakTotTekst(string invoerTekst, ILiturgieOptiesGebruiker opties);
+
+        /// <summary>
+        /// Splits de tekst op tussen een liturgie stuk en een opties stuk
+        /// </summary>
+        string[] SplitsVoorOpties(string liturgieRegel);
     }
 }

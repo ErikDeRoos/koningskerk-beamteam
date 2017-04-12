@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            this.components = new System.ComponentModel.Container();
             this.button1 = new System.Windows.Forms.Button();
             this.bestandToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.nieuweLiturgieToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -44,10 +44,11 @@
             this.plakkenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.optiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.bekijkDatabaseToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.stopPowerpointToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.templatesToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.invoerenMasksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.bekijkDatabaseToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.stopPowerpointToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label2 = new System.Windows.Forms.Label();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
@@ -59,17 +60,23 @@
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.label1 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.RichTextBox();
-            this.textBox5 = new System.Windows.Forms.RichTextBox();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.textBox5 = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.splitContainer4 = new System.Windows.Forms.SplitContainer();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.button3 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.textBox6 = new System.Windows.Forms.TextBox();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.textBox7 = new System.Windows.Forms.TextBox();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.knippenToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.kopierenToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.plakkenToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -80,6 +87,7 @@
             this.splitContainer4.Panel2.SuspendLayout();
             this.splitContainer4.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
             this.splitContainer2.Panel1.SuspendLayout();
             this.splitContainer2.Panel2.SuspendLayout();
@@ -166,6 +174,7 @@
             // 
             // toolStripMenuItem4
             // 
+            this.toolStripMenuItem4.Enabled = false;
             this.toolStripMenuItem4.Name = "toolStripMenuItem4";
             this.toolStripMenuItem4.Size = new System.Drawing.Size(228, 22);
             this.toolStripMenuItem4.Text = "Opnieuw doen      (CTRL + Y)";
@@ -208,22 +217,8 @@
             this.toolStripSeparator1,
             this.stopPowerpointToolStripMenuItem});
             this.optiesToolStripMenuItem.Name = "optiesToolStripMenuItem";
-            this.optiesToolStripMenuItem.Size = new System.Drawing.Size(53, 20);
-            this.optiesToolStripMenuItem.Text = "Opties";
-            // 
-            // bekijkDatabaseToolStripMenuItem1
-            // 
-            this.bekijkDatabaseToolStripMenuItem1.Name = "bekijkDatabaseToolStripMenuItem1";
-            this.bekijkDatabaseToolStripMenuItem1.Size = new System.Drawing.Size(184, 22);
-            this.bekijkDatabaseToolStripMenuItem1.Text = "Bekijk Database";
-            this.bekijkDatabaseToolStripMenuItem1.Click += new System.EventHandler(this.bekijkDatabaseToolStripMenuItem1_Click);
-            // 
-            // stopPowerpointToolStripMenuItem
-            // 
-            this.stopPowerpointToolStripMenuItem.Name = "stopPowerpointToolStripMenuItem";
-            this.stopPowerpointToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
-            this.stopPowerpointToolStripMenuItem.Text = "Repareer powerpoint";
-            this.stopPowerpointToolStripMenuItem.Click += new System.EventHandler(this.stopPowerpointToolStripMenuItem_Click);
+            this.optiesToolStripMenuItem.Size = new System.Drawing.Size(55, 20);
+            this.optiesToolStripMenuItem.Text = "Beheer";
             // 
             // templatesToolStripMenuItem1
             // 
@@ -238,6 +233,25 @@
             this.invoerenMasksToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
             this.invoerenMasksToolStripMenuItem.Text = "Invoeren Masks";
             this.invoerenMasksToolStripMenuItem.Click += new System.EventHandler(this.invoerenMasksToolStripMenuItem_Click);
+            // 
+            // bekijkDatabaseToolStripMenuItem1
+            // 
+            this.bekijkDatabaseToolStripMenuItem1.Name = "bekijkDatabaseToolStripMenuItem1";
+            this.bekijkDatabaseToolStripMenuItem1.Size = new System.Drawing.Size(184, 22);
+            this.bekijkDatabaseToolStripMenuItem1.Text = "Bekijk Database";
+            this.bekijkDatabaseToolStripMenuItem1.Click += new System.EventHandler(this.bekijkDatabaseToolStripMenuItem1_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(181, 6);
+            // 
+            // stopPowerpointToolStripMenuItem
+            // 
+            this.stopPowerpointToolStripMenuItem.Name = "stopPowerpointToolStripMenuItem";
+            this.stopPowerpointToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
+            this.stopPowerpointToolStripMenuItem.Text = "Repareer powerpoint";
+            this.stopPowerpointToolStripMenuItem.Click += new System.EventHandler(this.stopPowerpointToolStripMenuItem_Click);
             // 
             // label2
             // 
@@ -346,20 +360,20 @@
             this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox1.Location = new System.Drawing.Point(3, 133);
+            this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(228, 62);
             this.textBox1.TabIndex = 16;
-            this.textBox1.Text = "";
             // 
             // textBox5
             // 
             this.textBox5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox5.Location = new System.Drawing.Point(3, 214);
+            this.textBox5.Multiline = true;
             this.textBox5.Name = "textBox5";
             this.textBox5.Size = new System.Drawing.Size(228, 67);
             this.textBox5.TabIndex = 17;
-            this.textBox5.Text = "";
             // 
             // label6
             // 
@@ -406,12 +420,13 @@
             // 
             // splitContainer4.Panel2
             // 
-            this.splitContainer4.Panel2.Controls.Add(this.richTextBox1);
+            this.splitContainer4.Panel2.Controls.Add(this.textBox7);
             this.splitContainer4.Size = new System.Drawing.Size(473, 599);
             this.splitContainer4.TabIndex = 20;
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.button3);
             this.groupBox1.Controls.Add(this.button2);
             this.groupBox1.Controls.Add(this.textBox6);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -422,9 +437,19 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Zoeken";
             // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(392, 17);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(75, 23);
+            this.button3.TabIndex = 3;
+            this.button3.Text = "Wijzig opties";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(283, 17);
+            this.button2.Location = new System.Drawing.Point(311, 17);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(75, 23);
             this.button2.TabIndex = 2;
@@ -438,19 +463,64 @@
             this.textBox6.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
             this.textBox6.Location = new System.Drawing.Point(12, 19);
             this.textBox6.Name = "textBox6";
-            this.textBox6.Size = new System.Drawing.Size(265, 20);
+            this.textBox6.Size = new System.Drawing.Size(293, 20);
             this.textBox6.TabIndex = 1;
             this.textBox6.TextChanged += new System.EventHandler(this.textBox6_TextChanged);
             this.textBox6.KeyUp += new System.Windows.Forms.KeyEventHandler(this.textBox6_KeyUp);
             // 
-            // richTextBox1
+            // textBox7
             // 
-            this.richTextBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBox1.Location = new System.Drawing.Point(0, 0);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(473, 545);
-            this.richTextBox1.TabIndex = 0;
-            this.richTextBox1.Text = "";
+            this.textBox7.ContextMenuStrip = this.contextMenuStrip1;
+            this.textBox7.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox7.Location = new System.Drawing.Point(0, 0);
+            this.textBox7.Multiline = true;
+            this.textBox7.Name = "textBox7";
+            this.textBox7.Size = new System.Drawing.Size(473, 545);
+            this.textBox7.TabIndex = 0;
+            // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItem5,
+            this.toolStripSeparator2,
+            this.knippenToolStripMenuItem1,
+            this.kopierenToolStripMenuItem1,
+            this.plakkenToolStripMenuItem1});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(142, 98);
+            // 
+            // toolStripMenuItem5
+            // 
+            this.toolStripMenuItem5.Name = "toolStripMenuItem5";
+            this.toolStripMenuItem5.Size = new System.Drawing.Size(141, 22);
+            this.toolStripMenuItem5.Text = "Wijzig opties";
+            this.toolStripMenuItem5.Click += new System.EventHandler(this.toolStripMenuItem5_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(138, 6);
+            // 
+            // knippenToolStripMenuItem1
+            // 
+            this.knippenToolStripMenuItem1.Name = "knippenToolStripMenuItem1";
+            this.knippenToolStripMenuItem1.Size = new System.Drawing.Size(141, 22);
+            this.knippenToolStripMenuItem1.Text = "Knippen";
+            this.knippenToolStripMenuItem1.Click += new System.EventHandler(this.knippenToolStripMenuItem_Click);
+            // 
+            // kopierenToolStripMenuItem1
+            // 
+            this.kopierenToolStripMenuItem1.Name = "kopierenToolStripMenuItem1";
+            this.kopierenToolStripMenuItem1.Size = new System.Drawing.Size(141, 22);
+            this.kopierenToolStripMenuItem1.Text = "Kopieren";
+            this.kopierenToolStripMenuItem1.Click += new System.EventHandler(this.kopierenToolStripMenuItem_Click);
+            // 
+            // plakkenToolStripMenuItem1
+            // 
+            this.plakkenToolStripMenuItem1.Name = "plakkenToolStripMenuItem1";
+            this.plakkenToolStripMenuItem1.Size = new System.Drawing.Size(141, 22);
+            this.plakkenToolStripMenuItem1.Text = "Plakken";
+            this.plakkenToolStripMenuItem1.Click += new System.EventHandler(this.plakkenToolStripMenuItem_Click);
             // 
             // splitContainer2
             // 
@@ -482,11 +552,6 @@
             this.splitContainer2.SplitterDistance = 561;
             this.splitContainer2.TabIndex = 0;
             // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(181, 6);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -496,6 +561,7 @@
             this.Controls.Add(this.menuStrip1);
             this.KeyPreview = true;
             this.MainMenuStrip = this.menuStrip1;
+            this.MinimumSize = new System.Drawing.Size(726, 500);
             this.Name = "Form1";
             this.Text = "Powerpoint Generator";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
@@ -508,10 +574,12 @@
             this.splitContainer1.ResumeLayout(false);
             this.splitContainer4.Panel1.ResumeLayout(false);
             this.splitContainer4.Panel2.ResumeLayout(false);
+            this.splitContainer4.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer4)).EndInit();
             this.splitContainer4.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            this.contextMenuStrip1.ResumeLayout(false);
             this.splitContainer2.Panel1.ResumeLayout(false);
             this.splitContainer2.Panel1.PerformLayout();
             this.splitContainer2.Panel2.ResumeLayout(false);
@@ -549,8 +617,8 @@
         public System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label5;
-        public System.Windows.Forms.RichTextBox textBox1;
-        public System.Windows.Forms.RichTextBox textBox5;
+        public System.Windows.Forms.TextBox textBox1;
+        public System.Windows.Forms.TextBox textBox5;
         private System.Windows.Forms.ToolStripMenuItem contactToolStripMenuItem;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.ToolStripMenuItem bekijkDatabaseToolStripMenuItem1;
@@ -558,12 +626,19 @@
         private System.Windows.Forms.ToolStripMenuItem stopPowerpointToolStripMenuItem;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.SplitContainer splitContainer2;
-        private System.Windows.Forms.RichTextBox richTextBox1;
+        private System.Windows.Forms.TextBox textBox7;
         private System.Windows.Forms.TextBox textBox6;
         private System.Windows.Forms.SplitContainer splitContainer4;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem5;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem knippenToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem kopierenToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem plakkenToolStripMenuItem1;
     }
 }
 

@@ -1,11 +1,8 @@
-﻿// Copyright 2016 door Erik de Roos
+﻿// Copyright 2017 door Erik de Roos
 using ILiturgieDatabase;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using Tools;
 
 namespace mppt.LiedPresentator
 {
@@ -18,11 +15,15 @@ namespace mppt.LiedPresentator
 
         /// Je kunt er voor kiezen dat een volgende item gewoon niet aangekondigd wordt. Dat gaat
         /// via 'TonenInVolgende'.
-        public LiedFormatResult Volgende(ILiturgieRegel volgende)
+        public LiedFormatResult Volgende(IEnumerable<ILiturgieRegel> volgenden, int overslaan = 0)
         {
             // Alleen volgende tonen als volgende er is
-            if (volgende != null && volgende.TonenInVolgende)
-                return ToonWaarNodigMetVerzen(volgende);
+            if (volgenden != null && volgenden.Any() && overslaan >= 0)
+            {
+                var volgende = volgenden.Skip(overslaan).FirstOrDefault();
+                if (volgende != null && volgende.TonenInVolgende)
+                    return ToonWaarNodigMetVerzen(volgende);
+            }
             return null;
         }
 

@@ -1,4 +1,4 @@
-﻿// Copyright 2016 door Erik de Roos
+﻿// Copyright 2017 door Erik de Roos
 using ILiturgieDatabase;
 using ISlideBuilder;
 using mppt.Connect;
@@ -10,6 +10,10 @@ using Tools;
 
 namespace mppt.RegelVerwerking
 {
+    /// <summary>
+    /// Deze klasse implementeert de logica die nodig is om de aangeleverde content (liturgie) voor een
+    /// bijbeltekst slide te combineren met de bijbeltekst template
+    /// </summary>
     class VerwerkerBijbeltekst : IVerwerkFactory
     {
         public IVerwerk Init(IMppApplication metApplicatie, IMppPresentatie toevoegenAanPresentatie, IMppFactory metFactory, ILiedFormatter gebruikLiedFormatter, IBuilderBuildSettings buildSettings,
@@ -43,9 +47,9 @@ namespace mppt.RegelVerwerking
                 _lengteBerekenaar = lengteBerekenaar;
             }
 
-            public IVerwerkResultaat Verwerk(ILiturgieRegel regel, ILiturgieRegel volgende)
+            public IVerwerkResultaat Verwerk(ILiturgieRegel regel, IEnumerable<ILiturgieRegel> volgenden)
             {
-                InvullenTekstOpTemplate(regel, volgende);
+                InvullenTekstOpTemplate(regel, volgenden);
 
                 return new VerwerkResultaat()
                 {
@@ -53,7 +57,7 @@ namespace mppt.RegelVerwerking
                 };
             }
 
-            private void InvullenTekstOpTemplate(ILiturgieRegel regel, ILiturgieRegel volgende)
+            private void InvullenTekstOpTemplate(ILiturgieRegel regel, IEnumerable<ILiturgieRegel> volgenden)
             {
                 var tekstPerSlide = OpdelenPerSlide(TekstOpknippen(regel.Content), _buildDefaults.RegelsPerBijbeltekstSlide, _lengteBerekenaar);
 
@@ -78,7 +82,7 @@ namespace mppt.RegelVerwerking
                         {
                             //we moeten dan wel al op de laatste slide zitten ('InvullenVolgende' is wel al intelligent maar in het geval van 1
                             //lange tekst over meerdere dia's kan 'InvullenVolgende' niet de juiste keuze maken)
-                            var display = tekstPerSlide.Last() == tekst ? _liedFormatter.Volgende(volgende) : null;
+                            var display = tekstPerSlide.Last() == tekst ? _liedFormatter.Volgende(volgenden) : null;
                             shape.Text = display != null ? $"{_buildDefaults.LabelVolgende} {display.Display}" : string.Empty;
                         }
                     }

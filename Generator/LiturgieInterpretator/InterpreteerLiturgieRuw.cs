@@ -3,10 +3,23 @@ using ILiturgieDatabase;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using static System.String;
 
 namespace Generator.LiturgieInterpretator
 {
+    public static class LiturgieOptieSettings
+    {
+        public const string OptieNietVerwerken = "geendb";
+        public const string OptieNietTonenInVolgende = "geenvolg";
+        public const string OptieNietTonenInOverzicht = "geenlt";
+        public const string OptieAlternatieveNaamOverzicht = "altlt";
+        public const string OptieAlternatieveNaam = "altnm";
+        public const string AlsCommando = "als";
+        public static readonly char[] OptieParamScheidingstekens = { ':' };
+        public const string AlsBijbeltekst = "bijbeltekst";
+    }
+
     /// <summary>
     /// Maak een ruwe lijst van een tekstuele liturgie
     /// </summary>
@@ -19,10 +32,6 @@ namespace Generator.LiturgieInterpretator
         private static readonly char[] OptieStart = { '(' };
         private static readonly char[] OptieEinde = { ')' };
         private static readonly char[] OptieScheidingstekens = { ',' };
-
-        private static readonly string AlsCommando = "als";
-        private static readonly char[] AlsScheidingstekens = { ':' };
-        private static readonly string AlsBijbeltekst = "bijbeltekst";
 
         public ILiturgieInterpretatie VanTekstregel(string regels)
         {
@@ -41,32 +50,119 @@ namespace Generator.LiturgieInterpretator
               .ToList();
         }
 
+        public ILiturgieOptiesGebruiker BepaalBasisOptiesTekstinvoer(string invoerTekst, string uitDatabase)
+        {
+            var returnValue = new LiturgieOpties();
+            returnValue.NietVerwerkenViaDatabase = String.IsNullOrWhiteSpace(invoerTekst);
+            if (returnValue.NietVerwerkenViaDatabase)
+                return returnValue;
+            returnValue.AlsBijbeltekst = !string.IsNullOrWhiteSpace(uitDatabase) && uitDatabase == Database.LiturgieDatabaseSettings.DatabaseNameBijbeltekst;
+            returnValue.ToonInOverzicht = true;
+            returnValue.ToonInVolgende = true;
+            return returnValue;
+        }
+
+        public string MaakTekstVanOpties(ILiturgieOptiesGebruiker opties)
+        {
+            var optiesReeks = new StringBuilder();
+            if (opties.AlsBijbeltekst)
+                optiesReeks
+                    .Append(LiturgieOptieSettings.AlsCommando)
+                    .Append(LiturgieOptieSettings.OptieParamScheidingstekens.First())
+                    .Append(LiturgieOptieSettings.AlsBijbeltekst)
+                    .Append(OptieScheidingstekens.First());
+            if (opties.NietVerwerkenViaDatabase)
+                optiesReeks
+                    .Append(LiturgieOptieSettings.OptieNietVerwerken)
+                    .Append(OptieScheidingstekens.First());
+            if (!opties.ToonInOverzicht)
+                optiesReeks
+                    .Append(LiturgieOptieSettings.OptieNietTonenInOverzicht)
+                    .Append(OptieScheidingstekens.First());
+            if (!opties.ToonInVolgende)
+                optiesReeks
+                    .Append(LiturgieOptieSettings.OptieNietTonenInVolgende)
+                    .Append(OptieScheidingstekens.First());
+            if (!string.IsNullOrWhiteSpace(opties.AlternatieveNaam))
+                optiesReeks
+                    .Append(LiturgieOptieSettings.OptieAlternatieveNaam)
+                    .Append(LiturgieOptieSettings.OptieParamScheidingstekens.First())
+                    .Append(opties.AlternatieveNaam)
+                    .Append(OptieScheidingstekens.First());
+            if (!string.IsNullOrWhiteSpace(opties.AlternatieveNaamOverzicht))
+                optiesReeks
+                    .Append(LiturgieOptieSettings.OptieAlternatieveNaamOverzicht)
+                    .Append(LiturgieOptieSettings.OptieParamScheidingstekens.First())
+                    .Append(opties.AlternatieveNaamOverzicht)
+                    .Append(OptieScheidingstekens.First());
+
+            if (optiesReeks.Length == 0)
+                return string.Empty;
+            optiesReeks.Remove(optiesReeks.Length - 1, 1); // laatste ',' verwijderen
+            return $"{OptieStart.First()}{optiesReeks}{OptieEinde.First()}";
+        }
+
+        public string[] SplitsVoorOpties(string liturgieRegel)
+        {
+            if (String.IsNullOrWhiteSpace(liturgieRegel))
+                return new string[0];
+            var startOp = liturgieRegel.IndexOfAny(OptieStart);
+            if (startOp < 0)
+                return new string[0];
+            return new string[]
+            {
+                liturgieRegel.Substring(0, startOp),
+                liturgieRegel.Substring(startOp),
+            };
+        }
+
+        public ILiturgieOptiesGebruiker BepaalOptiesTekstinvoer(string optiesTekst)
+        {
+            var heeftOpties = optiesTekst.IndexOfAny(OptieStart) >= 0 && optiesTekst.IndexOfAny(OptieEinde) >= 0;
+            var voorOpties = optiesTekst.Split(OptieStart, StringSplitOptions.RemoveEmptyEntries);
+            var optiesRuw = heeftOpties && voorOpties.Length >= 1 ? voorOpties.Last().Split(OptieEinde, StringSplitOptions.RemoveEmptyEntries)[0].Trim() : Empty;
+            return InterpreteerOpties(optiesRuw);
+        }
+
+
         private static ILiturgieInterpretatie SplitTekstregel(string invoer)
         {
             var invoerTrimmed = invoer.Trim();
             var voorOpties = invoerTrimmed.Split(OptieStart, StringSplitOptions.RemoveEmptyEntries);
             var optiesRuw = voorOpties.Length > 1 ? voorOpties[1].Split(OptieEinde, StringSplitOptions.RemoveEmptyEntries)[0].Trim() : Empty;
-            var opties = (!IsNullOrEmpty(optiesRuw) ? optiesRuw : "")
-              .Split(OptieScheidingstekens, StringSplitOptions.RemoveEmptyEntries)
-              .Select(v => v.Trim())
-              .ToList();
-            var als = Als(opties);
-            if ((als ?? "").Trim().Equals(AlsBijbeltekst, StringComparison.CurrentCultureIgnoreCase))
+            var opties = InterpreteerOpties(optiesRuw);
+            if (opties.AlsBijbeltekst)
                 return VerwerkAlsBijbeltekst(voorOpties, opties);
             return VerwerkNormaal(voorOpties, opties);
         }
 
-        private static string Als(IEnumerable<string> voorOpties)
+        private static ILiturgieOptiesGebruiker InterpreteerOpties(string optiesRuw)
         {
-            if (voorOpties == null || !voorOpties.Any())
+            var returnValue = new LiturgieOpties();
+            var opties = (!IsNullOrEmpty(optiesRuw) ? optiesRuw : "")
+              .Split(OptieScheidingstekens, StringSplitOptions.RemoveEmptyEntries)
+              .Select(v => v.Trim())
+              .ToList();
+            returnValue.AlsBijbeltekst = (GetOptieParam(opties, LiturgieOptieSettings.AlsCommando) ?? "").Trim().Equals(LiturgieOptieSettings.AlsBijbeltekst, StringComparison.CurrentCultureIgnoreCase);
+            returnValue.NietVerwerkenViaDatabase = opties.Any(o => o.StartsWith(LiturgieOptieSettings.OptieNietVerwerken, StringComparison.CurrentCultureIgnoreCase));
+            returnValue.ToonInVolgende = !opties.Any(o => o.StartsWith(LiturgieOptieSettings.OptieNietTonenInVolgende, StringComparison.CurrentCultureIgnoreCase));
+            returnValue.ToonInOverzicht = !opties.Any(o => o.StartsWith(LiturgieOptieSettings.OptieNietTonenInOverzicht, StringComparison.CurrentCultureIgnoreCase));
+            returnValue.AlternatieveNaamOverzicht = GetOptieParam(opties, LiturgieOptieSettings.OptieAlternatieveNaamOverzicht);
+            returnValue.AlternatieveNaam = GetOptieParam(opties, LiturgieOptieSettings.OptieAlternatieveNaam);
+            return returnValue;
+        }
+
+        private static string GetOptieParam(IEnumerable<string> opties, string optie)
+        {
+            if (opties == null || !opties.Any())
                 return null;
-            return voorOpties.Select(o => o.Split(AlsScheidingstekens))
-                .Where(o => o.Length == 2 && o[0].Trim().Equals(AlsCommando, StringComparison.CurrentCultureIgnoreCase))
+            return opties.Select(o => o.Split(LiturgieOptieSettings.OptieParamScheidingstekens))
+                .Where(o => o.Length == 2 && o[0].Trim().Equals(optie, StringComparison.CurrentCultureIgnoreCase))
                 .Select(o => o[1])
                 .FirstOrDefault();
         }
 
-        private static ILiturgieInterpretatie VerwerkNormaal(string[] voorOpties, IEnumerable<string> opties)
+        private static ILiturgieInterpretatie VerwerkNormaal(string[] voorOpties, ILiturgieOptiesGebruiker opties)
         {
             var regel = new InterpretatieNormaal();
             if (voorOpties.Length == 0)
@@ -86,11 +182,11 @@ namespace Generator.LiturgieInterpretator
               .Split(VersScheidingstekens, StringSplitOptions.RemoveEmptyEntries)
               .Select(v => v.Trim())
               .ToList();
-            regel.Opties = opties.ToList();
+            regel.OptiesGebruiker = opties;
             return regel;
         }
 
-        private static ILiturgieInterpretatieBijbeltekst VerwerkAlsBijbeltekst(string[] voorOpties, IEnumerable<string> opties)
+        private static ILiturgieInterpretatieBijbeltekst VerwerkAlsBijbeltekst(string[] voorOpties, ILiturgieOptiesGebruiker opties)
         {
             var regel = new InterpretatieBijbeltekst();
             if (voorOpties.Length == 0)
@@ -154,19 +250,18 @@ namespace Generator.LiturgieInterpretator
             }
             regel.PerDeelVersen = deelVersen;
             regel.Benaming = voorBenaming;
-            var optieLijst = opties.ToList();
 
             // downward compatibility met ILiturgieInterpretatie
             regel.Deel = deelVersen.FirstOrDefault().Deel;
             regel.VerzenZoalsIngevoerd = deelVersen.FirstOrDefault().VerzenZoalsIngevoerd;
             regel.Verzen = deelVersen.FirstOrDefault().Verzen;
-
-            // visualisatie handmatig regelen
-            optieLijst.Add($"{LiturgieOplosser.LiturgieOplosserSettings.OptieAlternatieveNaamOverzicht} {voorOpties[0]}");
-            optieLijst.Add($"{LiturgieOplosser.LiturgieOplosserSettings.OptieAlternatieveNaam} {voorOpties[0]}");
+                
+            // bijbeltekst visualisatie handmatig regelen
+            regel.TeTonenNaamOpOverzicht = voorOpties[0];
+            regel.TeTonenNaam = voorOpties[0];
 
             // opties toekennen
-            regel.Opties = optieLijst;
+            regel.OptiesGebruiker = opties;
             return regel;
         }
 
@@ -178,9 +273,13 @@ namespace Generator.LiturgieInterpretator
             public string Benaming { get; set; }
             public string Deel { get; set; }
 
-            public IEnumerable<string> Opties { get; set; }
+            public string TeTonenNaam { get; set; }
+            public string TeTonenNaamOpOverzicht { get; set; }
+
+            public ILiturgieOptiesGebruiker OptiesGebruiker { get; set; }
             public IEnumerable<string> Verzen { get; set; }
             public string VerzenZoalsIngevoerd { get; set; }
+
 
             public override string ToString()
             {
@@ -212,6 +311,31 @@ namespace Generator.LiturgieInterpretator
                     return $"{Deel}: {VerzenZoalsIngevoerd}";
                 return Deel;
             }
+        }
+
+        private class LiturgieOpties : ILiturgieOptiesGebruiker
+        {
+            public bool NietVerwerkenViaDatabase { get; set; }
+            public bool ToonInOverzicht { get; set; }
+            public bool ToonInVolgende { get; set; }
+            public bool AlsBijbeltekst { get; set; }
+            public string AlternatieveNaamOverzicht { get; set; }
+            public string AlternatieveNaam { get; set; }
+
+
+            public LiturgieOpties()
+            {
+
+            }
+            //public static LiturgieOpties Clone(ILiturgieOpties opties)
+            //{
+            //    var returnValue = new LiturgieOpties();
+            //    returnValue.ToonInOverzicht = opties.ToonInOverzicht;
+            //    returnValue.AlsBijbeltekst = opties.AlsBijbeltekst;
+            //    returnValue.AlternatieveNaam = opties.AlternatieveNaam;
+            //    returnValue.AlternatieveNaamOverzicht = opties.AlternatieveNaamOverzicht;
+            //    return returnValue;
+            //}
         }
     }
 }

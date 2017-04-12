@@ -86,6 +86,8 @@
             this.Controls.Add(this.button1);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.label1);
+            this.MaximizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(300, 300);
             this.Name = "LiturgieNotFoundFormulier";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
