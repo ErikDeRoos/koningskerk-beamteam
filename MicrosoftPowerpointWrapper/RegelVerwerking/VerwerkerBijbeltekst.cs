@@ -24,26 +24,13 @@ namespace mppt.RegelVerwerking
 
         private class Verwerker : VerwerkBase, IVerwerk
         {
-            private IMppPresentatie _presentatie { get; }
-            private IMppFactory _mppFactory { get; }
-            private ILiedFormatter _liedFormatter { get; }
-            private IBuilderBuildSettings _buildSettings { get; }
-            private IBuilderBuildDefaults _buildDefaults { get; }
-            private IBuilderDependendFiles _dependentFileList { get; }
-            private IEnumerable<ILiturgieRegel> _liturgie { get; }
             private ILengteBerekenaar _lengteBerekenaar { get; }
             private int _slidesGemist = 0;
 
             public Verwerker(IMppApplication metApplicatie, IMppPresentatie toevoegenAanPresentatie, IMppFactory metFactory, ILiedFormatter gebruikLiedFormatter, IBuilderBuildSettings buildSettings,
-                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ILiturgieRegel> volledigeLiturgieOpVolgorde, ILengteBerekenaar lengteBerekenaar) : base(metApplicatie)
+                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ILiturgieRegel> volledigeLiturgieOpVolgorde, ILengteBerekenaar lengteBerekenaar)
+                : base(metApplicatie, toevoegenAanPresentatie, metFactory, gebruikLiedFormatter, buildSettings, buildDefaults, dependentFileList, volledigeLiturgieOpVolgorde)
             {
-                _presentatie = toevoegenAanPresentatie;
-                _mppFactory = metFactory;
-                _liedFormatter = gebruikLiedFormatter;
-                _buildSettings = buildSettings;
-                _buildDefaults = buildDefaults;
-                _dependentFileList = dependentFileList;
-                _liturgie = volledigeLiturgieOpVolgorde;
                 _lengteBerekenaar = lengteBerekenaar;
             }
 
@@ -70,21 +57,22 @@ namespace mppt.RegelVerwerking
                                                             //voor elk object op de slides (we zoeken naar de tekst die vervangen moet worden in de template)
                     foreach (var shape in slide.Shapes().Where(s => s is IMppShapeTextbox).Cast<IMppShapeTextbox>())
                     {
-                        var text = shape.Text;
-                        //als de template de tekst bevat "Liturgieregel" moet daar de liturgieregel komen
-                        if (text.Equals("<Liturgieregel>"))
-                            shape.Text = _liedFormatter.Huidig(regel, null).Display;
-                        //als de template de tekst bevat "Inhoud" moet daar de inhoud van het vers komen
-                        else if (text.Equals("<Inhoud>"))
-                            shape.Text = tekst.ToString();
-                        //als de template de tekst bevat "Volgende" moet daar de Liturgieregel van de volgende sheet komen
-                        else if (text.Equals("<Volgende>"))
-                        {
-                            //we moeten dan wel al op de laatste slide zitten ('InvullenVolgende' is wel al intelligent maar in het geval van 1
-                            //lange tekst over meerdere dia's kan 'InvullenVolgende' niet de juiste keuze maken)
-                            var display = tekstPerSlide.Last() == tekst ? _liedFormatter.Volgende(volgenden) : null;
-                            shape.Text = display != null ? $"{_buildDefaults.LabelVolgende} {display.Display}" : string.Empty;
-                        }
+                        var tagReplacementResult = ProcessForTagReplacement(shape.Text, regel,
+                            additionalSearchForTagReplacement: (s) => {
+                                switch (s)
+                                {
+                                    case "inhoud":
+                                        return new SearchForTagReplacementResult(tekst.ToString());
+                                    case "volgende":
+                                        //we moeten dan wel al op de laatste slide zitten ('InvullenVolgende' is wel al intelligent maar in het geval van 1
+                                        //lange tekst over meerdere dia's kan 'InvullenVolgende' niet de juiste keuze maken)
+                                        var display = tekstPerSlide.Last() == tekst ? _liedFormatter.Volgende(volgenden) : null;
+                                        return new SearchForTagReplacementResult(display != null ? $"{_buildDefaults.LabelVolgende} {display.Display}" : string.Empty);
+                                }
+                                return SearchForTagReplacementResult.Unresolved;
+                            });
+                        if (tagReplacementResult.TagsReplaced)
+                            shape.Text = tagReplacementResult.NewValue;
                     }
                     //voeg slide in in het grote geheel
                     _slidesGemist += _presentatie.SlidesKopieNaarPresentatie(new List<IMppSlide> { slide });
