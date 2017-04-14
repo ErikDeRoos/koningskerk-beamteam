@@ -1,10 +1,12 @@
-﻿// Copyright 2016 door Remco Veurink en Erik de Roos
+﻿// Copyright 2017 door Remco Veurink en Erik de Roos
 using IFileSystem;
 using ISettings;
 using ISettings.CommonImplementation;
 using System.IO;
 using Newtonsoft.Json;
 using System.Linq;
+using Tools;
+using System;
 
 namespace PowerpointGenerator.Settings
 {
@@ -88,46 +90,53 @@ namespace PowerpointGenerator.Settings
 
         private static Instellingen LoadFromJsonFile(IFileOperations fileManager, string instellingenFile, string maskFile)
         {
-            SaveInstellingen saveInstellingen;
+            try {
+                SaveInstellingen saveInstellingen;
 
-            if (!fileManager.FileExists(instellingenFile))
-                return null;
+                if (!fileManager.FileExists(instellingenFile))
+                    return null;
 
-            using (var file = new StreamReader(fileManager.FileReadStream(instellingenFile)))
-            {
-                var serializer = new JsonSerializer();
-                saveInstellingen = (SaveInstellingen)serializer.Deserialize(file, typeof(SaveInstellingen));
-            }
-            if (saveInstellingen == null)
-                return null;
-            var instellingen = new Instellingen()
-            {
-                DatabasePad = saveInstellingen.DatabasePad,
-                BijbelPad = saveInstellingen.BijbelPad,
-                TemplateTheme = saveInstellingen.TemplateTheme,
-                TemplateLied = saveInstellingen.TemplateLied,
-                TemplateBijbeltekst = saveInstellingen.TemplateBijbeltekst,
-                TekstChar_a_OnARow = saveInstellingen.TekstChar_a_OnARow,
-                TekstFontName = saveInstellingen.TekstFontName,
-                TekstFontPointSize = saveInstellingen.TekstFontPointSize,
-                RegelsPerLiedSlide = saveInstellingen.RegelsPerLiedSlide,
-                RegelsPerBijbeltekstSlide = saveInstellingen.RegelsPerBijbeltekstSlide,
-                StandaardTeksten = saveInstellingen.StandaardTeksten,
-            };
-
-            if (!fileManager.FileExists(maskFile))
-                return instellingen;
-
-            using (var file = new StreamReader(fileManager.FileReadStream(maskFile)))
-            {
-                var serializer = new JsonSerializer();
-                foreach (var mask in (SaveMask[])serializer.Deserialize(file, typeof(SaveMask[])))
+                using (var file = new StreamReader(fileManager.FileReadStream(instellingenFile)))
                 {
-                    instellingen.AddMask(new Mapmask(mask.Name, mask.RealName));
+                    var serializer = new JsonSerializer();
+                    saveInstellingen = (SaveInstellingen)serializer.Deserialize(file, typeof(SaveInstellingen));
                 }
-            }
+                if (saveInstellingen == null)
+                    return null;
+                var instellingen = new Instellingen()
+                {
+                    DatabasePad = saveInstellingen.DatabasePad,
+                    BijbelPad = saveInstellingen.BijbelPad,
+                    TemplateTheme = saveInstellingen.TemplateTheme,
+                    TemplateLied = saveInstellingen.TemplateLied,
+                    TemplateBijbeltekst = saveInstellingen.TemplateBijbeltekst,
+                    TekstChar_a_OnARow = saveInstellingen.TekstChar_a_OnARow,
+                    TekstFontName = saveInstellingen.TekstFontName,
+                    TekstFontPointSize = saveInstellingen.TekstFontPointSize,
+                    RegelsPerLiedSlide = saveInstellingen.RegelsPerLiedSlide,
+                    RegelsPerBijbeltekstSlide = saveInstellingen.RegelsPerBijbeltekstSlide,
+                    StandaardTeksten = saveInstellingen.StandaardTeksten,
+                };
 
-            return instellingen;
+                if (!fileManager.FileExists(maskFile))
+                    return instellingen;
+
+                using (var file = new StreamReader(fileManager.FileReadStream(maskFile)))
+                {
+                    var serializer = new JsonSerializer();
+                    foreach (var mask in (SaveMask[])serializer.Deserialize(file, typeof(SaveMask[])))
+                    {
+                        instellingen.AddMask(new Mapmask(mask.Name, mask.RealName));
+                    }
+                }
+
+                return instellingen;
+            }
+            catch (Exception exc)
+            {
+                FoutmeldingSchrijver.Log(exc);
+            }
+            return null;
         }
 
         private static Instellingen GetDefault()
