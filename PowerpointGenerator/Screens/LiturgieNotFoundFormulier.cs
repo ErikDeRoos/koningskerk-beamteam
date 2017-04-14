@@ -23,7 +23,7 @@ namespace PowerpointGenerator
                 case LiturgieOplossingResultaat.DatabaseFout:
                     return $"De tekst achter 'als' is niet correct.";
                 case LiturgieOplossingResultaat.SetFout:
-                    return $"'{vanInterpretatie.Benaming}' is niet bekend lied, bijbelboek of slide.";
+                    return $"'{vanInterpretatie.Benaming}' is niet een bekend lied, bijbelboek of slide.";
                 case LiturgieOplossingResultaat.SubSetFout:
                     return string.IsNullOrWhiteSpace(vanInterpretatie.Deel) ? "Je moet een hoofdstuk of lied opgeven." : $"'{vanInterpretatie.Deel}' is niet te vinden in {vanInterpretatie.Benaming}.";
                 case LiturgieOplossingResultaat.VersFout:
