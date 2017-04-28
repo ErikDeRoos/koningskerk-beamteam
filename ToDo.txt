@@ -1,0 +1,5 @@
+
+
+Liturgie wijzigen:
+-Rechtermuisknop op liturgie geeft verkeerde regel (in ieder geval in release versie zonder debugger)
+-Weergeven welke regel wijzigt

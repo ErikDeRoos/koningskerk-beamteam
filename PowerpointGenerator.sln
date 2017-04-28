@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerpointGenerator", "PowerpointGenerator\PowerpointGenerator.csproj", "{6B51E79C-9BED-457F-BF11-889863FF5BAA}"
 EndProject
@@ -36,6 +36,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Generator.Tests", "Tests\PowerpointGenerator.Tests\Generator.Tests.csproj", "{06D1D7F9-FB24-464B-8EFD-52E93D561E4E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Generator", "Generator\Generator.csproj", "{E502AED1-D6CD-4E2B-9524-AA333AA1AC21}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "~Docs", "~Docs", "{5F0DC94C-B384-4BF0-8D2F-79EB2BDDD03F}"
+	ProjectSection(SolutionItems) = preProject
+		Roadmap.txt = Roadmap.txt
+		ToDo.txt = ToDo.txt
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
