@@ -61,6 +61,8 @@ namespace mppt.RegelVerwerking
                             additionalSearchForTagReplacement: (s) => {
                                 switch (s)
                                 {
+                                    case "liturgieregel":
+                                        return new SearchForTagReplacementResult(_liedFormatter.Huidig(regel, null).Display);
                                     case "inhoud":
                                         return new SearchForTagReplacementResult(tekst.ToString());
                                     case "volgende":

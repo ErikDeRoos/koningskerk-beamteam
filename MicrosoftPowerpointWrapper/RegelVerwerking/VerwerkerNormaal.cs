@@ -134,9 +134,9 @@ namespace mppt.RegelVerwerking
                                         display = _liedFormatter.Volgende(volgenden);
                                         return new SearchForTagReplacementResult(display != null ? display.Display : string.Empty);
                                 }
-                                if (s.StartsWith("<Volgende_over_") && s.EndsWith(">"))
+                                if (s.StartsWith("volgende_over_"))
                                 {
-                                    var aantalOverslaanStr = s.Substring("<Volgende_over_".Length, s.Length - "<Volgende_over_>".Length);
+                                    var aantalOverslaanStr = s.Substring("volgende_over_".Length, s.Length - "volgende_over_".Length);
                                     int aantalOverslaan = 0;
                                     if (int.TryParse(aantalOverslaanStr, out aantalOverslaan))
                                     {
