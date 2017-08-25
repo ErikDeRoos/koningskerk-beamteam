@@ -51,7 +51,7 @@ namespace Generator.Powerpoint
                 if (_huidigeStatus != State.Onbekend && _huidigeStatus != State.Geinitialiseerd)
                     return new StatusMelding(_huidigeStatus, "Kan powerpoint niet initialiseren", "Start het programma opnieuw op");
                 _liturgie = liturgie.ToList();
-                _builderSettings = new BuilderBuildSettings(voorganger, collecte1, collecte2, lezen, tekst);
+                _builderSettings = new BuilderBuildSettings(voorganger, collecte1, collecte2, lezen, tekst, instellingen.Een2eCollecte);
                 var defaults = new BuilderDefaults(instellingen);
                 _builderDefaults = defaults;
                 _builderDependentFileList = defaults;
@@ -203,14 +203,16 @@ namespace Generator.Powerpoint
             public string Collecte2 { get; set; }
             public string Lezen { get; set; }
             public string Tekst { get; set; }
+            public bool Een2eCollecte { get; set; }
 
-            public BuilderBuildSettings(string voorganger, string collecte1, string collecte2, string lezen, string tekst)
+            public BuilderBuildSettings(string voorganger, string collecte1, string collecte2, string lezen, string tekst, bool een2eCollecte)
             {
                 Voorganger = voorganger;
                 Collecte1 = collecte1;
                 Collecte2 = collecte2;
                 Lezen = lezen;
                 Tekst = tekst;
+                Een2eCollecte = een2eCollecte;
             }
         }
         private class BuilderDefaults : IBuilderBuildDefaults, IBuilderDependendFiles

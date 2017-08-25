@@ -14,6 +14,8 @@ namespace ISettings
         string TekstFontName { get; }
         float TekstFontPointSize { get; }
 
+        bool Een2eCollecte { get; }
+
         IEnumerable<IMapmask> Masks { get; }
         bool AddMask(IMapmask mask);
         void ClearMasks();

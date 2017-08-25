@@ -1,19 +1,26 @@
 ﻿// Copyright 2017 door Remco Veurink en Erik de Roos
+using Generator;
 using ILiturgieDatabase;
 using ISettings;
+using PowerpointGenerator.Properties;
 using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using PowerpointGenerator.Properties;
-using Generator;
-using System.Collections.Generic;
-using Generator.Database;
 
 namespace PowerpointGenerator.Screens
 {
+    /// <remarks>
+    /// Win 10 + VS2008, VS2012, etc. vs no way to disable DPI scaling
+    /// 
+    /// There is no option * listed* because, Microsoft. No Compatibility tab in the right-click context menu for the.exe, and so on.However, it is possible to disable DPI scaling with VS/BIDS/etc by using the right-click context menu option "troubleshoot compatibility". Select the option that says the program used to display correctly but no longer does so. (under 'select troubleshooting option" choose, "troubleshoot program".  Then select, "the program opens but doesn't display correctly", and then, "Program does not display property when large scale fond settings are selected").
+    /// Presto! DPI scaling is disabled for VS.Now, to track down the .REG flag it is hopefully flipping...
+    /// 
+    /// [update] Reg setting info appears to be here:
+    /// https://blogs.technet.microsoft.com/mspfe/2013/11/21/disabling-dpi-scaling-on-windows-8-1-the-enterprise-way/
+    /// </remarks>
     internal partial class Form1 : Form
     {
         private readonly IInstellingenFactory _instellingenFactory;
@@ -62,6 +69,7 @@ namespace PowerpointGenerator.Screens
             _funcs.Opstarten(_startBestand);
 
             TriggerZoeklijstVeranderd();
+            BouwLiturgieSchermOp();
         }
 
         #region Eventhandlers
@@ -80,7 +88,7 @@ namespace PowerpointGenerator.Screens
 
         private void slaLiturgieOpToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Opslaan_Op_Locatie(_funcs.GetWorkingFile(), _funcs.CurrentFile);
+            OpslaanOpLocatie(_funcs.GetWorkingFile(), _funcs.CurrentFile);
         }
 
         private void nieuweLiturgieToolStripMenuItem_Click(object sender, EventArgs e)
@@ -164,6 +172,7 @@ namespace PowerpointGenerator.Screens
             {
                 if (!_instellingenFactory.WriteToFile(formulier.Instellingen))
                     MessageBox.Show(Resources.Form1_Niet_opgeslagen_wegens_te_lang_pad);
+                BouwLiturgieSchermOp();
             }
         }
         private void bekijkDatabaseToolStripMenuItem1_Click(object sender, EventArgs e)
@@ -340,6 +349,13 @@ namespace PowerpointGenerator.Screens
                 .Union(textLines.Skip(regelnummer + 1))
                 .ToArray();
         }
+
+        private void BouwLiturgieSchermOp()
+        {
+            var huidigeInstellingen = _instellingenFactory.LoadFromFile();
+            groupBox5.Visible = huidigeInstellingen.Een2eCollecte;
+            groupBox3.Text = huidigeInstellingen.Een2eCollecte ? "Collecte 1" : "Collecte";
+        }
         #endregion Liturgie editor
 
         public void StartGenereren()
@@ -347,7 +363,7 @@ namespace PowerpointGenerator.Screens
             if (_funcs.Status == GeneratorStatus.Gestopt)
             {
                 //sla een back up voor als er iets fout gaat
-                Opslaan_Op_Locatie(_funcs.GetWorkingFile(), _funcs.TempLiturgiePath);
+                OpslaanOpLocatie(_funcs.GetWorkingFile(), _funcs.TempLiturgiePath);
 
                 // creeer lijst van liturgie
                 var ingeladenLiturgie = _funcs.LiturgieOplossingen().ToList();
@@ -418,7 +434,7 @@ namespace PowerpointGenerator.Screens
                 Title = Resources.Form1_Openen_liturgie_title
             };
 
-            return openFileDialog1.ShowDialog() == DialogResult.Cancel ? "" : OpenenopLocatie(openFileDialog1.FileName);
+            return openFileDialog1.ShowDialog() == DialogResult.Cancel ? "" : OpenenOpLocatie(openFileDialog1.FileName);
         }
 
         /// <summary>
@@ -426,12 +442,12 @@ namespace PowerpointGenerator.Screens
         /// </summary>
         /// <param name="pad"></param>
         /// <returns></returns>
-        private string OpenenopLocatie(string pad)
+        private string OpenenOpLocatie(string pad)
         {
             //probeer om te lezen van gekozen bestand
             try
             {
-                return _funcs.OpenenopLocatie(pad);
+                return _funcs.OpenenOpLocatie(pad);
             }
                 //vang errors af en geef een melding dat er iets is fout gegaan
             catch (Exception)
@@ -481,7 +497,7 @@ namespace PowerpointGenerator.Screens
         /// </summary>
         /// <param name="bestand">bestand als string dat opgeslagen moet worden</param>
         /// <param name="path">path waarin het bestand moet worden opgeslagen</param>
-        private void Opslaan_Op_Locatie(string bestand, string path)
+        private void OpslaanOpLocatie(string bestand, string path)
         {
             //controleer dat het pad niet leeg is en anders laden we gewoon opslaan
             if (path.Equals(""))

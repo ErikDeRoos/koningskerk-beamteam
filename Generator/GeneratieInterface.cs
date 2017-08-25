@@ -47,7 +47,7 @@ namespace Generator
             {
                 try
                 {
-                    LoadWorkingfile(OpenenopLocatie(startBestand));
+                    LoadWorkingfile(OpenenOpLocatie(startBestand));
                 }
                 catch { }
             }
@@ -55,7 +55,7 @@ namespace Generator
             {
                 try
                 {
-                    LoadWorkingfile(OpenenopLocatie(TempLiturgiePath));
+                    LoadWorkingfile(OpenenOpLocatie(TempLiturgiePath));
                 }
                 catch { }
                 try
@@ -201,7 +201,7 @@ namespace Generator
         /// </summary>
         /// <param name="pad"></param>
         /// <returns></returns>
-        public string OpenenopLocatie(string pad)
+        public string OpenenOpLocatie(string pad)
         {
             //open een filestream naar het gekozen bestand
             var strm = new FileStream(pad, FileMode.Open, FileAccess.Read);

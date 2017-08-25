@@ -113,10 +113,14 @@ namespace mppt.RegelVerwerking
                     return new SearchForTagReplacementResult(_buildDefaults.LabelCollecte + _buildSettings.Collecte1);
                 case "1e collecte:":
                     //als de template de tekst bevat "1e Collecte: " moet daar de 1e collecte achter komen
-                    return new SearchForTagReplacementResult(_buildDefaults.LabelCollecte1 + _buildSettings.Collecte1);
+                    var label = _buildSettings.Een2eCollecte ? _buildDefaults.LabelCollecte1 : _buildDefaults.LabelCollecte;
+                    return new SearchForTagReplacementResult(label + _buildSettings.Collecte1);
                 case "2e collecte:":
-                    //als de template de tekst bevat "2e Collecte: " moet daar de 2e collecte achter komen
-                    return new SearchForTagReplacementResult(_buildDefaults.LabelCollecte2 + _buildSettings.Collecte2);
+                    if (_buildSettings.Een2eCollecte)
+                        //als de template de tekst bevat "2e Collecte: " moet daar de 2e collecte achter komen
+                        return new SearchForTagReplacementResult(_buildDefaults.LabelCollecte2 + _buildSettings.Collecte2);
+                    else
+                        return SearchForTagReplacementResult.Unresolved;
                 case "lezen":
                     return new SearchForTagReplacementResult(_buildDefaults.LabelLezen + _buildSettings.Lezen);
                 case "tekst":

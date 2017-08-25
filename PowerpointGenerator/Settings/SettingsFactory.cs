@@ -1,4 +1,4 @@
-﻿// Copyright 2017 door Remco Veurink en Erik de Roos
+﻿// Copyright 2017 door  Erik de Roos
 using IFileSystem;
 using ISettings;
 using ISettings.CommonImplementation;
@@ -10,7 +10,6 @@ using System;
 
 namespace PowerpointGenerator.Settings
 {
-    // TODO settings definieeren in een key-value array zodat je meer op kan slaan met minder risico's op incombatibiliteit
     public class SettingsFactory : IInstellingenFactory
     {
         private readonly string _baseDir;
@@ -21,7 +20,7 @@ namespace PowerpointGenerator.Settings
         public SettingsFactory(IFileOperations fileManager, string instellingenFileName, string masksFileName)
         {
             _fileManager = fileManager;
-            _baseDir = Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);  // TODO alternatief voor vinden
+            _baseDir = Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);
             _instellingenFileName = instellingenFileName;
             _masksFileName = masksFileName;
         }
@@ -59,6 +58,7 @@ namespace PowerpointGenerator.Settings
                     TekstFontPointSize = instellingen.TekstFontPointSize,
                     RegelsPerLiedSlide = instellingen.RegelsPerLiedSlide,
                     RegelsPerBijbeltekstSlide = instellingen.RegelsPerBijbeltekstSlide,
+                    Een2eCollecte = instellingen.Een2eCollecte,
                     StandaardTeksten = instellingen.StandaardTeksten,
                 };
 
@@ -115,6 +115,7 @@ namespace PowerpointGenerator.Settings
                     TekstFontPointSize = saveInstellingen.TekstFontPointSize,
                     RegelsPerLiedSlide = saveInstellingen.RegelsPerLiedSlide,
                     RegelsPerBijbeltekstSlide = saveInstellingen.RegelsPerBijbeltekstSlide,
+                    Een2eCollecte = saveInstellingen.Een2eCollecte,
                     StandaardTeksten = saveInstellingen.StandaardTeksten,
                 };
 
@@ -168,6 +169,7 @@ namespace PowerpointGenerator.Settings
             public float TekstFontPointSize { get; set; }
             public int RegelsPerLiedSlide { get; set; }
             public int RegelsPerBijbeltekstSlide { get; set; }
+            public bool Een2eCollecte { get; set; }
             public StandaardTeksten StandaardTeksten { get; set; }
         }
     }
