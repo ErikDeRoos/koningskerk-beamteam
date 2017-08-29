@@ -106,6 +106,7 @@
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bootstrap.cs" />
@@ -127,6 +128,12 @@
     </Compile>
     <Compile Include="Screens\Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Screens\LiturgieEdit.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Screens\LiturgieEdit.Designer.cs">
+      <DependentUpon>LiturgieEdit.cs</DependentUpon>
     </Compile>
     <Compile Include="Screens\LiturgieNotFoundFormulier.cs">
       <SubType>Form</SubType>
@@ -154,6 +161,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Screens\Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Screens\LiturgieEdit.resx">
+      <DependentUpon>LiturgieEdit.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Screens\LiturgieNotFoundFormulier.resx">
       <DependentUpon>LiturgieNotFoundFormulier.cs</DependentUpon>

@@ -273,8 +273,10 @@ namespace Generator.LiturgieOplosser
 
         public ILiturgieOptiesGebruiker ZoekStandaardOptiesUitZoekresultaat(string invoerTekst, IVrijZoekresultaat zoekresultaat)
         {
+            if (string.IsNullOrWhiteSpace(invoerTekst))
+                return null;
             var databaseNaam = string.Empty;
-            if (zoekresultaat != null && invoerTekst != null)
+            if (zoekresultaat != null)
             {
                 var invoerTekstSplitsing = _liturgieInterperator.VanTekstregel(invoerTekst);
                 var teZoekenTekst = $"{invoerTekstSplitsing.Benaming} {invoerTekstSplitsing.Deel}";
@@ -291,6 +293,10 @@ namespace Generator.LiturgieOplosser
         }
 
 
+        public string MaakTotTekst(ILiturgieOptiesGebruiker opties)
+        {
+            return _liturgieInterperator.MaakTekstVanOpties(opties).Trim();
+        }
         public string MaakTotTekst(string invoerTekst, ILiturgieOptiesGebruiker opties)
         {
             var tekstUitOpties = _liturgieInterperator.MaakTekstVanOpties(opties);

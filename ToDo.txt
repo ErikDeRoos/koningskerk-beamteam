@@ -1,8 +1,4 @@
 
 
-Liturgie wijzigen:
--Rechtermuisknop op liturgie geeft verkeerde regel (in ieder geval in release versie zonder debugger)
--Weergeven welke regel wijzigt
-
 Unit Tests:
 -8 falende unittests repareren... vanaf welke change zijn ze stuk?!

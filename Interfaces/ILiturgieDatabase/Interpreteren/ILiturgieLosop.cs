@@ -46,6 +46,11 @@ namespace ILiturgieDatabase {
         /// <summary>
         /// Zet de geinterpreteerde opties weer om naar een tekst
         /// </summary>
+        string MaakTotTekst(ILiturgieOptiesGebruiker opties);
+
+        /// <summary>
+        /// Zet de geinterpreteerde opties weer om naar een tekst
+        /// </summary>
         string MaakTotTekst(string invoerTekst, ILiturgieOptiesGebruiker opties);
 
         /// <summary>

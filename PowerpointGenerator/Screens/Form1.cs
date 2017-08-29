@@ -25,26 +25,19 @@ namespace PowerpointGenerator.Screens
     {
         private readonly IInstellingenFactory _instellingenFactory;
         private readonly GeneratieInterface<CompRegistration> _funcs;
-        private readonly ILiturgieLosOp _liturgieOplosser;
         private readonly string _startBestand;
 
         //locatie van het programma op de pc
         private string _programDirectory = "";
 
-        // huidige zoekresultaat voor autocomplete
-        private IVrijZoekresultaat _huidigZoekresultaat;
-        private object _dropdownLocker = new object();
-        private ILiturgieOptiesGebruiker _huidigeOptiesBijZoeken;
-
         public Form1(IInstellingenFactory instellingenOplosser, GeneratieInterface<CompRegistration> funcs, ILiturgieLosOp liturgieOplosser, string startBestand)
         {
             _instellingenFactory = instellingenOplosser;
             _funcs = funcs;
-            _liturgieOplosser = liturgieOplosser;
             _startBestand = startBestand;
             InitializeComponent();
-            textBox6.AutoCompleteCustomSource = new AutoCompleteStringCollection();
-            this.Icon = Icon.FromHandle(Resources.Powerpoint_Overlay_icon.GetHicon());
+            liturgieEdit1._liturgieOplosser = liturgieOplosser;
+            Icon = Icon.FromHandle(Resources.Powerpoint_Overlay_icon.GetHicon());
         }
 
         public void Opstarten()
@@ -59,7 +52,7 @@ namespace PowerpointGenerator.Screens
 
             progressBar1.Visible = false;
 
-            _funcs.Registration.LiturgieRichTextBox = textBox7;
+            _funcs.Registration.LiturgieRichTextBox = liturgieEdit1.TextBoxLiturgie;
             _funcs.Registration.VoorgangerTextBox = textBox2;
             _funcs.Registration.Collecte1eTextBox = textBox3;
             _funcs.Registration.Collecte2eTextBox = textBox4;
@@ -68,7 +61,6 @@ namespace PowerpointGenerator.Screens
 
             _funcs.Opstarten(_startBestand);
 
-            TriggerZoeklijstVeranderd();
             BouwLiturgieSchermOp();
         }
 
@@ -121,46 +113,6 @@ namespace PowerpointGenerator.Screens
             {
                 Close();
             }
-        }
-        private void toolStripMenuItem4_Click(object sender, EventArgs e)
-        {
-            // TODO betere redo functionaleit (via een stack array?)
-            //textBox7.();
-        }
-        private void toolStripMenuItem3_Click(object sender, EventArgs e)
-        {
-            textBox7.Undo();
-        }
-        private void toolStripMenuItem1_Click(object sender, EventArgs e)
-        {
-            textBox7.SelectAll();
-        }
-        private void plakkenToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            textBox7.Paste();
-        }
-        private void kopierenToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            textBox7.Copy();
-        }
-        private void knippenToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            textBox7.Cut();
-        }
-        private void toolStripMenuItem5_Click(object sender, EventArgs e)
-        {
-            var postion = textBox7.SelectionStart;
-            var atLineNumber = 0;
-            var searchPosition = 0;
-            foreach(var row in textBox7.Lines)
-            {
-                searchPosition += row.Length;
-                if (postion < searchPosition)
-                    break;
-                atLineNumber++;
-            }
-            TriggerWijzigRegel(atLineNumber);
-            textBox7.SelectionStart = postion;
         }
         #endregion bewerken
         #region opties
@@ -219,136 +171,8 @@ namespace PowerpointGenerator.Screens
             Help.ShowHelp(this, "help.chm", HelpNavigator.TopicId, "20");
             hlpevent.Handled = true;
         }
-        private void textBox6_TextChanged(object sender, EventArgs e)
-        {
-            TriggerZoeklijstVeranderd();
-        }
-        private void textBox6_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.KeyData == Keys.Enter)
-                HuidigeTekstInvoegenEnInvoerLegen();
-        }
-        private void button2_Click(object sender, EventArgs e)
-        {
-            HuidigeTekstInvoegenEnInvoerLegen();
-        }
-        private void button3_Click(object sender, EventArgs e)
-        {
-            TriggerAanpassenOptiesBijZoeken();
-        }
         #endregion formulier eventhandlers
         #endregion Eventhandlers
-
-        #region Liturgie editor
-        // TODO de werkwijze van het aanpassen van de autocomplete source veroorzaakt soms een access violation. Bijv. snel typen na opstarten.
-        // TODO soms triggert de autoselect en wordt je tekst vanzelf geselecteerd, dat is irritant.
-        // TODO er lijkt een memoryleak te zijn. Geheugengebruik loopt op als je snel wisselt tussen bijv. 'psalmen ' en 'psalmen 1'. Vermoedelijk de database.
-        private void TriggerZoeklijstVeranderd()
-        {
-            _huidigZoekresultaat = _liturgieOplosser.VrijZoeken(textBox6.Text, _huidigZoekresultaat);
-            if (_huidigZoekresultaat.ZoeklijstAanpassing == VrijZoekresultaatAanpassingType.Geen)
-                return;
-
-            // We gaan kijken wat de verandering is.
-            // Dit moet wat slimmer dan gewoon verwijderen/toevoegen omdat deze lijst zich instabiel gedraagt
-            textBox6.SuspendLayout();
-            lock(_dropdownLocker)  // Lock om te voorkomen dat werk nog niet af is als we er nog een x in komen (lijkt namelijk te gebeuren)
-            {
-                if (_huidigZoekresultaat == null || _huidigZoekresultaat.ZoeklijstAanpassing == VrijZoekresultaatAanpassingType.Alles || _huidigZoekresultaat.DeltaMogelijkhedenVerwijderd.Count() > 50)
-                {
-                    textBox6.AutoCompleteCustomSource.Clear();
-                    textBox6.AutoCompleteCustomSource.AddRange(_huidigZoekresultaat.AlleMogelijkheden.Select(m => m.Weergave).ToArray());
-                }
-                else if (_huidigZoekresultaat.ZoeklijstAanpassing == VrijZoekresultaatAanpassingType.Deel)
-                {
-                    textBox6.AutoCompleteCustomSource.AddRange(_huidigZoekresultaat.DeltaMogelijkhedenToegevoegd.Select(m => m.Weergave).ToArray());
-                    foreach (var item in _huidigZoekresultaat.DeltaMogelijkhedenVerwijderd)
-                    {
-                        textBox6.AutoCompleteCustomSource.Remove(item.Weergave);
-                    }
-                }
-            }
-            textBox6.ResumeLayout();
-        }
-
-        private void HuidigeTekstInvoegenEnInvoerLegen()
-        {
-            var geinterpreteerdeOpties = KrijgOptiesBijZoeken();
-            var toeTeVoegenTekst = _liturgieOplosser.MaakTotTekst(textBox6.Text, geinterpreteerdeOpties);
-            var liturgie = textBox7.Lines.ToList();
-            liturgie.Add(toeTeVoegenTekst);
-            textBox7.Lines = liturgie.ToArray();
-            textBox6.Text = null;
-            _huidigeOptiesBijZoeken = null;
-            _huidigZoekresultaat = null;
-        }
-
-        private void TriggerAanpassenOptiesBijZoeken()
-        {
-            var nieuweOpties = ToonAanpassenOptiesBijZoeken();
-            if (nieuweOpties != null)
-                VerwerkAanpassenOptiesBijZoeken(nieuweOpties);
-        }
-
-        private ILiturgieOptiesGebruiker KrijgOptiesBijZoeken()
-        {
-            if (_huidigeOptiesBijZoeken == null)
-                _huidigeOptiesBijZoeken = _liturgieOplosser.ZoekStandaardOptiesUitZoekresultaat(textBox6.Text, _huidigZoekresultaat);
-            return _huidigeOptiesBijZoeken;
-        }
-
-        private ILiturgieOptiesGebruiker ToonAanpassenOptiesBijZoeken()
-        {
-            var optiesFormulier = new WijzigOpties();
-            optiesFormulier.Initialise(KrijgOptiesBijZoeken());
-            if (optiesFormulier.ShowDialog() != DialogResult.OK)
-                return null;
-            return optiesFormulier.GetOpties();
-        }
-
-        private void VerwerkAanpassenOptiesBijZoeken(ILiturgieOptiesGebruiker opties)
-        {
-            if (opties != null)
-                _huidigeOptiesBijZoeken = opties;
-        }
-
-        private void TriggerWijzigRegel(int regelnummer)
-        {
-            // Zoek de regel op die we gaan wijzigen
-            var textLines = textBox7.Lines;
-            if (regelnummer < 0 || regelnummer >= textLines.Length)
-                return;
-            var regel = textLines[regelnummer];
-            // Zoek de opties in deze regel
-            var opsplitsing = _liturgieOplosser.SplitsVoorOpties(regel);
-            ILiturgieOptiesGebruiker opties = null;
-            var liturgieRegel = string.Empty;
-            if (opsplitsing.Length == 1)
-                opties = _liturgieOplosser.ToonOpties(opsplitsing[0]);
-            else if (opsplitsing.Length == 2)
-            {
-                liturgieRegel = opsplitsing[0];
-                opties = _liturgieOplosser.ToonOpties(opsplitsing[1]);
-            }
-            else
-            {
-                liturgieRegel = regel;
-                opties = _liturgieOplosser.ZoekStandaardOptiesUitZoekresultaat(regel, null);
-            }
-            // Laat de gebruiker de wijzigingen doorvoeren
-            var optiesFormulier = new WijzigOpties();
-            optiesFormulier.Initialise(opties);
-            if (optiesFormulier.ShowDialog() != DialogResult.OK)
-                return;
-            opties = optiesFormulier.GetOpties();
-            // Verwerk de opties weer in de tekst
-            var nieuweTekst = _liturgieOplosser.MaakTotTekst(liturgieRegel, opties);
-            textBox7.Lines = textLines
-                .Take(regelnummer)
-                .Union(new[] { nieuweTekst })
-                .Union(textLines.Skip(regelnummer + 1))
-                .ToArray();
-        }
 
         private void BouwLiturgieSchermOp()
         {
@@ -356,7 +180,6 @@ namespace PowerpointGenerator.Screens
             groupBox5.Visible = huidigeInstellingen.Een2eCollecte;
             groupBox3.Text = huidigeInstellingen.Een2eCollecte ? "Collecte 1" : "Collecte";
         }
-        #endregion Liturgie editor
 
         public void StartGenereren()
         {
@@ -548,7 +371,7 @@ namespace PowerpointGenerator.Screens
         {
             var actie = new Action(() =>
             {
-                button1.Text = "Generate";
+                button1.Text = "Maak slides";
                 progressBar1.Visible = false;
                 if (string.IsNullOrEmpty(foutmelding))
                 {

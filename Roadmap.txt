@@ -5,7 +5,6 @@ Feature 31 - Alternatieve invoer
 
 Feature 32 - Major release
 -Copyrights vervangen
--2e collecte weg
 -Feature 31 klaar
 -Release of v2.0.x
 
