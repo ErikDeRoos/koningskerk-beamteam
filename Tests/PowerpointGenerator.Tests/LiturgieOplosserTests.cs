@@ -115,11 +115,12 @@ namespace Generator.Tests
             return liturgieItem;
         }
 
-        private static ILiturgieDatabase.ILiturgieDatabase FakeDatabase(string onderdeel, string fragment, string display = null)
+        private static ILiturgieDatabase.ILiturgieDatabase FakeDatabase(string onderdeel, string fragment, string display = null, LiturgieOplossingResultaat status = LiturgieOplossingResultaat.Opgelost)
         {
             var zoekresultaat = A.Fake<IOplossing>();
             A.CallTo(() => zoekresultaat.OnderdeelNaam).Returns(onderdeel);
             A.CallTo(() => zoekresultaat.FragmentNaam).Returns(fragment);
+            A.CallTo(() => zoekresultaat.Status).Returns(status);
             if (display != null)
                 A.CallTo(() => zoekresultaat.OnderdeelDisplayNaam).Returns(display);
             var database = A.Fake<ILiturgieDatabase.ILiturgieDatabase>();
@@ -184,11 +185,12 @@ namespace Generator.Tests
             return liturgieItem;
         }
 
-        private static ILiturgieDatabase.ILiturgieDatabase FakeDatabase(string onderdeel, string fragment, string display = null)
+        private static ILiturgieDatabase.ILiturgieDatabase FakeDatabase(string onderdeel, string fragment, string display = null, LiturgieOplossingResultaat status = LiturgieOplossingResultaat.Opgelost)
         {
             var zoekresultaat = A.Fake<IOplossing>();
             A.CallTo(() => zoekresultaat.OnderdeelNaam).Returns(onderdeel);
             A.CallTo(() => zoekresultaat.FragmentNaam).Returns(fragment);
+            A.CallTo(() => zoekresultaat.Status).Returns(status);
             if (display != null)
                 A.CallTo(() => zoekresultaat.OnderdeelDisplayNaam).Returns(display);
             var database = A.Fake<ILiturgieDatabase.ILiturgieDatabase>();
