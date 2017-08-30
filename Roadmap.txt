@@ -1,11 +1,6 @@
 
-Feature 31 - Alternatieve invoer
--Opslaan zodra je gaat zoeken (want daar zitten bugs)
--Bugfixes
-
 Feature 32 - Major release
 -Copyrights vervangen
--Feature 31 klaar
 -Release of v2.0.x
 
 

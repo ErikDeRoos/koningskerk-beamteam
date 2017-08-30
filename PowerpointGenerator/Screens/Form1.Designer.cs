@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.button1 = new System.Windows.Forms.Button();
             this.bestandToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.nieuweLiturgieToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -58,6 +59,7 @@
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.timerAutosave = new System.Windows.Forms.Timer(this.components);
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -77,7 +79,7 @@
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(161, 9);
+            this.button1.Location = new System.Drawing.Point(164, 9);
             this.button1.Margin = new System.Windows.Forms.Padding(6);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(123, 78);
@@ -185,7 +187,7 @@
             this.textBox2.Location = new System.Drawing.Point(9, 31);
             this.textBox2.Margin = new System.Windows.Forms.Padding(6);
             this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(269, 29);
+            this.textBox2.Size = new System.Drawing.Size(272, 29);
             this.textBox2.TabIndex = 7;
             // 
             // textBox3
@@ -195,7 +197,7 @@
             this.textBox3.Location = new System.Drawing.Point(9, 31);
             this.textBox3.Margin = new System.Windows.Forms.Padding(6);
             this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(270, 29);
+            this.textBox3.Size = new System.Drawing.Size(273, 29);
             this.textBox3.TabIndex = 9;
             // 
             // textBox4
@@ -205,7 +207,7 @@
             this.textBox4.Location = new System.Drawing.Point(9, 31);
             this.textBox4.Margin = new System.Windows.Forms.Padding(6);
             this.textBox4.Name = "textBox4";
-            this.textBox4.Size = new System.Drawing.Size(270, 29);
+            this.textBox4.Size = new System.Drawing.Size(273, 29);
             this.textBox4.TabIndex = 11;
             // 
             // menuStrip1
@@ -236,7 +238,7 @@
             this.progressBar1.Location = new System.Drawing.Point(6, 9);
             this.progressBar1.Margin = new System.Windows.Forms.Padding(6);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(143, 78);
+            this.progressBar1.Size = new System.Drawing.Size(146, 78);
             this.progressBar1.TabIndex = 13;
             this.progressBar1.Visible = false;
             // 
@@ -248,7 +250,7 @@
             this.textBox1.Margin = new System.Windows.Forms.Padding(6);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(270, 111);
+            this.textBox1.Size = new System.Drawing.Size(273, 111);
             this.textBox1.TabIndex = 16;
             // 
             // textBox5
@@ -259,7 +261,7 @@
             this.textBox5.Margin = new System.Windows.Forms.Padding(6);
             this.textBox5.Multiline = true;
             this.textBox5.Name = "textBox5";
-            this.textBox5.Size = new System.Drawing.Size(269, 120);
+            this.textBox5.Size = new System.Drawing.Size(272, 120);
             this.textBox5.TabIndex = 17;
             // 
             // label6
@@ -289,7 +291,7 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
             this.splitContainer1.Size = new System.Drawing.Size(1287, 1108);
-            this.splitContainer1.SplitterDistance = 992;
+            this.splitContainer1.SplitterDistance = 989;
             this.splitContainer1.SplitterWidth = 7;
             this.splitContainer1.TabIndex = 20;
             // 
@@ -301,7 +303,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.liturgieEdit1.Location = new System.Drawing.Point(0, 28);
             this.liturgieEdit1.Name = "liturgieEdit1";
-            this.liturgieEdit1.Size = new System.Drawing.Size(989, 1077);
+            this.liturgieEdit1.Size = new System.Drawing.Size(986, 1077);
             this.liturgieEdit1.TabIndex = 19;
             // 
             // splitContainer2
@@ -326,8 +328,8 @@
             // 
             this.splitContainer2.Panel2.Controls.Add(this.button1);
             this.splitContainer2.Panel2.Controls.Add(this.progressBar1);
-            this.splitContainer2.Size = new System.Drawing.Size(288, 1108);
-            this.splitContainer2.SplitterDistance = 1002;
+            this.splitContainer2.Size = new System.Drawing.Size(291, 1108);
+            this.splitContainer2.SplitterDistance = 999;
             this.splitContainer2.SplitterWidth = 7;
             this.splitContainer2.TabIndex = 0;
             // 
@@ -337,7 +339,7 @@
             this.groupBox6.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox6.Location = new System.Drawing.Point(0, 381);
             this.groupBox6.Name = "groupBox6";
-            this.groupBox6.Size = new System.Drawing.Size(288, 164);
+            this.groupBox6.Size = new System.Drawing.Size(291, 164);
             this.groupBox6.TabIndex = 22;
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "Tekst";
@@ -348,7 +350,7 @@
             this.groupBox4.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox4.Location = new System.Drawing.Point(0, 226);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(288, 155);
+            this.groupBox4.Size = new System.Drawing.Size(291, 155);
             this.groupBox4.TabIndex = 20;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Lezen";
@@ -359,7 +361,7 @@
             this.groupBox5.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox5.Location = new System.Drawing.Point(0, 150);
             this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(288, 76);
+            this.groupBox5.Size = new System.Drawing.Size(291, 76);
             this.groupBox5.TabIndex = 21;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Collecte 2";
@@ -370,7 +372,7 @@
             this.groupBox3.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox3.Location = new System.Drawing.Point(0, 74);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(288, 76);
+            this.groupBox3.Size = new System.Drawing.Size(291, 76);
             this.groupBox3.TabIndex = 19;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Collecte 1";
@@ -381,10 +383,16 @@
             this.groupBox2.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox2.Location = new System.Drawing.Point(0, 0);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(288, 74);
+            this.groupBox2.Size = new System.Drawing.Size(291, 74);
             this.groupBox2.TabIndex = 18;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Predikant";
+            // 
+            // timerAutosave
+            // 
+            this.timerAutosave.Enabled = true;
+            this.timerAutosave.Interval = 30000;
+            this.timerAutosave.Tick += new System.EventHandler(this.timerAutosave_Tick);
             // 
             // Form1
             // 
@@ -457,6 +465,7 @@
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.GroupBox groupBox2;
         private LiturgieEdit liturgieEdit1;
+        private System.Windows.Forms.Timer timerAutosave;
     }
 }
 

@@ -27,9 +27,6 @@ namespace PowerpointGenerator.Screens
         private readonly GeneratieInterface<CompRegistration> _funcs;
         private readonly string _startBestand;
 
-        //locatie van het programma op de pc
-        private string _programDirectory = "";
-
         public Form1(IInstellingenFactory instellingenOplosser, GeneratieInterface<CompRegistration> funcs, ILiturgieLosOp liturgieOplosser, string startBestand)
         {
             _instellingenFactory = instellingenOplosser;
@@ -43,9 +40,7 @@ namespace PowerpointGenerator.Screens
         public void Opstarten()
         {
             HelpRequested += Form1_HelpRequested;
-            _programDirectory = Path.GetDirectoryName(Application.ExecutablePath) + Path.DirectorySeparatorChar;
-            _funcs.TempLiturgiePath = _programDirectory + @"temp.liturgie";
-
+            _funcs.TempLiturgiePath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}\temp.liturgie";
             KeyDown += Form1_KeyDown;
             _funcs.RegisterVoortgang(PresentatieVoortgangCallback);
             _funcs.RegisterGereedmelding(PresentatieGereedmeldingCallback);
@@ -170,6 +165,10 @@ namespace PowerpointGenerator.Screens
         {
             Help.ShowHelp(this, "help.chm", HelpNavigator.TopicId, "20");
             hlpevent.Handled = true;
+        }
+        private void timerAutosave_Tick(object sender, EventArgs e)
+        {
+            OpslaanOpLocatie(_funcs.GetWorkingFile(), _funcs.TempLiturgiePath);
         }
         #endregion formulier eventhandlers
         #endregion Eventhandlers
