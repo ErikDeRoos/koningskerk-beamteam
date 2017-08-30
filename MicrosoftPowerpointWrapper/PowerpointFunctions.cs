@@ -7,6 +7,7 @@ using mppt.RegelVerwerking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Tools;
 
 namespace mppt
@@ -18,7 +19,7 @@ namespace mppt
     /// Presentatie slides worden hard vanaf het file systeem verwerkt! 
     /// (powerpoint heeft geen ondersteuning voor streams)
     /// </remarks>
-    public class PowerpointFunctions : IBuilder
+    public class PowerpointFunctions : IBuilder, IDisposable
     {
         private IMppFactory _mppFactory { get; }
         private ILiedFormatter _liedFormatter { get; }
@@ -26,6 +27,7 @@ namespace mppt
         private Dictionary<VerwerkingType, IVerwerkFactory> _regelVerwerker { get; }
 
         private bool _stop;
+        private CancellationTokenSource _token = null;
 
         private IEnumerable<ILiturgieRegel> _liturgie = new List<ILiturgieRegel>();
         private IBuilderBuildSettings _buildSettings;
@@ -44,6 +46,7 @@ namespace mppt
             _regelVerwerker = new Dictionary<VerwerkingType, IVerwerkFactory>();
             _regelVerwerker.Add(VerwerkingType.normaal, new VerwerkerNormaal());
             _regelVerwerker.Add(VerwerkingType.bijbeltekst, new VerwerkerBijbeltekst());
+            _stop = false;
         }
 
         public void PreparePresentation(IEnumerable<ILiturgieRegel> liturgie, IBuilderBuildSettings buildSettings, IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, string opslaanAls)
@@ -60,50 +63,63 @@ namespace mppt
         /// </summary>
         public void GeneratePresentation()
         {
+            _token = new CancellationTokenSource();
             StatusWijziging?.Invoke(Status.Gestart, null, null);
 
+            var succes = true;
+            var slidesGemist = 0;
+            var exception = string.Empty;
+            
             // Hier pas COM calls want dit is de juiste thread
-            var applicatie = _mppFactory.GetApplication();
+            using (var applicatie = _mppFactory.GetApplication())
             //Creeer een nieuwe lege presentatie volgens de template thema (toon scherm zodat bij fout nog iets te zien is)
-            var presentatie = applicatie.Open(_dependentFileList.FullTemplateTheme, metWindow: true);
-            //Minimaliseer scherm
-            applicatie.MinimizeInterface();
-
-            try
+            using (var presentatie = applicatie.Open(_dependentFileList.FullTemplateTheme, metWindow: true))
             {
-                var slidesGemist = 0;
-                // Voor elke regel in de liturgie moeten sheets worden gemaakt (als dat mag)
-                // Gebruik een list zodat we de plek weten voor de progress
-                var hardeLijst = _liturgie.Where(l => l.VerwerkenAlsSlide).ToList();
-                foreach (var regel in hardeLijst)
+                //Minimaliseer scherm
+                applicatie.MinimizeInterface();
+
+                try
                 {
-                    var resultaat = _regelVerwerker[regel.VerwerkenAlsType]
-                        .Init(applicatie, presentatie, _mppFactory, _liedFormatter, _buildSettings, _buildDefaults, _dependentFileList, _liturgie, _lengteBerekenaar)
-                        .Verwerk(regel, Volgende(_liturgie, regel));
-                    slidesGemist += resultaat.SlidesGemist;
+                    // Voor elke regel in de liturgie moeten sheets worden gemaakt (als dat mag)
+                    // Gebruik een list zodat we de plek weten voor de progress
+                    var hardeLijst = _liturgie.Where(l => l.VerwerkenAlsSlide).ToList();
+                    foreach (var regel in hardeLijst)
+                    {
+                        var resultaat = _regelVerwerker[regel.VerwerkenAlsType]
+                            .Init(applicatie, presentatie, _mppFactory, _liedFormatter, _buildSettings, _buildDefaults, _dependentFileList, _liturgie, _lengteBerekenaar)
+                            .Verwerk(regel, Volgende(_liturgie, regel), _token.Token);
+                        slidesGemist += resultaat.SlidesGemist;
 
-                    Voortgang?.Invoke(0, _liturgie.Count(), hardeLijst.IndexOf(regel) + 1);
-                    if (_stop)
-                        break;
+                        Voortgang?.Invoke(0, _liturgie.Count(), hardeLijst.IndexOf(regel) + 1);
+                        if (_stop)
+                            break;
+                    }
+
+                    //sla de presentatie op
+                    presentatie.OpslaanAls(_opslaanAls);
                 }
+                catch (Exception ex)
+                {
+                    succes = false;
+                    exception = ex.ToString();
+                    FoutmeldingSchrijver.Log(exception);
+                }
+            }
+            _token = null;
 
-                //sla de presentatie op
-                presentatie.OpslaanAls(_opslaanAls);
-                // Eerst disposen zodat applicatie gesloten is voordat gereedmelding komt
-                presentatie?.Dispose();
-                applicatie?.Dispose();
+            // dispose voordat we een statuswijziging hebben, anders is de applicatie niet op tijd gesloten
+
+            if (succes)
+            {
                 // gereedmelding geven
                 if (_stop)
                     StatusWijziging?.Invoke(Status.StopFout, "Tussentijds gestopt door de gebruiker.", null);
                 else
                     StatusWijziging?.Invoke(Status.StopGoed, null, slidesGemist);
             }
-            catch (Exception ex)
+            else
             {
-                FoutmeldingSchrijver.Log(ex.ToString());
-                StatusWijziging?.Invoke(Status.StopFout, ex.ToString(), null);
-                presentatie?.Dispose();
-                applicatie?.Dispose();
+                StatusWijziging?.Invoke(Status.StopFout, exception, null);
             }
         }
 
@@ -117,14 +133,44 @@ namespace mppt
             return lijst.Skip(huidigeItemIndex + 1);
         }
 
-
-        public void Stop()
+        public void ProbeerStop()
         {
             _stop = true;
         }
 
+        public void ForceerStop()
+        {
+            ProbeerStop();
+            _token?.Cancel();
+        }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    if (_token != null)
+                        _token.Dispose();
+                    _token = null;
+                }
+
+                // free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // This code added to correctly implement the disposable pattern.
         public void Dispose()
         {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
         }
+        #endregion
     }
 }

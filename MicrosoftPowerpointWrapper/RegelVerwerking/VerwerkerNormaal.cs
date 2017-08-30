@@ -7,6 +7,7 @@ using mppt.Connect;
 using mppt.LiedPresentator;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Tools;
 
 namespace mppt.RegelVerwerking
@@ -36,15 +37,17 @@ namespace mppt.RegelVerwerking
             {
             }
 
-            public IVerwerkResultaat Verwerk(ILiturgieRegel regel, IEnumerable<ILiturgieRegel> volgenden)
+            public IVerwerkResultaat Verwerk(ILiturgieRegel regel, IEnumerable<ILiturgieRegel> volgenden, CancellationToken token)
             {
                 // Per onderdeel in de regel moet een sheet komen
                 foreach (var inhoud in regel.Content)
                 {
+                    if (token.IsCancellationRequested)
+                        break;
                     if (inhoud.InhoudType == InhoudType.Tekst)
-                        InvullenTekstOpTemplate(regel, inhoud, volgenden);
+                        InvullenTekstOpTemplate(regel, inhoud, volgenden, token);
                     else
-                        ToevoegenSlides(regel, inhoud, volgenden);
+                        ToevoegenSlides(regel, inhoud, volgenden, token);
                 }
 
                 return new VerwerkResultaat()
@@ -56,13 +59,16 @@ namespace mppt.RegelVerwerking
             /// <summary>
             /// Lied in template plaatsen
             /// </summary>
-            private void InvullenTekstOpTemplate(ILiturgieRegel regel, ILiturgieContent inhoud, IEnumerable<ILiturgieRegel> volgenden)
+            private void InvullenTekstOpTemplate(ILiturgieRegel regel, ILiturgieContent inhoud, IEnumerable<ILiturgieRegel> volgenden, CancellationToken token)
             {
                 var tekstOmTeRenderen = inhoud.Inhoud;
                 var tekstOmTeRenderenLijst = new List<string>();
                 // knip de te renderen tekst in stukken (zodat we van tevoren het aantal weten)
                 while (!string.IsNullOrWhiteSpace(tekstOmTeRenderen))
                 {
+                    if (token.IsCancellationRequested)
+                        return;
+
                     // plaats zo veel mogelijk tekst op de slide totdat het niet meer past, krijg de restjes terug
                     var uitzoeken = InvullenLiedTekst(tekstOmTeRenderen);
                     tekstOmTeRenderenLijst.Add(uitzoeken.Invullen);
@@ -72,6 +78,9 @@ namespace mppt.RegelVerwerking
                 //zolang er nog iets is in te voegen in sheets
                 foreach (var tekst in tekstOmTeRenderenLijst)
                 {
+                    if (token.IsCancellationRequested)
+                        return;
+
                     //regel de template om het lied op af te beelden
                     var presentatie = OpenPps(_dependentFileList.FullTemplateLied);
                     var slide = presentatie.EersteSlide();  //alleen eerste slide gebruiken we
@@ -107,7 +116,7 @@ namespace mppt.RegelVerwerking
             /// <summary>
             /// Algemene slide waarop we alleen template teksten moeten vervangen
             /// </summary>
-            private void ToevoegenSlides(ILiturgieRegel regel, ILiturgieContent inhoud, IEnumerable<ILiturgieRegel> volgenden)
+            private void ToevoegenSlides(ILiturgieRegel regel, ILiturgieContent inhoud, IEnumerable<ILiturgieRegel> volgenden, CancellationToken token)
             {
                 //open de presentatie met de sheets erin
                 var presentatie = OpenPps(inhoud.Inhoud);
@@ -115,6 +124,9 @@ namespace mppt.RegelVerwerking
                 var slides = presentatie.AlleSlides().ToList();
                 foreach (var shape in slides.SelectMany(s => s.Shapes()).ToList())
                 {
+                    if (token.IsCancellationRequested)
+                        return;
+
                     var textbox = shape as IMppShapeTextbox;
                     var table = shape as IMppShapeTable;
 

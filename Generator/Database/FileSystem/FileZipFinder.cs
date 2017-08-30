@@ -47,10 +47,37 @@ namespace Generator.Database.FileSystem
             return _archive ?? (_archive = new ZipArchive(_archiveStream, ZipArchiveMode.Read));
         }
 
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // dispose managed state (managed objects).
+                    if (_archiveStream != null)
+                    {
+                        _archiveStream.Close();
+                        _archiveStream = null;
+                    }
+                }
+
+                // free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // This code added to correctly implement the disposable pattern.
         public void Dispose()
         {
-            _archiveStream?.Dispose();
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
         }
+        #endregion
     }
 
     public class FileZipBundledItem : IDbItem
@@ -74,14 +101,17 @@ namespace Generator.Database.FileSystem
 
             public string Type => FileEngineDefaults.BundleTypeDir;
 
-            public Stream Content => new MemoryStream();
-
             public string PersistentLink => string.Empty;
 
             public DirContent(IEnumerable<ZipArchiveEntry> fileEntries, bool cached)
             {
                 _entries = fileEntries;
                 _cached = cached;
+            }
+
+            public Stream GetContentStream()
+            {
+                return new MemoryStream();
             }
 
             private static IEnumerable<IDbItem> GetItems(IEnumerable<ZipArchiveEntry> entries)
@@ -116,7 +146,6 @@ namespace Generator.Database.FileSystem
             private readonly ZipArchiveEntry _entry;
 
             public string Type { get; }
-            public Stream Content => _entry.Open();
             public string PersistentLink => _entry.FullName;
 
             public FileContent(ZipArchiveEntry entry)
@@ -124,6 +153,11 @@ namespace Generator.Database.FileSystem
                 _entry = entry;
 
                 Type = entry != null && entry.Name != null ? Path.GetExtension(entry.Name).Substring(1) : string.Empty;  // remove dot
+            }
+
+            public Stream GetContentStream()
+            {
+                return _entry.Open();
             }
 
             public IEnumerable<IDbItem> TryAccessSubs()

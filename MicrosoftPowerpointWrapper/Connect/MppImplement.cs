@@ -28,17 +28,43 @@ namespace mppt.Connect
             return new MppPresentatie(presSet.Open(bestandsnaam, MsoTriState.msoFalse, MsoTriState.msoTrue, metWindow ? MsoTriState.msoTrue : MsoTriState.msoFalse));
         }
 
-        public void Dispose()
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
         {
-            try
+            if (!disposedValue)
             {
-                _applicatie?.Quit();
-            }
-            finally
-            {
-                _applicatie = null;
+                if (disposing)
+                {
+                    // dispose managed state (managed objects).
+                    if (_applicatie != null)
+                    {
+                        try
+                        {
+                            _applicatie.Quit();
+                        }
+                        finally
+                        {
+                            _applicatie = null;
+                        }
+                    }
+                }
+
+                // free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // set large fields to null.
+
+                disposedValue = true;
             }
         }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+        }
+        #endregion
     }
 
     class MppPresentatie : IMppPresentatie

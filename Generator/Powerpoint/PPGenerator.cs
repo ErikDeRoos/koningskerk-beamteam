@@ -125,11 +125,11 @@ namespace Generator.Powerpoint
         {
             lock (_locker)
             {
-                _powerpoint.Stop();
+                _powerpoint.ProbeerStop();
                 for (int teller = 0; teller < 1000 && _generatorThread.IsAlive; teller++)
                     Thread.Sleep(5);
                 _generatorThread = null;
-                _powerpoint?.Dispose();
+                _powerpoint.ForceerStop();
                 _powerpoint = null;
                 _huidigeStatus = State.Geinitialiseerd;
             }
@@ -149,20 +149,51 @@ namespace Generator.Powerpoint
         }
 
 
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    bool gelocked = false;
+                    // dispose managed state (managed objects).
+                    try
+                    {
+                        Monitor.TryEnter(_locker, 100, ref gelocked);  // probeer eerst lief (door lock met timeout aan te vragen) maar ga door (forceer) als dat niet lukt
+                        if (_stopThread != null && _stopThread.IsAlive)
+                            _stopThread.Abort();
+                        _stopThread = null;
+                        if (_generatorThread != null && _generatorThread.IsAlive)
+                            _generatorThread.Abort();
+                        _generatorThread = null;
+                        if (_powerpoint != null)
+                            _powerpoint.ForceerStop();
+                        _powerpoint = null;
+                    }
+                    finally
+                    {
+                        if (gelocked)
+                            Monitor.Exit(_locker);
+                    }
+                }
+
+                // free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // This code added to correctly implement the disposable pattern.
         public void Dispose()
         {
-            var gelocked = Monitor.TryEnter(_locker, 100);  // probeer eerst lief maar als dat niet lukt, forceer exit
-            if (_stopThread != null && _stopThread.IsAlive)
-                _stopThread.Abort();
-            _stopThread = null;
-            if (_generatorThread != null && _generatorThread.IsAlive)
-                _generatorThread.Abort();
-            _generatorThread = null;
-            _powerpoint.Dispose();
-            _powerpoint = null;
-            if (gelocked)
-                Monitor.Exit(_locker);
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
         }
+        #endregion
 
         public enum State
         {

@@ -171,13 +171,11 @@ namespace Generator.Database
             switch (metItem.Type)
             {
                 case "txt":
-                    using (var fs = metItem.Content)
+                    using (var fs = metItem.GetContentStream())
                     {
-                        using (var rdr = new StreamReader(fs, Encoding.Default))
-                        {
-                            // geef de inhoud als tekst terug
-                            return new Content { Inhoud = rdr.ReadToEnd(), InhoudType = InhoudType.Tekst, Nummer = nummer };
-                        }
+                        var rdr = new StreamReader(fs, Encoding.Default);
+                        // geef de inhoud als tekst terug
+                        return new Content { Inhoud = rdr.ReadToEnd(), InhoudType = InhoudType.Tekst, Nummer = nummer };
                     }
                 case "ppt":
                 case "pptx":

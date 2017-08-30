@@ -1,6 +1,5 @@
 ﻿// Copyright 2017 door Remco Veurink en Erik de Roos
 using Generator.Database;
-using Generator.LiturgieInterpretator;
 using Generator.Powerpoint;
 using ILiturgieDatabase;
 using ISettings;
@@ -12,7 +11,7 @@ using Tools;
 
 namespace Generator
 {
-    public class GeneratieInterface<T> where T : class, ICompRegistration
+    public class GeneratieInterface<T> : IDisposable where T : class, ICompRegistration
     {
         private readonly ILiturgieLosOp _liturgieOplosser;
         private readonly ILiturgieInterpreteer _liturgieInterpreteer;
@@ -87,12 +86,6 @@ namespace Generator
             if (Status == GeneratorStatus.Gestopt)
                 return;
             Status = GeneratorStatus.Gestopt;
-            if (string.IsNullOrEmpty(foutmelding))
-            {
-                if (string.IsNullOrEmpty(opgeslagenAlsBestand)) return;
-                if (File.Exists(TempLiturgiePath))
-                    File.Delete(TempLiturgiePath);
-            }
             _setGereedmelding?.Invoke(opgeslagenAlsBestand, foutmelding, slidesGemist);
         }
 
@@ -294,5 +287,35 @@ namespace Generator
             NotDeleteable,
             NotCreateable
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // dispose managed state (managed objects).
+                    if (_powerpoint != null)
+                        _powerpoint.Dispose();
+                    _powerpoint = null;
+                }
+
+                // free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+        }
+        #endregion
     }
 }

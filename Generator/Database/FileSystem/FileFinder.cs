@@ -54,8 +54,6 @@ namespace Generator.Database.FileSystem
 
             public string Type => FileEngineDefaults.BundleTypeDir;
 
-            public Stream Content => new MemoryStream();
-
             public string PersistentLink => string.Empty;
 
             public DirContent(IFileOperations fileManager, string dirPath, bool cached)
@@ -63,6 +61,11 @@ namespace Generator.Database.FileSystem
                 _fileManager = fileManager;
                 _inDir = dirPath;
                 _cached = cached;
+            }
+
+            public Stream GetContentStream()
+            {
+                return new MemoryStream();
             }
 
             public IEnumerable<IDbItem> TryAccessSubs()
@@ -97,7 +100,6 @@ namespace Generator.Database.FileSystem
             private IFileOperations _fileManager;
 
             public string Type { get; }
-            public Stream Content => ReadFile(_filePath);
             public string PersistentLink => _filePath;
 
             public FileContent(IFileOperations fileManager, string filePath)
@@ -108,8 +110,14 @@ namespace Generator.Database.FileSystem
                 Type = _filePath != null ? Path.GetExtension(_filePath).Substring(1) : string.Empty;
             }
 
+            public Stream GetContentStream()
+            {
+                return ReadFile(_filePath);
+            }
+
             private Stream ReadFile(string filePath)
             {
+                // Open a new stream and return the stream
                 return _fileManager.FileReadStream(filePath);
             }
 

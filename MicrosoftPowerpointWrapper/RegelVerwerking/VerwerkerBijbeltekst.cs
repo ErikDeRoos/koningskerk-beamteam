@@ -6,6 +6,7 @@ using mppt.LiedPresentator;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Tools;
 
 namespace mppt.RegelVerwerking
@@ -34,9 +35,9 @@ namespace mppt.RegelVerwerking
                 _lengteBerekenaar = lengteBerekenaar;
             }
 
-            public IVerwerkResultaat Verwerk(ILiturgieRegel regel, IEnumerable<ILiturgieRegel> volgenden)
+            public IVerwerkResultaat Verwerk(ILiturgieRegel regel, IEnumerable<ILiturgieRegel> volgenden, CancellationToken token)
             {
-                InvullenTekstOpTemplate(regel, volgenden);
+                InvullenTekstOpTemplate(regel, volgenden, token);
 
                 return new VerwerkResultaat()
                 {
@@ -44,13 +45,16 @@ namespace mppt.RegelVerwerking
                 };
             }
 
-            private void InvullenTekstOpTemplate(ILiturgieRegel regel, IEnumerable<ILiturgieRegel> volgenden)
+            private void InvullenTekstOpTemplate(ILiturgieRegel regel, IEnumerable<ILiturgieRegel> volgenden, CancellationToken token)
             {
                 var tekstPerSlide = OpdelenPerSlide(TekstOpknippen(regel.Content), _buildDefaults.RegelsPerBijbeltekstSlide, _lengteBerekenaar);
 
                 //zolang er nog iets is in te voegen in sheets
                 foreach (var tekst in tekstPerSlide)
                 {
+                    if (token.IsCancellationRequested)
+                        return;
+
                     //regel de template om de bijbeltekst op af te beelden
                     var presentatie = OpenPps(_dependentFileList.FullTemplateBijbeltekst);
                     var slide = presentatie.EersteSlide();  //alleen eerste slide gebruiken we

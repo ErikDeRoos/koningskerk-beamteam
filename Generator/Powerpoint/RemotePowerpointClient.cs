@@ -192,6 +192,7 @@ namespace Generator.Powerpoint
             return ConnectieState.WachtOpGereed;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
         private ConnectieState CheckStatus()
         {
             var voortgang = _proxy.CheckVoortgang(_token);
@@ -240,7 +241,7 @@ namespace Generator.Powerpoint
             }
         }
 
-        public void Stop()
+        public void ProbeerStop()
         {
             _stop = true;
         }
@@ -249,8 +250,9 @@ namespace Generator.Powerpoint
         {
             DisposeStreams();
         }
-        public void Dispose()
+        public void ForceerStop()
         {
+            ProbeerStop();
             SluitAlles();
         }
 
