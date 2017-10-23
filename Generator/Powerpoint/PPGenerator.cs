@@ -51,7 +51,7 @@ namespace Generator.Powerpoint
                 if (_huidigeStatus != State.Onbekend && _huidigeStatus != State.Geinitialiseerd)
                     return new StatusMelding(_huidigeStatus, "Kan powerpoint niet initialiseren", "Start het programma opnieuw op");
                 _liturgie = liturgie.ToList();
-                _builderSettings = new BuilderBuildSettings(voorganger, collecte1, collecte2, lezen, tekst);
+                _builderSettings = new BuilderBuildSettings(voorganger, collecte1, collecte2, lezen, tekst, instellingen.Een2eCollecte);
                 var defaults = new BuilderDefaults(instellingen);
                 _builderDefaults = defaults;
                 _builderDependentFileList = defaults;
@@ -125,11 +125,11 @@ namespace Generator.Powerpoint
         {
             lock (_locker)
             {
-                _powerpoint.Stop();
+                _powerpoint.ProbeerStop();
                 for (int teller = 0; teller < 1000 && _generatorThread.IsAlive; teller++)
                     Thread.Sleep(5);
                 _generatorThread = null;
-                _powerpoint?.Dispose();
+                _powerpoint.ForceerStop();
                 _powerpoint = null;
                 _huidigeStatus = State.Geinitialiseerd;
             }
@@ -149,20 +149,51 @@ namespace Generator.Powerpoint
         }
 
 
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    bool gelocked = false;
+                    // dispose managed state (managed objects).
+                    try
+                    {
+                        Monitor.TryEnter(_locker, 100, ref gelocked);  // probeer eerst lief (door lock met timeout aan te vragen) maar ga door (forceer) als dat niet lukt
+                        if (_stopThread != null && _stopThread.IsAlive)
+                            _stopThread.Abort();
+                        _stopThread = null;
+                        if (_generatorThread != null && _generatorThread.IsAlive)
+                            _generatorThread.Abort();
+                        _generatorThread = null;
+                        if (_powerpoint != null)
+                            _powerpoint.ForceerStop();
+                        _powerpoint = null;
+                    }
+                    finally
+                    {
+                        if (gelocked)
+                            Monitor.Exit(_locker);
+                    }
+                }
+
+                // free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // This code added to correctly implement the disposable pattern.
         public void Dispose()
         {
-            var gelocked = Monitor.TryEnter(_locker, 100);  // probeer eerst lief maar als dat niet lukt, forceer exit
-            if (_stopThread != null && _stopThread.IsAlive)
-                _stopThread.Abort();
-            _stopThread = null;
-            if (_generatorThread != null && _generatorThread.IsAlive)
-                _generatorThread.Abort();
-            _generatorThread = null;
-            _powerpoint.Dispose();
-            _powerpoint = null;
-            if (gelocked)
-                Monitor.Exit(_locker);
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
         }
+        #endregion
 
         public enum State
         {
@@ -203,14 +234,16 @@ namespace Generator.Powerpoint
             public string Collecte2 { get; set; }
             public string Lezen { get; set; }
             public string Tekst { get; set; }
+            public bool Een2eCollecte { get; set; }
 
-            public BuilderBuildSettings(string voorganger, string collecte1, string collecte2, string lezen, string tekst)
+            public BuilderBuildSettings(string voorganger, string collecte1, string collecte2, string lezen, string tekst, bool een2eCollecte)
             {
                 Voorganger = voorganger;
                 Collecte1 = collecte1;
                 Collecte2 = collecte2;
                 Lezen = lezen;
                 Tekst = tekst;
+                Een2eCollecte = een2eCollecte;
             }
         }
         private class BuilderDefaults : IBuilderBuildDefaults, IBuilderDependendFiles

@@ -11,13 +11,13 @@ namespace IDatabase
         /// </summary>
         string Type { get; }
         /// <summary>
-        /// Stream van content. Indien null kan het zijn dat je subcontent hebt.
-        /// </summary>
-        Stream Content { get; }
-        /// <summary>
         /// Link naar waar de inhoud staat.
         /// </summary>
         string PersistentLink { get; }
+        /// <summary>
+        /// Stream van content. Indien null kan het zijn dat je subcontent hebt.
+        /// </summary>
+        Stream GetContentStream();
         /// <summary>
         /// Als de instellingen zeggen dat er subcontent mogelijk is, kan je hier bij de subs.
         /// </summary>

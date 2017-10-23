@@ -1,18 +1,19 @@
 ﻿// Copyright 2017 door Erik de Roos
 using ILiturgieDatabase;
+using System;
 using System.Linq;
 using System.Windows.Forms;
 
 namespace mppt.RegelVerwerking
 {
-    public class LengteBerekenaar : ILengteBerekenaar
+    public class LengteBerekenaar : ILengteBerekenaar, IDisposable
     {
         private const int PadMesureShort = 8;  // Arbitrary number
         private const int PadMesureLong = PadMesureShort * 2;
 
-        private System.Drawing.Font _font { get; }
-        private System.Drawing.Size _baseSize { get; }
-        private int _padSize { get; }
+        private System.Drawing.Font _font;
+        private System.Drawing.Size _baseSize;
+        private int _padSize;
 
         public LengteBerekenaar(ISettings instellingen)
         {
@@ -36,5 +37,33 @@ namespace mppt.RegelVerwerking
                 correctedSize += _padSize;
             return (float)correctedSize * 100 / _baseSize.Width;
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    _font.Dispose();
+                    _font = null;
+                }
+
+                // free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+        }
+        #endregion
     }
 }

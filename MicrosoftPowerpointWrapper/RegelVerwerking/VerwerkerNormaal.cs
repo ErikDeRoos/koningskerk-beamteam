@@ -7,6 +7,7 @@ using mppt.Connect;
 using mppt.LiedPresentator;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Tools;
 
 namespace mppt.RegelVerwerking
@@ -21,45 +22,32 @@ namespace mppt.RegelVerwerking
         public IVerwerk Init(IMppApplication metApplicatie, IMppPresentatie toevoegenAanPresentatie, IMppFactory metFactory, ILiedFormatter gebruikLiedFormatter, IBuilderBuildSettings buildSettings,
                 IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ILiturgieRegel> volledigeLiturgieOpVolgorde, ILengteBerekenaar lengteBerekenaar)
         {
-            return new Verwerker(metApplicatie, toevoegenAanPresentatie, metFactory, gebruikLiedFormatter, buildSettings, buildDefaults, dependentFileList, volledigeLiturgieOpVolgorde, lengteBerekenaar);
+            return new Verwerker(metApplicatie, toevoegenAanPresentatie, metFactory, gebruikLiedFormatter, buildSettings, buildDefaults, dependentFileList, volledigeLiturgieOpVolgorde);
         }
 
         private class Verwerker : VerwerkBase, IVerwerk
         {
             private const string NieuweSlideAanduiding = "#";
 
-            private IMppPresentatie _presentatie { get; }
-            private IMppFactory _mppFactory { get; }
-            private ILiedFormatter _liedFormatter { get; }
-            private IBuilderBuildSettings _buildSettings { get; }
-            private IBuilderBuildDefaults _buildDefaults { get; }
-            private IBuilderDependendFiles _dependentFileList { get; }
-            private IEnumerable<ILiturgieRegel> _liturgie { get; }
-            private ILengteBerekenaar _lengteBerekenaar { get; }
             private int _slidesGemist = 0;
 
             public Verwerker(IMppApplication metApplicatie, IMppPresentatie toevoegenAanPresentatie, IMppFactory metFactory, ILiedFormatter gebruikLiedFormatter, IBuilderBuildSettings buildSettings,
-                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ILiturgieRegel> volledigeLiturgieOpVolgorde, ILengteBerekenaar lengteBerekenaar) : base (metApplicatie)
+                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ILiturgieRegel> volledigeLiturgieOpVolgorde) 
+                : base (metApplicatie, toevoegenAanPresentatie, metFactory, gebruikLiedFormatter, buildSettings, buildDefaults, dependentFileList, volledigeLiturgieOpVolgorde)
             {
-                _presentatie = toevoegenAanPresentatie;
-                _mppFactory = metFactory;
-                _liedFormatter = gebruikLiedFormatter;
-                _buildSettings = buildSettings;
-                _buildDefaults = buildDefaults;
-                _dependentFileList = dependentFileList;
-                _liturgie = volledigeLiturgieOpVolgorde;
-                _lengteBerekenaar = lengteBerekenaar;
             }
 
-            public IVerwerkResultaat Verwerk(ILiturgieRegel regel, IEnumerable<ILiturgieRegel> volgenden)
+            public IVerwerkResultaat Verwerk(ILiturgieRegel regel, IEnumerable<ILiturgieRegel> volgenden, CancellationToken token)
             {
                 // Per onderdeel in de regel moet een sheet komen
                 foreach (var inhoud in regel.Content)
                 {
+                    if (token.IsCancellationRequested)
+                        break;
                     if (inhoud.InhoudType == InhoudType.Tekst)
-                        InvullenTekstOpTemplate(regel, inhoud, volgenden);
+                        InvullenTekstOpTemplate(regel, inhoud, volgenden, token);
                     else
-                        ToevoegenSlides(regel, inhoud, volgenden);
+                        ToevoegenSlides(regel, inhoud, volgenden, token);
                 }
 
                 return new VerwerkResultaat()
@@ -71,13 +59,16 @@ namespace mppt.RegelVerwerking
             /// <summary>
             /// Lied in template plaatsen
             /// </summary>
-            private void InvullenTekstOpTemplate(ILiturgieRegel regel, ILiturgieContent inhoud, IEnumerable<ILiturgieRegel> volgenden)
+            private void InvullenTekstOpTemplate(ILiturgieRegel regel, ILiturgieContent inhoud, IEnumerable<ILiturgieRegel> volgenden, CancellationToken token)
             {
                 var tekstOmTeRenderen = inhoud.Inhoud;
                 var tekstOmTeRenderenLijst = new List<string>();
                 // knip de te renderen tekst in stukken (zodat we van tevoren het aantal weten)
                 while (!string.IsNullOrWhiteSpace(tekstOmTeRenderen))
                 {
+                    if (token.IsCancellationRequested)
+                        return;
+
                     // plaats zo veel mogelijk tekst op de slide totdat het niet meer past, krijg de restjes terug
                     var uitzoeken = InvullenLiedTekst(tekstOmTeRenderen);
                     tekstOmTeRenderenLijst.Add(uitzoeken.Invullen);
@@ -87,27 +78,33 @@ namespace mppt.RegelVerwerking
                 //zolang er nog iets is in te voegen in sheets
                 foreach (var tekst in tekstOmTeRenderenLijst)
                 {
+                    if (token.IsCancellationRequested)
+                        return;
+
                     //regel de template om het lied op af te beelden
                     var presentatie = OpenPps(_dependentFileList.FullTemplateLied);
                     var slide = presentatie.EersteSlide();  //alleen eerste slide gebruiken we
                                                             //voor elk object op de slides (we zoeken naar de tekst die vervangen moet worden in de template)
                     foreach (var shape in slide.Shapes().Where(s => s is IMppShapeTextbox).Cast<IMppShapeTextbox>())
                     {
-                        var text = shape.Text;
-                        //als de template de tekst bevat "Liturgieregel" moet daar de liturgieregel komen
-                        if (text.Equals("<Liturgieregel>"))
-                            shape.Text = _liedFormatter.Huidig(regel, inhoud).Display;
-                        //als de template de tekst bevat "Inhoud" moet daar de inhoud van het vers komen
-                        else if (text.Equals("<Inhoud>"))
-                            shape.Text = tekst;
-                        //als de template de tekst bevat "Volgende" moet daar de Liturgieregel van de volgende sheet komen
-                        else if (text.Equals("<Volgende>"))
-                        {
-                            //we moeten dan wel al op de laatste slide zitten ('InvullenVolgende' is wel al intelligent maar in het geval van 1
-                            //lange tekst over meerdere dia's kan 'InvullenVolgende' niet de juiste keuze maken)
-                            var display = IsLaatsteSlide(tekstOmTeRenderenLijst, tekst, regel, inhoud) ? _liedFormatter.Volgende(volgenden) : null;
-                            shape.Text = display != null ? $"{_buildDefaults.LabelVolgende} {display.Display}" : string.Empty;
-                        }
+                        var tagReplacementResult = ProcessForTagReplacement(shape.Text, regel, 
+                            additionalSearchForTagReplacement: (s) => {
+                                switch (s)
+                                {
+                                    case "liturgieregel":
+                                        return new SearchForTagReplacementResult(_liedFormatter.Huidig(regel, inhoud).Display);
+                                    case "inhoud":
+                                        return new SearchForTagReplacementResult(tekst);
+                                    case "volgende":
+                                        //we moeten dan wel al op de laatste slide zitten ('InvullenVolgende' is wel al intelligent maar in het geval van 1
+                                        //lange tekst over meerdere dia's kan 'InvullenVolgende' niet de juiste keuze maken)
+                                        var display = IsLaatsteSlide(tekstOmTeRenderenLijst, tekst, regel, inhoud) ? _liedFormatter.Volgende(volgenden) : null;
+                                        return new SearchForTagReplacementResult(display != null ? $"{_buildDefaults.LabelVolgende} {display.Display}" : string.Empty);
+                                }
+                                return SearchForTagReplacementResult.Unresolved;
+                            });
+                        if (tagReplacementResult.TagsReplaced)
+                            shape.Text = tagReplacementResult.NewValue;
                     }
                     //voeg slide in in het grote geheel
                     _slidesGemist += _presentatie.SlidesKopieNaarPresentatie(new List<IMppSlide> { slide });
@@ -119,7 +116,7 @@ namespace mppt.RegelVerwerking
             /// <summary>
             /// Algemene slide waarop we alleen template teksten moeten vervangen
             /// </summary>
-            private void ToevoegenSlides(ILiturgieRegel regel, ILiturgieContent inhoud, IEnumerable<ILiturgieRegel> volgenden)
+            private void ToevoegenSlides(ILiturgieRegel regel, ILiturgieContent inhoud, IEnumerable<ILiturgieRegel> volgenden, CancellationToken token)
             {
                 //open de presentatie met de sheets erin
                 var presentatie = OpenPps(inhoud.Inhoud);
@@ -127,55 +124,44 @@ namespace mppt.RegelVerwerking
                 var slides = presentatie.AlleSlides().ToList();
                 foreach (var shape in slides.SelectMany(s => s.Shapes()).ToList())
                 {
+                    if (token.IsCancellationRequested)
+                        return;
+
                     var textbox = shape as IMppShapeTextbox;
                     var table = shape as IMppShapeTable;
 
                     if (textbox != null)
                     {
-                        var text = textbox.Text;
-                        //als de template de tekst bevat "Voorganger: " moet daar de Voorgangersnaam achter komen
-                        if (text.Equals("<Voorganger:>"))
-                            textbox.Text = _buildDefaults.LabelVoorganger + _buildSettings.Voorganger;
-                        //als de template de tekst bevat "Collecte: " moet daar de collectedoel achter komen
-                        else if (text.Equals("<Collecte:>"))
-                            textbox.Text = _buildDefaults.LabelCollecte + _buildSettings.Collecte1;
-                        //als de template de tekst bevat "1e Collecte: " moet daar de 1e collecte achter komen
-                        else if (text.Equals("<1e Collecte:>"))
-                            textbox.Text = _buildDefaults.LabelCollecte1 + _buildSettings.Collecte1;
-                        //als de template de tekst bevat "2e Collecte: " moet daar de 2e collecte achter komen
-                        else if (text.Equals("<2e Collecte:>"))
-                            textbox.Text = _buildDefaults.LabelCollecte2 + _buildSettings.Collecte2;
-                        //als de template de tekst bevat "Volgende" moet daar de Liturgieregel van de volgende sheet komen
-                        else if (text.Equals("<Volgende>"))
-                        {
-                            var display = _liedFormatter.Volgende(volgenden);
-                            textbox.Text = display != null ? $"{_buildDefaults.LabelVolgende} {display.Display}" : string.Empty;
-                        }
-                        //verkorte versie van "Volgende"
-                        else if (text.Equals("<Volgende_kort>"))
-                        {
-                            var display = _liedFormatter.Volgende(volgenden);
-                            textbox.Text = display != null ? display.Display : string.Empty;
-                        }
-                        //een "Volgende" waarbij je kan bepalen dat je iets verder kijkt
-                        else if (text.StartsWith("<Volgende_over_") && text.EndsWith(">"))
-                        {
-                            var aantalOverslaanStr = text.Substring("<Volgende_over_".Length, text.Length - "<Volgende_over_>".Length);
-                            int aantalOverslaan = 0;
-                            if (int.TryParse(aantalOverslaanStr, out aantalOverslaan))
-                            {
-                                var display = _liedFormatter.Volgende(volgenden, aantalOverslaan);
-                                textbox.Text = display != null ? $"{_buildDefaults.LabelVolgende} {display.Display}" : string.Empty;
-                            }
-                            else
-                                textbox.Text = string.Empty;
-                        }
-                        else if (text.Equals("<Lezen>"))
-                            textbox.Text = _buildDefaults.LabelLezen + _buildSettings.Lezen;
-                        else if (text.Equals("<Tekst>"))
-                            textbox.Text = _buildDefaults.LabelTekst + _buildSettings.Tekst;
-                        else if (text.Equals("<Tekst_Onder>"))
-                            textbox.Text = _buildSettings.Tekst;
+                        var tagReplacementResult = ProcessForTagReplacement(textbox.Text, regel,
+                            additionalSearchForTagReplacement: (s) => {
+                                LiedFormatResult display;
+                                switch (s)
+                                {
+                                    case "volgende":
+                                        //als de template de tekst bevat "Volgende" moet daar de Liturgieregel van de volgende sheet komen
+                                        display = _liedFormatter.Volgende(volgenden);
+                                        return new SearchForTagReplacementResult(display != null ? $"{_buildDefaults.LabelVolgende} {display.Display}" : string.Empty);
+                                    case "volgende_kort":
+                                        //verkorte versie van "Volgende"
+                                        display = _liedFormatter.Volgende(volgenden);
+                                        return new SearchForTagReplacementResult(display != null ? display.Display : string.Empty);
+                                }
+                                if (s.StartsWith("volgende_over_"))
+                                {
+                                    var aantalOverslaanStr = s.Substring("volgende_over_".Length, s.Length - "volgende_over_".Length);
+                                    int aantalOverslaan = 0;
+                                    if (int.TryParse(aantalOverslaanStr, out aantalOverslaan))
+                                    {
+                                        display = _liedFormatter.Volgende(volgenden, aantalOverslaan);
+                                        return new SearchForTagReplacementResult(display != null ? $"{_buildDefaults.LabelVolgende} {display.Display}" : string.Empty);
+                                    }
+                                    else
+                                        return new SearchForTagReplacementResult(string.Empty);
+                                }
+                                return SearchForTagReplacementResult.Unresolved;
+                            });
+                        if (tagReplacementResult.TagsReplaced)
+                            textbox.Text = tagReplacementResult.NewValue;
                     }
                     else if (table != null)
                     {

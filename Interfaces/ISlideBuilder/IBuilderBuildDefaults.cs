@@ -2,6 +2,9 @@
 
 namespace ISlideBuilder
 {
+    /// <summary>
+    /// Instellingen die normaliter niet wijzigen tussen slide generaties
+    /// </summary>
     public interface IBuilderBuildDefaults
     {
         int RegelsPerLiedSlide { get; }

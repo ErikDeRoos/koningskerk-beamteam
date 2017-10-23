@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ILiturgieDatabase
 {
-    public interface IZoekresultaat
+    public interface IOplossing
     {
         LiturgieOplossingResultaat Status { get; }
         string OnderdeelNaam { get; }

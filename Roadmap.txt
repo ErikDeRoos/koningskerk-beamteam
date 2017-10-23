@@ -1,0 +1,28 @@
+
+Feature 32 - Major release
+-Copyrights vervangen
+-Release of v2.0.x
+
+
+
+
+
+
+
+
+
+Klant wensen:
+-Bijbeltekst vers-weergave formatteren
+-Bugfix: Sommige hoofdstukken worden overgeslagen (ergens in een mailtje of in t werkzaamheden overzicht bestand staat het voorbeeld)
+
+Eigen ideeën:
+S-Opslaan via het nieuwe powerpoint formaat
+S-tempfile lokaal (zodat deze niet in dropbox komt)
+M-database files via json
+M-liturgie voorbeeld tonen
+C-context binding (van bewerken operaties in werkbalk) verbeteren
+C-flowpanel onder rechter scherm
+M-critical error fixen
+S-undo/redo verbeteren
+C-Instellingen via array (zoals in VS settings)
+C-2e collecte terugbrengen

@@ -10,8 +10,10 @@ namespace ILiturgieDatabase
     {
         string Benaming { get; }
         string Deel { get; }
+        string TeTonenNaam { get; }
+        string TeTonenNaamOpOverzicht { get; }
         IEnumerable<string> Verzen { get; }
         string VerzenZoalsIngevoerd { get; }
-        IEnumerable<string> Opties { get; }
+        ILiturgieOptiesGebruiker OptiesGebruiker { get; }
     }
 }

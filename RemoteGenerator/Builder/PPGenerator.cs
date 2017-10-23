@@ -220,11 +220,11 @@ namespace RemoteGenerator.Builder
         {
             lock (this)
             {
-                _powerpoint.Stop();
+                _powerpoint.ProbeerStop();
                 for (int teller = 0; teller < 100 && _generatorThread.IsAlive; teller++)
                     Thread.Sleep(5);
                 _generatorThread = null;
-                _powerpoint.Dispose();
+                _powerpoint.ForceerStop();
                 _powerpoint = null;
                 _huidigeStatus = State.Geinitialiseerd;
             }
@@ -291,18 +291,25 @@ namespace RemoteGenerator.Builder
 
         private void HardeStop()
         {
-            var gelocked = Monitor.TryEnter(this, 100);  // probeer eerst lief maar als dat niet lukt, forceer exit
-            if (_stopThread != null && _stopThread.IsAlive)
-                _stopThread.Abort();
-            _stopThread = null;
-            if (_generatorThread != null && _generatorThread.IsAlive)
-                _generatorThread.Abort();
-            _generatorThread = null;
-            _powerpoint?.Dispose();
-            _powerpoint = null;
-            _huidigeStatus = State.Onbekend;
-            if (gelocked)
-                Monitor.Exit(this);
+            bool gelocked = false;
+            try
+            {
+                Monitor.TryEnter(this, 100, ref gelocked);  // probeer eerst lief maar als dat niet lukt, forceer exit
+                if (_stopThread != null && _stopThread.IsAlive)
+                    _stopThread.Abort();
+                _stopThread = null;
+                if (_generatorThread != null && _generatorThread.IsAlive)
+                    _generatorThread.Abort();
+                _generatorThread = null;
+                _powerpoint?.ForceerStop();
+                _powerpoint = null;
+                _huidigeStatus = State.Onbekend;
+            }
+            finally
+            {
+                if (gelocked)
+                    Monitor.Exit(this);
+            }
         }
 
         public void Dispose()

@@ -1,4 +1,4 @@
-﻿// Copyright 2016 door Erik de Roos
+﻿// Copyright 2017 door Erik de Roos
 using System;
 using System.IO;
 using System.ServiceModel;
@@ -17,13 +17,36 @@ namespace ConnectTools.Berichten
         [MessageBodyMember]
         public Stream FileByteStream;
 
-        public void Dispose()
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
         {
-            if (FileByteStream != null)
+            if (!disposedValue)
             {
-                FileByteStream.Close();
-                FileByteStream = null;
+                if (disposing)
+                {
+                    // dispose managed state (managed objects).
+                    if (FileByteStream != null)
+                    {
+                        FileByteStream.Close();
+                        FileByteStream = null;
+                    }
+                }
+
+                // free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // set large fields to null.
+
+                disposedValue = true;
             }
         }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+        }
+        #endregion
     }
 }

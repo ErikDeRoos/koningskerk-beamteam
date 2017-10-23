@@ -151,10 +151,8 @@ namespace Generator.Database.FileSystem
                 var settings = new XmlReaderSettings();
                 using (var textReader = new StreamReader(_fileManager.FileReadStream(fileName)))
                 {
-                    using (var xmlReader = XmlReader.Create(textReader, settings))
-                    {
-                        return (serializer.Deserialize(xmlReader) as T) ?? new T();
-                    }
+                    var xmlReader = XmlReader.Create(textReader, settings);
+                    return (serializer.Deserialize(xmlReader) as T) ?? new T();
                 }
             }
             catch (InvalidOperationException)  // XML niet in juiste format

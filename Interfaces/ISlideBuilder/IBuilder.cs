@@ -5,14 +5,15 @@ using ILiturgieDatabase;
 
 namespace ISlideBuilder
 {
-    public interface IBuilder : IDisposable
+    public interface IBuilder
     {
         Action<int, int, int> Voortgang { set; }
         Action<Status, string, int?> StatusWijziging { set; }
 
         void PreparePresentation(IEnumerable<ILiturgieRegel> liturgie, IBuilderBuildSettings buildSettings, IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, string opslaanAls);
         void GeneratePresentation();
-        void Stop();
+        void ProbeerStop();
+        void ForceerStop();
     }
 
     public enum Status

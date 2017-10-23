@@ -2,6 +2,7 @@
 using Autofac;
 using System;
 using System.Windows.Forms;
+using Tools;
 
 namespace PowerpointGenerator
 {
@@ -13,14 +14,21 @@ namespace PowerpointGenerator
         [STAThread]
         static void Main(string[] args)
         {
-            var builder = new ContainerBuilder();
-            Bootstrap.SetDefault(builder);
+            try {
+                var builder = new ContainerBuilder();
+                Bootstrap.SetDefault(builder);
 
-            using (var container = builder.Build())
+                using (var container = builder.Build())
+                {
+                    // Start de main programma loop
+                    new ProgramInternals(container.Resolve<Func<string, Form>>())
+                        .Run(args.Length >= 1 ? args[0] : null);
+                }
+            }
+            catch (Exception Exc)
             {
-                // Start de main programma loop
-                new ProgramInternals(container.Resolve<Func<string, Form>>())
-                    .Run(args.Length >= 1 ? args[0] : null);
+                FoutmeldingSchrijver.Log(Exc);
+                throw;
             }
         }
 

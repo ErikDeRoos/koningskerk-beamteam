@@ -1,4 +1,4 @@
-﻿// Copyright 2016 door Remco Veurink en Erik de Roos
+﻿// Copyright 2017 door Remco Veurink en Erik de Roos
 using ISettings;
 using ISettings.CommonImplementation;
 using System;
@@ -23,7 +23,7 @@ namespace PowerpointGenerator
 
         public void Opstarten()
         {
-            var vanInstellingen = _instellingenFactory.LoadFromXmlFile();
+            var vanInstellingen = _instellingenFactory.LoadFromFile();
 
             textBox3.Text = vanInstellingen.DatabasePad;
             textBox5.Text = vanInstellingen.BijbelPad;
@@ -48,6 +48,8 @@ namespace PowerpointGenerator
             tbLiturgieTekst.Text = vanInstellingen.StandaardTeksten.LiturgieTekst;
 
             _masks = vanInstellingen.Masks;
+
+            checkBox1.Checked = vanInstellingen.Een2eCollecte;
         }
 
         #region Eventhandlers
@@ -175,18 +177,15 @@ namespace PowerpointGenerator
                 TemplateBijbeltekst = textBox6.Text,
                 TekstFontName = textBox8.Text,
             };
-            int regelsPerSlide;
-            if (TryParse(textBox4.Text, out regelsPerSlide))
+            if (TryParse(textBox4.Text, out int regelsPerSlide))
                 instellingen.RegelsPerLiedSlide = regelsPerSlide;
-            int regelsPerBijbeltekstSlide;
-            if (TryParse(textBox7.Text, out regelsPerBijbeltekstSlide))
+            if (TryParse(textBox7.Text, out int regelsPerBijbeltekstSlide))
                 instellingen.RegelsPerBijbeltekstSlide = regelsPerBijbeltekstSlide;
-            int fontPointSize;
-            if (TryParse(textBox9.Text, out fontPointSize))
+            if (TryParse(textBox9.Text, out int fontPointSize))
                 instellingen.TekstFontPointSize = fontPointSize;
-            int char_a_OnARow;
-            if (TryParse(textBox10.Text, out char_a_OnARow))
+            if (TryParse(textBox10.Text, out int char_a_OnARow))
                 instellingen.TekstChar_a_OnARow = char_a_OnARow;
+            instellingen.Een2eCollecte = checkBox1.Checked;
 
             Instellingen = instellingen;
         }

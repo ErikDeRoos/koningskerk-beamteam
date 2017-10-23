@@ -1,4 +1,4 @@
-﻿// Copyright 2016 door Remco Veurink en Erik de Roos
+﻿// Copyright 2017 door Remco Veurink en Erik de Roos
 using System.Collections.Generic;
 using System;
 using System.Linq;
@@ -12,6 +12,7 @@ namespace ISettings.CommonImplementation
         private const int DefaultTekstChar_a_OnARow = 41;
         private const string DefaultTekstFontName = "Verdana";
         private const float DefaultTekstFontPointSize = 28;
+        private const bool DefaultEen2eCollecte = true;
 
         public string DatabasePad { get; set; }
         public string BijbelPad { get; set; }
@@ -23,8 +24,10 @@ namespace ISettings.CommonImplementation
         public float TekstFontPointSize { get; set; }
         public int RegelsPerLiedSlide { get; set; }
         public int RegelsPerBijbeltekstSlide { get; set; }
+        public bool Een2eCollecte { get; set; }
         private readonly List<IMapmask> _lijstmasks = new List<IMapmask>();
         public StandaardTeksten StandaardTeksten { get; set; }
+
 
         public Instellingen()
         {
@@ -37,6 +40,7 @@ namespace ISettings.CommonImplementation
             TekstFontPointSize = DefaultTekstFontPointSize;
             RegelsPerLiedSlide = DefaultRegelsperslide;
             RegelsPerBijbeltekstSlide = DefaultRegelsperbijbeltekstslide;
+            Een2eCollecte = DefaultEen2eCollecte;
 
             StandaardTeksten = new StandaardTeksten()
             {

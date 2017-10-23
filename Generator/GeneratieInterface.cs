@@ -1,6 +1,5 @@
 ﻿// Copyright 2017 door Remco Veurink en Erik de Roos
 using Generator.Database;
-using Generator.LiturgieInterpretator;
 using Generator.Powerpoint;
 using ILiturgieDatabase;
 using ISettings;
@@ -12,7 +11,7 @@ using Tools;
 
 namespace Generator
 {
-    public class GeneratieInterface<T> where T : class, ICompRegistration
+    public class GeneratieInterface<T> : IDisposable where T : class, ICompRegistration
     {
         private readonly ILiturgieLosOp _liturgieOplosser;
         private readonly ILiturgieInterpreteer _liturgieInterpreteer;
@@ -47,7 +46,7 @@ namespace Generator
             {
                 try
                 {
-                    LoadWorkingfile(OpenenopLocatie(startBestand));
+                    LoadWorkingfile(OpenenOpLocatie(startBestand));
                 }
                 catch { }
             }
@@ -55,7 +54,7 @@ namespace Generator
             {
                 try
                 {
-                    LoadWorkingfile(OpenenopLocatie(TempLiturgiePath));
+                    LoadWorkingfile(OpenenOpLocatie(TempLiturgiePath));
                 }
                 catch { }
                 try
@@ -87,12 +86,6 @@ namespace Generator
             if (Status == GeneratorStatus.Gestopt)
                 return;
             Status = GeneratorStatus.Gestopt;
-            if (string.IsNullOrEmpty(foutmelding))
-            {
-                if (string.IsNullOrEmpty(opgeslagenAlsBestand)) return;
-                if (File.Exists(TempLiturgiePath))
-                    File.Delete(TempLiturgiePath);
-            }
             _setGereedmelding?.Invoke(opgeslagenAlsBestand, foutmelding, slidesGemist);
         }
 
@@ -201,7 +194,7 @@ namespace Generator
         /// </summary>
         /// <param name="pad"></param>
         /// <returns></returns>
-        public string OpenenopLocatie(string pad)
+        public string OpenenOpLocatie(string pad)
         {
             //open een filestream naar het gekozen bestand
             var strm = new FileStream(pad, FileMode.Open, FileAccess.Read);
@@ -236,7 +229,7 @@ namespace Generator
             // Liturgie uit tekstbox omzetten in leesbare items
             var ruweLiturgie = _liturgieInterpreteer.VanTekstregels(Registration.Liturgie);
             // Zoek op het bestandssysteem zo veel mogelijk al op (behalve ppt, die gaan via COM element)
-            var masks = MapMasksToLiturgie.Map(_instellingenFactory.LoadFromXmlFile().Masks);
+            var masks = MapMasksToLiturgie.Map(_instellingenFactory.LoadFromFile().Masks);
             return _liturgieOplosser.LosOp(ruweLiturgie, masks).ToList();
         }
 
@@ -245,7 +238,7 @@ namespace Generator
             Status = GeneratorStatus.AanHetGenereren;
             var lezenText = string.Join("\n\r", Registration.Lezen);
             var tekstText = string.Join("\n\r", Registration.Tekst);
-            var status = _powerpoint.Initialiseer(ingeladenLiturgie.Select(l => l.Regel).ToList(), Registration.Voorganger, Registration.Collecte1e, Registration.Collecte2e, lezenText, tekstText, _instellingenFactory.LoadFromXmlFile(), opslaanAlsBestandsnaam);
+            var status = _powerpoint.Initialiseer(ingeladenLiturgie.Select(l => l.Regel).ToList(), Registration.Voorganger, Registration.Collecte1e, Registration.Collecte2e, lezenText, tekstText, _instellingenFactory.LoadFromFile(), opslaanAlsBestandsnaam);
             if (status.Fout == null)
                 status = _powerpoint.Start();
             // Stop weer als er een fout is geweest
@@ -294,5 +287,35 @@ namespace Generator
             NotDeleteable,
             NotCreateable
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // dispose managed state (managed objects).
+                    if (_powerpoint != null)
+                        _powerpoint.Dispose();
+                    _powerpoint = null;
+                }
+
+                // free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+        }
+        #endregion
     }
 }

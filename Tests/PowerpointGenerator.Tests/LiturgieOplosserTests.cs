@@ -11,10 +11,12 @@ namespace Generator.Tests
     public class LiturgieOplosserTests
     {
         private static string DefaultEmptyName = "!leeg";
+        private ILiturgieInterpreteer _liturgieInterpreteer;
 
         [OneTimeSetUp]
         public void Initialise()
         {
+            _liturgieInterpreteer = A.Fake<ILiturgieInterpreteer>();
         }
 
         [TestFixture]
@@ -25,7 +27,7 @@ namespace Generator.Tests
             {
                 var liturgieItem = FakeInterpretatie(onderdeel, fragment: fragment);
                 var database = FakeDatabase(onderdeel, fragment);
-                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
+                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieLosOp;
 
                 var oplossing = sut.LosOp(liturgieItem);
 
@@ -37,7 +39,7 @@ namespace Generator.Tests
             {
                 var liturgieItem = FakeInterpretatie(onderdeel);
                 var database = FakeDatabase(FileEngineDefaults.CommonFilesSetName, onderdeel);
-                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
+                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieLosOp;
 
                 var oplossing = sut.LosOp(liturgieItem);
 
@@ -50,7 +52,7 @@ namespace Generator.Tests
             {
                 var liturgieItem = FakeInterpretatie(onderdeel, fragment: fragment);
                 var database = fragment != null ? FakeDatabase(onderdeel, fragment) : FakeDatabase(FileEngineDefaults.CommonFilesSetName, onderdeel);
-                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
+                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieLosOp;
 
                 var oplossing = sut.LosOp(liturgieItem);
 
@@ -62,7 +64,7 @@ namespace Generator.Tests
             {
                 var liturgieItem = FakeInterpretatie(onderdeel, fragment: fragment);
                 var database = FakeDatabase(onderdeel, fragment, display: display);
-                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
+                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieLosOp;
 
                 var oplossing = sut.LosOp(liturgieItem);
 
@@ -75,7 +77,7 @@ namespace Generator.Tests
                 var maskList = FakeMask(maskRealName, maskUseName);
                 var liturgieItem = FakeInterpretatie(onderdeel, fragment: fragment);
                 var database = FakeDatabase(onderdeel, fragment);
-                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
+                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieLosOp;
 
                 var oplossing = sut.LosOp(liturgieItem, maskList);
 
@@ -88,7 +90,7 @@ namespace Generator.Tests
                 var maskList = FakeMask(maskRealName, maskUseName);
                 var liturgieItem = FakeInterpretatie(onderdeel);
                 var database = FakeDatabase(FileEngineDefaults.CommonFilesSetName, onderdeel);
-                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
+                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieLosOp;
 
                 var oplossing = sut.LosOp(liturgieItem, maskList);
 
@@ -113,17 +115,18 @@ namespace Generator.Tests
             return liturgieItem;
         }
 
-        private static ILiturgieDatabase.ILiturgieDatabase FakeDatabase(string onderdeel, string fragment, string display = null)
+        private static ILiturgieDatabase.ILiturgieDatabase FakeDatabase(string onderdeel, string fragment, string display = null, LiturgieOplossingResultaat status = LiturgieOplossingResultaat.Opgelost)
         {
-            var zoekresultaat = A.Fake<IZoekresultaat>();
+            var zoekresultaat = A.Fake<IOplossing>();
             A.CallTo(() => zoekresultaat.OnderdeelNaam).Returns(onderdeel);
             A.CallTo(() => zoekresultaat.FragmentNaam).Returns(fragment);
+            A.CallTo(() => zoekresultaat.Status).Returns(status);
             if (display != null)
                 A.CallTo(() => zoekresultaat.OnderdeelDisplayNaam).Returns(display);
             var database = A.Fake<ILiturgieDatabase.ILiturgieDatabase>();
             A.CallTo(database)
                 .Where(d => d.Method.Name == "ZoekOnderdeel")
-                .WithReturnType<IZoekresultaat>()
+                .WithReturnType<IOplossing>()
                 .WithAnyArguments()
                 .Returns(zoekresultaat);
             return database;
@@ -133,29 +136,41 @@ namespace Generator.Tests
     public class LiturgieOplosser_Bijbeltekst
     {
         private static string DefaultEmptyName = "!leeg";
+        private ILiturgieInterpreteer _liturgieInterpreteer;
 
-        [TestCase("Johannes", "3", new [] { "1" ,"2", "3"})]
-        public void LosOp_NormaalItem_ZoekInDatabase(string onderdeel, string fragment, IEnumerable<string> fragmentVerzen)
+        [OneTimeSetUp]
+        public void Initialise()
         {
-            var liturgieItem = FakeBijbeltekstInterpretatie(onderdeel, fragment, fragmentVerzen);
-            var database = FakeDatabase(onderdeel, fragment);
-            var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
-
-            var oplossing = sut.LosOp(liturgieItem);
-
-            A.CallTo(() => database.ZoekOnderdeel(VerwerkingType.bijbeltekst, liturgieItem.Benaming, liturgieItem.PerDeelVersen.First().Deel, liturgieItem.PerDeelVersen.First().Verzen)).MustHaveHappened();
+            _liturgieInterpreteer = A.Fake<ILiturgieInterpreteer>();
         }
 
-        [TestCase("Johannes", "3", new[] { "1", "2", "3" })]
-        public void LosOp_NormaalItem_Gevonden(string onderdeel, string fragment, IEnumerable<string> fragmentVerzen)
+        [TestFixture]
+        public class LosOpMethod : LiturgieOplosser_Bijbeltekst
         {
-            var liturgieItem = FakeBijbeltekstInterpretatie(onderdeel, fragment, fragmentVerzen);
-            var database = FakeDatabase(onderdeel, fragment);
-            var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, DefaultEmptyName)) as ILiturgieLosOp;
 
-            var oplossing = sut.LosOp(liturgieItem);
+            [TestCase("Johannes", "3", new[] { "1", "2", "3" })]
+            public void NormaalItem_ZoekInDatabase(string onderdeel, string fragment, IEnumerable<string> fragmentVerzen)
+            {
+                var liturgieItem = FakeBijbeltekstInterpretatie(onderdeel, fragment, fragmentVerzen);
+                var database = FakeDatabase(onderdeel, fragment);
+                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieLosOp;
 
-            Assert.That(oplossing.Resultaat, Is.EqualTo(LiturgieOplossingResultaat.Opgelost));
+                var oplossing = sut.LosOp(liturgieItem);
+
+                A.CallTo(() => database.ZoekOnderdeel(VerwerkingType.bijbeltekst, liturgieItem.Benaming, liturgieItem.PerDeelVersen.First().Deel, liturgieItem.PerDeelVersen.First().Verzen)).MustHaveHappened();
+            }
+
+            [TestCase("Johannes", "3", new[] { "1", "2", "3" })]
+            public void NormaalItem_Gevonden(string onderdeel, string fragment, IEnumerable<string> fragmentVerzen)
+            {
+                var liturgieItem = FakeBijbeltekstInterpretatie(onderdeel, fragment, fragmentVerzen);
+                var database = FakeDatabase(onderdeel, fragment);
+                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieLosOp;
+
+                var oplossing = sut.LosOp(liturgieItem);
+
+                Assert.That(oplossing.Resultaat, Is.EqualTo(LiturgieOplossingResultaat.Opgelost));
+            }
         }
 
         private static ILiturgieInterpretatieBijbeltekst FakeBijbeltekstInterpretatie(string onderdeel, string fragment, IEnumerable<string> verzen)
@@ -170,17 +185,18 @@ namespace Generator.Tests
             return liturgieItem;
         }
 
-        private static ILiturgieDatabase.ILiturgieDatabase FakeDatabase(string onderdeel, string fragment, string display = null)
+        private static ILiturgieDatabase.ILiturgieDatabase FakeDatabase(string onderdeel, string fragment, string display = null, LiturgieOplossingResultaat status = LiturgieOplossingResultaat.Opgelost)
         {
-            var zoekresultaat = A.Fake<IZoekresultaat>();
+            var zoekresultaat = A.Fake<IOplossing>();
             A.CallTo(() => zoekresultaat.OnderdeelNaam).Returns(onderdeel);
             A.CallTo(() => zoekresultaat.FragmentNaam).Returns(fragment);
+            A.CallTo(() => zoekresultaat.Status).Returns(status);
             if (display != null)
                 A.CallTo(() => zoekresultaat.OnderdeelDisplayNaam).Returns(display);
             var database = A.Fake<ILiturgieDatabase.ILiturgieDatabase>();
             A.CallTo(database)
                 .Where(d => d.Method.Name == "ZoekOnderdeel")
-                .WithReturnType<IZoekresultaat>()
+                .WithReturnType<IOplossing>()
                 .WithAnyArguments()
                 .Returns(zoekresultaat);
             return database;

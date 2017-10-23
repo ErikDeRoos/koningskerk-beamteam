@@ -1,10 +1,12 @@
-﻿// Copyright 2016 door Remco Veurink en Erik de Roos
+﻿// Copyright 2017 door  Erik de Roos
 using IFileSystem;
 using ISettings;
 using ISettings.CommonImplementation;
 using System.IO;
-using System.Xml;
-using System.Xml.Serialization;
+using Newtonsoft.Json;
+using System.Linq;
+using Tools;
+using System;
 
 namespace PowerpointGenerator.Settings
 {
@@ -18,22 +20,25 @@ namespace PowerpointGenerator.Settings
         public SettingsFactory(IFileOperations fileManager, string instellingenFileName, string masksFileName)
         {
             _fileManager = fileManager;
-            _baseDir = Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);  // TODO alternatief voor vinden
+            _baseDir = Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);
             _instellingenFileName = instellingenFileName;
             _masksFileName = masksFileName;
         }
 
-        public bool WriteToXmlFile(IInstellingen instellingen)
+        public bool WriteToFile(IInstellingen instellingen)
         {
-            return WriteToXmlFile(_fileManager, _fileManager.CombineDirectories(_baseDir, _instellingenFileName), _fileManager.CombineDirectories(_baseDir, _masksFileName), (instellingen as Instellingen) ?? GetDefault());
+            return WriteToJsonFile(_fileManager, _fileManager.CombineDirectories(_baseDir, _instellingenFileName), _fileManager.CombineDirectories(_baseDir, _masksFileName), (instellingen as Instellingen) ?? GetDefault());
         }
 
-        public IInstellingen LoadFromXmlFile()
+        public IInstellingen LoadFromFile()
         {
-            return LoadFromXmlFile(_fileManager, _fileManager.CombineDirectories(_baseDir, _instellingenFileName), _fileManager.CombineDirectories(_baseDir, _masksFileName)) ?? GetDefault();
+            var settingsFromJson = LoadFromJsonFile(_fileManager, _fileManager.CombineDirectories(_baseDir, _instellingenFileName), _fileManager.CombineDirectories(_baseDir, _masksFileName));
+            if (settingsFromJson != null)
+                return settingsFromJson;
+            return GetDefault();
         }
 
-        private static bool WriteToXmlFile(IFileOperations fileManager, string instellingenFile, string maskFile, Instellingen instellingen)
+        private static bool WriteToJsonFile(IFileOperations fileManager, string instellingenFile, string maskFile, Instellingen instellingen)
         {
             try
             {
@@ -41,34 +46,38 @@ namespace PowerpointGenerator.Settings
                 if (fileManager.FileExists(instellingenFile))
                     fileManager.Delete(instellingenFile);
 
+                var saveInstellingen = new SaveInstellingen()
+                {
+                    DatabasePad = instellingen.DatabasePad,
+                    BijbelPad = instellingen.BijbelPad,
+                    TemplateTheme = instellingen.TemplateTheme,
+                    TemplateLied = instellingen.TemplateLied,
+                    TemplateBijbeltekst = instellingen.TemplateBijbeltekst,
+                    TekstChar_a_OnARow = instellingen.TekstChar_a_OnARow,
+                    TekstFontName = instellingen.TekstFontName,
+                    TekstFontPointSize = instellingen.TekstFontPointSize,
+                    RegelsPerLiedSlide = instellingen.RegelsPerLiedSlide,
+                    RegelsPerBijbeltekstSlide = instellingen.RegelsPerBijbeltekstSlide,
+                    Een2eCollecte = instellingen.Een2eCollecte,
+                    StandaardTeksten = instellingen.StandaardTeksten,
+                };
+
                 //schrijf instellingen weg
-                var serializer = new XmlSerializer(typeof(Instellingen));
                 using (var sw = new StreamWriter(fileManager.FileWriteStream(instellingenFile)))
                 {
-                    serializer.Serialize(sw, instellingen);
+                    var serializer = new JsonSerializer();
+                    serializer.Serialize(sw, saveInstellingen);
                     sw.Flush();
                 }
 
+                var saveMasks = instellingen.Masks.Select(m => new SaveMask() { Name = m.Name, RealName = m.RealName }).ToArray();
+                
                 //schrijf Masks weg
-                using (var xw = XmlWriter.Create(maskFile, new XmlWriterSettings() { Indent = true }))
+                using (var sw = new StreamWriter(fileManager.FileWriteStream(maskFile)))
                 {
-                    xw.WriteStartDocument();
-                    xw.WriteStartElement("Masks");
-                    foreach (var mask in instellingen.Masks)
-                    {
-                        xw.WriteStartElement("Mask");
-                        xw.WriteStartElement("Name");
-                        xw.WriteString(mask.Name);
-                        xw.WriteEndElement();
-                        xw.WriteStartElement("RealName");
-                        xw.WriteString(mask.RealName);
-                        xw.WriteEndElement();
-                        xw.WriteEndElement();
-                    }
-                    xw.WriteEndElement();
-                    xw.WriteEndDocument();
-
-                    xw.Flush();
+                    var serializer = new JsonSerializer();
+                    serializer.Serialize(sw, saveMasks);
+                    sw.Flush();
                 }
 
                 return true;
@@ -79,48 +88,56 @@ namespace PowerpointGenerator.Settings
             }
         }
 
-        private static Instellingen LoadFromXmlFile(IFileOperations fileManager, string instellingenFile, string maskFile)
+        private static Instellingen LoadFromJsonFile(IFileOperations fileManager, string instellingenFile, string maskFile)
         {
-            Instellingen instellingen;
+            try {
+                SaveInstellingen saveInstellingen;
 
-            if (!fileManager.FileExists(instellingenFile))
-                return null;
+                if (!fileManager.FileExists(instellingenFile))
+                    return null;
 
-            var serializer = new XmlSerializer(typeof(Instellingen));
-            var settings = new XmlReaderSettings();
-
-            using (var textReader = new StreamReader(fileManager.FileReadStream(instellingenFile)))
-            {
-                using (var xmlReader = XmlReader.Create(textReader, settings))
+                using (var file = new StreamReader(fileManager.FileReadStream(instellingenFile)))
                 {
-                    instellingen = serializer.Deserialize(xmlReader) as Instellingen;
+                    var serializer = new JsonSerializer();
+                    saveInstellingen = (SaveInstellingen)serializer.Deserialize(file, typeof(SaveInstellingen));
                 }
-            }
-            if (instellingen == null)
-                return null;
+                if (saveInstellingen == null)
+                    return null;
+                var instellingen = new Instellingen()
+                {
+                    DatabasePad = saveInstellingen.DatabasePad,
+                    BijbelPad = saveInstellingen.BijbelPad,
+                    TemplateTheme = saveInstellingen.TemplateTheme,
+                    TemplateLied = saveInstellingen.TemplateLied,
+                    TemplateBijbeltekst = saveInstellingen.TemplateBijbeltekst,
+                    TekstChar_a_OnARow = saveInstellingen.TekstChar_a_OnARow,
+                    TekstFontName = saveInstellingen.TekstFontName,
+                    TekstFontPointSize = saveInstellingen.TekstFontPointSize,
+                    RegelsPerLiedSlide = saveInstellingen.RegelsPerLiedSlide,
+                    RegelsPerBijbeltekstSlide = saveInstellingen.RegelsPerBijbeltekstSlide,
+                    Een2eCollecte = saveInstellingen.Een2eCollecte,
+                    StandaardTeksten = saveInstellingen.StandaardTeksten,
+                };
 
-            if (!fileManager.FileExists(maskFile))
-                return instellingen;
-
-            using (var maskStream = fileManager.FileReadStream(maskFile))
-            {
-                var xdoc = new XmlDocument();
-                xdoc.Load(maskStream);
-                var root = xdoc.DocumentElement;
-
-                if (root == null)
+                if (!fileManager.FileExists(maskFile))
                     return instellingen;
-                var masklist = root.GetElementsByTagName("Mask");
-                foreach (XmlNode mask in masklist)
-                {
-                    var nameNode = mask.SelectSingleNode("Name");
-                    var realnameNode = mask.SelectSingleNode("RealName");
-                    if (nameNode != null && realnameNode != null)
-                        instellingen.AddMask(new Mapmask(nameNode.InnerText, realnameNode.InnerText));
-                }
-            }
 
-            return instellingen;
+                using (var file = new StreamReader(fileManager.FileReadStream(maskFile)))
+                {
+                    var serializer = new JsonSerializer();
+                    foreach (var mask in (SaveMask[])serializer.Deserialize(file, typeof(SaveMask[])))
+                    {
+                        instellingen.AddMask(new Mapmask(mask.Name, mask.RealName));
+                    }
+                }
+
+                return instellingen;
+            }
+            catch (Exception exc)
+            {
+                FoutmeldingSchrijver.Log(exc);
+            }
+            return null;
         }
 
         private static Instellingen GetDefault()
@@ -132,6 +149,28 @@ namespace PowerpointGenerator.Settings
                 TemplateLied = @".Resources\Database\Template Liederen.pptx",
                 TemplateBijbeltekst = @".Resources\Database\Template Bijbeltekst.pptx",
             };
+        }
+
+        private class SaveMask
+        {
+            public string Name { get; set; }
+            public string RealName { get; set; }
+        }
+
+        private class SaveInstellingen
+        {
+            public string DatabasePad { get; set; }
+            public string BijbelPad { get; set; }
+            public string TemplateTheme { get; set; }
+            public string TemplateLied { get; set; }
+            public string TemplateBijbeltekst { get; set; }
+            public int TekstChar_a_OnARow { get; set; }
+            public string TekstFontName { get; set; }
+            public float TekstFontPointSize { get; set; }
+            public int RegelsPerLiedSlide { get; set; }
+            public int RegelsPerBijbeltekstSlide { get; set; }
+            public bool Een2eCollecte { get; set; }
+            public StandaardTeksten StandaardTeksten { get; set; }
         }
     }
 }

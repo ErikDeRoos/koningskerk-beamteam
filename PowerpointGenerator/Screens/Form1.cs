@@ -1,58 +1,53 @@
 ﻿// Copyright 2017 door Remco Veurink en Erik de Roos
+using Generator;
 using ILiturgieDatabase;
 using ISettings;
+using PowerpointGenerator.Properties;
 using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using PowerpointGenerator.Properties;
-using Generator;
-using System.Collections.Generic;
-using Generator.Database;
 
 namespace PowerpointGenerator.Screens
 {
+    /// <remarks>
+    /// Win 10 + VS2008, VS2012, etc. vs no way to disable DPI scaling
+    /// 
+    /// There is no option * listed* because, Microsoft. No Compatibility tab in the right-click context menu for the.exe, and so on.However, it is possible to disable DPI scaling with VS/BIDS/etc by using the right-click context menu option "troubleshoot compatibility". Select the option that says the program used to display correctly but no longer does so. (under 'select troubleshooting option" choose, "troubleshoot program".  Then select, "the program opens but doesn't display correctly", and then, "Program does not display property when large scale fond settings are selected").
+    /// Presto! DPI scaling is disabled for VS.Now, to track down the .REG flag it is hopefully flipping...
+    /// 
+    /// [update] Reg setting info appears to be here:
+    /// https://blogs.technet.microsoft.com/mspfe/2013/11/21/disabling-dpi-scaling-on-windows-8-1-the-enterprise-way/
+    /// </remarks>
     internal partial class Form1 : Form
     {
         private readonly IInstellingenFactory _instellingenFactory;
         private readonly GeneratieInterface<CompRegistration> _funcs;
-        private readonly ILiturgieLosOp _liturgieOplosser;
-        private readonly ILiturgieInterpreteer _liturgieInterperator;
         private readonly string _startBestand;
 
-        //locatie van het programma op de pc
-        private string _programDirectory = "";
-
-        // huidige zoekresultaat voor autocomplete
-        private IVrijZoekresultaat _huidigZoekresultaat;
-        private object _dropdownLocker = new object();
-
-        public Form1(IInstellingenFactory instellingenOplosser, GeneratieInterface<CompRegistration> funcs, ILiturgieLosOp liturgieOplosser, ILiturgieInterpreteer liturgieInterperator, string startBestand)
+        public Form1(IInstellingenFactory instellingenOplosser, GeneratieInterface<CompRegistration> funcs, ILiturgieLosOp liturgieOplosser, string startBestand)
         {
             _instellingenFactory = instellingenOplosser;
             _funcs = funcs;
-            _liturgieOplosser = liturgieOplosser;
-            _liturgieInterperator = liturgieInterperator;
             _startBestand = startBestand;
             InitializeComponent();
-            this.Icon = Icon.FromHandle(Resources.Powerpoint_Overlay_icon.GetHicon());
+            liturgieEdit1._liturgieOplosser = liturgieOplosser;
+            Icon = Icon.FromHandle(Resources.Powerpoint_Overlay_icon.GetHicon());
         }
 
         public void Opstarten()
         {
             HelpRequested += Form1_HelpRequested;
-            _programDirectory = Path.GetDirectoryName(Application.ExecutablePath) + Path.DirectorySeparatorChar;
-            _funcs.TempLiturgiePath = _programDirectory + @"temp.liturgie";
-
+            _funcs.TempLiturgiePath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}\temp.liturgie";
             KeyDown += Form1_KeyDown;
             _funcs.RegisterVoortgang(PresentatieVoortgangCallback);
             _funcs.RegisterGereedmelding(PresentatieGereedmeldingCallback);
 
             progressBar1.Visible = false;
 
-            _funcs.Registration.LiturgieRichTextBox = richTextBox1;
+            _funcs.Registration.LiturgieRichTextBox = liturgieEdit1.TextBoxLiturgie;
             _funcs.Registration.VoorgangerTextBox = textBox2;
             _funcs.Registration.Collecte1eTextBox = textBox3;
             _funcs.Registration.Collecte2eTextBox = textBox4;
@@ -61,10 +56,7 @@ namespace PowerpointGenerator.Screens
 
             _funcs.Opstarten(_startBestand);
 
-            // TODO test
-            _liturgieOplosser.VrijZoeken("psalm ", _liturgieInterperator, _huidigZoekresultaat);
-
-            TriggerZoeklijstVeranderd();
+            BouwLiturgieSchermOp();
         }
 
         #region Eventhandlers
@@ -83,7 +75,7 @@ namespace PowerpointGenerator.Screens
 
         private void slaLiturgieOpToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Opslaan_Op_Locatie(_funcs.GetWorkingFile(), _funcs.CurrentFile);
+            OpslaanOpLocatie(_funcs.GetWorkingFile(), _funcs.CurrentFile);
         }
 
         private void nieuweLiturgieToolStripMenuItem_Click(object sender, EventArgs e)
@@ -117,30 +109,6 @@ namespace PowerpointGenerator.Screens
                 Close();
             }
         }
-        private void toolStripMenuItem4_Click(object sender, EventArgs e)
-        {
-            richTextBox1.Redo();
-        }
-        private void toolStripMenuItem3_Click(object sender, EventArgs e)
-        {
-            richTextBox1.Undo();
-        }
-        private void toolStripMenuItem1_Click(object sender, EventArgs e)
-        {
-            richTextBox1.SelectAll();
-        }
-        private void plakkenToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            richTextBox1.Paste();
-        }
-        private void kopierenToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            richTextBox1.Copy();
-        }
-        private void knippenToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            richTextBox1.Cut();
-        }
         #endregion bewerken
         #region opties
         private void templatesToolStripMenuItem1_Click(object sender, EventArgs e)
@@ -149,13 +117,14 @@ namespace PowerpointGenerator.Screens
             formulier.Opstarten();
             if (formulier.ShowDialog() == DialogResult.Yes && formulier.Instellingen != null)
             {
-                if (!_instellingenFactory.WriteToXmlFile(formulier.Instellingen))
+                if (!_instellingenFactory.WriteToFile(formulier.Instellingen))
                     MessageBox.Show(Resources.Form1_Niet_opgeslagen_wegens_te_lang_pad);
+                BouwLiturgieSchermOp();
             }
         }
         private void bekijkDatabaseToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            Process.Start("explorer.exe", "/root, \"" + _instellingenFactory.LoadFromXmlFile().FullDatabasePath + "\"");
+            Process.Start("explorer.exe", "/root, \"" + _instellingenFactory.LoadFromFile().FullDatabasePath + "\"");
         }
         private void stopPowerpointToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -163,16 +132,16 @@ namespace PowerpointGenerator.Screens
         }
         private void invoerenMasksToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var formulier = new MaskInvoer(_instellingenFactory.LoadFromXmlFile().Masks);
+            var formulier = new MaskInvoer(_instellingenFactory.LoadFromFile().Masks);
             if (formulier.ShowDialog() == DialogResult.OK)
             {
-                var instellingen = _instellingenFactory.LoadFromXmlFile();
+                var instellingen = _instellingenFactory.LoadFromFile();
                 instellingen.ClearMasks();
                 foreach (var mask in formulier.Masks)
                 {
                     instellingen.AddMask(mask);
                 }
-                if (!_instellingenFactory.WriteToXmlFile(instellingen))
+                if (!_instellingenFactory.WriteToFile(instellingen))
                     MessageBox.Show(Resources.Form1_Niet_opgeslagen_wegens_te_lang_pad);
             }
         }
@@ -197,62 +166,18 @@ namespace PowerpointGenerator.Screens
             Help.ShowHelp(this, "help.chm", HelpNavigator.TopicId, "20");
             hlpevent.Handled = true;
         }
-        private void textBox6_TextChanged(object sender, EventArgs e)
+        private void timerAutosave_Tick(object sender, EventArgs e)
         {
-            TriggerZoeklijstVeranderd();
-        }
-        private void textBox6_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.KeyData == Keys.Enter)
-                HuidigeTekstInvoegen();
-        }
-        private void button2_Click(object sender, EventArgs e)
-        {
-            HuidigeTekstInvoegen();
+            OpslaanOpLocatie(_funcs.GetWorkingFile(), _funcs.TempLiturgiePath);
         }
         #endregion formulier eventhandlers
         #endregion Eventhandlers
 
-
-        private void TriggerZoeklijstVeranderd()
+        private void BouwLiturgieSchermOp()
         {
-            _huidigZoekresultaat = _liturgieOplosser.VrijZoeken(textBox6.Text, _liturgieInterperator, _huidigZoekresultaat);
-            if (_huidigZoekresultaat.ZoeklijstAanpassing == VrijZoekresultaatAanpassingType.Geen)
-                return;
-
-            // We gaan kijken wat de verandering is.
-            // Dit moet wat slimmer dan gewoon verwijderen/toevoegen omdat deze lijst zich instabiel gedraagt
-            textBox6.SuspendLayout();
-            lock(_dropdownLocker)  // Lock om te voorkomen dat werk nog niet af is als we er nog een x in komen (lijkt namelijk te gebeuren)
-            {
-                if (textBox6.AutoCompleteCustomSource == null)
-                {
-                    textBox6.AutoCompleteCustomSource = new AutoCompleteStringCollection();
-                    textBox6.AutoCompleteCustomSource.AddRange(_huidigZoekresultaat.AlleMogelijkheden.ToArray());
-                }
-                else if (_huidigZoekresultaat.ZoeklijstAanpassing == VrijZoekresultaatAanpassingType.Alles)
-                {
-                    textBox6.AutoCompleteCustomSource.Clear();
-                    textBox6.AutoCompleteCustomSource.AddRange(_huidigZoekresultaat.AlleMogelijkheden.ToArray());
-                }
-                else if (_huidigZoekresultaat.ZoeklijstAanpassing == VrijZoekresultaatAanpassingType.Deel)
-                {
-                    textBox6.AutoCompleteCustomSource.AddRange(_huidigZoekresultaat.DeltaMogelijkhedenToegevoegd.ToArray());
-                    foreach (var item in _huidigZoekresultaat.DeltaMogelijkhedenVerwijderd)
-                    {
-                        textBox6.AutoCompleteCustomSource.Remove(item);
-                    }
-                }
-            }
-            textBox6.ResumeLayout();
-        }
-
-        private void HuidigeTekstInvoegen()
-        {
-            var liturgie = richTextBox1.Lines.ToList();
-            liturgie.Add(textBox6.Text);
-            richTextBox1.Lines = liturgie.ToArray();
-            textBox6.Text = null;
+            var huidigeInstellingen = _instellingenFactory.LoadFromFile();
+            groupBox5.Visible = huidigeInstellingen.Een2eCollecte;
+            groupBox3.Text = huidigeInstellingen.Een2eCollecte ? "Collecte 1" : "Collecte";
         }
 
         public void StartGenereren()
@@ -260,7 +185,7 @@ namespace PowerpointGenerator.Screens
             if (_funcs.Status == GeneratorStatus.Gestopt)
             {
                 //sla een back up voor als er iets fout gaat
-                Opslaan_Op_Locatie(_funcs.GetWorkingFile(), _funcs.TempLiturgiePath);
+                OpslaanOpLocatie(_funcs.GetWorkingFile(), _funcs.TempLiturgiePath);
 
                 // creeer lijst van liturgie
                 var ingeladenLiturgie = _funcs.LiturgieOplossingen().ToList();
@@ -269,7 +194,7 @@ namespace PowerpointGenerator.Screens
                 if (ingeladenLiturgie.Any(l => l.Resultaat != LiturgieOplossingResultaat.Opgelost))
                 {
                     var errorformulier = new LiturgieNotFoundFormulier(ingeladenLiturgie.Where(l => l.Resultaat != LiturgieOplossingResultaat.Opgelost));
-                    if (errorformulier.ShowDialog() == DialogResult.Cancel)
+                    if (errorformulier.ShowDialog() != DialogResult.OK)
                         return;
                     ingeladenLiturgie = ingeladenLiturgie.Where(l => l.Resultaat == LiturgieOplossingResultaat.Opgelost).ToList();
                 }
@@ -331,7 +256,7 @@ namespace PowerpointGenerator.Screens
                 Title = Resources.Form1_Openen_liturgie_title
             };
 
-            return openFileDialog1.ShowDialog() == DialogResult.Cancel ? "" : OpenenopLocatie(openFileDialog1.FileName);
+            return openFileDialog1.ShowDialog() == DialogResult.Cancel ? "" : OpenenOpLocatie(openFileDialog1.FileName);
         }
 
         /// <summary>
@@ -339,12 +264,12 @@ namespace PowerpointGenerator.Screens
         /// </summary>
         /// <param name="pad"></param>
         /// <returns></returns>
-        private string OpenenopLocatie(string pad)
+        private string OpenenOpLocatie(string pad)
         {
             //probeer om te lezen van gekozen bestand
             try
             {
-                return _funcs.OpenenopLocatie(pad);
+                return _funcs.OpenenOpLocatie(pad);
             }
                 //vang errors af en geef een melding dat er iets is fout gegaan
             catch (Exception)
@@ -394,7 +319,7 @@ namespace PowerpointGenerator.Screens
         /// </summary>
         /// <param name="bestand">bestand als string dat opgeslagen moet worden</param>
         /// <param name="path">path waarin het bestand moet worden opgeslagen</param>
-        private void Opslaan_Op_Locatie(string bestand, string path)
+        private void OpslaanOpLocatie(string bestand, string path)
         {
             //controleer dat het pad niet leeg is en anders laden we gewoon opslaan
             if (path.Equals(""))
@@ -445,7 +370,7 @@ namespace PowerpointGenerator.Screens
         {
             var actie = new Action(() =>
             {
-                button1.Text = "Generate";
+                button1.Text = "Maak slides";
                 progressBar1.Visible = false;
                 if (string.IsNullOrEmpty(foutmelding))
                 {

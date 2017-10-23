@@ -185,10 +185,10 @@ namespace IDatabase.Engine
                 return this;
             }
 
-            private class ItemContentMock : IDbItemContent, IDisposable
+            private class ItemContentMock : IDbItemContent
             {
                 public string Type { get; private set; }
-                public Stream Content { get; private set; }
+                private readonly Stream _content;
 
                 public string PersistentLink
                 {
@@ -198,23 +198,21 @@ namespace IDatabase.Engine
                     }
                 }
 
-                public IEnumerable<IDbItem> TryAccessSubs()
-                {
-                    throw new NotImplementedException();
-                }
-
                 public ItemContentMock() { }
                 public ItemContentMock(string type, Stream content)
                 {
                     Type = type;
-                    Content = content;
+                    _content = content;
                 }
 
-                public void Dispose()
+                public Stream GetContentStream()
                 {
-                    if (Content != null)
-                        Content.Dispose();
-                    Content = null;
+                    return _content;
+                }
+
+                public IEnumerable<IDbItem> TryAccessSubs()
+                {
+                    throw new NotImplementedException();
                 }
             }
         }

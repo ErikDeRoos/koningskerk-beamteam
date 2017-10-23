@@ -74,18 +74,18 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(10, 2);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(64, 13);
+            this.label1.Size = new System.Drawing.Size(135, 13);
             this.label1.TabIndex = 3;
-            this.label1.Text = "Echte naam";
+            this.label1.Text = "Naam zoals in de database";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(10, 47);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(71, 13);
+            this.label2.Size = new System.Drawing.Size(154, 13);
             this.label2.TabIndex = 4;
-            this.label2.Text = "Virtuele naam";
+            this.label2.Text = "Hoe je het eigenlijk wilt hebben";
             // 
             // listBox1
             // 

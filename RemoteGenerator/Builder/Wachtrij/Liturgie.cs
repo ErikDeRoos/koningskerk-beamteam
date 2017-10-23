@@ -15,11 +15,12 @@ namespace RemoteGenerator.Builder.Wachtrij
         public string Collecte2 { get; set; }
         public string Lezen { get; set; }
         public string Tekst { get; set; }
+        public bool Een2eCollecte { get; set; }
 
         public Liturgie(ConnectTools.Berichten.Liturgie vanLiturgie, Func<ConnectTools.Berichten.StreamToken, BestandStreamToken> bestandStreamTokenFactory)
         {
-            LiturgieRegels = vanLiturgie.Regels.OrderBy(r => r.Index).Select(r => new LiturgieRegel(r, bestandStreamTokenFactory)).ToList(); ;
-
+            LiturgieRegels = vanLiturgie.Regels.OrderBy(r => r.Index).Select(r => new LiturgieRegel(r, bestandStreamTokenFactory)).ToList();
+            // TODO
         }
     }
 }

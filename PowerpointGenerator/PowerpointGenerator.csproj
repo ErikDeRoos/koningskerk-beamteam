@@ -84,20 +84,24 @@
     <TargetZone>LocalIntranet</TargetZone>
   </PropertyGroup>
   <PropertyGroup />
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Autofac, Version=4.2.1.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
-      <HintPath>..\packages\Autofac.4.2.1\lib\net45\Autofac.dll</HintPath>
+    <Reference Include="Autofac, Version=4.5.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
+      <HintPath>..\packages\Autofac.4.5.0\lib\net45\Autofac.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.DirectoryServices" />
-    <Reference Include="System.Xml.Linq">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
     <Reference Include="System.Data.DataSetExtensions">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -128,11 +132,23 @@
     <Compile Include="Screens\Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Screens\LiturgieEdit.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Screens\LiturgieEdit.Designer.cs">
+      <DependentUpon>LiturgieEdit.cs</DependentUpon>
+    </Compile>
     <Compile Include="Screens\LiturgieNotFoundFormulier.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Screens\LiturgieNotFoundFormulier.Designer.cs">
       <DependentUpon>LiturgieNotFoundFormulier.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Screens\WijzigOpties.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Screens\WijzigOpties.Designer.cs">
+      <DependentUpon>WijzigOpties.cs</DependentUpon>
     </Compile>
     <Compile Include="Settings\Mapmask.cs" />
     <Compile Include="Screens\MaskInvoer.cs">
@@ -149,6 +165,9 @@
     <EmbeddedResource Include="Screens\Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Screens\LiturgieEdit.resx">
+      <DependentUpon>LiturgieEdit.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Screens\LiturgieNotFoundFormulier.resx">
       <DependentUpon>LiturgieNotFoundFormulier.cs</DependentUpon>
     </EmbeddedResource>
@@ -163,7 +182,11 @@
     <EmbeddedResource Include="Screens\Instellingenform.resx">
       <DependentUpon>Instellingenform.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Screens\WijzigOpties.resx">
+      <DependentUpon>WijzigOpties.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="app.config" />
+    <None Include="app.manifest" />
     <None Include="LICENSE.md">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
