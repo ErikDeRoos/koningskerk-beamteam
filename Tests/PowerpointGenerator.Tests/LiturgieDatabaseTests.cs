@@ -1,25 +1,26 @@
-﻿// Copyright 2016 door Erik de Roos
+﻿// Copyright 2018 door Erik de Roos
 using FakeItEasy;
 using Generator.Database.FileSystem;
 using IDatabase;
 using IDatabase.Engine;
 using ILiturgieDatabase;
-using NUnit.Framework;
 using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Generator.Tests
 {
     public class LiturgieDatabaseTests
     {
-        [OneTimeSetUp]
+        [TestInitialize]
         public void Initialise()
         {
         }
 
-        [TestFixture]
+        [TestClass]
         public class ZoekOnderdeelMethod : LiturgieDatabaseTests
         {
-            [TestCase("Psalm", "100")]
+            [DataTestMethod]
+            [DataRow("Psalm", "100")]
             public void NormaalItem_Gevonden(string onderdeel, string fragment)
             {
                 var engine = new EngineMock<FileEngineSetSettings>(f => f
@@ -32,12 +33,13 @@ namespace Generator.Tests
 
                 var oplossing = sut.ZoekOnderdeel(onderdeel, fragment);
 
-                Assert.That(oplossing.Status, Is.EqualTo(LiturgieOplossingResultaat.Opgelost));
+                Assert.AreEqual(oplossing.Status, LiturgieOplossingResultaat.Opgelost);
             }
 
-            [TestCase("Psalm", "100", "2 - 4", new[] { 2, 3, 4 })]
-            [TestCase("Psalm", "100", " - 4", new[] { 1, 2, 3, 4 })]
-            [TestCase("Psalm", "100", "2 - ", new[] { 2, 3 })]
+            [DataTestMethod]
+            [DataRow("Psalm", "100", "2 - 4", new[] { 2, 3, 4 })]
+            [DataRow("Psalm", "100", " - 4", new[] { 1, 2, 3, 4 })]
+            [DataRow("Psalm", "100", "2 - ", new[] { 2, 3 })]
             public void NormaalItem_Opgesplitst(string onderdeel, string fragment, string nummer, int[] opgesplitstAls)
             {
                 var itemSubContent = string.Join(" ", Enumerable.Range(1, opgesplitstAls.Max()).Select(r => $"{r} Line."));
@@ -53,11 +55,12 @@ namespace Generator.Tests
 
                 var oplossing = sut.ZoekOnderdeel(onderdeel, fragment, fragmentDelen: fragmentDelen);
 
-                Assert.That(oplossing.Content.Count(), Is.EqualTo(opgesplitstAls.Length));
-                Assert.That(oplossing.Content.All(c => opgesplitstAls.Contains(c.Nummer.Value)), Is.True);
+                Assert.AreEqual(oplossing.Content.Count(), opgesplitstAls.Length);
+                Assert.AreEqual(oplossing.Content.All(c => opgesplitstAls.Contains(c.Nummer.Value)), true);
             }
 
-            [TestCase("Johannes", "3")]
+            [DataTestMethod]
+            [DataRow("Johannes", "3")]
             public void BijbeltekstItem_Gevonden(string onderdeel, string fragment)
             {
                 var engine = new EngineMock<FileEngineSetSettings>(f => f
@@ -70,14 +73,15 @@ namespace Generator.Tests
 
                 var oplossing = sut.ZoekOnderdeel(VerwerkingType.bijbeltekst, onderdeel, fragment);
 
-                Assert.That(oplossing.Status, Is.EqualTo(LiturgieOplossingResultaat.Opgelost));
+                Assert.AreEqual(oplossing.Status, LiturgieOplossingResultaat.Opgelost);
             }
 
-            [TestCase("Johannes", "3", "2", "1 In den beginne 2 was het woord 3 en het woord was", 2, "was het woord")]
-            [TestCase("Deutronomium", "10", "1", "1 Jakob nam 5 mannen mee. 2 Zij gingen een stukje lopen", 1, "Jakob nam 5 mannen mee.")]
-            [TestCase("Deutronomium", "10", "1", "1 Jakob nam 5-7 mannen mee. 2 Zij gingen een stukje lopen", 1, "Jakob nam 5-7 mannen mee.")]
-            [TestCase("Deutronomium", "10", "2", "1 Jakob nam 5 mannen mee. 2-3 Zij gingen een stukje lopen", 2, "Zij gingen een stukje lopen")]
-            [TestCase("Deutronomium", "10", "4", "1 Jakob nam 5 mannen mee. 2-3 Zij gingen een stukje lopen, 4 het was fijn.", 4, "het was fijn.")]
+            [DataTestMethod]
+            [DataRow("Johannes", "3", "2", "1 In den beginne 2 was het woord 3 en het woord was", 2, "was het woord")]
+            [DataRow("Deutronomium", "10", "1", "1 Jakob nam 5 mannen mee. 2 Zij gingen een stukje lopen", 1, "Jakob nam 5 mannen mee.")]
+            [DataRow("Deutronomium", "10", "1", "1 Jakob nam 5-7 mannen mee. 2 Zij gingen een stukje lopen", 1, "Jakob nam 5-7 mannen mee.")]
+            [DataRow("Deutronomium", "10", "2", "1 Jakob nam 5 mannen mee. 2-3 Zij gingen een stukje lopen", 2, "Zij gingen een stukje lopen")]
+            [DataRow("Deutronomium", "10", "4", "1 Jakob nam 5 mannen mee. 2-3 Zij gingen een stukje lopen, 4 het was fijn.", 4, "het was fijn.")]
             public void BijbeltekstItem_ItemIsSubcontent(string onderdeel, string fragment, string find, string inContent, int foundNumber, string foundContent)
             {
                 var engine = new EngineMock<FileEngineSetSettings>(f => f
@@ -92,7 +96,9 @@ namespace Generator.Tests
 
                 var oplossing = sut.ZoekOnderdeel(VerwerkingType.bijbeltekst, onderdeel, fragment, delen);
 
-                Assert.That(oplossing.Content.FirstOrDefault().Inhoud, Is.EqualTo(foundContent));
+                var eersteContent = oplossing.Content.FirstOrDefault();
+                Assert.IsNotNull(eersteContent);
+                Assert.AreEqual(eersteContent.Inhoud, foundContent);
             }
         }
 

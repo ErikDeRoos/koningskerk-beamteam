@@ -1,24 +1,24 @@
-﻿// Copyright 2016 door Erik de Roos
+﻿// Copyright 2018 door Erik de Roos
 using Autofac.Extras.FakeItEasy;
 using FakeItEasy;
 using ISlideBuilder;
 using mppt.Connect;
-using NUnit.Framework;
 using System.Collections.Generic;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace MicrosoftPowerpointWrapper.Tests
 {
     public class PowerpointFunctionsTests
     {
-        [OneTimeSetUp]
+        [TestInitialize]
         public void Initialise()
         {
         }
 
-        [TestFixture]
+        [TestClass]
         public class GeneratePresentationMethod : PowerpointFunctionsTests
         {
-            [Test]
+            [TestMethod]
             public void Application_Opened()
             {
                 using (var fake = new AutoFake())
@@ -27,7 +27,7 @@ namespace MicrosoftPowerpointWrapper.Tests
                     A.CallTo(() => fake.Resolve<IMppFactory>().GetApplication()).Returns(app);
                     var sut = fake.Resolve<mppt.PowerpointFunctions>();
                     var dependendFiles = A.Fake<IBuilderDependendFiles>();
-                    A.CallTo(() => dependendFiles.FullTemplateTheme).Returns("\testbestand.ppt");
+                    A.CallTo(() => dependendFiles.FullTemplateTheme).Returns(@"\testbestand.ppt");
                     sut.PreparePresentation(GetEmptyLiturgie(), A.Fake<IBuilderBuildSettings>(), A.Fake<IBuilderBuildDefaults>(), dependendFiles, null);
 
                     sut.GeneratePresentation();
@@ -36,13 +36,14 @@ namespace MicrosoftPowerpointWrapper.Tests
                 }
             }
 
-            [TestCase("presentatie.pptx")]
+            [DataTestMethod]
+            [DataRow("presentatie.pptx")]
             public void Application_Saved(string saveAsFileName)
             {
                 using (var fake = new AutoFake())
                 {
                     var dependendFiles = A.Fake<IBuilderDependendFiles>();
-                    A.CallTo(() => dependendFiles.FullTemplateTheme).Returns("\testbestand.ppt");
+                    A.CallTo(() => dependendFiles.FullTemplateTheme).Returns(@"\testbestand.ppt");
                     var pres = PreparePresentation(fake, dependendFiles.FullTemplateTheme);
                     var sut = fake.Resolve<mppt.PowerpointFunctions>();
                     sut.PreparePresentation(GetEmptyLiturgie(), A.Fake<IBuilderBuildSettings>(), A.Fake<IBuilderBuildDefaults>(), dependendFiles, saveAsFileName);

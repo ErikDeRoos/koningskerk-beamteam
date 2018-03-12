@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerpointGenerator", "PowerpointGenerator\PowerpointGenerator.csproj", "{6B51E79C-9BED-457F-BF11-889863FF5BAA}"
 EndProject
@@ -42,6 +42,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "~Docs", "~Docs", "{5F0DC94C
 		Roadmap.txt = Roadmap.txt
 		ToDo.txt = ToDo.txt
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeneratorRemote", "GeneratorRemote\GeneratorRemote.csproj", "{E44E655D-8314-463A-80E3-66E3FE15FAA5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -109,6 +111,10 @@ Global
 		{E502AED1-D6CD-4E2B-9524-AA333AA1AC21}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E502AED1-D6CD-4E2B-9524-AA333AA1AC21}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E502AED1-D6CD-4E2B-9524-AA333AA1AC21}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E44E655D-8314-463A-80E3-66E3FE15FAA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E44E655D-8314-463A-80E3-66E3FE15FAA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E44E655D-8314-463A-80E3-66E3FE15FAA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E44E655D-8314-463A-80E3-66E3FE15FAA5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -123,5 +129,8 @@ Global
 		{51839F5A-7EB1-4B3B-9D86-8B9A55263E7F} = {82068B2E-5C2D-4417-A7CE-828B8C4B6F8A}
 		{10295C3D-BC8B-4FCA-A6C8-ABC0E1DFE510} = {61E1F30A-F73D-4228-B559-DBD9F8511AC8}
 		{06D1D7F9-FB24-464B-8EFD-52E93D561E4E} = {82068B2E-5C2D-4417-A7CE-828B8C4B6F8A}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EBF53CD7-6AC3-4E43-8C81-0DD5D7B03BF1}
 	EndGlobalSection
 EndGlobal
