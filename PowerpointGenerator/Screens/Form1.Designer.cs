@@ -79,10 +79,9 @@
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(166, -37);
-            this.button1.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.button1.Location = new System.Drawing.Point(152, 8);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(123, 78);
+            this.button1.Size = new System.Drawing.Size(67, 42);
             this.button1.TabIndex = 1;
             this.button1.Text = "Maak slides";
             this.button1.UseVisualStyleBackColor = true;
@@ -97,41 +96,41 @@
             this.toolStripMenuItem2,
             this.afsluitenToolStripMenuItem});
             this.bestandToolStripMenuItem.Name = "bestandToolStripMenuItem";
-            this.bestandToolStripMenuItem.Size = new System.Drawing.Size(99, 34);
+            this.bestandToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.bestandToolStripMenuItem.Text = "Bestand";
             // 
             // nieuweLiturgieToolStripMenuItem
             // 
             this.nieuweLiturgieToolStripMenuItem.Name = "nieuweLiturgieToolStripMenuItem";
-            this.nieuweLiturgieToolStripMenuItem.Size = new System.Drawing.Size(367, 34);
+            this.nieuweLiturgieToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
             this.nieuweLiturgieToolStripMenuItem.Text = "Nieuwe Liturgie  (CTRL + N)";
             this.nieuweLiturgieToolStripMenuItem.Click += new System.EventHandler(this.nieuweLiturgieToolStripMenuItem_Click);
             // 
             // openLiturgieToolStripMenuItem
             // 
             this.openLiturgieToolStripMenuItem.Name = "openLiturgieToolStripMenuItem";
-            this.openLiturgieToolStripMenuItem.Size = new System.Drawing.Size(367, 34);
+            this.openLiturgieToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
             this.openLiturgieToolStripMenuItem.Text = "Open Liturgie      (CTRL + O)";
             this.openLiturgieToolStripMenuItem.Click += new System.EventHandler(this.openLiturgieToolStripMenuItem_Click);
             // 
             // slaLiturgieOpToolStripMenuItem
             // 
             this.slaLiturgieOpToolStripMenuItem.Name = "slaLiturgieOpToolStripMenuItem";
-            this.slaLiturgieOpToolStripMenuItem.Size = new System.Drawing.Size(367, 34);
+            this.slaLiturgieOpToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
             this.slaLiturgieOpToolStripMenuItem.Text = "Sla Liturgie op     (CTRL + S)";
             this.slaLiturgieOpToolStripMenuItem.Click += new System.EventHandler(this.slaLiturgieOpToolStripMenuItem_Click);
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(367, 34);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(223, 22);
             this.toolStripMenuItem2.Text = "Sla Liturgie op als...";
             this.toolStripMenuItem2.Click += new System.EventHandler(this.toolStripMenuItem2_Click);
             // 
             // afsluitenToolStripMenuItem
             // 
             this.afsluitenToolStripMenuItem.Name = "afsluitenToolStripMenuItem";
-            this.afsluitenToolStripMenuItem.Size = new System.Drawing.Size(367, 34);
+            this.afsluitenToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
             this.afsluitenToolStripMenuItem.Text = "Afsluiten              (CTRL + E)";
             this.afsluitenToolStripMenuItem.Click += new System.EventHandler(this.afsluitenToolStripMenuItem_Click);
             // 
@@ -144,67 +143,64 @@
             this.toolStripSeparator1,
             this.stopPowerpointToolStripMenuItem});
             this.optiesToolStripMenuItem.Name = "optiesToolStripMenuItem";
-            this.optiesToolStripMenuItem.Size = new System.Drawing.Size(89, 34);
+            this.optiesToolStripMenuItem.Size = new System.Drawing.Size(55, 20);
             this.optiesToolStripMenuItem.Text = "Beheer";
             // 
             // templatesToolStripMenuItem1
             // 
             this.templatesToolStripMenuItem1.Name = "templatesToolStripMenuItem1";
-            this.templatesToolStripMenuItem1.Size = new System.Drawing.Size(297, 34);
+            this.templatesToolStripMenuItem1.Size = new System.Drawing.Size(184, 22);
             this.templatesToolStripMenuItem1.Text = "Instellingen";
             this.templatesToolStripMenuItem1.Click += new System.EventHandler(this.templatesToolStripMenuItem1_Click);
             // 
             // invoerenMasksToolStripMenuItem
             // 
             this.invoerenMasksToolStripMenuItem.Name = "invoerenMasksToolStripMenuItem";
-            this.invoerenMasksToolStripMenuItem.Size = new System.Drawing.Size(297, 34);
+            this.invoerenMasksToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
             this.invoerenMasksToolStripMenuItem.Text = "Invoeren Masks";
             this.invoerenMasksToolStripMenuItem.Click += new System.EventHandler(this.invoerenMasksToolStripMenuItem_Click);
             // 
             // bekijkDatabaseToolStripMenuItem1
             // 
             this.bekijkDatabaseToolStripMenuItem1.Name = "bekijkDatabaseToolStripMenuItem1";
-            this.bekijkDatabaseToolStripMenuItem1.Size = new System.Drawing.Size(297, 34);
+            this.bekijkDatabaseToolStripMenuItem1.Size = new System.Drawing.Size(184, 22);
             this.bekijkDatabaseToolStripMenuItem1.Text = "Bekijk Database";
             this.bekijkDatabaseToolStripMenuItem1.Click += new System.EventHandler(this.bekijkDatabaseToolStripMenuItem1_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(294, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(181, 6);
             // 
             // stopPowerpointToolStripMenuItem
             // 
             this.stopPowerpointToolStripMenuItem.Name = "stopPowerpointToolStripMenuItem";
-            this.stopPowerpointToolStripMenuItem.Size = new System.Drawing.Size(297, 34);
+            this.stopPowerpointToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
             this.stopPowerpointToolStripMenuItem.Text = "Repareer powerpoint";
             this.stopPowerpointToolStripMenuItem.Click += new System.EventHandler(this.stopPowerpointToolStripMenuItem_Click);
             // 
             // textBox2
             // 
             this.textBox2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox2.Location = new System.Drawing.Point(4, 26);
-            this.textBox2.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.textBox2.Location = new System.Drawing.Point(2, 15);
             this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(286, 29);
+            this.textBox2.Size = new System.Drawing.Size(217, 20);
             this.textBox2.TabIndex = 7;
             // 
             // textBox3
             // 
             this.textBox3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox3.Location = new System.Drawing.Point(4, 26);
-            this.textBox3.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.textBox3.Location = new System.Drawing.Point(2, 15);
             this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(286, 29);
+            this.textBox3.Size = new System.Drawing.Size(217, 20);
             this.textBox3.TabIndex = 9;
             // 
             // textBox4
             // 
             this.textBox4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox4.Location = new System.Drawing.Point(4, 26);
-            this.textBox4.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.textBox4.Location = new System.Drawing.Point(2, 15);
             this.textBox4.Name = "textBox4";
-            this.textBox4.Size = new System.Drawing.Size(286, 29);
+            this.textBox4.Size = new System.Drawing.Size(217, 20);
             this.textBox4.TabIndex = 11;
             // 
             // menuStrip1
@@ -216,15 +212,14 @@
             this.contactToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Padding = new System.Windows.Forms.Padding(11, 4, 0, 4);
-            this.menuStrip1.Size = new System.Drawing.Size(1294, 42);
+            this.menuStrip1.Size = new System.Drawing.Size(706, 24);
             this.menuStrip1.TabIndex = 4;
             this.menuStrip1.Text = "menuStrip1";
             // 
             // contactToolStripMenuItem
             // 
             this.contactToolStripMenuItem.Name = "contactToolStripMenuItem";
-            this.contactToolStripMenuItem.Size = new System.Drawing.Size(97, 34);
+            this.contactToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.contactToolStripMenuItem.Text = "Contact";
             this.contactToolStripMenuItem.Click += new System.EventHandler(this.contactToolStripMenuItem_Click);
             // 
@@ -232,40 +227,36 @@
             // 
             this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar1.Location = new System.Drawing.Point(6, -37);
-            this.progressBar1.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.progressBar1.Location = new System.Drawing.Point(3, 8);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(149, 78);
+            this.progressBar1.Size = new System.Drawing.Size(142, 42);
             this.progressBar1.TabIndex = 13;
             this.progressBar1.Visible = false;
             // 
             // textBox1
             // 
             this.textBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox1.Location = new System.Drawing.Point(4, 26);
-            this.textBox1.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.textBox1.Location = new System.Drawing.Point(2, 15);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(286, 125);
+            this.textBox1.Size = new System.Drawing.Size(217, 67);
             this.textBox1.TabIndex = 16;
             // 
             // textBox5
             // 
             this.textBox5.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox5.Location = new System.Drawing.Point(4, 26);
-            this.textBox5.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.textBox5.Location = new System.Drawing.Point(2, 15);
             this.textBox5.Multiline = true;
             this.textBox5.Name = "textBox5";
-            this.textBox5.Size = new System.Drawing.Size(286, 134);
+            this.textBox5.Size = new System.Drawing.Size(217, 72);
             this.textBox5.TabIndex = 17;
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(6, 0);
-            this.label6.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label6.Location = new System.Drawing.Point(3, 0);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(81, 25);
+            this.label6.Size = new System.Drawing.Size(44, 13);
             this.label6.TabIndex = 18;
             this.label6.Text = "Liturgie:";
             // 
@@ -273,8 +264,7 @@
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 42);
-            this.splitContainer1.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.splitContainer1.Location = new System.Drawing.Point(0, 24);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
@@ -285,21 +275,18 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
-            this.splitContainer1.Size = new System.Drawing.Size(1294, 1010);
-            this.splitContainer1.SplitterDistance = 993;
-            this.splitContainer1.SplitterWidth = 7;
+            this.splitContainer1.Size = new System.Drawing.Size(706, 546);
+            this.splitContainer1.SplitterDistance = 481;
             this.splitContainer1.TabIndex = 20;
             // 
             // liturgieEdit1
             // 
             this.liturgieEdit1._liturgieOplosser = null;
-            this.liturgieEdit1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.liturgieEdit1.Location = new System.Drawing.Point(0, 28);
-            this.liturgieEdit1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.liturgieEdit1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.liturgieEdit1.Location = new System.Drawing.Point(0, 0);
+            this.liturgieEdit1.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             this.liturgieEdit1.Name = "liturgieEdit1";
-            this.liturgieEdit1.Size = new System.Drawing.Size(991, 979);
+            this.liturgieEdit1.Size = new System.Drawing.Size(481, 546);
             this.liturgieEdit1.TabIndex = 19;
             // 
             // splitContainer2
@@ -308,7 +295,6 @@
             this.splitContainer2.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
             this.splitContainer2.IsSplitterFixed = true;
             this.splitContainer2.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer2.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.splitContainer2.Name = "splitContainer2";
             this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -324,20 +310,19 @@
             // 
             this.splitContainer2.Panel2.Controls.Add(this.button1);
             this.splitContainer2.Panel2.Controls.Add(this.progressBar1);
-            this.splitContainer2.Size = new System.Drawing.Size(294, 1010);
-            this.splitContainer2.SplitterDistance = 944;
-            this.splitContainer2.SplitterWidth = 7;
+            this.splitContainer2.Size = new System.Drawing.Size(221, 546);
+            this.splitContainer2.SplitterDistance = 480;
             this.splitContainer2.TabIndex = 0;
             // 
             // groupBox6
             // 
             this.groupBox6.Controls.Add(this.textBox5);
             this.groupBox6.Dock = System.Windows.Forms.DockStyle.Top;
-            this.groupBox6.Location = new System.Drawing.Point(0, 381);
-            this.groupBox6.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox6.Location = new System.Drawing.Point(0, 206);
+            this.groupBox6.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.groupBox6.Name = "groupBox6";
-            this.groupBox6.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.groupBox6.Size = new System.Drawing.Size(294, 164);
+            this.groupBox6.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox6.Size = new System.Drawing.Size(221, 89);
             this.groupBox6.TabIndex = 22;
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "Tekst";
@@ -346,11 +331,11 @@
             // 
             this.groupBox4.Controls.Add(this.textBox1);
             this.groupBox4.Dock = System.Windows.Forms.DockStyle.Top;
-            this.groupBox4.Location = new System.Drawing.Point(0, 226);
-            this.groupBox4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox4.Location = new System.Drawing.Point(0, 122);
+            this.groupBox4.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.groupBox4.Size = new System.Drawing.Size(294, 155);
+            this.groupBox4.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox4.Size = new System.Drawing.Size(221, 84);
             this.groupBox4.TabIndex = 20;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Lezen";
@@ -359,11 +344,11 @@
             // 
             this.groupBox5.Controls.Add(this.textBox4);
             this.groupBox5.Dock = System.Windows.Forms.DockStyle.Top;
-            this.groupBox5.Location = new System.Drawing.Point(0, 150);
-            this.groupBox5.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox5.Location = new System.Drawing.Point(0, 81);
+            this.groupBox5.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.groupBox5.Size = new System.Drawing.Size(294, 76);
+            this.groupBox5.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox5.Size = new System.Drawing.Size(221, 41);
             this.groupBox5.TabIndex = 21;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Collecte 2";
@@ -372,11 +357,11 @@
             // 
             this.groupBox3.Controls.Add(this.textBox3);
             this.groupBox3.Dock = System.Windows.Forms.DockStyle.Top;
-            this.groupBox3.Location = new System.Drawing.Point(0, 74);
-            this.groupBox3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox3.Location = new System.Drawing.Point(0, 40);
+            this.groupBox3.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.groupBox3.Size = new System.Drawing.Size(294, 76);
+            this.groupBox3.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox3.Size = new System.Drawing.Size(221, 41);
             this.groupBox3.TabIndex = 19;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Collecte 1";
@@ -386,10 +371,10 @@
             this.groupBox2.Controls.Add(this.textBox2);
             this.groupBox2.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox2.Location = new System.Drawing.Point(0, 0);
-            this.groupBox2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.groupBox2.Size = new System.Drawing.Size(294, 74);
+            this.groupBox2.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox2.Size = new System.Drawing.Size(221, 40);
             this.groupBox2.TabIndex = 18;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Predikant";
@@ -402,15 +387,14 @@
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1294, 1052);
+            this.ClientSize = new System.Drawing.Size(706, 570);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.menuStrip1);
             this.KeyPreview = true;
             this.MainMenuStrip = this.menuStrip1;
-            this.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
-            this.MinimumSize = new System.Drawing.Size(1304, 849);
+            this.MinimumSize = new System.Drawing.Size(719, 478);
             this.Name = "Form1";
             this.Text = "Powerpoint Generator";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
