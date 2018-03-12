@@ -1,4 +1,5 @@
-﻿using ILiturgieDatabase;
+﻿// Copyright 2018 door Erik de Roos
+using ILiturgieDatabase;
 using System;
 using System.Linq;
 using System.Windows.Forms;
@@ -63,12 +64,12 @@ namespace PowerpointGenerator.Screens
 
         private void toolStripMenuItemKopieren_Click(object sender, EventArgs e)
         {
-            textBoxLiturgie.Cut();
+            textBoxLiturgie.Copy();
         }
 
         private void toolStripMenuItemPlakken_Click(object sender, EventArgs e)
         {
-            textBoxLiturgie.Cut();
+            textBoxLiturgie.Paste();
         }
 
         private void textBoxZoek_TextChanged(object sender, EventArgs e)
