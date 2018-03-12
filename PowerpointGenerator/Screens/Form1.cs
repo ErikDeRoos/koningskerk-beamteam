@@ -1,4 +1,4 @@
-﻿// Copyright 2017 door Remco Veurink en Erik de Roos
+﻿// Copyright 2018 door Remco Veurink en Erik de Roos
 using Generator;
 using ILiturgieDatabase;
 using ISettings;
@@ -15,7 +15,7 @@ namespace PowerpointGenerator.Screens
     /// <remarks>
     /// Win 10 + VS2008, VS2012, etc. vs no way to disable DPI scaling
     /// 
-    /// There is no option * listed* because, Microsoft. No Compatibility tab in the right-click context menu for the.exe, and so on.However, it is possible to disable DPI scaling with VS/BIDS/etc by using the right-click context menu option "troubleshoot compatibility". Select the option that says the program used to display correctly but no longer does so. (under 'select troubleshooting option" choose, "troubleshoot program".  Then select, "the program opens but doesn't display correctly", and then, "Program does not display property when large scale fond settings are selected").
+    /// There is no option *listed* because, Microsoft. No Compatibility tab in the right-click context menu for the.exe, and so on.However, it is possible to disable DPI scaling with VS/BIDS/etc by using the right-click context menu option "troubleshoot compatibility". Select the option that says the program used to display correctly but no longer does so. (under 'select troubleshooting option" choose, "troubleshoot program".  Then select, "the program opens but doesn't display correctly", and then, "Program does not display property when large scale fond settings are selected").
     /// Presto! DPI scaling is disabled for VS.Now, to track down the .REG flag it is hopefully flipping...
     /// 
     /// [update] Reg setting info appears to be here:
@@ -178,6 +178,8 @@ namespace PowerpointGenerator.Screens
             var huidigeInstellingen = _instellingenFactory.LoadFromFile();
             groupBox5.Visible = huidigeInstellingen.Een2eCollecte;
             groupBox3.Text = huidigeInstellingen.Een2eCollecte ? "Collecte 1" : "Collecte";
+            groupBox4.Visible = huidigeInstellingen.DeLezenVraag;
+            groupBox6.Visible = huidigeInstellingen.DeTekstVraag;
         }
 
         public void StartGenereren()

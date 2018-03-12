@@ -1,12 +1,12 @@
-﻿// Copyright 2017 door Remco Veurink en Erik de Roos
-using ISettings;
-using ISettings.CommonImplementation;
+﻿// Copyright 2018 door Remco Veurink en Erik de Roos
+
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using static System.Int32;
+using ISettings;
+using ISettings.CommonImplementation;
 
-namespace PowerpointGenerator
+namespace PowerpointGenerator.Screens
 {
     partial class Instellingenform : Form
     {
@@ -50,6 +50,8 @@ namespace PowerpointGenerator
             _masks = vanInstellingen.Masks;
 
             checkBox1.Checked = vanInstellingen.Een2eCollecte;
+            checkBox2.Checked = vanInstellingen.DeLezenVraag;
+            checkBox3.Checked = vanInstellingen.DeTekstVraag;
         }
 
         #region Eventhandlers
@@ -177,15 +179,17 @@ namespace PowerpointGenerator
                 TemplateBijbeltekst = textBox6.Text,
                 TekstFontName = textBox8.Text,
             };
-            if (TryParse(textBox4.Text, out int regelsPerSlide))
+            if (Int32.TryParse(textBox4.Text, out int regelsPerSlide))
                 instellingen.RegelsPerLiedSlide = regelsPerSlide;
-            if (TryParse(textBox7.Text, out int regelsPerBijbeltekstSlide))
+            if (Int32.TryParse(textBox7.Text, out int regelsPerBijbeltekstSlide))
                 instellingen.RegelsPerBijbeltekstSlide = regelsPerBijbeltekstSlide;
-            if (TryParse(textBox9.Text, out int fontPointSize))
+            if (Int32.TryParse(textBox9.Text, out int fontPointSize))
                 instellingen.TekstFontPointSize = fontPointSize;
-            if (TryParse(textBox10.Text, out int char_a_OnARow))
+            if (Int32.TryParse(textBox10.Text, out int char_a_OnARow))
                 instellingen.TekstChar_a_OnARow = char_a_OnARow;
             instellingen.Een2eCollecte = checkBox1.Checked;
+            instellingen.DeLezenVraag = checkBox2.Checked;
+            instellingen.DeTekstVraag = checkBox3.Checked;
 
             Instellingen = instellingen;
         }
