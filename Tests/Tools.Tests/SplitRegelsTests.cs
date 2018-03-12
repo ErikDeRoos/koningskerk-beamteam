@@ -1,28 +1,30 @@
-﻿using NUnit.Framework;
+﻿// Copyright 2018 door Erik de Roos
 using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tools.Tests
 {
     public class SplitRegelsTests
     {
-        [OneTimeSetUp]
+        [TestInitialize]
         public void Initialise()
         {
         }
 
-        [TestFixture]
+        [TestClass]
         public class KnipInWoordenMethod : SplitRegelsTests
         {
-            [TestCase("Dit wordt opgeknipt.", new[] { "Dit ", "wordt ", "opgeknipt." })]
-            [TestCase("Greedy   en intact doorgegeven.", new[] { "Greedy   ", "en ", "intact ", "doorgegeven." })]
-            [TestCase("Zin 1. Zin 2.", new[] { "Zin ", "1. ", "Zin ", "2." })]
-            public void Klopt(string regel, string[] verwachtResultaat)
+            [DataTestMethod]
+            [DataRow("Dit wordt opgeknipt.", "", new[] { "Dit ", "wordt ", "opgeknipt." })]
+            [DataRow("Greedy   en intact doorgegeven.", "", new[] { "Greedy   ", "en ", "intact ", "doorgegeven." })]
+            [DataRow("Zin 1. Zin 2.", "", new[] { "Zin ", "1. ", "Zin ", "2." })]
+            public void Klopt(string regel, string empty, string[] verwachtResultaat)
             {
                 var opgeknipt = Tools.SplitRegels.KnipInWoorden(regel).ToList();
 
-                Assert.That(opgeknipt.Count, Is.EqualTo(verwachtResultaat.Length));
+                Assert.AreEqual(opgeknipt.Count, verwachtResultaat.Length);
                 verwachtResultaat.Select((r, i) => new { r, i }).ToList()
-                    .ForEach(r => Assert.That(r.r, Is.EqualTo(verwachtResultaat[r.i])));
+                    .ForEach(r => Assert.AreEqual(r.r, verwachtResultaat[r.i]));
             }
         }
     }

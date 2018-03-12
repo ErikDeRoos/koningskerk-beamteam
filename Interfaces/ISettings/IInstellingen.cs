@@ -15,6 +15,8 @@ namespace ISettings
         float TekstFontPointSize { get; }
 
         bool Een2eCollecte { get; }
+        bool DeTekstVraag { get; }
+        bool DeLezenVraag { get; }
 
         IEnumerable<IMapmask> Masks { get; }
         bool AddMask(IMapmask mask);

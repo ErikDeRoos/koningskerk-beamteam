@@ -13,6 +13,8 @@ namespace ISettings.CommonImplementation
         private const string DefaultTekstFontName = "Verdana";
         private const float DefaultTekstFontPointSize = 28;
         private const bool DefaultEen2eCollecte = true;
+        private const bool DefaultDeTekstVraag = true;
+        private const bool DefaultDeLezenVraag = true;
 
         public string DatabasePad { get; set; }
         public string BijbelPad { get; set; }
@@ -25,6 +27,8 @@ namespace ISettings.CommonImplementation
         public int RegelsPerLiedSlide { get; set; }
         public int RegelsPerBijbeltekstSlide { get; set; }
         public bool Een2eCollecte { get; set; }
+        public bool DeTekstVraag { get; set; }
+        public bool DeLezenVraag { get; set; }
         private readonly List<IMapmask> _lijstmasks = new List<IMapmask>();
         public StandaardTeksten StandaardTeksten { get; set; }
 
@@ -41,6 +45,8 @@ namespace ISettings.CommonImplementation
             RegelsPerLiedSlide = DefaultRegelsperslide;
             RegelsPerBijbeltekstSlide = DefaultRegelsperbijbeltekstslide;
             Een2eCollecte = DefaultEen2eCollecte;
+            DeLezenVraag = DefaultDeLezenVraag;
+            DeTekstVraag = DefaultDeTekstVraag;
 
             StandaardTeksten = new StandaardTeksten()
             {

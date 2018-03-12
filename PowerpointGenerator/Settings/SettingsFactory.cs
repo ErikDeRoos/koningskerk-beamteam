@@ -59,6 +59,8 @@ namespace PowerpointGenerator.Settings
                     RegelsPerLiedSlide = instellingen.RegelsPerLiedSlide,
                     RegelsPerBijbeltekstSlide = instellingen.RegelsPerBijbeltekstSlide,
                     Een2eCollecte = instellingen.Een2eCollecte,
+                    DeTekstVraag = instellingen.DeTekstVraag,
+                    DeLezenVraag = instellingen.DeLezenVraag,
                     StandaardTeksten = instellingen.StandaardTeksten,
                 };
 
@@ -116,6 +118,8 @@ namespace PowerpointGenerator.Settings
                     RegelsPerLiedSlide = saveInstellingen.RegelsPerLiedSlide,
                     RegelsPerBijbeltekstSlide = saveInstellingen.RegelsPerBijbeltekstSlide,
                     Een2eCollecte = saveInstellingen.Een2eCollecte,
+                    DeTekstVraag = saveInstellingen.DeTekstVraag,
+                    DeLezenVraag = saveInstellingen.DeLezenVraag,
                     StandaardTeksten = saveInstellingen.StandaardTeksten,
                 };
 
@@ -170,6 +174,8 @@ namespace PowerpointGenerator.Settings
             public int RegelsPerLiedSlide { get; set; }
             public int RegelsPerBijbeltekstSlide { get; set; }
             public bool Een2eCollecte { get; set; }
+            public bool DeTekstVraag { get; set; }
+            public bool DeLezenVraag { get; set; }
             public StandaardTeksten StandaardTeksten { get; set; }
         }
     }
