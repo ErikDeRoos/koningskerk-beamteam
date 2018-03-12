@@ -11,7 +11,7 @@ Dit project bevat ook andere projecten waarmee:
 * Op een andere pc de powerpoint gegenereerd kan worden (onder GPL)
 * Interfaces voor alle onderdelen op basis waarvan je uit kan breiden (onder LGPL)
 
-Copyright (C) 2017 by Erik de Roos.
+Copyright (C) 2018 by Erik de Roos.
 
 Original idea by Remco Veurink. Further worked on by Erik de Roos.
 
