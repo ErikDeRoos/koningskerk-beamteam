@@ -9,10 +9,8 @@ Klant wensen:
 
 Eigen ideeën:
 S-Opslaan via het nieuwe powerpoint formaat
-S-tempfile lokaal (zodat deze niet in dropbox komt)
 M-database files via json
 M-liturgie voorbeeld tonen
-C-Powerpoint Slides in zipfiles ondersteunen via temp bestanden
 C-context binding (van bewerken operaties in werkbalk) verbeteren
 C-flowpanel onder rechter scherm
 M-critical error fixen
