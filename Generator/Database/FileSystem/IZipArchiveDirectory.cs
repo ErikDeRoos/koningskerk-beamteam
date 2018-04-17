@@ -1,4 +1,4 @@
-// Copyright 2016 door Erik de Roos
+// Copyright 2018 door Erik de Roos
 using System.Collections.Generic;
 using System.IO.Compression;
 

@@ -1,4 +1,4 @@
-﻿// Copyright 2016 door Erik de Roos
+﻿// Copyright 2018 door Erik de Roos
 using IDatabase;
 using System;
 using System.Collections.Generic;
@@ -52,23 +52,23 @@ namespace Generator.Database.FileSystem
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (disposedValue)
+                return;
+            if (disposing)
             {
-                if (disposing)
+                // dispose managed state (managed objects).
+                if (_archiveStream != null)
                 {
-                    // dispose managed state (managed objects).
-                    if (_archiveStream != null)
-                    {
-                        _archiveStream.Close();
-                        _archiveStream = null;
-                    }
+                    _archiveStream.Close();
+                    _archiveStream = null;
                 }
-
-                // free unmanaged resources (unmanaged objects) and override a finalizer below.
-                // set large fields to null.
-
-                disposedValue = true;
+                _archive?.Dispose();
             }
+
+            // free unmanaged resources (unmanaged objects) and override a finalizer below.
+            // set large fields to null.
+
+            disposedValue = true;
         }
 
         // This code added to correctly implement the disposable pattern.
@@ -143,16 +143,23 @@ namespace Generator.Database.FileSystem
 
         private class FileContent : IDbItemContent
         {
+            private static readonly string[] ServeThisFromTemp = { "ppt", "pptx" };
+
             private readonly ZipArchiveEntry _entry;
+            private readonly INameWrapper _nameWrapper;
 
             public string Type { get; }
-            public string PersistentLink => _entry.FullName;
+            public string PersistentLink => _nameWrapper.GetLink();
 
             public FileContent(ZipArchiveEntry entry)
             {
                 _entry = entry;
+                Type = entry?.Name != null ? Path.GetExtension(entry.Name).Substring(1) : string.Empty;  // remove dot
 
-                Type = entry != null && entry.Name != null ? Path.GetExtension(entry.Name).Substring(1) : string.Empty;  // remove dot
+                if (ServeThisFromTemp.Contains(Type.ToLower()))
+                    _nameWrapper = new AutoTempFileWrapper(entry);
+                else
+                    _nameWrapper = new ArchiveEntryNameWrapper(entry);
             }
 
             public Stream GetContentStream()
@@ -163,6 +170,46 @@ namespace Generator.Database.FileSystem
             public IEnumerable<IDbItem> TryAccessSubs()
             {
                 return new List<IDbItem>();
+            }
+        }
+
+        private interface INameWrapper
+        {
+            string GetLink();
+        }
+
+        private class ArchiveEntryNameWrapper : INameWrapper
+        {
+            private readonly ZipArchiveEntry _entry;
+
+            public ArchiveEntryNameWrapper(ZipArchiveEntry entry)
+            {
+                _entry = entry;
+            }
+
+            public string GetLink()
+            {
+                return _entry.FullName;
+            }
+        }
+
+        private class AutoTempFileWrapper : INameWrapper
+        {
+            private readonly ZipArchiveEntry _entry;
+            private AutoTempFile _autoTempFile;
+
+            public AutoTempFileWrapper(ZipArchiveEntry entry)
+            {
+                _entry = entry;
+            }
+
+            public string GetLink()
+            {
+                if (_autoTempFile == null)
+                    using (var stream = _entry.Open())
+                        _autoTempFile = new AutoTempFile(stream);
+
+                return _autoTempFile.GetLink();
             }
         }
     }
