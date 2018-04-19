@@ -1,4 +1,4 @@
-﻿// Copyright 2017 door Erik de Roos
+﻿// Copyright 2018 door Erik de Roos
 using IDatabase;
 using System;
 using System.Collections.Generic;
@@ -74,14 +74,9 @@ namespace Generator.Database.FileSystem
 
         public IEnumerable<string> GetAllNames()
         {
-            var dbSet = GetDbSet();
-            return dbSet
+            return GetDbSet()
                 .Select(db => db.Name)
-                .Union(
-                    dbSet
-                    .Select(db => db.Settings.DisplayName)
-                    .Where(name => !string.IsNullOrWhiteSpace(name))
-                ).ToList();
+                .ToList();
         }
     }
 
