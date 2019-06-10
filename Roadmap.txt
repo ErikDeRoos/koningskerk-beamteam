@@ -4,7 +4,6 @@
 
 
 Klant wensen:
--Bugfix: textbox geeft dubbele regels
 -Bugfix: overtollige liturgie regels in grid opruimen als gegenereerd is
 -vinkje bijbeltekst niet in liturgie
 -In xml settings dat dingen niet in beeld komen
