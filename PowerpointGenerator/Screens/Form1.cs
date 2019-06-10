@@ -1,4 +1,4 @@
-﻿// Copyright 2018 door Remco Veurink en Erik de Roos
+﻿// Copyright 2019 door Remco Veurink en Erik de Roos
 using Generator;
 using ILiturgieDatabase;
 using ISettings;
@@ -65,17 +65,17 @@ namespace PowerpointGenerator.Screens
 
         private void openLiturgieToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _funcs.LoadWorkingfile(Openen());
+            _funcs.LaadVanWerkbestand(Openen());
         }
 
         private void toolStripMenuItem2_Click(object sender, EventArgs e)
         {
-            Opslaan(_funcs.GetWorkingFile());
+            Opslaan(_funcs.MaakWerkbestand());
         }
 
         private void slaLiturgieOpToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OpslaanOpLocatie(_funcs.GetWorkingFile(), _funcs.CurrentFile);
+            OpslaanOpLocatie(_funcs.MaakWerkbestand(), _funcs.CurrentFile);
         }
 
         private void nieuweLiturgieToolStripMenuItem_Click(object sender, EventArgs e)
@@ -168,7 +168,7 @@ namespace PowerpointGenerator.Screens
         }
         private void timerAutosave_Tick(object sender, EventArgs e)
         {
-            OpslaanOpLocatie(_funcs.GetWorkingFile(), _funcs.TempLiturgiePath);
+            OpslaanOpLocatie(_funcs.MaakWerkbestand(), _funcs.TempLiturgiePath);
         }
         #endregion formulier eventhandlers
         #endregion Eventhandlers
@@ -187,7 +187,7 @@ namespace PowerpointGenerator.Screens
             if (_funcs.Status == GeneratorStatus.Gestopt)
             {
                 //sla een back up voor als er iets fout gaat
-                OpslaanOpLocatie(_funcs.GetWorkingFile(), _funcs.TempLiturgiePath);
+                OpslaanOpLocatie(_funcs.MaakWerkbestand(), _funcs.TempLiturgiePath);
 
                 // creeer lijst van liturgie
                 var ingeladenLiturgie = _funcs.LiturgieOplossingen().ToList();
@@ -319,14 +319,14 @@ namespace PowerpointGenerator.Screens
         /// <summary>
         /// Opslaan van het meegegeven bestand op de meegegeven locatie
         /// </summary>
-        /// <param name="bestand">bestand als string dat opgeslagen moet worden</param>
+        /// <param name="bestandsinhoud">bestand als string dat opgeslagen moet worden</param>
         /// <param name="path">path waarin het bestand moet worden opgeslagen</param>
-        private void OpslaanOpLocatie(string bestand, string path)
+        private void OpslaanOpLocatie(string bestandsinhoud, string path)
         {
             //controleer dat het pad niet leeg is en anders laden we gewoon opslaan
             if (path.Equals(""))
             {
-                Opslaan(bestand);
+                Opslaan(bestandsinhoud);
                 return;
             }
             //probeer om te schrijven naar gekozen bestand
@@ -336,7 +336,7 @@ namespace PowerpointGenerator.Screens
                 using (var writer = new StreamWriter(path))
                 {
                     //schrijf string weg naar streamwriter
-                    writer.Write(bestand);
+                    writer.Write(bestandsinhoud);
 
                     Console.WriteLine("opgeslagen");
                 }

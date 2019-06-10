@@ -1,15 +1,19 @@
-﻿// Copyright 2017 door Erik de Roos
+﻿// Copyright 2019 door Erik de Roos
 using Autofac;
 
 namespace PowerpointGenerator
 {
     static class Bootstrap
     {
+        private const string SettingsFileName = @"lib\instellingen.json";
+        private const string MasksFileName = @"lib\masks.json";
+        private const string DefaultSetNameEmpty = "!leeg";
+
         internal static void SetDefault(ContainerBuilder container)
         {
             container.RegisterType<Tools.LocalFileOperations>().As<IFileSystem.IFileOperations>();
             container.RegisterType<Settings.SettingsFactory>().As<ISettings.IInstellingenFactory>()
-                .WithParameter("instellingenFileName", Properties.Settings.Default.InstellingenFileName).WithParameter("masksFileName", Properties.Settings.Default.MasksFileName)
+                .WithParameter("instellingenFileName", SettingsFileName).WithParameter("masksFileName", MasksFileName)
                 .SingleInstance();
             container.RegisterGeneric(typeof(Generator.GeneratieInterface<>));
             container.RegisterType<Screens.CompRegistration>().As<Generator.ICompRegistration>();
@@ -22,7 +26,7 @@ namespace PowerpointGenerator
         {
             container.RegisterType<Generator.Database.LiturgieDatabase>().As<ILiturgieDatabase.ILiturgieDatabase>();
             container.RegisterType<Generator.LiturgieOplosser.LiturgieOplosser>().As<ILiturgieDatabase.ILiturgieLosOp>()
-                .WithParameter("defaultSetNameEmpty", Properties.Settings.Default.SetNameEmpty)
+                .WithParameter("defaultSetNameEmpty", DefaultSetNameEmpty)
                 .InstancePerLifetimeScope();
             container.RegisterType<mppt.RegelVerwerking.LengteBerekenaar>().As<ILiturgieDatabase.ILengteBerekenaar>();
             container.RegisterType<Generator.LiturgieInterpretator.InterpreteerLiturgieRuw>().As<ILiturgieDatabase.ILiturgieInterpreteer>();

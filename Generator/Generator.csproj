@@ -53,12 +53,9 @@
     <Compile Include="LiturgieOplosser\LiturgieOplosser.cs" />
     <Compile Include="Powerpoint\PPGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SaveFileHandling.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ConnectTools\ConnectTools.csproj">
-      <Project>{00ef486e-9338-4978-97ef-1a165498e9c8}</Project>
-      <Name>ConnectTools</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Interfaces\IDatabase\IDatabase.csproj">
       <Project>{318647d0-b6bb-410e-a547-628049eadb9d}</Project>
       <Name>IDatabase</Name>
