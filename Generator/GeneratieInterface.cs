@@ -1,4 +1,4 @@
-﻿// Copyright 2017 door Remco Veurink en Erik de Roos
+﻿// Copyright 2019 door Erik de Roos
 using Generator.Database;
 using Generator.Powerpoint;
 using ILiturgieDatabase;
@@ -49,7 +49,7 @@ namespace Generator
             {
                 try
                 {
-                    LoadFromWorkingFile(OpenenOpLocatie(startBestand));
+                    LaadVanWerkbestand(OpenenOpLocatie(startBestand));
                 }
                 catch { }
             }
@@ -57,7 +57,7 @@ namespace Generator
             {
                 try
                 {
-                    LoadFromWorkingFile(OpenenOpLocatie(TempLiturgiePath));
+                    LaadVanWerkbestand(OpenenOpLocatie(TempLiturgiePath));
                 }
                 catch { }
                 try
@@ -66,6 +66,33 @@ namespace Generator
                 }
                 catch { }
             }
+        }
+
+        public void LaadVanWerkbestand(string bestandsInhoud)
+        {
+            var liturgie = SaveFileHandling.LoadFromWorkingFile(bestandsInhoud);
+            if (liturgie == null)
+                return;
+
+            Registration.Liturgie = liturgie.Liturgie;
+            Registration.Voorganger = liturgie.Voorganger;
+            Registration.Collecte1e = liturgie.Collecte1e;
+            Registration.Collecte2e = liturgie.Collecte2e;
+            Registration.Lezen = liturgie.Lezen;
+            Registration.Tekst = liturgie.Tekst;
+        }
+
+        public string MaakWerkbestand()
+        {
+            return SaveFileHandling.CreateWorkingFile(new SaveFileHandling
+            {
+                Liturgie = Registration.Liturgie,
+                Voorganger = Registration.Voorganger,
+                Collecte1e = Registration.Collecte1e,
+                Collecte2e = Registration.Collecte2e,
+                Lezen = Registration.Lezen,
+                Tekst = Registration.Tekst
+            });
         }
 
         public void RegisterVoortgang(Voortgang callback)
@@ -90,89 +117,6 @@ namespace Generator
                 return;
             Status = GeneratorStatus.Gestopt;
             _setGereedmelding?.Invoke(opgeslagenAlsBestand, foutmelding, slidesGemist);
-        }
-
-        public void LoadFromWorkingFile(string input)
-        {
-            if (input.Equals(""))
-                return;
-            var inputstring = SplitRegels.Split(input);
-            var liturgieLijst = new List<string>();
-            var i = 0;
-            for (; i < inputstring.Length; i++)
-            {
-                if (inputstring[i].StartsWith("<"))
-                    break;
-                if (!inputstring[i].Equals(""))
-                    liturgieLijst.Add(inputstring[i]);
-            }
-            Registration.Liturgie = liturgieLijst.ToArray();
-            for (; i < inputstring.Length; i++)
-            {
-                if (inputstring[i].Equals("")) continue;
-                var inputstringparts = inputstring[i].Split('<', '>');
-                switch (inputstringparts[1])
-                {
-                    case "Voorganger:":
-                        Registration.Voorganger = inputstringparts[2];
-                        break;
-                    case "1e Collecte:":
-                        Registration.Collecte1e = inputstringparts[2];
-                        break;
-                    case "2e Collecte:":
-                        Registration.Collecte2e = inputstringparts[2];
-                        break;
-                    case "Lezen":
-                        var lezenLijst = new List<string>();
-                        for (var j = 2; j < inputstringparts.Length; j += 2)
-                        {
-                            lezenLijst.Add(inputstringparts[j]);
-                        }
-                        Registration.Lezen = lezenLijst.ToArray();
-                        break;
-                    case "Tekst":
-                        var tekstLijst = new List<string>();
-                        for (var j = 2; j < inputstringparts.Length; j += 2)
-                        {
-                            tekstLijst.Add(inputstringparts[j]);
-                        }
-                        Registration.Tekst = tekstLijst.ToArray();
-                        break;
-                }
-            }
-        }
-        public string CreateWorkingFile()
-        {
-            var output = string.Join("\n", Registration.Liturgie) + "\n";
-            output += "<Voorganger:>" + Registration.Voorganger + "\n";
-            output += "<1e Collecte:>" + Registration.Collecte1e + "\n";
-            output += "<2e Collecte:>" + Registration.Collecte2e + "\n";
-
-            output += "<Lezen>";
-            var regels = Registration.Lezen.ToList();
-            for (var i = 0; i < regels.Count; i++)
-            {
-                if (regels[i].Equals("")) continue;
-                if (i + 1 < regels.Count)
-                    output += regels[i] + "<n>";
-                else
-                    output += regels[i];
-            }
-            output += "\n";
-
-            output += "<Tekst>";
-            regels = Registration.Tekst.ToList();
-            for (var i = 0; i < regels.Count; i++)
-            {
-                if (regels[i].Equals("")) continue;
-                if (i + 1 < regels.Count)
-                    output += regels[i] + "<n>";
-                else
-                    output += regels[i];
-            }
-            output += "\n";
-
-            return output;
         }
 
         /// <summary>
