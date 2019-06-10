@@ -1,4 +1,4 @@
-﻿// Copyright 2017 Erik de Roos
+﻿// Copyright 2019 Erik de Roos
 // Van Remco Veurink is het idee van 'liturgie regels' die zich vertalen naar 'templates' met vervangteksten.
 // Van Remco Veurink is het idee van een bestandsdatabase waarvan liedteksten op een template ingevuld worden.
 using ILiturgieDatabase;
@@ -165,7 +165,7 @@ namespace mppt.RegelVerwerking
                     }
                     else if (table != null)
                     {
-                        if (table.GetTitel().Equals("<Liturgie>"))
+                        if (table.GetTitelFromFirstRowCell().Equals("<Liturgie>"))
                             VulLiturgieTabel(table, _mppFactory, _liedFormatter, _liturgie, _buildSettings.Lezen, _buildSettings.Tekst, _buildDefaults.LabelLiturgieLezen, _buildDefaults.LabelLiturgieTekst, _buildDefaults.LabelLiturgie);
                     }
                 }
@@ -198,7 +198,8 @@ namespace mppt.RegelVerwerking
                     toonLijst.Add(mppFactory.GetMppShapeTableContent1Column(toonLijst.Count, $"{instellingenLezen}{lezen}", true));
                 if (!string.IsNullOrWhiteSpace(tekst))
                     toonLijst.Add(mppFactory.GetMppShapeTableContent1Column(toonLijst.Count, $"{instellingenTekst}{tekst}", true));
-                inTabel.InsertContent(toonLijst);
+                inTabel.SetRowsContent(toonLijst);
+                inTabel.TrimRows();
             }
 
 

@@ -1,4 +1,4 @@
-﻿// Copyright 2016 door Erik de Roos
+﻿// Copyright 2019 door Erik de Roos
 using System;
 using System.Collections.Generic;
 
@@ -33,8 +33,9 @@ namespace mppt.Connect
 
     public interface IMppShapeTable : IMppShape
     {
-        string GetTitel();
-        void InsertContent(IEnumerable<IMppShapeTableContent> content);
+        string GetTitelFromFirstRowCell();
+        void SetRowsContent(IEnumerable<IMppShapeTableContent> content);
+        void TrimRows();
     }
 
     public interface IMppShapeTableContent

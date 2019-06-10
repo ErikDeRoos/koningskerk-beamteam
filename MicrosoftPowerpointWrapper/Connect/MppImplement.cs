@@ -1,4 +1,4 @@
-﻿// Copyright 2016 door Erik de Roos
+﻿// Copyright 2019 door Erik de Roos
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -214,31 +214,31 @@ namespace mppt.Connect
     class MppShapeTable : IMppShapeTable
     {
         private Shape _shape;
+        private int _amountOfRowsFilled;
 
         public MppShapeTable(Shape shape)
         {
             _shape = shape;
         }
 
-        public string GetTitel()
+        public string GetTitelFromFirstRowCell()
         {
             return _shape.Table.Rows[1].Cells[1].Shape.TextFrame.TextRange.Text;
         }
 
-        public void InsertContent(IEnumerable<IMppShapeTableContent> content)
+        public void SetRowsContent(IEnumerable<IMppShapeTableContent> content)
         {
             var stack = new Stack<IMppShapeTableContent>(content.OrderByDescending(c => c.Index));
             var inTabel = _shape.Table;
+            _amountOfRowsFilled = 0;
             for (var index = 1; index <= inTabel.Rows.Count && stack.Any(); index++)
             {
                 var cont = stack.Pop();
-                var column3 = cont as MppShapeTableContent3Column;
-                var column1 = cont as MppShapeTableContent1Column;
 
-                if (column3 != null)
+                if (cont is MppShapeTableContent3Column column3)
                 {
                     inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = column3.Column1;
-                    if (string.IsNullOrWhiteSpace(column3.Column3) && !string.IsNullOrWhiteSpace(column3.Column2) && IsColumnThatSuitsARowMoreBetter(column3.Column2))
+                    if (string.IsNullOrWhiteSpace(column3.Column3) && !string.IsNullOrWhiteSpace(column3.Column2) && NeedForColumnMergeBecauseOfPossibleOverflowColumn2(column3.Column2))
                     {
                         inTabel.Rows[index].Cells[2].Merge(inTabel.Rows[index].Cells[3]);  // row 3 has (probably) better aligning
                         inTabel.Rows[index].Cells[2].Shape.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignLeft;
@@ -248,7 +248,7 @@ namespace mppt.Connect
                     if (!string.IsNullOrWhiteSpace(column3.Column3))
                         inTabel.Rows[index].Cells[3].Shape.TextFrame.TextRange.Text = column3.Column3;
                 }
-                else if (column1 != null)
+                else if (cont is MppShapeTableContent1Column column1)
                 {
                     if (column1.MergeRemainingColumns && inTabel.Rows[index].Cells.Count >= 2)
                     {
@@ -259,14 +259,27 @@ namespace mppt.Connect
                     inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.Text = column1.Column1;
                     inTabel.Rows[index].Cells[1].Shape.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignLeft;
                 }
+                _amountOfRowsFilled++;
             }
         }
         
-        private bool IsColumnThatSuitsARowMoreBetter(string column2)
+        private bool NeedForColumnMergeBecauseOfPossibleOverflowColumn2(string column2)
         {
             var testValue = (column2 ?? "").Trim();
             return testValue.Contains(" ") || testValue.Length > 5;
         } 
+
+        public void TrimRows()
+        {
+            var inTabel = _shape.Table;
+            if (inTabel.Rows.Count <= _amountOfRowsFilled)
+                return;
+
+            for (int teller = inTabel.Rows.Count; teller > _amountOfRowsFilled; teller--)
+            {
+                inTabel.Rows[teller].Delete();
+            }
+        }
     }
 
     class MppShapeTableContent3Column : IMppShapeTableContent
