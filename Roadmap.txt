@@ -4,15 +4,19 @@
 
 
 Klant wensen:
+-Bugfix: textbox geeft dubbele regels
+-Bugfix: overtollige liturgie regels in grid opruimen als gegenereerd is
+-vinkje bijbeltekst niet in liturgie
+-In xml settings dat dingen niet in beeld komen
 -Bijbeltekst vers-weergave formatteren
 -Bugfix: Sommige hoofdstukken worden overgeslagen (ergens in een mailtje of in t werkzaamheden overzicht bestand staat het voorbeeld)
+-Bugfix: Sommige opwekkingen laten 'volgende' in beeld bij bepaalde slides (Opw 585, liturgie 5 mei)
 
 Eigen ideeën:
+M-Eenvoudige zoeken-invoegen balk
 S-Opslaan via het nieuwe powerpoint formaat
 M-database files via json
 M-liturgie voorbeeld tonen
-C-context binding (van bewerken operaties in werkbalk) verbeteren
-C-flowpanel onder rechter scherm
-M-critical error fixen
-S-undo/redo verbeteren
-C-Instellingen via array (zoals in VS settings)
+S-Zoeken in teksten
+S-Solution vereenvoudigen
+S-Begeleidende teksten vereenvoudigen: dit project is de beamteam generator voor kerken, niet iets generieks
