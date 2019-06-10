@@ -323,8 +323,8 @@ namespace PowerpointGenerator.Screens
         /// <param name="path">path waarin het bestand moet worden opgeslagen</param>
         private void OpslaanOpLocatie(string bestandsinhoud, string path)
         {
-            //controleer dat het pad niet leeg is en anders laden we gewoon opslaan
-            if (path.Equals(""))
+            //controleer dat het pad niet leeg is en anders laten we gewoon opslaan
+            if (string.IsNullOrWhiteSpace(path))
             {
                 Opslaan(bestandsinhoud);
                 return;
