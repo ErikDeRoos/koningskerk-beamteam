@@ -65,17 +65,17 @@ namespace PowerpointGenerator.Screens
 
         private void openLiturgieToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _funcs.LoadWorkingfile(Openen());
+            _funcs.LoadFromWorkingFile(Openen());
         }
 
         private void toolStripMenuItem2_Click(object sender, EventArgs e)
         {
-            Opslaan(_funcs.GetWorkingFile());
+            Opslaan(_funcs.CreateWorkingFile());
         }
 
         private void slaLiturgieOpToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OpslaanOpLocatie(_funcs.GetWorkingFile(), _funcs.CurrentFile);
+            OpslaanOpLocatie(_funcs.CreateWorkingFile(), _funcs.CurrentFile);
         }
 
         private void nieuweLiturgieToolStripMenuItem_Click(object sender, EventArgs e)
@@ -168,7 +168,7 @@ namespace PowerpointGenerator.Screens
         }
         private void timerAutosave_Tick(object sender, EventArgs e)
         {
-            OpslaanOpLocatie(_funcs.GetWorkingFile(), _funcs.TempLiturgiePath);
+            OpslaanOpLocatie(_funcs.CreateWorkingFile(), _funcs.TempLiturgiePath);
         }
         #endregion formulier eventhandlers
         #endregion Eventhandlers
@@ -187,7 +187,7 @@ namespace PowerpointGenerator.Screens
             if (_funcs.Status == GeneratorStatus.Gestopt)
             {
                 //sla een back up voor als er iets fout gaat
-                OpslaanOpLocatie(_funcs.GetWorkingFile(), _funcs.TempLiturgiePath);
+                OpslaanOpLocatie(_funcs.CreateWorkingFile(), _funcs.TempLiturgiePath);
 
                 // creeer lijst van liturgie
                 var ingeladenLiturgie = _funcs.LiturgieOplossingen().ToList();

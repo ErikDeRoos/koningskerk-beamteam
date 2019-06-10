@@ -11,6 +11,9 @@ using Tools;
 
 namespace Generator
 {
+    /// <summary>
+    /// Tussenklasse waarmee UI logica losgehaald is van de forms componenten
+    /// </summary>
     public class GeneratieInterface<T> : IDisposable where T : class, ICompRegistration
     {
         private readonly ILiturgieLosOp _liturgieOplosser;
@@ -46,7 +49,7 @@ namespace Generator
             {
                 try
                 {
-                    LoadWorkingfile(OpenenOpLocatie(startBestand));
+                    LoadFromWorkingFile(OpenenOpLocatie(startBestand));
                 }
                 catch { }
             }
@@ -54,7 +57,7 @@ namespace Generator
             {
                 try
                 {
-                    LoadWorkingfile(OpenenOpLocatie(TempLiturgiePath));
+                    LoadFromWorkingFile(OpenenOpLocatie(TempLiturgiePath));
                 }
                 catch { }
                 try
@@ -89,7 +92,7 @@ namespace Generator
             _setGereedmelding?.Invoke(opgeslagenAlsBestand, foutmelding, slidesGemist);
         }
 
-        public void LoadWorkingfile(string input)
+        public void LoadFromWorkingFile(string input)
         {
             if (input.Equals(""))
                 return;
@@ -138,7 +141,7 @@ namespace Generator
                 }
             }
         }
-        public string GetWorkingFile()
+        public string CreateWorkingFile()
         {
             var output = string.Join("\n", Registration.Liturgie) + "\n";
             output += "<Voorganger:>" + Registration.Voorganger + "\n";
