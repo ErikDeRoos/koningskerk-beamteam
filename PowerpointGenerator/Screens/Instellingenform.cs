@@ -2,14 +2,19 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Windows.Forms;
 using ISettings;
 using ISettings.CommonImplementation;
+using System.Linq;
+using Tools;
 
 namespace PowerpointGenerator.Screens
 {
     partial class Instellingenform : Form
     {
+        private const string StandaarPad = "Path";
+
         private readonly IInstellingenFactory _instellingenFactory;
 
         public IInstellingen Instellingen { get; private set; }
@@ -61,7 +66,7 @@ namespace PowerpointGenerator.Screens
         {
             //kies een bestand en sla het pad op
             var temp = KiesFile();
-            if (!temp.Equals(""))
+            if (temp != null)
                 textBox1.Text = temp;
         }
 
@@ -69,7 +74,7 @@ namespace PowerpointGenerator.Screens
         {
             //kies een bestand en sla het pad op
             var temp = KiesFile();
-            if (!temp.Equals(""))
+            if (temp != null)
                 textBox2.Text = temp;
         }
 
@@ -77,52 +82,29 @@ namespace PowerpointGenerator.Screens
         {
             //kies een bestand en sla het pad op
             var temp = KiesFile();
-            if (!temp.Equals(""))
+            if (temp != null)
                 textBox6.Text = temp;
         }
 
         private void button5_Click(object sender, EventArgs e)
         {
-            var applicationPath = AppDomain.CurrentDomain.BaseDirectory;
-
-            //open een open window met bepaalde instellingen
-            var openFolderDialog1 = new FolderBrowserDialog
-            {
-                Description = "Kies map van de Database",
-                SelectedPath = applicationPath
-            };
-
-            //return als er word geannuleerd
-            if (openFolderDialog1.ShowDialog() == DialogResult.Cancel)
-                return;
-
-            var dbPath = openFolderDialog1.SelectedPath;
-            if (dbPath.StartsWith(applicationPath))
-                dbPath = dbPath.Replace(applicationPath, ".");
-
-            textBox3.Text = dbPath;
+            //kies een pad
+            var temp = KiesPad(textBox3.Text, "Kies map van de Database");
+            if (temp != null)
+                textBox3.Text = temp;
         }
 
         private void button6_Click(object sender, EventArgs e)
         {
-            var applicationPath = AppDomain.CurrentDomain.BaseDirectory;
+            //kies een pad
+            var temp = KiesPad(textBox5.Text, "Kies map van de Bijbel Database");
+            if (temp != null)
+                textBox5.Text = temp;
+        }
 
-            //open een open window met bepaalde instellingen
-            var openFolderDialog1 = new FolderBrowserDialog
-            {
-                Description = "Kies map van de Bijbel Database",
-                SelectedPath = applicationPath
-            };
-
-            //return als er word geannuleerd
-            if (openFolderDialog1.ShowDialog() == DialogResult.Cancel)
-                return;
-
-            var dbPath = openFolderDialog1.SelectedPath;
-            if (dbPath.StartsWith(applicationPath))
-                dbPath = dbPath.Replace(applicationPath, ".");
-
-            textBox5.Text = dbPath;
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Opslaan();
         }
         #endregion Eventhandlers
 
@@ -145,7 +127,8 @@ namespace PowerpointGenerator.Screens
 
             //return als er word geannuleerd
             if (openFileDialog1.ShowDialog() == DialogResult.Cancel)
-                return "";
+                return null;
+
             //return bestandspad
             var selectedPath = openFileDialog1.FileName;
             if (selectedPath.StartsWith(applicationPath))
@@ -153,9 +136,33 @@ namespace PowerpointGenerator.Screens
 
             return selectedPath;
         }
+
+        private static string KiesPad(string huidigePad, string padKeuzeTekst)
+        {
+            var applicationPath = AppDomain.CurrentDomain.BaseDirectory;
+            var voorselectiePad = applicationPath;
+            if (!string.IsNullOrWhiteSpace(huidigePad) && huidigePad != StandaarPad)
+                voorselectiePad = RelatiefPad.ReplaceWithNormalPath(applicationPath, huidigePad);
+
+            //open een open window met bepaalde instellingen
+            var openFolderDialog1 = new FolderBrowserDialog
+            {
+                Description = padKeuzeTekst,
+                SelectedPath = voorselectiePad
+            };
+
+            //return als er word geannuleerd
+            if (openFolderDialog1.ShowDialog() == DialogResult.Cancel)
+                return null;
+
+            var selectedPath = RelatiefPad.ReplaceWithRelativePath(applicationPath, openFolderDialog1.SelectedPath);
+
+            return selectedPath;
+        }
+        
         #endregion Functions
 
-        private void button2_Click(object sender, EventArgs e)
+        private void Opslaan()
         {
             var instellingen = new Instellingen(
                 standaardTeksten: new StandaardTeksten

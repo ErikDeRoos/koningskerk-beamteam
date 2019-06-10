@@ -41,6 +41,7 @@
     <Compile Include="LocalFileOperations.cs" />
     <Compile Include="FoutmeldingSchrijver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RelatiefPad.cs" />
     <Compile Include="SplitRegels.cs" />
   </ItemGroup>
   <ItemGroup>
