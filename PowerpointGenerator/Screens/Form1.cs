@@ -274,7 +274,7 @@ namespace PowerpointGenerator.Screens
                 return _funcs.OpenenOpLocatie(pad);
             }
                 //vang errors af en geef een melding dat er iets is fout gegaan
-            catch (Exception)
+            catch
             {
                 MessageBox.Show("Fout tijdens openen bestand", "Bestand error",
                                  MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
@@ -308,7 +308,7 @@ namespace PowerpointGenerator.Screens
                     _funcs.Opslaan(saveFileDialog1.FileName, bestand);
                 }
                 //vang errors af en geef een melding dat er iets is fout gegaan
-                catch (Exception)
+                catch
                 {
                     MessageBox.Show("Fout tijdens opslaan bestand", "Bestand error",
                                  MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
@@ -323,8 +323,8 @@ namespace PowerpointGenerator.Screens
         /// <param name="path">path waarin het bestand moet worden opgeslagen</param>
         private void OpslaanOpLocatie(string bestandsinhoud, string path)
         {
-            //controleer dat het pad niet leeg is en anders laden we gewoon opslaan
-            if (path.Equals(""))
+            //controleer dat het pad niet leeg is en anders laten we gewoon opslaan
+            if (string.IsNullOrWhiteSpace(path))
             {
                 Opslaan(bestandsinhoud);
                 return;
@@ -342,7 +342,7 @@ namespace PowerpointGenerator.Screens
                 }
             }
             //vang errors af en geef een melding dat er iets is fout gegaan
-            catch (Exception)
+            catch
             {
                 MessageBox.Show("Fout tijdens opslaan bestand", "Bestand error",
                              MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
