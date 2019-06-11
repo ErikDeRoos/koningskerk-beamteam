@@ -15,8 +15,10 @@ namespace Generator.LiturgieOplosser
     {
         private readonly ILiturgieDatabase.ILiturgieDatabase _database;
         private readonly string _defaultSetNameEmpty;
-        private IEnumerable<IVrijZoekresultaatMogelijkheid> _onderdelenLijstCache;
         private readonly ILiturgieInterpreteer _liturgieInterperator;
+
+        private IEnumerable<IVrijZoekresultaatMogelijkheid> _onderdelenLijstCache;
+        private ZoekRestricties _onderdelenLijstRestrictiesCache;
 
         public LiturgieOplosser(ILiturgieDatabase.ILiturgieDatabase database, ILiturgieInterpreteer liturgieInterperator, string defaultSetNameEmpty)
         {
@@ -171,12 +173,13 @@ namespace Generator.LiturgieOplosser
 
         // TODO oplossen dat logica om regel weer samen te stellen uit gaat van vaste waarden
         // TODO efficienter omgaan met zoekresources (verschillende lijsten opslaan in zoekresultaat en alleen wijzigingen veranderen)
-        public IVrijZoekresultaat VrijZoeken(string zoekTekst, IVrijZoekresultaat vorigResultaat = null)
+        public IVrijZoekresultaat VrijZoeken(string zoekTekst, bool alsBijbeltekst = false, IVrijZoekresultaat vorigResultaat = null)
         {
             var veiligeZoekTekst = (zoekTekst ?? "").TrimStart();
             var veranderingGemaakt = false;
+            var zoekRestricties = new ZoekRestricties(alsBijbeltekst);
 
-            var onderdeelLijst = KrijgBasisDatabaseLijst(true);
+            var onderdeelLijst = KrijgBasisDatabaseLijst(zoekRestricties, true);
             var fragmentLijst = Enumerable.Empty<IVrijZoekresultaatMogelijkheid>();
             var vorigeZoektermSplit = _liturgieInterperator.VanTekstregel(vorigResultaat == null ? "" : vorigResultaat.ZoekTerm);
             var huidigeZoektermSplit = _liturgieInterperator.VanTekstregel(veiligeZoekTekst);
@@ -201,13 +204,13 @@ namespace Generator.LiturgieOplosser
                 veranderingGemaakt = true;
             }
 
-            return ZoekresultaatSamenstellen(veiligeZoekTekst, vorigResultaat, onderdeelLijst.Union(fragmentLijst), veranderingGemaakt);
+            return ZoekresultaatSamenstellen(veiligeZoekTekst, alsBijbeltekst, vorigResultaat, onderdeelLijst.Union(fragmentLijst), veranderingGemaakt);
         }
 
-        private IEnumerable<IVrijZoekresultaatMogelijkheid> KrijgBasisDatabaseLijst(bool cached)
+        private IEnumerable<IVrijZoekresultaatMogelijkheid> KrijgBasisDatabaseLijst(ZoekRestricties zoekRestricties, bool cached)
         {
             if (!cached)
-                return ZoekBasisDatabaseLijst()
+                return ZoekBasisDatabaseLijst(zoekRestricties)
                     .Select(t => new ZoekresultaatItem()
                     {
                         Weergave = t.Resultaat,
@@ -215,18 +218,21 @@ namespace Generator.LiturgieOplosser
                     });
             else
             {
-                if (_onderdelenLijstCache == null)
-                    _onderdelenLijstCache = ZoekBasisDatabaseLijst()
+                if (_onderdelenLijstCache == null || !zoekRestricties.Equals(_onderdelenLijstRestrictiesCache))
+                {
+                    _onderdelenLijstCache = ZoekBasisDatabaseLijst(zoekRestricties)
                         .Select(t => new ZoekresultaatItem()
                         {
                             Weergave = t.Resultaat,
                             UitDatabase = t.Database,
                         })
                         .ToList();
+                    _onderdelenLijstRestrictiesCache = zoekRestricties;
+                }
                 return _onderdelenLijstCache;
             }
         }
-        private IList<IZoekresultaat> ZoekBasisDatabaseLijst()
+        private IList<IZoekresultaat> ZoekBasisDatabaseLijst(ZoekRestricties zoekRestricties)
         {
             return _database.KrijgAlleOnderdelen()  // Alle onderdelen (psalmen, gezangen, bijbelboeken, etc)
                 .Union(ZoekVerdieping(FileEngineDefaults.CommonFilesSetName))  // Alle slide templates zoals amen, votum, bidden etc)
@@ -237,7 +243,7 @@ namespace Generator.LiturgieOplosser
             return _database.KrijgAlleFragmenten(vanOnderdeelNaam);
         }
 
-        private Zoekresultaat ZoekresultaatSamenstellen(string zoekTekst, IVrijZoekresultaat vorigResultaat, IEnumerable<IVrijZoekresultaatMogelijkheid> lijst, bool lijstIsGewijzigd)
+        private Zoekresultaat ZoekresultaatSamenstellen(string zoekTekst, bool alsBijbeltekst, IVrijZoekresultaat vorigResultaat, IEnumerable<IVrijZoekresultaatMogelijkheid> lijst, bool lijstIsGewijzigd)
         {
             var zoekLijst = Enumerable.Empty<IVrijZoekresultaatMogelijkheid>();
             var zoekLijstDeltaToegevoegd = Enumerable.Empty<IVrijZoekresultaatMogelijkheid>();
@@ -264,6 +270,7 @@ namespace Generator.LiturgieOplosser
             return new Zoekresultaat()
             {
                 ZoekTerm = zoekTekst,
+                AlsBijbeltekst = alsBijbeltekst,
                 AlleMogelijkheden = zoekLijst.ToList(),
                 DeltaMogelijkhedenToegevoegd = zoekLijstDeltaToegevoegd,
                 DeltaMogelijkhedenVerwijderd = zoekLijstDeltaVerwijderd,
@@ -371,6 +378,7 @@ namespace Generator.LiturgieOplosser
             public VrijZoekresultaatAanpassingType ZoeklijstAanpassing { get; set; }
 
             public string ZoekTerm { get; set; }
+            public bool AlsBijbeltekst { get; set; }
         }
 
         private class ZoekresultaatItem : IVrijZoekresultaatMogelijkheid
@@ -393,6 +401,28 @@ namespace Generator.LiturgieOplosser
             public override string ToString()
             {
                 return Weergave;
+            }
+        }
+
+        private class ZoekRestricties : IEquatable<ZoekRestricties>
+        {
+            public bool ZoekInBijbel { get; }
+            public bool ZoekInCommon { get; }
+            public bool ZoekInLiederen { get; }
+
+            public ZoekRestricties(bool alsBijbeltekst)
+            {
+                ZoekInBijbel = alsBijbeltekst;
+                ZoekInCommon = !alsBijbeltekst;
+                ZoekInLiederen = !alsBijbeltekst;
+            }
+
+            public bool Equals(ZoekRestricties other)
+            {
+                return other != null &&
+                    ZoekInBijbel == other.ZoekInBijbel &&
+                    ZoekInCommon == other.ZoekInCommon &&
+                    ZoekInLiederen == other.ZoekInLiederen;
             }
         }
     }

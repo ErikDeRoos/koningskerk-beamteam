@@ -8,7 +8,6 @@ namespace PowerpointGenerator.Screens
 {
     public partial class LiturgieEdit : UserControl
     {
-        private static readonly Keys[] TextDirectionKeys = new[] { Keys.Left, Keys.Right, Keys.Up, Keys.Down };
         public ILiturgieLosOp _liturgieOplosser { get; set; }
         new private readonly bool DesignMode;
 
@@ -18,9 +17,6 @@ namespace PowerpointGenerator.Screens
         private IVrijZoekresultaat _huidigZoekresultaat;
         private object _dropdownLocker = new object();
         private ILiturgieOptiesGebruiker _huidigeOptiesBijZoeken;
-
-        // plek waar de gebruiker bezig is
-        private int? _regelInBewerking = null;
 
         public LiturgieEdit()
         {
@@ -36,27 +32,6 @@ namespace PowerpointGenerator.Screens
         }
 
         #region events
-        private void timerUpdateSelection_Tick(object sender, EventArgs e)
-        {
-            UpdateSelection();
-        }
-
-        private void textBoxLiturgie_MouseClick(object sender, MouseEventArgs e)
-        {
-            ScheduleUpdateSelection();
-        }
-
-        private void textBoxLiturgie_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            ScheduleUpdateSelection();
-        }
-
-        private void textBoxLiturgie_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
-        {
-            if (TextDirectionKeys.Contains(e.KeyCode))
-                ScheduleUpdateSelection();
-        }
-
         private void toolStripMenuItemKnippen_Click(object sender, EventArgs e)
         {
             textBoxLiturgie.Cut();
@@ -77,31 +52,17 @@ namespace PowerpointGenerator.Screens
             TriggerZoeklijstVeranderd();
         }
 
-        private void textBoxZoek_KeyUp(object sender, KeyEventArgs e)
+        private void checkBoxAlsBijbeltekst_CheckedChanged(object sender, EventArgs e)
         {
-            //if (e.KeyData == Keys.Enter)
-            //    HuidigeTekstInvoegenEnInvoerLegen();
-        }
-
-        private void buttonWijzigOpties_Click(object sender, EventArgs e)
-        {
-            TriggerAanpassenOptiesBijZoeken();
-        }
-
-        private void buttonVervangen_Click(object sender, EventArgs e)
-        {
-            HuidigeTekstAanpassen();
+            TriggerZoeklijstVeranderd();
         }
 
         private void buttonInvoegen_Click(object sender, EventArgs e)
         {
             HuidigeTekstInvoegen();
-        }
 
-        private void LiturgieEdit_Leave(object sender, EventArgs e)
-        {
-            buttonVervangen.Enabled = false;
-            _regelInBewerking = null;
+            textBoxZoek.Text = string.Empty;
+            checkBoxAlsBijbeltekst.Checked = false;
         }
         #endregion events
 
@@ -110,7 +71,7 @@ namespace PowerpointGenerator.Screens
         // TODO er lijkt een memoryleak te zijn. Geheugengebruik loopt op als je snel wisselt tussen bijv. 'psalmen ' en 'psalmen 1'. Vermoedelijk de database.
         private void TriggerZoeklijstVeranderd()
         {
-            _huidigZoekresultaat = _liturgieOplosser.VrijZoeken(textBoxZoek.Text, _huidigZoekresultaat);
+            _huidigZoekresultaat = _liturgieOplosser.VrijZoeken(textBoxZoek.Text, _huidigZoekresultaat, checkBoxAlsBijbeltekst.Checked);
             if (_huidigZoekresultaat.ZoeklijstAanpassing == VrijZoekresultaatAanpassingType.Geen)
                 return;
 
@@ -141,45 +102,12 @@ namespace PowerpointGenerator.Screens
             var geinterpreteerdeOpties = KrijgOptiesBijZoeken();
             var toeTeVoegenTekst = _liturgieOplosser.MaakTotTekst(textBoxZoek.Text, geinterpreteerdeOpties);
             var liturgie = textBoxLiturgie.Lines.ToList();
-            if (_regelInBewerking.HasValue)
-                liturgie.Insert(_regelInBewerking.Value, toeTeVoegenTekst);
+            var huidigeRegel = GetHuidigeRegel();
+            if (huidigeRegel != null)
+                liturgie.Insert(huidigeRegel.LineNumber, toeTeVoegenTekst);
             else
                 liturgie.Add(toeTeVoegenTekst);
             textBoxLiturgie.Lines = liturgie.ToArray();
-        }
-
-        private void HuidigeTekstAanpassen()
-        {
-            if (!_regelInBewerking.HasValue)
-                return;
-            var geinterpreteerdeOpties = KrijgOptiesBijZoeken();
-            var toeTeVoegenTekst = _liturgieOplosser.MaakTotTekst(textBoxZoek.Text, geinterpreteerdeOpties);
-            var liturgie = textBoxLiturgie.Lines.ToList();
-            liturgie[_regelInBewerking.Value] = toeTeVoegenTekst;
-            textBoxLiturgie.Lines = liturgie.ToArray();
-        }
-
-        private void TriggerAanpassenOptiesBijZoeken()
-        {
-            var nieuweOpties = ToonAanpassenOptiesBijZoeken();
-            if (nieuweOpties != null)
-            {
-                ZetHuidigeOpties(nieuweOpties);
-            }
-        }
-
-        private void ZetHuidigeOpties(ILiturgieOptiesGebruiker opties)
-        {
-            if (opties != null)
-            {
-                _huidigeOptiesBijZoeken = opties;
-                textBoxOpties.Text = _liturgieOplosser.MaakTotTekst(KrijgOptiesBijZoeken());
-            }
-            else
-            {
-                textBoxOpties.Text = null;
-                _huidigeOptiesBijZoeken = null;
-            }
         }
 
         private ILiturgieOptiesGebruiker KrijgOptiesBijZoeken()
@@ -187,15 +115,6 @@ namespace PowerpointGenerator.Screens
             if (_huidigeOptiesBijZoeken == null)
                 _huidigeOptiesBijZoeken = _liturgieOplosser.ZoekStandaardOptiesUitZoekresultaat(textBoxZoek.Text, _huidigZoekresultaat);
             return _huidigeOptiesBijZoeken;
-        }
-
-        private ILiturgieOptiesGebruiker ToonAanpassenOptiesBijZoeken()
-        {
-            var optiesFormulier = new WijzigOpties();
-            optiesFormulier.Initialise(KrijgOptiesBijZoeken());
-            if (optiesFormulier.ShowDialog() != DialogResult.OK)
-                return null;
-            return optiesFormulier.GetOpties();
         }
 
         private RegelStatus GetHuidigeRegel()
@@ -220,44 +139,6 @@ namespace PowerpointGenerator.Screens
                 TextStartingAtTextboxPosition = rowStartPosition,
             };
         }
-
-        private void ScheduleUpdateSelection()
-        {
-            timerUpdateSelection.Enabled = true;
-            timerUpdateSelection.Start();
-        }
-
-        private void UpdateSelection()
-        {
-            timerUpdateSelection.Stop();
-            var position = GetHuidigeRegel();
-            _regelInBewerking = position.LineNumber;
-            buttonVervangen.Enabled = true;
-            ZetZoekTekst(position.Text);
-        }
-
-        private void ZetZoekTekst(string tekst)
-        {
-            var opsplitsing = _liturgieOplosser.SplitsVoorOpties(tekst);
-            ILiturgieOptiesGebruiker opties = null;
-            var liturgieRegel = string.Empty;
-            if (opsplitsing.Length == 1)  // Alleen opties
-                opties = _liturgieOplosser.ToonOpties(opsplitsing[0]);
-            else if (opsplitsing.Length == 2)  // Liturgie en opties
-            {
-                liturgieRegel = opsplitsing[0];
-                opties = _liturgieOplosser.ToonOpties(opsplitsing[1]);
-            }
-            else  // length = 0, alleen liturgie
-            {
-                liturgieRegel = tekst;
-                opties = _liturgieOplosser.ZoekStandaardOptiesUitZoekresultaat(tekst, null);
-            }
-            _huidigZoekresultaat = null;
-            textBoxZoek.Text = liturgieRegel;
-            ZetHuidigeOpties(opties);
-        }
-
         private class RegelStatus
         {
             public string Text { get; set; }
