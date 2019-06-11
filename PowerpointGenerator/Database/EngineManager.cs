@@ -31,7 +31,7 @@ namespace PowerpointGenerator.Database
             if (_default == null)
                 _default = new EngineSelection<T>()
                 {
-                    Name = "default",
+                    Name = Generator.Database.LiturgieDatabaseSettings.DatabaseNameDefault,
                     Engine = _fac.Invoke(_settings.LoadFromFile().FullDatabasePath, true)
                 };
             return _default;

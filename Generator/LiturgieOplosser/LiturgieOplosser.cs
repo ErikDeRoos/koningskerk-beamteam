@@ -234,9 +234,21 @@ namespace Generator.LiturgieOplosser
         }
         private IList<IZoekresultaat> ZoekBasisDatabaseLijst(ZoekRestricties zoekRestricties)
         {
-            return _database.KrijgAlleOnderdelen()  // Alle onderdelen (psalmen, gezangen, bijbelboeken, etc)
-                .Union(ZoekVerdieping(FileEngineDefaults.CommonFilesSetName))  // Alle slide templates zoals amen, votum, bidden etc)
-                .Distinct().ToList();
+            var alleDatabases = Enumerable.Empty<IZoekresultaat>();
+
+            // zoekrestricties toepassen
+            if (zoekRestricties.ZoekInBijbel && !zoekRestricties.ZoekInLiederen)
+                alleDatabases = _database.KrijgOnderdeelBijbel();
+            else if (!zoekRestricties.ZoekInBijbel && zoekRestricties.ZoekInLiederen)
+                alleDatabases = _database.KrijgOnderdeelDefault();
+            else if (zoekRestricties.ZoekInBijbel && zoekRestricties.ZoekInLiederen)
+                alleDatabases = _database.KrijgAlleOnderdelen();
+
+            // Alle slide templates zoals amen, votum, bidden etc)
+            if (zoekRestricties.ZoekInCommon)
+                alleDatabases.Union(ZoekVerdieping(FileEngineDefaults.CommonFilesSetName));  
+
+            return alleDatabases.Distinct().ToList();
         }
         private IEnumerable<IZoekresultaat> ZoekVerdieping(string vanOnderdeelNaam)
         {

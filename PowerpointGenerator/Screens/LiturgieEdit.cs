@@ -71,7 +71,7 @@ namespace PowerpointGenerator.Screens
         // TODO er lijkt een memoryleak te zijn. Geheugengebruik loopt op als je snel wisselt tussen bijv. 'psalmen ' en 'psalmen 1'. Vermoedelijk de database.
         private void TriggerZoeklijstVeranderd()
         {
-            _huidigZoekresultaat = _liturgieOplosser.VrijZoeken(textBoxZoek.Text, _huidigZoekresultaat, checkBoxAlsBijbeltekst.Checked);
+            _huidigZoekresultaat = _liturgieOplosser.VrijZoeken(textBoxZoek.Text, checkBoxAlsBijbeltekst.Checked, _huidigZoekresultaat);
             if (_huidigZoekresultaat.ZoeklijstAanpassing == VrijZoekresultaatAanpassingType.Geen)
                 return;
 
