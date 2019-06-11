@@ -8,6 +8,7 @@ namespace ILiturgieDatabase
     {
         string ZoekTerm { get; }
         bool AlsBijbeltekst { get; }
+        string VermoedelijkeDatabase { get; }
         IEnumerable<IVrijZoekresultaatMogelijkheid> AlleMogelijkheden { get; }
         VrijZoekresultaatAanpassingType ZoeklijstAanpassing { get; }
         IEnumerable<IVrijZoekresultaatMogelijkheid> DeltaMogelijkhedenVerwijderd { get; }

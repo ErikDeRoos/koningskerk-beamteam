@@ -265,11 +265,13 @@ namespace Generator.LiturgieOplosser
             var zoekLijstDeltaToegevoegd = Enumerable.Empty<IVrijZoekresultaatMogelijkheid>();
             var zoekLijstDeltaVerwijderd = Enumerable.Empty<IVrijZoekresultaatMogelijkheid>();
             var aanpassing = VrijZoekresultaatAanpassingType.Alles;
+            var vermoedelijkeDatabase = string.Empty;
 
             if (!lijstIsGewijzigd && vorigResultaat != null)
             {
                 aanpassing = VrijZoekresultaatAanpassingType.Geen;
                 zoekLijst = vorigResultaat.AlleMogelijkheden.ToList();
+                vermoedelijkeDatabase = vorigResultaat.VermoedelijkeDatabase;
             }
             else
             {
@@ -281,12 +283,17 @@ namespace Generator.LiturgieOplosser
                     if (zoekLijstDeltaVerwijderd.Count() != vorigResultaat.AlleMogelijkheden.Count())
                         aanpassing = VrijZoekresultaatAanpassingType.Deel;
                 }
+
+                var databases = zoekLijst.Select(z => z.UitDatabase).Distinct().ToList();
+                if (databases.Count == 1)
+                    vermoedelijkeDatabase = databases.First();
             }
 
             return new Zoekresultaat()
             {
                 ZoekTerm = zoekTekst,
                 AlsBijbeltekst = alsBijbeltekst,
+                VermoedelijkeDatabase = vermoedelijkeDatabase,
                 AlleMogelijkheden = zoekLijst.ToList(),
                 DeltaMogelijkhedenToegevoegd = zoekLijstDeltaToegevoegd,
                 DeltaMogelijkhedenVerwijderd = zoekLijstDeltaVerwijderd,
@@ -306,6 +313,8 @@ namespace Generator.LiturgieOplosser
                 var itemInZoeklijst = zoekresultaat.AlleMogelijkheden.FirstOrDefault(z => z.Weergave == teZoekenTekst);
                 if (itemInZoeklijst != null)
                     databaseNaam = itemInZoeklijst.UitDatabase;
+                if (string.IsNullOrWhiteSpace(databaseNaam))
+                    databaseNaam = zoekresultaat.VermoedelijkeDatabase;
             }
             return _liturgieInterperator.BepaalBasisOptiesTekstinvoer(invoerTekst, databaseNaam);
         }
@@ -387,14 +396,15 @@ namespace Generator.LiturgieOplosser
 
         private class Zoekresultaat : IVrijZoekresultaat
         {
+            public string ZoekTerm { get; set; }
+            public bool AlsBijbeltekst { get; set; }
+            public string VermoedelijkeDatabase { get; set; }
+
             public IEnumerable<IVrijZoekresultaatMogelijkheid> AlleMogelijkheden { get; set; }
             public IEnumerable<IVrijZoekresultaatMogelijkheid> DeltaMogelijkhedenToegevoegd { get; set; }
             public IEnumerable<IVrijZoekresultaatMogelijkheid> DeltaMogelijkhedenVerwijderd { get; set; }
 
             public VrijZoekresultaatAanpassingType ZoeklijstAanpassing { get; set; }
-
-            public string ZoekTerm { get; set; }
-            public bool AlsBijbeltekst { get; set; }
         }
 
         private class ZoekresultaatItem : IVrijZoekresultaatMogelijkheid

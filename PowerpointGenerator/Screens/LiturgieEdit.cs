@@ -16,7 +16,6 @@ namespace PowerpointGenerator.Screens
         // huidige zoekresultaat voor autocomplete
         private IVrijZoekresultaat _huidigZoekresultaat;
         private object _dropdownLocker = new object();
-        private ILiturgieOptiesGebruiker _huidigeOptiesBijZoeken;
 
         public LiturgieEdit()
         {
@@ -99,7 +98,7 @@ namespace PowerpointGenerator.Screens
 
         private void HuidigeTekstInvoegen()
         {
-            var geinterpreteerdeOpties = KrijgOptiesBijZoeken();
+            var geinterpreteerdeOpties = _liturgieOplosser.ZoekStandaardOptiesUitZoekresultaat(textBoxZoek.Text, _huidigZoekresultaat);
             var toeTeVoegenTekst = _liturgieOplosser.MaakTotTekst(textBoxZoek.Text, geinterpreteerdeOpties);
             var liturgie = textBoxLiturgie.Lines.ToList();
             var huidigeRegel = GetHuidigeRegel();
@@ -108,13 +107,6 @@ namespace PowerpointGenerator.Screens
             else
                 liturgie.Add(toeTeVoegenTekst);
             textBoxLiturgie.Lines = liturgie.ToArray();
-        }
-
-        private ILiturgieOptiesGebruiker KrijgOptiesBijZoeken()
-        {
-            if (_huidigeOptiesBijZoeken == null)
-                _huidigeOptiesBijZoeken = _liturgieOplosser.ZoekStandaardOptiesUitZoekresultaat(textBoxZoek.Text, _huidigZoekresultaat);
-            return _huidigeOptiesBijZoeken;
         }
 
         private RegelStatus GetHuidigeRegel()
