@@ -184,6 +184,10 @@ namespace Generator.LiturgieOplosser
             var vorigeZoektermSplit = _liturgieInterperator.VanTekstregel(vorigResultaat == null ? "" : vorigResultaat.ZoekTerm);
             var huidigeZoektermSplit = _liturgieInterperator.VanTekstregel(veiligeZoekTekst);
 
+            if (vorigResultaat != null && vorigResultaat.AlsBijbeltekst != alsBijbeltekst)
+            {
+                veranderingGemaakt = true;
+            }
             if ((zoekTekst.Length > 0 && LiturgieInterpretator.InterpreteerLiturgieRuw.BenamingDeelScheidingstekens.Contains(zoekTekst.Last())) || (string.IsNullOrWhiteSpace(vorigeZoektermSplit.Deel) && !string.IsNullOrWhiteSpace(huidigeZoektermSplit.Deel)))
             {
                 // Fragment is er bij gekomen
