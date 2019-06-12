@@ -31,7 +31,7 @@ namespace ILiturgieDatabase {
         /// <summary>
         /// Zoek in alle databases naar de opgegeven tekst
         /// </summary>
-        IVrijZoekresultaat VrijZoeken(string zoekTekst, IVrijZoekresultaat vorigResultaat = null);
+        IVrijZoekresultaat VrijZoeken(string zoekTekst, bool alsBijbeltekst = false, IVrijZoekresultaat vorigResultaat = null);
 
         /// <summary>
         /// Verschaft een basis inzicht van de opties op basis van het zoekresultaat

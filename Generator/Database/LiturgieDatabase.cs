@@ -16,6 +16,7 @@ namespace Generator.Database
     public static class LiturgieDatabaseSettings
     {
         public const string VersSamenvoeging = "-";
+        public const string DatabaseNameDefault = "default";
         public const string DatabaseNameBijbeltekst = "bijbel";
     }
 
@@ -240,6 +241,18 @@ namespace Generator.Database
         public IEnumerable<IZoekresultaat> KrijgAlleOnderdelen()
         {
             return _databases.Extensions
+                .SelectMany(de => de.Engine.GetAllNames().Select(n => new Zoekresultaat() { Database = de.Name, Resultaat = n }));
+        }
+
+        public IEnumerable<IZoekresultaat> KrijgOnderdeelDefault()
+        {
+            return _databases.Extensions.Where(e => e.Name == LiturgieDatabaseSettings.DatabaseNameDefault)
+                .SelectMany(de => de.Engine.GetAllNames().Select(n => new Zoekresultaat() { Database = de.Name, Resultaat = n }));
+        }
+
+        public IEnumerable<IZoekresultaat> KrijgOnderdeelBijbel()
+        {
+            return _databases.Extensions.Where(e => e.Name == LiturgieDatabaseSettings.DatabaseNameBijbeltekst)
                 .SelectMany(de => de.Engine.GetAllNames().Select(n => new Zoekresultaat() { Database = de.Name, Resultaat = n }));
         }
 
