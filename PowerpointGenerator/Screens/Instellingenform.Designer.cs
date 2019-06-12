@@ -91,6 +91,14 @@
             this.label14 = new System.Windows.Forms.Label();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.label13 = new System.Windows.Forms.Label();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.groupBox6 = new System.Windows.Forms.GroupBox();
+            this.label16 = new System.Windows.Forms.Label();
+            this.checkBox4 = new System.Windows.Forms.CheckBox();
+            this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.label17 = new System.Windows.Forms.Label();
+            this.checkBox5 = new System.Windows.Forms.CheckBox();
             this.pnlButtons.SuspendLayout();
             this.Algemeen.SuspendLayout();
             this.tabAlgemeen.SuspendLayout();
@@ -101,6 +109,10 @@
             this.groupBox1.SuspendLayout();
             this.tabStdTeksten.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.tabPage2.SuspendLayout();
+            this.groupBox5.SuspendLayout();
+            this.groupBox6.SuspendLayout();
+            this.groupBox7.SuspendLayout();
             this.SuspendLayout();
             // 
             // button2
@@ -146,6 +158,7 @@
             this.Algemeen.Controls.Add(this.tabPaden);
             this.Algemeen.Controls.Add(this.tabStdTeksten);
             this.Algemeen.Controls.Add(this.tabPage1);
+            this.Algemeen.Controls.Add(this.tabPage2);
             this.Algemeen.Dock = System.Windows.Forms.DockStyle.Fill;
             this.Algemeen.Location = new System.Drawing.Point(0, 0);
             this.Algemeen.Margin = new System.Windows.Forms.Padding(6);
@@ -741,24 +754,20 @@
             // 
             // tabPage1
             // 
-            this.tabPage1.Controls.Add(this.checkBox3);
-            this.tabPage1.Controls.Add(this.label15);
-            this.tabPage1.Controls.Add(this.checkBox2);
-            this.tabPage1.Controls.Add(this.label14);
-            this.tabPage1.Controls.Add(this.checkBox1);
-            this.tabPage1.Controls.Add(this.label13);
+            this.tabPage1.Controls.Add(this.groupBox6);
+            this.tabPage1.Controls.Add(this.groupBox5);
             this.tabPage1.Location = new System.Drawing.Point(4, 33);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage1.Size = new System.Drawing.Size(1087, 541);
             this.tabPage1.TabIndex = 3;
-            this.tabPage1.Text = "Invoer";
+            this.tabPage1.Text = "Gedrag generator";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
             // checkBox3
             // 
             this.checkBox3.AutoSize = true;
-            this.checkBox3.Location = new System.Drawing.Point(200, 93);
+            this.checkBox3.Location = new System.Drawing.Point(208, 103);
             this.checkBox3.Name = "checkBox3";
             this.checkBox3.Size = new System.Drawing.Size(117, 29);
             this.checkBox3.TabIndex = 6;
@@ -768,7 +777,7 @@
             // label15
             // 
             this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(8, 94);
+            this.label15.Location = new System.Drawing.Point(16, 104);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(61, 25);
             this.label15.TabIndex = 5;
@@ -777,7 +786,7 @@
             // checkBox2
             // 
             this.checkBox2.AutoSize = true;
-            this.checkBox2.Location = new System.Drawing.Point(200, 58);
+            this.checkBox2.Location = new System.Drawing.Point(208, 68);
             this.checkBox2.Name = "checkBox2";
             this.checkBox2.Size = new System.Drawing.Size(117, 29);
             this.checkBox2.TabIndex = 4;
@@ -787,7 +796,7 @@
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(8, 59);
+            this.label14.Location = new System.Drawing.Point(16, 69);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(66, 25);
             this.label14.TabIndex = 3;
@@ -796,7 +805,7 @@
             // checkBox1
             // 
             this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(200, 23);
+            this.checkBox1.Location = new System.Drawing.Point(208, 33);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(117, 29);
             this.checkBox1.TabIndex = 2;
@@ -806,11 +815,100 @@
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(8, 24);
+            this.label13.Location = new System.Drawing.Point(16, 34);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(105, 25);
             this.label13.TabIndex = 0;
             this.label13.Text = "2e collecte";
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.Controls.Add(this.groupBox7);
+            this.tabPage2.Location = new System.Drawing.Point(4, 33);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(1087, 541);
+            this.tabPage2.TabIndex = 4;
+            this.tabPage2.Text = "Gedrag PowerPoint";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // groupBox5
+            // 
+            this.groupBox5.Controls.Add(this.label13);
+            this.groupBox5.Controls.Add(this.checkBox1);
+            this.groupBox5.Controls.Add(this.label14);
+            this.groupBox5.Controls.Add(this.checkBox2);
+            this.groupBox5.Controls.Add(this.checkBox3);
+            this.groupBox5.Controls.Add(this.label15);
+            this.groupBox5.Dock = System.Windows.Forms.DockStyle.Top;
+            this.groupBox5.Location = new System.Drawing.Point(3, 3);
+            this.groupBox5.Name = "groupBox5";
+            this.groupBox5.Size = new System.Drawing.Size(1081, 151);
+            this.groupBox5.TabIndex = 10;
+            this.groupBox5.TabStop = false;
+            this.groupBox5.Text = "Beschikbare invoeren";
+            // 
+            // groupBox6
+            // 
+            this.groupBox6.Controls.Add(this.label16);
+            this.groupBox6.Controls.Add(this.checkBox4);
+            this.groupBox6.Dock = System.Windows.Forms.DockStyle.Top;
+            this.groupBox6.Location = new System.Drawing.Point(3, 154);
+            this.groupBox6.Name = "groupBox6";
+            this.groupBox6.Size = new System.Drawing.Size(1081, 95);
+            this.groupBox6.TabIndex = 11;
+            this.groupBox6.TabStop = false;
+            this.groupBox6.Text = "Hoe werkt zoeken";
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(16, 35);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(293, 25);
+            this.label16.TabIndex = 3;
+            this.label16.Text = "\'DisplayName\' in instellingen.xml";
+            // 
+            // checkBox4
+            // 
+            this.checkBox4.AutoSize = true;
+            this.checkBox4.Location = new System.Drawing.Point(355, 34);
+            this.checkBox4.Name = "checkBox4";
+            this.checkBox4.Size = new System.Drawing.Size(251, 29);
+            this.checkBox4.TabIndex = 4;
+            this.checkBox4.Text = "gebruik ook voor zoeken";
+            this.checkBox4.UseVisualStyleBackColor = true;
+            // 
+            // groupBox7
+            // 
+            this.groupBox7.Controls.Add(this.label17);
+            this.groupBox7.Controls.Add(this.checkBox5);
+            this.groupBox7.Dock = System.Windows.Forms.DockStyle.Top;
+            this.groupBox7.Location = new System.Drawing.Point(3, 3);
+            this.groupBox7.Name = "groupBox7";
+            this.groupBox7.Size = new System.Drawing.Size(1081, 93);
+            this.groupBox7.TabIndex = 0;
+            this.groupBox7.TabStop = false;
+            this.groupBox7.Text = "Liturgie overzicht";
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(17, 38);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(122, 25);
+            this.label17.TabIndex = 3;
+            this.label17.Text = "Bijbelteksten";
+            // 
+            // checkBox5
+            // 
+            this.checkBox5.AutoSize = true;
+            this.checkBox5.Location = new System.Drawing.Point(209, 37);
+            this.checkBox5.Name = "checkBox5";
+            this.checkBox5.Size = new System.Drawing.Size(117, 29);
+            this.checkBox5.TabIndex = 4;
+            this.checkBox5.Text = "zichtbaar";
+            this.checkBox5.UseVisualStyleBackColor = true;
             // 
             // Instellingenform
             // 
@@ -838,7 +936,13 @@
             this.tabStdTeksten.ResumeLayout(false);
             this.tabStdTeksten.PerformLayout();
             this.tabPage1.ResumeLayout(false);
-            this.tabPage1.PerformLayout();
+            this.tabPage2.ResumeLayout(false);
+            this.groupBox5.ResumeLayout(false);
+            this.groupBox5.PerformLayout();
+            this.groupBox6.ResumeLayout(false);
+            this.groupBox6.PerformLayout();
+            this.groupBox7.ResumeLayout(false);
+            this.groupBox7.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -908,5 +1012,13 @@
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.GroupBox groupBox6;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.CheckBox checkBox4;
+        private System.Windows.Forms.GroupBox groupBox5;
+        private System.Windows.Forms.TabPage tabPage2;
+        private System.Windows.Forms.GroupBox groupBox7;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.CheckBox checkBox5;
     }
 }
