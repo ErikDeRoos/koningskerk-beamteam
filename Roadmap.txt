@@ -11,9 +11,6 @@ Klant wensen:
 -Bugfix: Sommige opwekkingen laten 'volgende' in beeld bij bepaalde slides (Opw 585, liturgie 5 mei)
 
 Eigen ideeën:
-M-Eenvoudige zoeken-invoegen balk
-  -Onderaan
-  -Tekst 'Zoeken' + Tekstbox + vinkje 'als bijbeltekst' + Knop 'Invoegen'
 S-Opslaan via het nieuwe powerpoint formaat
 M-database files via json
 M-liturgie voorbeeld tonen
