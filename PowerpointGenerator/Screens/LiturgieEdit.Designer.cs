@@ -56,19 +56,19 @@
             this.groupBox1.Controls.Add(this.textBoxZoek);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Location = new System.Drawing.Point(0, 0);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(6);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(6);
-            this.groupBox1.Size = new System.Drawing.Size(766, 129);
+            this.groupBox1.Size = new System.Drawing.Size(418, 52);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             // 
             // checkBoxAlsBijbeltekst
             // 
+            this.checkBoxAlsBijbeltekst.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.checkBoxAlsBijbeltekst.AutoSize = true;
-            this.checkBoxAlsBijbeltekst.Location = new System.Drawing.Point(485, 37);
+            this.checkBoxAlsBijbeltekst.Location = new System.Drawing.Point(264, 20);
+            this.checkBoxAlsBijbeltekst.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.checkBoxAlsBijbeltekst.Name = "checkBoxAlsBijbeltekst";
-            this.checkBoxAlsBijbeltekst.Size = new System.Drawing.Size(126, 29);
+            this.checkBoxAlsBijbeltekst.Size = new System.Drawing.Size(74, 17);
             this.checkBoxAlsBijbeltekst.TabIndex = 6;
             this.checkBoxAlsBijbeltekst.Text = "Bijbeltekst";
             this.checkBoxAlsBijbeltekst.UseVisualStyleBackColor = true;
@@ -77,20 +77,19 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(9, 39);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Location = new System.Drawing.Point(5, 21);
+            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(56, 25);
+            this.label1.Size = new System.Drawing.Size(32, 13);
             this.label1.TabIndex = 5;
             this.label1.Text = "Zoek";
             // 
             // buttonInvoegen
             // 
             this.buttonInvoegen.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonInvoegen.Location = new System.Drawing.Point(629, 30);
-            this.buttonInvoegen.Margin = new System.Windows.Forms.Padding(6);
+            this.buttonInvoegen.Location = new System.Drawing.Point(343, 16);
             this.buttonInvoegen.Name = "buttonInvoegen";
-            this.buttonInvoegen.Size = new System.Drawing.Size(125, 42);
+            this.buttonInvoegen.Size = new System.Drawing.Size(68, 23);
             this.buttonInvoegen.TabIndex = 2;
             this.buttonInvoegen.Text = "Invoegen";
             this.buttonInvoegen.UseVisualStyleBackColor = true;
@@ -102,10 +101,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBoxZoek.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
             this.textBoxZoek.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
-            this.textBoxZoek.Location = new System.Drawing.Point(75, 35);
-            this.textBoxZoek.Margin = new System.Windows.Forms.Padding(6);
+            this.textBoxZoek.Location = new System.Drawing.Point(41, 19);
             this.textBoxZoek.Name = "textBoxZoek";
-            this.textBoxZoek.Size = new System.Drawing.Size(386, 29);
+            this.textBoxZoek.Size = new System.Drawing.Size(218, 20);
             this.textBoxZoek.TabIndex = 1;
             this.textBoxZoek.TextChanged += new System.EventHandler(this.textBoxZoek_TextChanged);
             // 
@@ -113,8 +111,9 @@
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
+            this.splitContainer1.IsSplitterFixed = true;
             this.splitContainer1.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer1.Margin = new System.Windows.Forms.Padding(4);
+            this.splitContainer1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -125,8 +124,9 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.textBoxLiturgie);
-            this.splitContainer1.Size = new System.Drawing.Size(766, 766);
-            this.splitContainer1.SplitterDistance = 129;
+            this.splitContainer1.Size = new System.Drawing.Size(418, 415);
+            this.splitContainer1.SplitterDistance = 52;
+            this.splitContainer1.SplitterWidth = 2;
             this.splitContainer1.TabIndex = 0;
             // 
             // textBoxLiturgie
@@ -134,10 +134,9 @@
             this.textBoxLiturgie.ContextMenuStrip = this.contextMenuStripRightMouse;
             this.textBoxLiturgie.Dock = System.Windows.Forms.DockStyle.Fill;
             this.textBoxLiturgie.Location = new System.Drawing.Point(0, 0);
-            this.textBoxLiturgie.Margin = new System.Windows.Forms.Padding(6);
             this.textBoxLiturgie.Multiline = true;
             this.textBoxLiturgie.Name = "textBoxLiturgie";
-            this.textBoxLiturgie.Size = new System.Drawing.Size(766, 633);
+            this.textBoxLiturgie.Size = new System.Drawing.Size(418, 361);
             this.textBoxLiturgie.TabIndex = 1;
             // 
             // contextMenuStripRightMouse
@@ -148,37 +147,37 @@
             this.toolStripMenuItemKopieren,
             this.toolStripMenuItemPlakken});
             this.contextMenuStripRightMouse.Name = "contextMenuStrip1";
-            this.contextMenuStripRightMouse.Size = new System.Drawing.Size(168, 106);
+            this.contextMenuStripRightMouse.Size = new System.Drawing.Size(122, 70);
             // 
             // toolStripMenuItemKnippen
             // 
             this.toolStripMenuItemKnippen.Name = "toolStripMenuItemKnippen";
-            this.toolStripMenuItemKnippen.Size = new System.Drawing.Size(167, 34);
+            this.toolStripMenuItemKnippen.Size = new System.Drawing.Size(121, 22);
             this.toolStripMenuItemKnippen.Text = "Knippen";
             this.toolStripMenuItemKnippen.Click += new System.EventHandler(this.toolStripMenuItemKnippen_Click);
             // 
             // toolStripMenuItemKopieren
             // 
             this.toolStripMenuItemKopieren.Name = "toolStripMenuItemKopieren";
-            this.toolStripMenuItemKopieren.Size = new System.Drawing.Size(167, 34);
+            this.toolStripMenuItemKopieren.Size = new System.Drawing.Size(121, 22);
             this.toolStripMenuItemKopieren.Text = "Kopieren";
             this.toolStripMenuItemKopieren.Click += new System.EventHandler(this.toolStripMenuItemKopieren_Click);
             // 
             // toolStripMenuItemPlakken
             // 
             this.toolStripMenuItemPlakken.Name = "toolStripMenuItemPlakken";
-            this.toolStripMenuItemPlakken.Size = new System.Drawing.Size(167, 34);
+            this.toolStripMenuItemPlakken.Size = new System.Drawing.Size(121, 22);
             this.toolStripMenuItemPlakken.Text = "Plakken";
             this.toolStripMenuItemPlakken.Click += new System.EventHandler(this.toolStripMenuItemPlakken_Click);
             // 
             // LiturgieEdit
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.splitContainer1);
-            this.Margin = new System.Windows.Forms.Padding(4);
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "LiturgieEdit";
-            this.Size = new System.Drawing.Size(766, 766);
+            this.Size = new System.Drawing.Size(418, 415);
             this.Load += new System.EventHandler(this.LiturgieEdit_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
