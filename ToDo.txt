@@ -1,5 +1,4 @@
 Generator aanpassen aan wensen Emmeloord
--vinkje 'bijbeltekst niet in liturgie'
 -In xml een setting dat dingen niet in beeld komen
 
 Beheershandleiding 
