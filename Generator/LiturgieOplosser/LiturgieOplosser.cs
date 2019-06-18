@@ -219,18 +219,13 @@ namespace Generator.LiturgieOplosser
                     {
                         Weergave = t.Resultaat,
                         UitDatabase = t.Database,
-                    });
+                    })
+                    .Distinct().ToList();
             else
             {
                 if (_onderdelenLijstCache == null || !zoekRestricties.Equals(_onderdelenLijstRestrictiesCache))
                 {
-                    _onderdelenLijstCache = ZoekBasisDatabaseLijst(zoekRestricties)
-                        .Select(t => new ZoekresultaatItem()
-                        {
-                            Weergave = t.Resultaat,
-                            UitDatabase = t.Database,
-                        })
-                        .ToList();
+                    _onderdelenLijstCache = KrijgBasisDatabaseLijst(zoekRestricties, false);
                     _onderdelenLijstRestrictiesCache = zoekRestricties;
                 }
                 return _onderdelenLijstCache;
@@ -250,13 +245,13 @@ namespace Generator.LiturgieOplosser
 
             // Alle slide templates zoals amen, votum, bidden etc)
             if (zoekRestricties.ZoekInCommon)
-                alleDatabases.Union(ZoekVerdieping(FileEngineDefaults.CommonFilesSetName));  
+                alleDatabases = alleDatabases.Concat(ZoekVerdieping(FileEngineDefaults.CommonFilesSetName));  
 
-            return alleDatabases.Distinct().ToList();
+            return alleDatabases.ToList();
         }
         private IEnumerable<IZoekresultaat> ZoekVerdieping(string vanOnderdeelNaam)
         {
-            return _database.KrijgAlleFragmenten(vanOnderdeelNaam);
+            return _database.KrijgAlleFragmenten(vanOnderdeelNaam).ToList();
         }
 
         private Zoekresultaat ZoekresultaatSamenstellen(string zoekTekst, bool alsBijbeltekst, IVrijZoekresultaat vorigResultaat, IEnumerable<IVrijZoekresultaatMogelijkheid> lijst, bool lijstIsGewijzigd)
