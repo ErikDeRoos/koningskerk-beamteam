@@ -49,7 +49,7 @@ namespace Generator.LiturgieOplosser
             // zoek de regels in de database en pak ook de naamgeving daar uit over
             if (regel.VerwerkenAlsSlide)
             {
-                var fout = Aanvullen(regel, item);
+                var fout = Aanvullen(regel, item, settings);
                 if (fout.HasValue)
                     return new Oplossing(fout.Value, item);
             } else
@@ -102,13 +102,13 @@ namespace Generator.LiturgieOplosser
             return new Oplossing(LiturgieOplossingResultaat.Opgelost, item, regel);
         }
 
-        private LiturgieOplossingResultaat? Aanvullen(Regel regel, ILiturgieInterpretatie item)
+        private LiturgieOplossingResultaat? Aanvullen(Regel regel, ILiturgieInterpretatie item, ILiturgieSettings settings)
         {
             var setNaam = item.Benaming;
             if (item is ILiturgieInterpretatieBijbeltekst)
             {
                 regel.DisplayEdit.VersenGebruikDefault = new VersenDefault(string.Empty);
-                return BijbeltekstAanvuller(regel, setNaam, (item as ILiturgieInterpretatieBijbeltekst).PerDeelVersen.ToList());
+                return BijbeltekstAanvuller(regel, setNaam, (item as ILiturgieInterpretatieBijbeltekst).PerDeelVersen.ToList(), settings);
             }
             var zoekNaam = item.Deel;
             if (IsNullOrEmpty(item.Deel))
@@ -118,13 +118,13 @@ namespace Generator.LiturgieOplosser
                 regel.TonenInOverzicht = false;  // TODO tijdelijk default gedrag van het niet tonen van algemene items in het overzicht overgenomen uit de oude situatie
             }
 
-            return NormaleAanvuller(regel, setNaam, zoekNaam, item.Verzen.ToList());
+            return NormaleAanvuller(regel, setNaam, zoekNaam, item.Verzen.ToList(), settings);
         }
-        private LiturgieOplossingResultaat? NormaleAanvuller(Regel regel, string setNaam, string zoekNaam, IEnumerable<string> verzen)
+        private LiturgieOplossingResultaat? NormaleAanvuller(Regel regel, string setNaam, string zoekNaam, IEnumerable<string> verzen, ILiturgieSettings settings)
         {
             regel.VerwerkenAlsType = VerwerkingType.normaal;
             var verzenList = verzen.ToList();
-            var resultaat = _database.ZoekOnderdeel(setNaam, zoekNaam, verzenList);
+            var resultaat = _database.ZoekOnderdeel(setNaam, zoekNaam, verzenList, settings);
             if (resultaat.Status != LiturgieOplossingResultaat.Opgelost)
                 return resultaat.Status;
 
@@ -148,14 +148,14 @@ namespace Generator.LiturgieOplosser
 
             return null;
         }
-        private LiturgieOplossingResultaat? BijbeltekstAanvuller(Regel regel, string setNaam, IEnumerable<ILiturgieInterpretatieBijbeltekstDeel> versDelen)
+        private LiturgieOplossingResultaat? BijbeltekstAanvuller(Regel regel, string setNaam, IEnumerable<ILiturgieInterpretatieBijbeltekstDeel> versDelen, ILiturgieSettings settings)
         {
             regel.VerwerkenAlsType = VerwerkingType.bijbeltekst;
             var content = new List<ILiturgieContent>();
             var versDelenLijst = versDelen.ToList();
             foreach(var deel in versDelenLijst)
             {
-                var resultaat = _database.ZoekOnderdeel(VerwerkingType.bijbeltekst, setNaam, deel.Deel, deel.Verzen);
+                var resultaat = _database.ZoekOnderdeel(VerwerkingType.bijbeltekst, setNaam, deel.Deel, deel.Verzen, settings);
                 if (resultaat.Status != LiturgieOplossingResultaat.Opgelost)
                     return resultaat.Status;
                 content.AddRange(resultaat.Content);

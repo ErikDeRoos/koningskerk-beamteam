@@ -1,4 +1,4 @@
-﻿// Copyright 2017 door Erik de Roos
+﻿// Copyright 2019 door Erik de Roos
 using Generator.Database.FileSystem;
 using IDatabase;
 using ILiturgieDatabase;
@@ -31,18 +31,18 @@ namespace Generator.Database
             _databases = database;
         }
 
-        public IOplossing ZoekOnderdeel(string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen = null)
+        public IOplossing ZoekOnderdeel(string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen, ILiturgieSettings settings)
         {
-            return ZoekOnderdeel(VerwerkingType.normaal, onderdeelNaam, fragmentNaam, fragmentDelen);
+            return ZoekOnderdeel(VerwerkingType.normaal, onderdeelNaam, fragmentNaam, fragmentDelen, settings);
         }
 
-        public IOplossing ZoekOnderdeel(VerwerkingType alsType, string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen = null)
+        public IOplossing ZoekOnderdeel(VerwerkingType alsType, string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen, ILiturgieSettings settings)
         {
             var database = alsType == VerwerkingType.normaal ? _databases.GetDefault() : _databases.Extensions.FirstOrDefault(e => e.Name == LiturgieDatabaseSettings.DatabaseNameBijbeltekst);
             if (database == null)
                 return new Oplossing() { Status = LiturgieOplossingResultaat.DatabaseFout };
 
-            var set = database.Engine.Where(s => string.Equals(s.Name, onderdeelNaam, StringComparison.OrdinalIgnoreCase) || string.Equals(s.Settings.DisplayName, onderdeelNaam, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+            var set = database.Engine.Where(s => string.Equals(s.Name, onderdeelNaam, StringComparison.OrdinalIgnoreCase) || (settings.GebruikDisplayNameVoorZoeken && string.Equals(s.Settings.DisplayName, onderdeelNaam, StringComparison.OrdinalIgnoreCase))).FirstOrDefault();
             if (set == null)
                 return new Oplossing() { Status = LiturgieOplossingResultaat.SetFout };
             // Kijk of we het specifieke item in de set kunnen vinden (alleen via de op-schijf naam)
@@ -353,12 +353,15 @@ namespace Generator.Database
             return new LiturgieSettings
             {
                 ToonBijbeltekstenInLiturgie = instellingen.ToonBijbeltekstenInLiturgie,
+                GebruikDisplayNameVoorZoeken = instellingen.GebruikDisplayNameVoorZoeken,
             };
         }
 
         private class LiturgieSettings : ILiturgieSettings
         {
             public bool ToonBijbeltekstenInLiturgie { get; set; }
+
+            public bool GebruikDisplayNameVoorZoeken { get; set; }
         }
     }
 }

@@ -33,7 +33,7 @@ namespace Generator.Tests
 
                 var oplossing = sut.LosOp(liturgieItem, _liturgieSettings);
 
-                A.CallTo(() => database.ZoekOnderdeel(VerwerkingType.bijbeltekst, liturgieItem.Benaming, liturgieItem.PerDeelVersen.First().Deel, liturgieItem.PerDeelVersen.First().Verzen)).MustHaveHappened();
+                A.CallTo(() => database.ZoekOnderdeel(VerwerkingType.bijbeltekst, liturgieItem.Benaming, liturgieItem.PerDeelVersen.First().Deel, liturgieItem.PerDeelVersen.First().Verzen, _liturgieSettings)).MustHaveHappened();
             }
 
             [DataTestMethod]

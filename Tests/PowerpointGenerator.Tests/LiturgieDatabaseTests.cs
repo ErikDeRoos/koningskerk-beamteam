@@ -11,9 +11,12 @@ namespace Generator.Tests
 {
     public class LiturgieDatabaseTests
     {
+        private ILiturgieSettings _liturgieSettings;
+
         [TestInitialize]
         public void Initialise()
         {
+            _liturgieSettings = FakeLiturgieSettings();
         }
 
         [TestClass]
@@ -31,7 +34,7 @@ namespace Generator.Tests
                 var manager = FakeEngineManager(engine);
                 var sut = (new Database.LiturgieDatabase(manager)) as ILiturgieDatabase.ILiturgieDatabase;
 
-                var oplossing = sut.ZoekOnderdeel(onderdeel, fragment);
+                var oplossing = sut.ZoekOnderdeel(onderdeel, fragment, null, _liturgieSettings);
 
                 Assert.AreEqual(oplossing.Status, LiturgieOplossingResultaat.Opgelost);
             }
@@ -53,7 +56,7 @@ namespace Generator.Tests
                 var manager = FakeEngineManager(engine);
                 var sut = (new Database.LiturgieDatabase(manager)) as ILiturgieDatabase.ILiturgieDatabase;
 
-                var oplossing = sut.ZoekOnderdeel(onderdeel, fragment, fragmentDelen: fragmentDelen);
+                var oplossing = sut.ZoekOnderdeel(onderdeel, fragment, fragmentDelen, _liturgieSettings);
 
                 Assert.AreEqual(oplossing.Content.Count(), opgesplitstAls.Length);
                 Assert.AreEqual(oplossing.Content.All(c => opgesplitstAls.Contains(c.Nummer.Value)), true);
@@ -71,7 +74,7 @@ namespace Generator.Tests
                 var manager = FakeEngineManagerExtension(Database.LiturgieDatabaseSettings.DatabaseNameBijbeltekst, engine);
                 var sut = (new Database.LiturgieDatabase(manager)) as ILiturgieDatabase.ILiturgieDatabase;
 
-                var oplossing = sut.ZoekOnderdeel(VerwerkingType.bijbeltekst, onderdeel, fragment);
+                var oplossing = sut.ZoekOnderdeel(VerwerkingType.bijbeltekst, onderdeel, fragment, null, _liturgieSettings);
 
                 Assert.AreEqual(oplossing.Status, LiturgieOplossingResultaat.Opgelost);
             }
@@ -94,7 +97,7 @@ namespace Generator.Tests
                 var delen = new[] { find };
                 var sut = (new Database.LiturgieDatabase(manager)) as ILiturgieDatabase.ILiturgieDatabase;
 
-                var oplossing = sut.ZoekOnderdeel(VerwerkingType.bijbeltekst, onderdeel, fragment, delen);
+                var oplossing = sut.ZoekOnderdeel(VerwerkingType.bijbeltekst, onderdeel, fragment, delen, _liturgieSettings);
 
                 var eersteContent = oplossing.Content.FirstOrDefault();
                 Assert.IsNotNull(eersteContent);
@@ -122,6 +125,13 @@ namespace Generator.Tests
             A.CallTo(() => defaultReturn.Name).Returns(name);
             A.CallTo(() => manager.Extensions).Returns(new[] { defaultReturn });
             return manager;
+        }
+
+        private static ILiturgieSettings FakeLiturgieSettings()
+        {
+            var settings = A.Fake<ILiturgieSettings>();
+            A.CallTo(() => settings.ToonBijbeltekstenInLiturgie).Returns(true);
+            return settings;
         }
     }
 }
