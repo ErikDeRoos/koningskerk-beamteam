@@ -1,4 +1,4 @@
-﻿// Copyright 2018 door Erik de Roos
+﻿// Copyright 2019 door Erik de Roos
 using FakeItEasy;
 using Generator.Database.FileSystem;
 using ILiturgieDatabase;
@@ -11,11 +11,13 @@ namespace Generator.Tests
     {
         private const string DefaultEmptyName = "!leeg";
         private ILiturgieInterpreteer _liturgieInterpreteer;
+        private ILiturgieSettings _liturgieSettings;
 
         [TestInitialize]
         public void Initialise()
         {
             _liturgieInterpreteer = A.Fake<ILiturgieInterpreteer>();
+            _liturgieSettings = FakeLiturgieSettings();
         }
 
         [TestClass]
@@ -29,7 +31,7 @@ namespace Generator.Tests
                 var database = FakeDatabase(onderdeel, fragment);
                 var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieLosOp;
 
-                var oplossing = sut.LosOp(liturgieItem);
+                var oplossing = sut.LosOp(liturgieItem, _liturgieSettings);
 
                 Assert.AreEqual(oplossing.Resultaat, LiturgieOplossingResultaat.Opgelost);
             }
@@ -42,7 +44,7 @@ namespace Generator.Tests
                 var database = FakeDatabase(FileEngineDefaults.CommonFilesSetName, onderdeel);
                 var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieLosOp;
 
-                var oplossing = sut.LosOp(liturgieItem);
+                var oplossing = sut.LosOp(liturgieItem, _liturgieSettings);
 
                 Assert.AreEqual(oplossing.Resultaat, LiturgieOplossingResultaat.Opgelost);
             }
@@ -56,7 +58,7 @@ namespace Generator.Tests
                 var database = fragment != null ? FakeDatabase(onderdeel, fragment) : FakeDatabase(FileEngineDefaults.CommonFilesSetName, onderdeel);
                 var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieLosOp;
 
-                var oplossing = sut.LosOp(liturgieItem);
+                var oplossing = sut.LosOp(liturgieItem, _liturgieSettings);
 
                 Assert.AreEqual(oplossing.Regel.Display.Naam, onderdeel);
             }
@@ -69,7 +71,7 @@ namespace Generator.Tests
                 var database = FakeDatabase(onderdeel, fragment, display: display);
                 var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieLosOp;
 
-                var oplossing = sut.LosOp(liturgieItem);
+                var oplossing = sut.LosOp(liturgieItem, _liturgieSettings);
 
                 Assert.AreEqual(oplossing.Regel.Display.Naam, display);
             }
@@ -83,7 +85,7 @@ namespace Generator.Tests
                 var database = FakeDatabase(onderdeel, fragment);
                 var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieLosOp;
 
-                var oplossing = sut.LosOp(liturgieItem, maskList);
+                var oplossing = sut.LosOp(liturgieItem, maskList, _liturgieSettings);
 
                 Assert.AreEqual(oplossing.Regel.Display.Naam, maskUseName);
             }
@@ -97,7 +99,7 @@ namespace Generator.Tests
                 var database = FakeDatabase(FileEngineDefaults.CommonFilesSetName, onderdeel);
                 var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieLosOp;
 
-                var oplossing = sut.LosOp(liturgieItem, maskList);
+                var oplossing = sut.LosOp(liturgieItem, maskList, _liturgieSettings);
 
                 Assert.AreEqual(oplossing.Regel.Display.Naam, maskUseName);
             }
@@ -135,6 +137,13 @@ namespace Generator.Tests
                 .WithAnyArguments()
                 .Returns(zoekresultaat);
             return database;
+        }
+
+        private static ILiturgieSettings FakeLiturgieSettings()
+        {
+            var settings = A.Fake<ILiturgieSettings>();
+            A.CallTo(() => settings.ToonBijbeltekstenInLiturgie).Returns(true);
+            return settings;
         }
     }
 }

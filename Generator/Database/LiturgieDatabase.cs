@@ -345,4 +345,20 @@ namespace Generator.Database
         }
     }
 
+
+    public static class MapInstellingenToSettings
+    {
+        public static ILiturgieSettings Map(IInstellingen instellingen)
+        {
+            return new LiturgieSettings
+            {
+                ToonBijbeltekstenInLiturgie = instellingen.ToonBijbeltekstenInLiturgie,
+            };
+        }
+
+        private class LiturgieSettings : ILiturgieSettings
+        {
+            public bool ToonBijbeltekstenInLiturgie { get; set; }
+        }
+    }
 }

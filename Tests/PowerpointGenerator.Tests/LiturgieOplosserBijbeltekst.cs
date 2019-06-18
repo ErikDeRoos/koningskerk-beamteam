@@ -1,4 +1,4 @@
-﻿// Copyright 2018 door Erik de Roos
+﻿// Copyright 2019 door Erik de Roos
 using FakeItEasy;
 using ILiturgieDatabase;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -11,11 +11,13 @@ namespace Generator.Tests
     {
         private const string DefaultEmptyName = "!leeg";
         private ILiturgieInterpreteer _liturgieInterpreteer;
+        private ILiturgieSettings _liturgieSettings;
 
         [TestInitialize]
         public void Initialise()
         {
             _liturgieInterpreteer = A.Fake<ILiturgieInterpreteer>();
+            _liturgieSettings = FakeLiturgieSettings();
         }
 
         [TestClass]
@@ -29,7 +31,7 @@ namespace Generator.Tests
                 var database = FakeDatabase(onderdeel, fragment);
                 var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieLosOp;
 
-                var oplossing = sut.LosOp(liturgieItem);
+                var oplossing = sut.LosOp(liturgieItem, _liturgieSettings);
 
                 A.CallTo(() => database.ZoekOnderdeel(VerwerkingType.bijbeltekst, liturgieItem.Benaming, liturgieItem.PerDeelVersen.First().Deel, liturgieItem.PerDeelVersen.First().Verzen)).MustHaveHappened();
             }
@@ -42,7 +44,7 @@ namespace Generator.Tests
                 var database = FakeDatabase(onderdeel, fragment);
                 var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieLosOp;
 
-                var oplossing = sut.LosOp(liturgieItem);
+                var oplossing = sut.LosOp(liturgieItem, _liturgieSettings);
 
                 Assert.AreEqual(oplossing.Resultaat, LiturgieOplossingResultaat.Opgelost);
             }
@@ -75,6 +77,13 @@ namespace Generator.Tests
                 .WithAnyArguments()
                 .Returns(zoekresultaat);
             return database;
+        }
+
+        private static ILiturgieSettings FakeLiturgieSettings()
+        {
+            var settings = A.Fake<ILiturgieSettings>();
+            A.CallTo(() => settings.ToonBijbeltekstenInLiturgie).Returns(true);
+            return settings;
         }
     }
 }

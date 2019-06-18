@@ -9,24 +9,27 @@ namespace ILiturgieDatabase {
         /// 
         /// </summary>
         /// <param name="item"></param>
+        /// <param name="settings"></param>
         /// <returns></returns>
-        ILiturgieOplossing LosOp(ILiturgieInterpretatie item);
-        
+        ILiturgieOplossing LosOp(ILiturgieInterpretatie item, ILiturgieSettings settings);
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="item"></param>
         /// <param name="masks"></param>
+        /// <param name="settings"></param>
         /// <returns></returns>
-        ILiturgieOplossing LosOp(ILiturgieInterpretatie item, IEnumerable<ILiturgieMapmaskArg> masks);
-        
+        ILiturgieOplossing LosOp(ILiturgieInterpretatie item, IEnumerable<ILiturgieMapmaskArg> masks, ILiturgieSettings settings);
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="items"></param>
         /// <param name="masks"></param>
+        /// <param name="settings"></param>
         /// <returns></returns>
-        IEnumerable<ILiturgieOplossing> LosOp(IEnumerable<ILiturgieInterpretatie> items, IEnumerable<ILiturgieMapmaskArg> masks);
+        IEnumerable<ILiturgieOplossing> LosOp(IEnumerable<ILiturgieInterpretatie> items, IEnumerable<ILiturgieMapmaskArg> masks, ILiturgieSettings settings);
 
         /// <summary>
         /// Zoek in alle databases naar de opgegeven tekst

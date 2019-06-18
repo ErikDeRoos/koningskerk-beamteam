@@ -1,4 +1,4 @@
-﻿// Copyright 2017 door Erik de Roos
+﻿// Copyright 2019 door Erik de Roos
 using Generator.Database.FileSystem;
 using ILiturgieDatabase;
 using System;
@@ -28,18 +28,18 @@ namespace Generator.LiturgieOplosser
         }
 
 
-        public ILiturgieOplossing LosOp(ILiturgieInterpretatie item)
+        public ILiturgieOplossing LosOp(ILiturgieInterpretatie item, ILiturgieSettings settings)
         {
-            return LosOp(item, null);
+            return LosOp(item, null, settings);
         }
-        public ILiturgieOplossing LosOp(ILiturgieInterpretatie item, IEnumerable<ILiturgieMapmaskArg> masks)
+        public ILiturgieOplossing LosOp(ILiturgieInterpretatie item, IEnumerable<ILiturgieMapmaskArg> masks, ILiturgieSettings settings)
         {
             var regel = new Regel {DisplayEdit = new RegelDisplay()};
 
             // verwerk de opties
             regel.VerwerkenAlsSlide = !item.OptiesGebruiker.NietVerwerkenViaDatabase;
-            regel.TonenInOverzicht = item.OptiesGebruiker.ToonInOverzicht;
-            regel.TonenInVolgende = item.OptiesGebruiker.ToonInVolgende;
+            regel.TonenInOverzicht = item.OptiesGebruiker.ToonInOverzicht ?? (item.OptiesGebruiker.AlsBijbeltekst ? settings.ToonBijbeltekstenInLiturgie : true);
+            regel.TonenInVolgende = item.OptiesGebruiker.ToonInVolgende ?? true;
 
             // regel visualisatie default
             regel.DisplayEdit.Naam = item.Benaming;
@@ -166,9 +166,9 @@ namespace Generator.LiturgieOplosser
             return null;
         }
 
-        public IEnumerable<ILiturgieOplossing> LosOp(IEnumerable<ILiturgieInterpretatie> items, IEnumerable<ILiturgieMapmaskArg> masks)
+        public IEnumerable<ILiturgieOplossing> LosOp(IEnumerable<ILiturgieInterpretatie> items, IEnumerable<ILiturgieMapmaskArg> masks, ILiturgieSettings settings)
         {
-            return items.Select(i => LosOp(i, masks)).ToList();
+            return items.Select(i => LosOp(i, masks, settings)).ToList();
         }
 
         // TODO oplossen dat logica om regel weer samen te stellen uit gaat van vaste waarden
