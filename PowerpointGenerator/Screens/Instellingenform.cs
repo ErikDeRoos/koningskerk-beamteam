@@ -52,6 +52,8 @@ namespace PowerpointGenerator.Screens
             checkBox1.Checked = vanInstellingen.Een2eCollecte;
             checkBox2.Checked = vanInstellingen.DeLezenVraag;
             checkBox3.Checked = vanInstellingen.DeTekstVraag;
+            checkBox4.Checked = vanInstellingen.GebruikDisplayNameVoorZoeken;
+            checkBox5.Checked = vanInstellingen.ToonBijbeltekstenInLiturgie;
         }
 
         #region Eventhandlers
@@ -190,6 +192,8 @@ namespace PowerpointGenerator.Screens
             instellingen.Een2eCollecte = checkBox1.Checked;
             instellingen.DeLezenVraag = checkBox2.Checked;
             instellingen.DeTekstVraag = checkBox3.Checked;
+            instellingen.GebruikDisplayNameVoorZoeken = checkBox4.Checked;
+            instellingen.ToonBijbeltekstenInLiturgie = checkBox5.Checked;
 
             Instellingen = instellingen;
         }
