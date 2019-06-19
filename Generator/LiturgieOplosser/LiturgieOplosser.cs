@@ -115,7 +115,6 @@ namespace Generator.LiturgieOplosser
             {
                 setNaam = FileEngineDefaults.CommonFilesSetName;
                 zoekNaam = item.Benaming;
-                regel.TonenInOverzicht = false;  // TODO tijdelijk default gedrag van het niet tonen van algemene items in het overzicht overgenomen uit de oude situatie
             }
 
             return NormaleAanvuller(regel, setNaam, zoekNaam, item.Verzen.ToList(), settings);
@@ -141,6 +140,10 @@ namespace Generator.LiturgieOplosser
             if (resultaat.ZonderContentSplitsing)
                 regel.DisplayEdit.VersenGebruikDefault = new VersenDefault(string.Empty);  // Altijd default gebruiken omdat er altijd maar 1 content is
             regel.DisplayEdit.VolledigeContent = !verzenList.Any();
+
+            // Basis waarde van tonen in overzicht bepalen (kan nog overschreven worden door de regel specifieke opties)
+            var nietTonenInOverzicht = setNaam == FileEngineDefaults.CommonFilesSetName || (resultaat.StandaardNietTonenInLiturgie ?? false);
+            regel.TonenInOverzicht = !nietTonenInOverzicht;
 
             // bepaal de naamgeving
             if (!IsNullOrWhiteSpace(resultaat.OnderdeelDisplayNaam))

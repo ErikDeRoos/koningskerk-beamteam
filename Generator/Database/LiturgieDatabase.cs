@@ -55,6 +55,7 @@ namespace Generator.Database
                 FragmentNaam = subSet.Name,
                 ZonderContentSplitsing = !set.Settings.ItemsHaveSubContent,
                 OnderdeelDisplayNaam = set.Settings.DisplayName,
+                StandaardNietTonenInLiturgie = set.Settings.NotVisibleInIndex,
             };
             // Je kunt geen verzen opgeven als we ze niet los hebben.
             // (Andere kant op kan wel: geen verzen opgeven terwijl ze er wel zijn (wat 'alle verzen' betekend))
@@ -316,6 +317,7 @@ namespace Generator.Database
             public string FragmentNaam { get; set; }
             public IEnumerable<ILiturgieContent> Content { get; set; }
             public bool ZonderContentSplitsing { get; set; }
+            public bool? StandaardNietTonenInLiturgie { get; set; }
 
             public Oplossing()
             {
