@@ -2,9 +2,7 @@
 
 
 
-
 Klant wensen:
--In xml een setting dat dingen niet in beeld komen
 -Bijbeltekst vers-weergave formatteren
 -Bugfix: Sommige hoofdstukken worden overgeslagen (ergens in een mailtje of in t werkzaamheden overzicht bestand staat het voorbeeld)
 -Bugfix: Sommige opwekkingen laten 'volgende' in beeld bij bepaalde slides (Opw 585, liturgie 5 mei)

@@ -1,6 +1,3 @@
-Generator aanpassen aan wensen Emmeloord
--In xml een setting dat dingen niet in beeld komen
-
 Beheershandleiding 
 -Bijwerken
 -In repo opnemen
