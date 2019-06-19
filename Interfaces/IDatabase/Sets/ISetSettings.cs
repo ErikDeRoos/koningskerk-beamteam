@@ -10,6 +10,7 @@ namespace IDatabase
         bool UseContainer { get; }
         /// <summary>
         /// De naam van de set zoals deze weergegeven moet worden
+        /// Kan ook op gezocht worden indien dit is geactvieerd via instellingen
         /// </summary>
         string DisplayName { get; }
         /// <summary>
@@ -20,5 +21,9 @@ namespace IDatabase
         /// Als de inhoud van het item bestaat uit subcontent, gescheiden door opvolgende nummering. Werkt alleen voor txt.
         /// </summary>
         bool ItemIsSubContent { get; }
+        /// <summary>
+        /// Deze items standaard niet tonen in de liturgie
+        /// </summary>
+        bool NotVisibleInIndex { get; }
     }
 }

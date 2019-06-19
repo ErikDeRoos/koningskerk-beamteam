@@ -5,18 +5,22 @@ namespace ISettings
 {
     public interface IInstellingen : IInstellingenBase
     {
+        int TekstChar_a_OnARow { get; }
+        string TekstFontName { get; }
+        float TekstFontPointSize { get; }
+
         string DatabasePad { get; }
         string BijbelPad { get; }
         string TemplateLied { get; }
         string TemplateTheme { get; }
         string TemplateBijbeltekst { get; }
-        int TekstChar_a_OnARow { get; }
-        string TekstFontName { get; }
-        float TekstFontPointSize { get; }
 
         bool Een2eCollecte { get; }
         bool DeTekstVraag { get; }
         bool DeLezenVraag { get; }
+        bool GebruikDisplayNameVoorZoeken { get; }
+
+        bool ToonBijbeltekstenInLiturgie { get; }
 
         IEnumerable<IMapmask> Masks { get; }
         bool AddMask(IMapmask mask);

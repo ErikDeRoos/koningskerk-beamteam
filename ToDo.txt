@@ -1,11 +1,3 @@
-Generator aanpassen aan wensen Emmeloord
--vinkje 'bijbeltekst niet in liturgie'
--In xml een setting dat dingen niet in beeld komen
-
-M-Eenvoudige zoeken-invoegen balk
-  -Onderaan
-  -Tekst 'Zoeken' + Tekstbox + vinkje 'als bijbeltekst' + Knop 'Invoegen'
-
 Beheershandleiding 
 -Bijwerken
 -In repo opnemen

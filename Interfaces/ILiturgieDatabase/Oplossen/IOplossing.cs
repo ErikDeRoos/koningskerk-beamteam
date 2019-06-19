@@ -11,5 +11,6 @@ namespace ILiturgieDatabase
         string FragmentNaam { get; }
         IEnumerable<ILiturgieContent> Content { get; }
         bool ZonderContentSplitsing { get; }
+        bool? StandaardNietTonenInLiturgie { get; }
     }
 }

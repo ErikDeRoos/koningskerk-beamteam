@@ -99,12 +99,6 @@
     <Compile Include="Screens\LiturgieNotFoundFormulier.Designer.cs">
       <DependentUpon>LiturgieNotFoundFormulier.cs</DependentUpon>
     </Compile>
-    <Compile Include="Screens\WijzigOpties.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Screens\WijzigOpties.Designer.cs">
-      <DependentUpon>WijzigOpties.cs</DependentUpon>
-    </Compile>
     <Compile Include="Settings\Mapmask.cs" />
     <Compile Include="Screens\MaskInvoer.cs">
       <SubType>Form</SubType>
@@ -136,9 +130,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Screens\Instellingenform.resx">
       <DependentUpon>Instellingenform.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Screens\WijzigOpties.resx">
-      <DependentUpon>WijzigOpties.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
     <None Include="LICENSE.md">

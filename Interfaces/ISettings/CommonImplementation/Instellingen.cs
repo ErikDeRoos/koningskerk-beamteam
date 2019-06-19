@@ -15,6 +15,8 @@ namespace ISettings.CommonImplementation
         private const bool DefaultEen2eCollecte = true;
         private const bool DefaultDeTekstVraag = true;
         private const bool DefaultDeLezenVraag = true;
+        private const bool DefaultGebruikDisplayNameVoorZoeken = true;
+        private const bool DefaultToonBijbeltekstenInLiturgie = true;
 
         public string DatabasePad { get; set; }
         public string BijbelPad { get; set; }
@@ -29,6 +31,9 @@ namespace ISettings.CommonImplementation
         public bool Een2eCollecte { get; set; }
         public bool DeTekstVraag { get; set; }
         public bool DeLezenVraag { get; set; }
+        public bool GebruikDisplayNameVoorZoeken { get; set; }
+        public bool ToonBijbeltekstenInLiturgie { get; set; }
+
         private readonly List<IMapmask> _lijstmasks = new List<IMapmask>();
         public StandaardTeksten StandaardTeksten { get; set; }
 
@@ -47,6 +52,8 @@ namespace ISettings.CommonImplementation
             Een2eCollecte = DefaultEen2eCollecte;
             DeLezenVraag = DefaultDeLezenVraag;
             DeTekstVraag = DefaultDeTekstVraag;
+            GebruikDisplayNameVoorZoeken = DefaultGebruikDisplayNameVoorZoeken;
+            ToonBijbeltekstenInLiturgie = DefaultToonBijbeltekstenInLiturgie;
 
             StandaardTeksten = new StandaardTeksten()
             {

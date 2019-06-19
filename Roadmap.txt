@@ -2,18 +2,12 @@
 
 
 
-
 Klant wensen:
--vinkje 'bijbeltekst niet in liturgie'
--In xml een setting dat dingen niet in beeld komen
 -Bijbeltekst vers-weergave formatteren
 -Bugfix: Sommige hoofdstukken worden overgeslagen (ergens in een mailtje of in t werkzaamheden overzicht bestand staat het voorbeeld)
 -Bugfix: Sommige opwekkingen laten 'volgende' in beeld bij bepaalde slides (Opw 585, liturgie 5 mei)
 
 Eigen ideeën:
-M-Eenvoudige zoeken-invoegen balk
-  -Onderaan
-  -Tekst 'Zoeken' + Tekstbox + vinkje 'als bijbeltekst' + Knop 'Invoegen'
 S-Opslaan via het nieuwe powerpoint formaat
 M-database files via json
 M-liturgie voorbeeld tonen

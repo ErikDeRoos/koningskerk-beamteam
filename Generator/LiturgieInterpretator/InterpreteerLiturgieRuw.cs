@@ -1,4 +1,4 @@
-﻿// Copyright 2017 door Erik de Roos
+﻿// Copyright 2019 door Erik de Roos
 using ILiturgieDatabase;
 using System;
 using System.Collections.Generic;
@@ -75,11 +75,11 @@ namespace Generator.LiturgieInterpretator
                 optiesReeks
                     .Append(LiturgieOptieSettings.OptieNietVerwerken)
                     .Append(OptieScheidingstekens.First());
-            if (!opties.ToonInOverzicht)
+            if (opties.ToonInOverzicht != null && opties.ToonInOverzicht == false)
                 optiesReeks
                     .Append(LiturgieOptieSettings.OptieNietTonenInOverzicht)
                     .Append(OptieScheidingstekens.First());
-            if (!opties.ToonInVolgende)
+            if (!opties.ToonInVolgende != null && opties.ToonInVolgende == false)
                 optiesReeks
                     .Append(LiturgieOptieSettings.OptieNietTonenInVolgende)
                     .Append(OptieScheidingstekens.First());
@@ -145,8 +145,8 @@ namespace Generator.LiturgieInterpretator
               .ToList();
             returnValue.AlsBijbeltekst = (GetOptieParam(opties, LiturgieOptieSettings.AlsCommando) ?? "").Trim().Equals(LiturgieOptieSettings.AlsBijbeltekst, StringComparison.CurrentCultureIgnoreCase);
             returnValue.NietVerwerkenViaDatabase = opties.Any(o => o.StartsWith(LiturgieOptieSettings.OptieNietVerwerken, StringComparison.CurrentCultureIgnoreCase));
-            returnValue.ToonInVolgende = !opties.Any(o => o.StartsWith(LiturgieOptieSettings.OptieNietTonenInVolgende, StringComparison.CurrentCultureIgnoreCase));
-            returnValue.ToonInOverzicht = !opties.Any(o => o.StartsWith(LiturgieOptieSettings.OptieNietTonenInOverzicht, StringComparison.CurrentCultureIgnoreCase));
+            returnValue.ToonInVolgende = opties.Any(o => o.StartsWith(LiturgieOptieSettings.OptieNietTonenInVolgende, StringComparison.CurrentCultureIgnoreCase)) ? (bool?)false : null;
+            returnValue.ToonInOverzicht = opties.Any(o => o.StartsWith(LiturgieOptieSettings.OptieNietTonenInOverzicht, StringComparison.CurrentCultureIgnoreCase)) ? (bool?)false : null;
             returnValue.AlternatieveNaamOverzicht = GetOptieParam(opties, LiturgieOptieSettings.OptieAlternatieveNaamOverzicht);
             returnValue.AlternatieveNaam = GetOptieParam(opties, LiturgieOptieSettings.OptieAlternatieveNaam);
             return returnValue;
@@ -316,26 +316,11 @@ namespace Generator.LiturgieInterpretator
         private class LiturgieOpties : ILiturgieOptiesGebruiker
         {
             public bool NietVerwerkenViaDatabase { get; set; }
-            public bool ToonInOverzicht { get; set; }
-            public bool ToonInVolgende { get; set; }
+            public bool? ToonInOverzicht { get; set; }
+            public bool? ToonInVolgende { get; set; }
             public bool AlsBijbeltekst { get; set; }
             public string AlternatieveNaamOverzicht { get; set; }
             public string AlternatieveNaam { get; set; }
-
-
-            public LiturgieOpties()
-            {
-
-            }
-            //public static LiturgieOpties Clone(ILiturgieOpties opties)
-            //{
-            //    var returnValue = new LiturgieOpties();
-            //    returnValue.ToonInOverzicht = opties.ToonInOverzicht;
-            //    returnValue.AlsBijbeltekst = opties.AlsBijbeltekst;
-            //    returnValue.AlternatieveNaam = opties.AlternatieveNaam;
-            //    returnValue.AlternatieveNaamOverzicht = opties.AlternatieveNaamOverzicht;
-            //    return returnValue;
-            //}
         }
     }
 }

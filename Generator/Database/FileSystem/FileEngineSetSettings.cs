@@ -11,5 +11,7 @@ namespace Generator.Database.FileSystem
 
         public bool ItemsHaveSubContent { get; set; }
         public bool ItemIsSubContent { get; set; }
+
+        public bool NotVisibleInIndex { get; set; }
     }
 }

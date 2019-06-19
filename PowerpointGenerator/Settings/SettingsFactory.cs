@@ -61,6 +61,8 @@ namespace PowerpointGenerator.Settings
                     Een2eCollecte = instellingen.Een2eCollecte,
                     DeTekstVraag = instellingen.DeTekstVraag,
                     DeLezenVraag = instellingen.DeLezenVraag,
+                    GebruikDisplayNameVoorZoeken = instellingen.GebruikDisplayNameVoorZoeken,
+                    ToonBijbeltekstenInLiturgie = instellingen.ToonBijbeltekstenInLiturgie,
                     StandaardTeksten = instellingen.StandaardTeksten,
                 };
 
@@ -120,6 +122,8 @@ namespace PowerpointGenerator.Settings
                     Een2eCollecte = saveInstellingen.Een2eCollecte,
                     DeTekstVraag = saveInstellingen.DeTekstVraag,
                     DeLezenVraag = saveInstellingen.DeLezenVraag,
+                    GebruikDisplayNameVoorZoeken = saveInstellingen.GebruikDisplayNameVoorZoeken,
+                    ToonBijbeltekstenInLiturgie = saveInstellingen.ToonBijbeltekstenInLiturgie,
                     StandaardTeksten = saveInstellingen.StandaardTeksten,
                 };
 
@@ -176,6 +180,8 @@ namespace PowerpointGenerator.Settings
             public bool Een2eCollecte { get; set; }
             public bool DeTekstVraag { get; set; }
             public bool DeLezenVraag { get; set; }
+            public bool GebruikDisplayNameVoorZoeken { get; set; }
+            public bool ToonBijbeltekstenInLiturgie { get; set; }
             public StandaardTeksten StandaardTeksten { get; set; }
         }
     }

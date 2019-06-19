@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Tools;
 
 namespace Generator
 {
@@ -173,11 +172,15 @@ namespace Generator
 
         public IEnumerable<ILiturgieOplossing> LiturgieOplossingen()
         {
+            var instellingen = _instellingenFactory.LoadFromFile();
+
             // Liturgie uit tekstbox omzetten in leesbare items
             var ruweLiturgie = _liturgieInterpreteer.VanTekstregels(Registration.Liturgie);
+
             // Zoek op het bestandssysteem zo veel mogelijk al op (behalve ppt, die gaan via COM element)
-            var masks = MapMasksToLiturgie.Map(_instellingenFactory.LoadFromFile().Masks);
-            return _liturgieOplosser.LosOp(ruweLiturgie, masks).ToList();
+            var masks = MapMasksToLiturgie.Map(instellingen.Masks);
+            var settings = MapInstellingenToSettings.Map(instellingen);
+            return _liturgieOplosser.LosOp(ruweLiturgie, masks, settings).ToList();
         }
 
         public PpGenerator.StatusMelding StartGenereren(IEnumerable<ILiturgieOplossing> ingeladenLiturgie, string opslaanAlsBestandsnaam)
