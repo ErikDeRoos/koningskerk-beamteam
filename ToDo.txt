@@ -1,6 +1,0 @@
-Beheershandleiding 
--Bijwerken
--In repo opnemen
-
-Nieuwe versie uitbrengen 
--2.1
