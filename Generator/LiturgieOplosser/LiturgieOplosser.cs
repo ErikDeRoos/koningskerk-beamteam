@@ -174,24 +174,36 @@ namespace Generator.LiturgieOplosser
             return items.Select(i => LosOp(i, masks, settings)).ToList();
         }
 
-        // TODO oplossen dat logica om regel weer samen te stellen uit gaat van vaste waarden
-        // TODO efficienter omgaan met zoekresources (verschillende lijsten opslaan in zoekresultaat en alleen wijzigingen veranderen)
+        /// <summary>
+        /// Dit maakt een lijst van resultaten die voldoen aan de zoektekst. Filteren gebeurd hier niet maar in de UI zelf.
+        /// We helpen de UX beleving door de UI niet direct alle mogelijkheden meteen terug te geven, alleen te verdiepen waar de gebruiker
+        /// echt naar zoekt.
+        /// Verder wordt aangegeven welke zoekresultaten veranderd zijn zodat de UI de verwijderde of toegevoegde elementen kan animeren 
+        /// of iets dergelijks.
+        /// </summary>
         public IVrijZoekresultaat VrijZoeken(string zoekTekst, bool alsBijbeltekst = false, IVrijZoekresultaat vorigResultaat = null)
         {
             var veiligeZoekTekst = (zoekTekst ?? "").TrimStart();
-            var veranderingGemaakt = false;
+            var veranderingGemaakt = vorigResultaat == null;
             var zoekRestricties = new ZoekRestricties(alsBijbeltekst);
+            var aanname = vorigResultaat?.Aanname;
+            var laatsteZoektekenIsFragmentWissel = veiligeZoekTekst.Length > 0 ? LiturgieInterpretator.InterpreteerLiturgieRuw.BenamingDeelScheidingstekens.Contains(veiligeZoekTekst.Last()) : false;
 
             var onderdeelLijst = KrijgBasisDatabaseLijst(zoekRestricties, true);
             var fragmentLijst = Enumerable.Empty<IVrijZoekresultaatMogelijkheid>();
             var vorigeZoektermSplit = _liturgieInterperator.VanTekstregel(vorigResultaat == null ? "" : vorigResultaat.ZoekTerm);
             var huidigeZoektermSplit = _liturgieInterperator.VanTekstregel(veiligeZoekTekst);
 
+            // Wisselen tussen bijbeltekst vinkje of niet geeft natuurlijk grote wijziging
             if (vorigResultaat != null && vorigResultaat.AlsBijbeltekst != alsBijbeltekst)
             {
                 veranderingGemaakt = true;
             }
-            if ((zoekTekst.Length > 0 && LiturgieInterpretator.InterpreteerLiturgieRuw.BenamingDeelScheidingstekens.Contains(zoekTekst.Last())) || (string.IsNullOrWhiteSpace(vorigeZoektermSplit.Deel) && !string.IsNullOrWhiteSpace(huidigeZoektermSplit.Deel)))
+
+            // Let op: Omdat de UI zelf filtert detecteren we hier alleen overgangen.
+
+            // Kijk of er in de zoektekst een spatie is gebruikt, dan komt er nu een overgang aan
+            if ((veiligeZoekTekst.Length > 0 && laatsteZoektekenIsFragmentWissel) || (string.IsNullOrWhiteSpace(vorigeZoektermSplit.Deel) && !string.IsNullOrWhiteSpace(huidigeZoektermSplit.Deel)))
             {
                 // Fragment is er bij gekomen
                 veranderingGemaakt = true;
@@ -200,19 +212,55 @@ namespace Generator.LiturgieOplosser
                     Weergave = $"{huidigeZoektermSplit.Benaming} {t.Resultaat}",
                     UitDatabase = t.Database,
                 }).ToList();
+
+                // Geen aannames meer
+                aanname = null;
             }
-            else if (!string.IsNullOrWhiteSpace(vorigeZoektermSplit.Deel) && string.IsNullOrWhiteSpace(huidigeZoektermSplit.Deel) && (zoekTekst.Length == 0 || !LiturgieInterpretator.InterpreteerLiturgieRuw.BenamingDeelScheidingstekens.Contains(zoekTekst.Last())))
+            // Zo gauw je de spatie weghaald is de overgang weer weg
+            else if ((veiligeZoekTekst.Length == 0 || !laatsteZoektekenIsFragmentWissel) && string.IsNullOrWhiteSpace(huidigeZoektermSplit.Deel) && (vorigResultaat != null && vorigResultaat.ZoekTerm.Length > 0 && LiturgieInterpretator.InterpreteerLiturgieRuw.BenamingDeelScheidingstekens.Contains(vorigResultaat.ZoekTerm.Last())))
             {
                 // Fragment is weer weg gehaald
                 veranderingGemaakt = true;
             }
-            else if (vorigResultaat == null)
+
+            // Bepaal het nieuwe zoekresultaat
+            var nieuwResultaat = ZoekresultaatSamenstellen(veiligeZoekTekst, alsBijbeltekst, vorigResultaat, onderdeelLijst.Union(fragmentLijst), aanname, veranderingGemaakt);
+            if (vorigResultaat == null)
+                return nieuwResultaat;
+
+            // Het kan zijn dat bij het vorige zoekresultaat nog meerdere opties mogelijk waren, maar dat er nu nog maar 1 optie mogelijk is,
+            // terwijl je nog wel een paar tekens moet typen. Dat kan handiger,  we maken de aanname dat je deze ene optie bedoelt:
+            if (!laatsteZoektekenIsFragmentWissel && vorigResultaat.Aanname == null && VoorspelZoekresultaat(vorigResultaat.AlleMogelijkheden, vorigResultaat.ZoekTerm).Count() > 1 && VoorspelZoekresultaat(nieuwResultaat.AlleMogelijkheden, nieuwResultaat.ZoekTerm).Count() == 1)
             {
                 veranderingGemaakt = true;
+                aanname = VoorspelZoekresultaat(nieuwResultaat.AlleMogelijkheden, nieuwResultaat.ZoekTerm).First().Weergave;
+
+                // Fragment toevoegen op basis van aanname
+                fragmentLijst = ZoekVerdieping(aanname).Select(t => new ZoekresultaatItem()
+                {
+                    Weergave = $"{aanname} {t.Resultaat}",
+                    UitDatabase = t.Database,
+                }).ToList();
+
+                nieuwResultaat = ZoekresultaatSamenstellen(veiligeZoekTekst, alsBijbeltekst, vorigResultaat, onderdeelLijst.Union(fragmentLijst), aanname, veranderingGemaakt);
+            }
+            // Als de aanname niet meer gemaakt kan worden
+            else if (!string.IsNullOrEmpty(vorigResultaat.Aanname) && VoorspelZoekresultaat(nieuwResultaat.AlleMogelijkheden, nieuwResultaat.ZoekTerm).Count() > VoorspelZoekresultaat(vorigResultaat.AlleMogelijkheden, vorigResultaat.ZoekTerm).Count())
+            {
+                veranderingGemaakt = true;
+                aanname = null;
+
+                nieuwResultaat = ZoekresultaatSamenstellen(veiligeZoekTekst, alsBijbeltekst, vorigResultaat, onderdeelLijst.Union(fragmentLijst), aanname, veranderingGemaakt);
             }
 
-            return ZoekresultaatSamenstellen(veiligeZoekTekst, alsBijbeltekst, vorigResultaat, onderdeelLijst.Union(fragmentLijst), veranderingGemaakt);
+            return nieuwResultaat;
         }
+
+        private IEnumerable<IVrijZoekresultaatMogelijkheid> VoorspelZoekresultaat(IEnumerable<IVrijZoekresultaatMogelijkheid> resultaten, string zoekTekst)
+        {
+            return resultaten.Where(r => r.Weergave.StartsWith(zoekTekst, StringComparison.CurrentCultureIgnoreCase));
+        }
+
 
         private IEnumerable<IVrijZoekresultaatMogelijkheid> KrijgBasisDatabaseLijst(ZoekRestricties zoekRestricties, bool cached)
         {
@@ -257,7 +305,7 @@ namespace Generator.LiturgieOplosser
             return _database.KrijgAlleFragmenten(vanOnderdeelNaam).ToList();
         }
 
-        private Zoekresultaat ZoekresultaatSamenstellen(string zoekTekst, bool alsBijbeltekst, IVrijZoekresultaat vorigResultaat, IEnumerable<IVrijZoekresultaatMogelijkheid> lijst, bool lijstIsGewijzigd)
+        private Zoekresultaat ZoekresultaatSamenstellen(string zoekTekst, bool alsBijbeltekst, IVrijZoekresultaat vorigResultaat, IEnumerable<IVrijZoekresultaatMogelijkheid> lijst, string aanname, bool lijstIsGewijzigd)
         {
             var zoekLijst = Enumerable.Empty<IVrijZoekresultaatMogelijkheid>();
             var zoekLijstDeltaToegevoegd = Enumerable.Empty<IVrijZoekresultaatMogelijkheid>();
@@ -291,6 +339,7 @@ namespace Generator.LiturgieOplosser
             {
                 ZoekTerm = zoekTekst,
                 AlsBijbeltekst = alsBijbeltekst,
+                Aanname = aanname,
                 VermoedelijkeDatabase = vermoedelijkeDatabase,
                 AlleMogelijkheden = zoekLijst.ToList(),
                 DeltaMogelijkhedenToegevoegd = zoekLijstDeltaToegevoegd,
@@ -397,6 +446,7 @@ namespace Generator.LiturgieOplosser
             public string ZoekTerm { get; set; }
             public bool AlsBijbeltekst { get; set; }
             public string VermoedelijkeDatabase { get; set; }
+            public string Aanname { get; set; }
 
             public IEnumerable<IVrijZoekresultaatMogelijkheid> AlleMogelijkheden { get; set; }
             public IEnumerable<IVrijZoekresultaatMogelijkheid> DeltaMogelijkhedenToegevoegd { get; set; }
