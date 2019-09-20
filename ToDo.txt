@@ -1,0 +1,1 @@
+-bugfix: ingevoegd moet worden de real name ipv display name (wel display name houden in lijst)
