@@ -1,4 +1,4 @@
-﻿// Copyright 2018 door Erik de Roos
+﻿// Copyright 2019 door Erik de Roos
 using IDatabase;
 using System;
 using System.Collections.Generic;
@@ -83,6 +83,7 @@ namespace Generator.Database.FileSystem
     public class FileZipBundledItem : IDbItem
     {
         public string Name { get; }
+        public string SafeName { get; }
         public IDbItemContent Content { get; }
 
         internal FileZipBundledItem(IZipArchiveDirectory archiveDir, bool cached)
@@ -90,6 +91,7 @@ namespace Generator.Database.FileSystem
             var inDir = archiveDir;
 
             Name = inDir.Name;
+            SafeName = FileEngineDefaults.CreateSafeName(Name);
             Content = new DirContent(inDir.Entries, cached);
         }
 
@@ -131,6 +133,7 @@ namespace Generator.Database.FileSystem
     class FileZipItem : IDbItem
     {
         public string Name { get; }
+        public string SafeName { get; }
         public IDbItemContent Content { get; }
 
         public FileZipItem(ZipArchiveEntry entry)
@@ -138,6 +141,7 @@ namespace Generator.Database.FileSystem
             var entry1 = entry;
 
             Name = Path.GetFileNameWithoutExtension(entry1.Name);
+            SafeName = FileEngineDefaults.CreateSafeName(Name);
             Content = new FileContent(entry1);
         }
 

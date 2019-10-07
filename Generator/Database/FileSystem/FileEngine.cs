@@ -1,4 +1,4 @@
-﻿// Copyright 2018 door Erik de Roos
+﻿// Copyright 2019 door Erik de Roos
 using IDatabase;
 using System;
 using System.Collections.Generic;
@@ -17,12 +17,19 @@ namespace Generator.Database.FileSystem
         public const string CommonFilesSetName = "Common";
         public const string SetSettingsName = "instellingen.xml";
         public const string SetArchiveName = "inhoud.zip";
+        public static readonly char NotSafe = ' ';
+        public static readonly char Safe = '_';
 
         private static readonly char[] pathSeparators = new char[] { Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar };
 
         public static string ClosestPathName(string fromPath)
         {
             return fromPath.Split(pathSeparators).Last();
+        }
+
+        public static string CreateSafeName(string name)
+        {
+            return (name ?? string.Empty).Replace(NotSafe, Safe).ToLower();
         }
     }
 
@@ -89,7 +96,8 @@ namespace Generator.Database.FileSystem
         private IFinder _finderCached;
         private IFileOperations _fileManager;
 
-        public string Name { get; private set; }
+        public string Name { get; }
+        public string SafeName { get; }
         public T Settings { get { return GetSettings(_cached); } set { ChangeSettings(value, _cached); } }
 
         public FileSet(IFileOperations fileManager, string inDir, bool cached)
@@ -99,6 +107,7 @@ namespace Generator.Database.FileSystem
             _cached = cached;
 
             Name = FileEngineDefaults.ClosestPathName(_inDir);
+            SafeName = FileEngineDefaults.CreateSafeName(Name);
         }
 
         private IFinder GetFinder()

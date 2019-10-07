@@ -1,7 +1,6 @@
-﻿// Copyright 2016 door Erik de Roos
+﻿// Copyright 2019 door Erik de Roos
 using IDatabase;
 using IFileSystem;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -35,6 +34,8 @@ namespace Generator.Database.FileSystem
     public class FileBundledItem : IDbItem
     {
         public string Name { get; }
+        public string SafeName { get; }
+
         public IDbItemContent Content { get; }
         private IFileOperations _fileManager;
 
@@ -42,6 +43,8 @@ namespace Generator.Database.FileSystem
         {
             _fileManager = fileManager;
             Name = FileEngineDefaults.ClosestPathName(dirPath);
+            SafeName = FileEngineDefaults.CreateSafeName(Name);
+
             Content = new DirContent(_fileManager, dirPath, cached);
         }
 
@@ -85,6 +88,7 @@ namespace Generator.Database.FileSystem
     class FileItem : IDbItem
     {
         public string Name { get; }
+        public string SafeName { get; }
         public IDbItemContent Content { get; }
         private IFileOperations _fileManager;
 
@@ -92,6 +96,7 @@ namespace Generator.Database.FileSystem
         {
             _fileManager = fileManager;
             Name = Path.GetFileNameWithoutExtension(filePath);
+            SafeName = FileEngineDefaults.CreateSafeName(Name);
             Content = new FileContent(_fileManager, filePath);
         }
         class FileContent : IDbItemContent

@@ -83,6 +83,7 @@ namespace IDatabase.Engine
             private ItemMutator _items;
             public SetMutator SetMutator { get; private set; }
             public string Name { get; set; }
+            public string SafeName { get { return Name; } }
             public T Settings { get; set; }
             public IEnumerable<IDbItem> Where(Func<IDbItem, bool> query)
             {
@@ -153,6 +154,7 @@ namespace IDatabase.Engine
             public ItemMutator ItemMutator { get; private set; }
 
             public string Name { get; set; }
+            public string SafeName { get { return Name; } }
             private ItemContentMock _content;
 
             public IDbItemContent Content {  get { return _content; } }

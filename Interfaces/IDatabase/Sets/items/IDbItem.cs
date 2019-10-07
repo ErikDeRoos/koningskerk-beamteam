@@ -5,10 +5,16 @@ namespace IDatabase
     public interface IDbItem
     {
         /// <summary>
-        /// Naam (lowercase) van het item binnen de set. Bij subs is dit de naam (lowercase) 
+        /// Echte naam van het item binnen de set. Bij subs is dit de naam 
         /// van de afzonderlijke items.
         /// </summary>
         string Name { get; }
+
+        /// <summary>
+        /// De veilige versie van Naam waarin spaties vervangen zijn en alles lowercase is.
+        /// </summary>
+        string SafeName { get; }
+        
         /// <summary>
         /// Content
         /// </summary>
