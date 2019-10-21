@@ -18,6 +18,6 @@ namespace IDatabase.Engine
         /// Krijg alle beschikbare onderdeel namen
         /// </summary>
         /// <returns></returns>
-        IEnumerable<string> GetAllNames();
+        IEnumerable<IDbName> GetAllNames();
     }
 }

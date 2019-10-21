@@ -103,6 +103,42 @@ namespace Generator.Tests
 
                 Assert.AreEqual(oplossing.Regel.Display.Naam, maskUseName);
             }
+
+            [DataTestMethod]
+            [DataRow("1 Petrus 1 : 1", "1_Petrus 1 : 1")]
+            [DataRow("1 Petrus", "1_Petrus")]
+            [DataRow("Sela ik zal er zijn", "Sela ik_zal_er_zijn")]
+            public void MaakTotTekst_werkt(string invoer, string verwachtResultaat)
+            {
+                var zoekresultaat = FakeZoekresultaat(new[] {
+                new ZoekresultaatItem
+                {
+                    Weergave = "Sela",
+                    VeiligeNaam = "Sela",
+                },
+                new ZoekresultaatItem
+                {
+                    Weergave = "Sela ik zal er zijn",
+                    VeiligeNaam = "Sela ik_zal_er_zijn",
+                },
+                new ZoekresultaatItem
+                {
+                    Weergave = "1 Petrus",
+                    VeiligeNaam = "1_Petrus",
+                },
+                new ZoekresultaatItem
+                {
+                    Weergave = "1 Petrus 1",
+                    VeiligeNaam = "1_Petrus 1",
+                }
+            });
+                var database = A.Fake<ILiturgieDatabase.ILiturgieDatabase>();
+                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieLosOp;
+
+                var oplossing = sut.MaakTotTekst(invoer, null, zoekresultaat);
+
+                Assert.AreEqual(verwachtResultaat, oplossing);
+            }
         }
 
         private static IEnumerable<ILiturgieMapmaskArg> FakeMask(string maskRealName, string maskUseName)
@@ -124,12 +160,18 @@ namespace Generator.Tests
 
         private static ILiturgieDatabase.ILiturgieDatabase FakeDatabase(string onderdeel, string fragment, string display = null, LiturgieOplossingResultaat status = LiturgieOplossingResultaat.Opgelost)
         {
-            var zoekresultaat = A.Fake<IOplossing>();
-            A.CallTo(() => zoekresultaat.OnderdeelNaam).Returns(onderdeel);
-            A.CallTo(() => zoekresultaat.FragmentNaam).Returns(fragment);
-            A.CallTo(() => zoekresultaat.Status).Returns(status);
+            var zoekresultaatOnderdeel = A.Fake<IOplossingOnderdeel>();
+            A.CallTo(() => zoekresultaatOnderdeel.OrigineleNaam).Returns(onderdeel);
+            A.CallTo(() => zoekresultaatOnderdeel.VeiligeNaam).Returns(onderdeel);
             if (display != null)
-                A.CallTo(() => zoekresultaat.OnderdeelDisplayNaam).Returns(display);
+                A.CallTo(() => zoekresultaatOnderdeel.DisplayNaam).Returns(display);
+            var zoekresultaatFragment = A.Fake<IOplossingOnderdeel>();
+            A.CallTo(() => zoekresultaatFragment.OrigineleNaam).Returns(fragment);
+            A.CallTo(() => zoekresultaatFragment.VeiligeNaam).Returns(fragment);
+            var zoekresultaat = A.Fake<IOplossing>();
+            A.CallTo(() => zoekresultaat.Onderdeel).Returns(zoekresultaatOnderdeel);
+            A.CallTo(() => zoekresultaat.Fragment).Returns(zoekresultaatFragment);
+            A.CallTo(() => zoekresultaat.Status).Returns(status);
             var database = A.Fake<ILiturgieDatabase.ILiturgieDatabase>();
             A.CallTo(database)
                 .Where(d => d.Method.Name == "ZoekOnderdeel")
@@ -144,6 +186,37 @@ namespace Generator.Tests
             var settings = A.Fake<ILiturgieSettings>();
             A.CallTo(() => settings.ToonBijbeltekstenInLiturgie).Returns(true);
             return settings;
+        }
+
+        private static IVrijZoekresultaat FakeZoekresultaat(ZoekresultaatItem[] zoekresultaten)
+        {
+            var zoekresultaat = A.Fake<IVrijZoekresultaat>();
+            A.CallTo(() => zoekresultaat.AlleMogelijkheden).Returns(zoekresultaten);
+            return zoekresultaat;
+        }
+
+        private class ZoekresultaatItem : IVrijZoekresultaatMogelijkheid
+        {
+            public string Weergave { get; set; }
+            public string VeiligeNaam { get; set; }
+            public string UitDatabase { get; set; }
+
+            public bool Equals(IVrijZoekresultaatMogelijkheid x, IVrijZoekresultaatMogelijkheid y)
+            {
+                if (x == null || y == null)
+                    return false;
+                return x.Weergave == y.Weergave;  // Alleen sorteren op weergave naam
+            }
+
+            public int GetHashCode(IVrijZoekresultaatMogelijkheid obj)
+            {
+                return obj.Weergave.GetHashCode();
+            }
+
+            public override string ToString()
+            {
+                return Weergave;
+            }
         }
     }
 }

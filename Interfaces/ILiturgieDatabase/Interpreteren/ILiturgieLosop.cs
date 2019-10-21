@@ -49,12 +49,7 @@ namespace ILiturgieDatabase {
         /// <summary>
         /// Zet de geinterpreteerde opties weer om naar een tekst
         /// </summary>
-        string MaakTotTekst(ILiturgieOptiesGebruiker opties);
-
-        /// <summary>
-        /// Zet de geinterpreteerde opties weer om naar een tekst
-        /// </summary>
-        string MaakTotTekst(string invoerTekst, ILiturgieOptiesGebruiker opties);
+        string MaakTotTekst(string invoerTekst, ILiturgieOptiesGebruiker opties, IVrijZoekresultaat zoekresultaat);
 
         /// <summary>
         /// Splits de tekst op tussen een liturgie stuk en een opties stuk

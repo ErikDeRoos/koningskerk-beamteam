@@ -50,6 +50,7 @@
     <Compile Include="Engine\IEngineSelection.cs" />
     <Compile Include="Engine\EngineMock.cs" />
     <Compile Include="IEngineManager.cs" />
+    <Compile Include="Sets\IDbName.cs" />
     <Compile Include="Sets\items\IDbItem.cs" />
     <Compile Include="Sets\items\IDbItemContentcs.cs" />
     <Compile Include="Sets\IDbSet.cs" />

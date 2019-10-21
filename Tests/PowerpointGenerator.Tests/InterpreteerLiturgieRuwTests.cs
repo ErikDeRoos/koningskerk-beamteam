@@ -29,10 +29,10 @@ namespace Generator.Tests
 
                 var resultaat = _sut.VanTekstregel(input);
 
-                Assert.AreEqual(resultaat.Benaming, benaming);
-                Assert.AreEqual(resultaat.Deel, deel);
-                Assert.AreEqual(resultaat.VerzenZoalsIngevoerd, verzen);
-                Assert.AreEqual(resultaat.OptiesGebruiker.AlsBijbeltekst, alsBijbeltekst);
+                Assert.AreEqual(benaming, resultaat.Benaming);
+                Assert.AreEqual(deel, resultaat.Deel);
+                Assert.AreEqual(verzen, resultaat.VerzenZoalsIngevoerd);
+                Assert.AreEqual(alsBijbeltekst, resultaat.OptiesGebruiker.AlsBijbeltekst);
             }
 
             [DataTestMethod]
@@ -54,9 +54,9 @@ namespace Generator.Tests
 
                 var alleDelenGenummerd = resultaat.PerDeelVersen.Select((deelEnVers, i) => new { deelEnVers, i }).ToList();
 
-                Assert.AreEqual(resultaat.Benaming, resultaatBenaming);
-                Assert.AreEqual(alleDelenGenummerd.Count(), resultaatDelen.Count());
-                alleDelenGenummerd.ForEach((a) => Assert.AreEqual(a.deelEnVers.ToString(), resultaatDelen[a.i]));
+                Assert.AreEqual(resultaatBenaming, resultaat.Benaming);
+                Assert.AreEqual(resultaatDelen.Count(), alleDelenGenummerd.Count());
+                alleDelenGenummerd.ForEach((a) => Assert.AreEqual(resultaatDelen[a.i], a.deelEnVers.ToString()));
             }
 
             [DataTestMethod]
@@ -69,9 +69,9 @@ namespace Generator.Tests
 
                 var alleDelenGenummerd = resultaat.PerDeelVersen.Select((deelEnVers, i) => new { deelEnVers, i }).ToList();
 
-                Assert.AreEqual(resultaat.Benaming, resultaatBenaming);
-                Assert.AreEqual(alleDelenGenummerd.Count(), resultaatDelen.Count());
-                alleDelenGenummerd.ForEach((a) => Assert.AreEqual(a.deelEnVers.ToString(), resultaatDelen[a.i]));
+                Assert.AreEqual(resultaatBenaming, resultaat.Benaming);
+                Assert.AreEqual(resultaatDelen.Count(), alleDelenGenummerd.Count());
+                alleDelenGenummerd.ForEach((a) => Assert.AreEqual(resultaatDelen[a.i], a.deelEnVers.ToString()));
             }
         }
     }

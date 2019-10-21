@@ -6,11 +6,17 @@ namespace ILiturgieDatabase
     public interface IOplossing
     {
         LiturgieOplossingResultaat Status { get; }
-        string OnderdeelNaam { get; }
-        string OnderdeelDisplayNaam { get; }
-        string FragmentNaam { get; }
+        IOplossingOnderdeel Onderdeel { get; }
+        IOplossingOnderdeel Fragment { get; }
         IEnumerable<ILiturgieContent> Content { get; }
         bool ZonderContentSplitsing { get; }
         bool? StandaardNietTonenInLiturgie { get; }
+    }
+
+    public interface IOplossingOnderdeel
+    {
+        string VeiligeNaam { get; }
+        string OrigineleNaam { get; }
+        string DisplayNaam { get; }
     }
 }

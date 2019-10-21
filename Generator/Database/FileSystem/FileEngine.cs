@@ -79,7 +79,7 @@ namespace Generator.Database.FileSystem
             return GetDbSet().Where(query);
         }
 
-        public IEnumerable<string> GetAllNames()
+        public IEnumerable<IDbName> GetAllNames()
         {
             return GetDbSet()
                 .Select(db => db.Name)
@@ -96,8 +96,7 @@ namespace Generator.Database.FileSystem
         private IFinder _finderCached;
         private IFileOperations _fileManager;
 
-        public string Name { get; }
-        public string SafeName { get; }
+        public IDbName Name { get; }
         public T Settings { get { return GetSettings(_cached); } set { ChangeSettings(value, _cached); } }
 
         public FileSet(IFileOperations fileManager, string inDir, bool cached)
@@ -106,8 +105,12 @@ namespace Generator.Database.FileSystem
             _inDir = inDir;
             _cached = cached;
 
-            Name = FileEngineDefaults.ClosestPathName(_inDir);
-            SafeName = FileEngineDefaults.CreateSafeName(Name);
+            var dirName = FileEngineDefaults.ClosestPathName(_inDir);
+            Name = new DbItemName
+            {
+                Name = dirName,
+                SafeName = FileEngineDefaults.CreateSafeName(dirName),
+            };
         }
 
         private IFinder GetFinder()
@@ -185,7 +188,7 @@ namespace Generator.Database.FileSystem
             }
         }
 
-        public IEnumerable<string> GetAllNames()
+        public IEnumerable<IDbName> GetAllNames()
         {
             return GetItemSet()
                 .Select(db => db.Name);

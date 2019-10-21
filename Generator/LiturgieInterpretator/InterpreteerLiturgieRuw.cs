@@ -64,6 +64,9 @@ namespace Generator.LiturgieInterpretator
 
         public string MaakTekstVanOpties(ILiturgieOptiesGebruiker opties)
         {
+            if (opties == null)
+                return string.Empty;
+
             var optiesReeks = new StringBuilder();
             if (opties.AlsBijbeltekst)
                 optiesReeks

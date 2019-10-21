@@ -82,16 +82,18 @@ namespace Generator.Database.FileSystem
 
     public class FileZipBundledItem : IDbItem
     {
-        public string Name { get; }
-        public string SafeName { get; }
+        public IDbName Name { get; }
         public IDbItemContent Content { get; }
 
         internal FileZipBundledItem(IZipArchiveDirectory archiveDir, bool cached)
         {
             var inDir = archiveDir;
 
-            Name = inDir.Name;
-            SafeName = FileEngineDefaults.CreateSafeName(Name);
+            Name = new DbItemName
+            {
+                Name = inDir.Name,
+                SafeName = FileEngineDefaults.CreateSafeName(inDir.Name)
+            };
             Content = new DirContent(inDir.Entries, cached);
         }
 
@@ -132,16 +134,19 @@ namespace Generator.Database.FileSystem
 
     class FileZipItem : IDbItem
     {
-        public string Name { get; }
-        public string SafeName { get; }
+        public IDbName Name { get; }
         public IDbItemContent Content { get; }
 
         public FileZipItem(ZipArchiveEntry entry)
         {
             var entry1 = entry;
 
-            Name = Path.GetFileNameWithoutExtension(entry1.Name);
-            SafeName = FileEngineDefaults.CreateSafeName(Name);
+            var entryName = Path.GetFileNameWithoutExtension(entry1.Name);
+            Name = new DbItemName
+            {
+                Name = entryName,
+                SafeName = FileEngineDefaults.CreateSafeName(entryName),
+            };
             Content = new FileContent(entry1);
         }
 

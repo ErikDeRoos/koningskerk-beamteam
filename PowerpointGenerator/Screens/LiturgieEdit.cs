@@ -99,7 +99,7 @@ namespace PowerpointGenerator.Screens
         private void HuidigeTekstInvoegen()
         {
             var geinterpreteerdeOpties = _liturgieOplosser.ZoekStandaardOptiesUitZoekresultaat(textBoxZoek.Text, _huidigZoekresultaat);
-            var toeTeVoegenTekst = _liturgieOplosser.MaakTotTekst(textBoxZoek.Text, geinterpreteerdeOpties);
+            var toeTeVoegenTekst = _liturgieOplosser.MaakTotTekst(textBoxZoek.Text, geinterpreteerdeOpties, _huidigZoekresultaat);
             var liturgie = textBoxLiturgie.Lines.ToList();
             var huidigeRegel = GetHuidigeRegel();
             if (huidigeRegel != null)

@@ -59,7 +59,7 @@ namespace IDatabase.Engine
             return _sets.AddSet(name);
         }
 
-        public IEnumerable<string> GetAllNames()
+        public IEnumerable<IDbName> GetAllNames()
         {
             throw new NotImplementedException();
         }
@@ -85,6 +85,9 @@ namespace IDatabase.Engine
             public string Name { get; set; }
             public string SafeName { get { return Name; } }
             public T Settings { get; set; }
+
+            IDbName IDbSet<T>.Name => throw new NotImplementedException();
+
             public IEnumerable<IDbItem> Where(Func<IDbItem, bool> query)
             {
                 return _items.Where(query);
@@ -113,7 +116,7 @@ namespace IDatabase.Engine
                 return this;
             }
 
-            public IEnumerable<string> GetAllNames()
+            IEnumerable<IDbName> IDbSet<T>.GetAllNames()
             {
                 throw new NotImplementedException();
             }
@@ -158,6 +161,8 @@ namespace IDatabase.Engine
             private ItemContentMock _content;
 
             public IDbItemContent Content {  get { return _content; } }
+
+            IDbName IDbItem.Name => throw new NotImplementedException();
 
             public ItemMock(SetMutator sets, ItemMutator items)
             {

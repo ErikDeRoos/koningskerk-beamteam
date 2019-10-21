@@ -26,6 +26,7 @@ namespace ILiturgieDatabase
     public interface IVrijZoekresultaatMogelijkheid : IEqualityComparer<IVrijZoekresultaatMogelijkheid>
     {
         string Weergave { get; }
+        string VeiligeNaam { get; }
         string UitDatabase { get; }
     }
 }

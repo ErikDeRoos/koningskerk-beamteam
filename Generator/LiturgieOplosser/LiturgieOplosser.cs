@@ -123,18 +123,18 @@ namespace Generator.LiturgieOplosser
         {
             regel.VerwerkenAlsType = VerwerkingType.normaal;
             var verzenList = verzen.ToList();
-            var resultaat = _database.ZoekOnderdeel(setNaam, zoekNaam, verzenList, settings);
+            var resultaat = _database.ZoekSpecifiek(setNaam, zoekNaam, verzenList, settings);
             if (resultaat.Status != LiturgieOplossingResultaat.Opgelost)
                 return resultaat.Status;
 
-            if (resultaat.OnderdeelNaam == FileEngineDefaults.CommonFilesSetName)
+            if (resultaat.Onderdeel.OrigineleNaam == FileEngineDefaults.CommonFilesSetName)
             {
-                regel.DisplayEdit.Naam = resultaat.FragmentNaam;
+                regel.DisplayEdit.Naam = resultaat.Fragment.OrigineleNaam;
                 regel.DisplayEdit.VersenGebruikDefault = new VersenDefault(string.Empty);  // Expliciet: Common bestanden hebben nooit versen
             }
             else {
-                regel.DisplayEdit.Naam = resultaat.OnderdeelNaam;
-                regel.DisplayEdit.SubNaam = resultaat.FragmentNaam;
+                regel.DisplayEdit.Naam = resultaat.Onderdeel.OrigineleNaam;
+                regel.DisplayEdit.SubNaam = resultaat.Fragment.OrigineleNaam;
             }
             regel.Content = resultaat.Content.ToList();
             if (resultaat.ZonderContentSplitsing)
@@ -146,8 +146,8 @@ namespace Generator.LiturgieOplosser
             regel.TonenInOverzicht = !nietTonenInOverzicht;
 
             // bepaal de naamgeving
-            if (!IsNullOrWhiteSpace(resultaat.OnderdeelDisplayNaam))
-                regel.DisplayEdit.Naam = resultaat.OnderdeelDisplayNaam.Equals(_defaultSetNameEmpty, StringComparison.CurrentCultureIgnoreCase) ? null : resultaat.OnderdeelDisplayNaam;
+            if (!IsNullOrWhiteSpace(resultaat.Onderdeel.DisplayNaam))
+                regel.DisplayEdit.Naam = resultaat.Onderdeel.DisplayNaam.Equals(_defaultSetNameEmpty, StringComparison.CurrentCultureIgnoreCase) ? null : resultaat.Onderdeel.DisplayNaam;
 
             return null;
         }
@@ -158,7 +158,7 @@ namespace Generator.LiturgieOplosser
             var versDelenLijst = versDelen.ToList();
             foreach(var deel in versDelenLijst)
             {
-                var resultaat = _database.ZoekOnderdeel(VerwerkingType.bijbeltekst, setNaam, deel.Deel, deel.Verzen, settings);
+                var resultaat = _database.ZoekSpecifiek(VerwerkingType.bijbeltekst, setNaam, deel.Deel, deel.Verzen, settings);
                 if (resultaat.Status != LiturgieOplossingResultaat.Opgelost)
                     return resultaat.Status;
                 content.AddRange(resultaat.Content);
@@ -210,7 +210,7 @@ namespace Generator.LiturgieOplosser
                 fragmentLijst = ZoekVerdieping(huidigeZoektermSplit.Benaming).Select(t => new ZoekresultaatItem()
                 {
                     Weergave = $"{huidigeZoektermSplit.Benaming} {t.Resultaat}",
-                    UitDatabase = t.Database,
+                    UitDatabase = t.Database.Weergave,
                 }).ToList();
 
                 // Geen aannames meer
@@ -239,7 +239,7 @@ namespace Generator.LiturgieOplosser
                 fragmentLijst = ZoekVerdieping(aanname).Select(t => new ZoekresultaatItem()
                 {
                     Weergave = $"{aanname} {t.Resultaat}",
-                    UitDatabase = t.Database,
+                    UitDatabase = t.Database.Weergave,
                 }).ToList();
 
                 nieuwResultaat = ZoekresultaatSamenstellen(veiligeZoekTekst, alsBijbeltekst, vorigResultaat, onderdeelLijst.Union(fragmentLijst), aanname, veranderingGemaakt);
@@ -268,8 +268,9 @@ namespace Generator.LiturgieOplosser
                 return ZoekBasisDatabaseLijst(zoekRestricties)
                     .Select(t => new ZoekresultaatItem()
                     {
-                        Weergave = t.Resultaat,
-                        UitDatabase = t.Database,
+                        Weergave = t.Resultaat.Weergave,
+                        VeiligeNaam = t.Resultaat.VeiligeNaam,
+                        UitDatabase = t.Database.Weergave,
                     })
                     .Distinct().ToList();
             else
@@ -288,11 +289,11 @@ namespace Generator.LiturgieOplosser
 
             // zoekrestricties toepassen
             if (zoekRestricties.ZoekInBijbel && !zoekRestricties.ZoekInLiederen)
-                alleDatabases = _database.KrijgOnderdeelBijbel();
+                alleDatabases = _database.ZoekGeneriekOnderdeelBijbel();
             else if (!zoekRestricties.ZoekInBijbel && zoekRestricties.ZoekInLiederen)
-                alleDatabases = _database.KrijgOnderdeelDefault();
+                alleDatabases = _database.ZoekGeneriekOnderdeelDefault();
             else if (zoekRestricties.ZoekInBijbel && zoekRestricties.ZoekInLiederen)
-                alleDatabases = _database.KrijgAlleOnderdelen();
+                alleDatabases = _database.ZoekGeneriekAlleOnderdelen();
 
             // Alle slide templates zoals amen, votum, bidden etc)
             if (zoekRestricties.ZoekInCommon)
@@ -302,7 +303,7 @@ namespace Generator.LiturgieOplosser
         }
         private IEnumerable<IZoekresultaat> ZoekVerdieping(string vanOnderdeelNaam)
         {
-            return _database.KrijgAlleFragmenten(vanOnderdeelNaam).ToList();
+            return _database.ZoekGeneriekAlleFragmenten(vanOnderdeelNaam).ToList();
         }
 
         private Zoekresultaat ZoekresultaatSamenstellen(string zoekTekst, bool alsBijbeltekst, IVrijZoekresultaat vorigResultaat, IEnumerable<IVrijZoekresultaatMogelijkheid> lijst, string aanname, bool lijstIsGewijzigd)
@@ -372,14 +373,22 @@ namespace Generator.LiturgieOplosser
         }
 
 
-        public string MaakTotTekst(ILiturgieOptiesGebruiker opties)
-        {
-            return _liturgieInterperator.MaakTekstVanOpties(opties).Trim();
-        }
-        public string MaakTotTekst(string invoerTekst, ILiturgieOptiesGebruiker opties)
+        public string MaakTotTekst(string invoerTekst, ILiturgieOptiesGebruiker opties, IVrijZoekresultaat zoekresultaat)
         {
             var tekstUitOpties = _liturgieInterperator.MaakTekstVanOpties(opties);
-            return $"{invoerTekst.Trim()} {tekstUitOpties.Trim()}".Trim();
+            var gebruiktZoekresultaat = zoekresultaat.AlleMogelijkheden
+                .Where(w => invoerTekst.StartsWith(w.Weergave))
+                .OrderByDescending(w => w.Weergave.Length)
+                .FirstOrDefault();
+            if (gebruiktZoekresultaat == null)
+            {
+                return $"{invoerTekst.Trim()} {tekstUitOpties.Trim()}".Trim();
+            }
+            else
+            {
+                var resterend = invoerTekst.Substring(gebruiktZoekresultaat.Weergave.Length);
+                return $"{gebruiktZoekresultaat.VeiligeNaam} {resterend.Trim()} {tekstUitOpties.Trim()}".Trim();
+            }
         }
 
         public string[] SplitsVoorOpties(string liturgieRegel)
@@ -458,13 +467,14 @@ namespace Generator.LiturgieOplosser
         private class ZoekresultaatItem : IVrijZoekresultaatMogelijkheid
         {
             public string Weergave { get; set; }
+            public string VeiligeNaam { get; set; }
             public string UitDatabase { get; set; }
 
             public bool Equals(IVrijZoekresultaatMogelijkheid x, IVrijZoekresultaatMogelijkheid y)
             {
                 if (x == null || y == null)
                     return false;
-                return x.Weergave == y.Weergave;
+                return x.Weergave == y.Weergave;  // Alleen sorteren op weergave naam
             }
 
             public int GetHashCode(IVrijZoekresultaatMogelijkheid obj)

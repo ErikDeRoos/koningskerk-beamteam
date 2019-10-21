@@ -33,7 +33,7 @@ namespace Generator.Tests
 
                 var oplossing = sut.LosOp(liturgieItem, _liturgieSettings);
 
-                A.CallTo(() => database.ZoekOnderdeel(VerwerkingType.bijbeltekst, liturgieItem.Benaming, liturgieItem.PerDeelVersen.First().Deel, liturgieItem.PerDeelVersen.First().Verzen, _liturgieSettings)).MustHaveHappened();
+                A.CallTo(() => database.ZoekSpecifiek(VerwerkingType.bijbeltekst, liturgieItem.Benaming, liturgieItem.PerDeelVersen.First().Deel, liturgieItem.PerDeelVersen.First().Verzen, _liturgieSettings)).MustHaveHappened();
             }
 
             [DataTestMethod]
@@ -46,7 +46,7 @@ namespace Generator.Tests
 
                 var oplossing = sut.LosOp(liturgieItem, _liturgieSettings);
 
-                Assert.AreEqual(oplossing.Resultaat, LiturgieOplossingResultaat.Opgelost);
+                Assert.AreEqual(LiturgieOplossingResultaat.Opgelost, oplossing.Resultaat);
             }
         }
 
@@ -64,12 +64,18 @@ namespace Generator.Tests
 
         private static ILiturgieDatabase.ILiturgieDatabase FakeDatabase(string onderdeel, string fragment, string display = null, LiturgieOplossingResultaat status = LiturgieOplossingResultaat.Opgelost)
         {
-            var zoekresultaat = A.Fake<IOplossing>();
-            A.CallTo(() => zoekresultaat.OnderdeelNaam).Returns(onderdeel);
-            A.CallTo(() => zoekresultaat.FragmentNaam).Returns(fragment);
-            A.CallTo(() => zoekresultaat.Status).Returns(status);
+            var zoekresultaatOnderdeel = A.Fake<IOplossingOnderdeel>();
+            A.CallTo(() => zoekresultaatOnderdeel.OrigineleNaam).Returns(onderdeel);
+            A.CallTo(() => zoekresultaatOnderdeel.VeiligeNaam).Returns(onderdeel);
             if (display != null)
-                A.CallTo(() => zoekresultaat.OnderdeelDisplayNaam).Returns(display);
+                A.CallTo(() => zoekresultaatOnderdeel.DisplayNaam).Returns(display);
+            var zoekresultaatFragment = A.Fake<IOplossingOnderdeel>();
+            A.CallTo(() => zoekresultaatFragment.OrigineleNaam).Returns(fragment);
+            A.CallTo(() => zoekresultaatFragment.VeiligeNaam).Returns(fragment);
+            var zoekresultaat = A.Fake<IOplossing>();
+            A.CallTo(() => zoekresultaat.Onderdeel).Returns(zoekresultaatOnderdeel);
+            A.CallTo(() => zoekresultaat.Fragment).Returns(zoekresultaatFragment);
+            A.CallTo(() => zoekresultaat.Status).Returns(status);
             var database = A.Fake<ILiturgieDatabase.ILiturgieDatabase>();
             A.CallTo(database)
                 .Where(d => d.Method.Name == "ZoekOnderdeel")
