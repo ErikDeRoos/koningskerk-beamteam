@@ -1,4 +1,4 @@
-﻿// Copyright 2017 door Erik de Roos
+﻿// Copyright 2019 door Erik de Roos
 using System.Collections.Generic;
 
 namespace ILiturgieDatabase {
@@ -6,9 +6,9 @@ namespace ILiturgieDatabase {
     {
         ILiturgieInterpretatie VanTekstregel(string regels);
         IEnumerable<ILiturgieInterpretatie> VanTekstregels(string[] regels);
-        ILiturgieOptiesGebruiker BepaalBasisOptiesTekstinvoer(string invoerTekst, string uitDatabase);
-        string MaakTekstVanOpties(ILiturgieOptiesGebruiker opties);
+        LiturgieOptiesGebruiker BepaalBasisOptiesTekstinvoer(string invoerTekst, string uitDatabase);
+        string MaakTekstVanOpties(LiturgieOptiesGebruiker opties);
         string[] SplitsVoorOpties(string liturgieRegel);
-        ILiturgieOptiesGebruiker BepaalOptiesTekstinvoer(string optiesTekst);
+        LiturgieOptiesGebruiker BepaalOptiesTekstinvoer(string optiesTekst);
     }
 }

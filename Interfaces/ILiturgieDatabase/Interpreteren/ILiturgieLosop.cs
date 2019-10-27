@@ -1,4 +1,4 @@
-﻿// Copyright 2017 door Erik de Roos
+﻿// Copyright 2019 door Erik de Roos
 using System.Collections.Generic;
 
 namespace ILiturgieDatabase {
@@ -9,27 +9,10 @@ namespace ILiturgieDatabase {
         /// 
         /// </summary>
         /// <param name="item"></param>
-        /// <param name="settings"></param>
-        /// <returns></returns>
-        ILiturgieOplossing LosOp(ILiturgieInterpretatie item, ILiturgieSettings settings);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="item"></param>
         /// <param name="masks"></param>
         /// <param name="settings"></param>
         /// <returns></returns>
-        ILiturgieOplossing LosOp(ILiturgieInterpretatie item, IEnumerable<ILiturgieMapmaskArg> masks, ILiturgieSettings settings);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="items"></param>
-        /// <param name="masks"></param>
-        /// <param name="settings"></param>
-        /// <returns></returns>
-        IEnumerable<ILiturgieOplossing> LosOp(IEnumerable<ILiturgieInterpretatie> items, IEnumerable<ILiturgieMapmaskArg> masks, ILiturgieSettings settings);
+        ILiturgieOplossing LosOp(ILiturgieInterpretatie item, LiturgieSettings settings, IEnumerable<LiturgieMapmaskArg> masks = null);
 
         /// <summary>
         /// Zoek in alle databases naar de opgegeven tekst
@@ -39,17 +22,17 @@ namespace ILiturgieDatabase {
         /// <summary>
         /// Verschaft een basis inzicht van de opties op basis van het zoekresultaat
         /// </summary>
-        ILiturgieOptiesGebruiker ZoekStandaardOptiesUitZoekresultaat(string invoerTekst, IVrijZoekresultaat zoekresultaat);
+        LiturgieOptiesGebruiker ZoekStandaardOptiesUitZoekresultaat(string invoerTekst, IVrijZoekresultaat zoekresultaat);
 
         /// <summary>
         /// Lees alle opties uit
         /// </summary>
-        ILiturgieOptiesGebruiker ToonOpties(string invoerTekst);
+        LiturgieOptiesGebruiker ToonOpties(string invoerTekst);
 
         /// <summary>
         /// Zet de geinterpreteerde opties weer om naar een tekst
         /// </summary>
-        string MaakTotTekst(string invoerTekst, ILiturgieOptiesGebruiker opties, IVrijZoekresultaat zoekresultaat);
+        string MaakTotTekst(string invoerTekst, LiturgieOptiesGebruiker opties, IVrijZoekresultaat zoekresultaat);
 
         /// <summary>
         /// Splits de tekst op tussen een liturgie stuk en een opties stuk

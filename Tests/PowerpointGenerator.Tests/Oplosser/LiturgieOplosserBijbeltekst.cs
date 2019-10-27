@@ -1,7 +1,8 @@
 ﻿// Copyright 2019 door Erik de Roos
-using FakeItEasy;
+using Generator.Tests.Builders;
 using ILiturgieDatabase;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,13 +12,16 @@ namespace Generator.Tests
     {
         private const string DefaultEmptyName = "!leeg";
         private ILiturgieInterpreteer _liturgieInterpreteer;
-        private ILiturgieSettings _liturgieSettings;
+        private LiturgieSettings _liturgieSettingsDefault;
 
         [TestInitialize]
         public void Initialise()
         {
-            _liturgieInterpreteer = A.Fake<ILiturgieInterpreteer>();
-            _liturgieSettings = FakeLiturgieSettings();
+            _liturgieInterpreteer = new Mock<ILiturgieInterpreteer>().Object;
+            _liturgieSettingsDefault = new LiturgieSettings
+            {
+                ToonBijbeltekstenInLiturgie = true,
+            };
         }
 
         [TestClass]
@@ -27,69 +31,45 @@ namespace Generator.Tests
             [DataRow("Johannes", "3", new[] { "1", "2", "3" })]
             public void NormaalItem_ZoekInDatabase(string onderdeel, string fragment, IEnumerable<string> fragmentVerzen)
             {
-                var liturgieItem = FakeBijbeltekstInterpretatie(onderdeel, fragment, fragmentVerzen);
-                var database = FakeDatabase(onderdeel, fragment);
+                var liturgieItem = MockBijbeltekstInvoer(onderdeel, fragment, fragmentVerzen);
+                var databaseBuilder = new LiturgieDatabaseBuilder()
+                    .ZoekSpecifiek_AddOnderdeelAndFragment(onderdeel, fragment);
+                var database = databaseBuilder.Build();
                 var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieLosOp;
 
-                var oplossing = sut.LosOp(liturgieItem, _liturgieSettings);
+                var oplossing = sut.LosOp(liturgieItem, _liturgieSettingsDefault);
 
-                A.CallTo(() => database.ZoekSpecifiek(VerwerkingType.bijbeltekst, liturgieItem.Benaming, liturgieItem.PerDeelVersen.First().Deel, liturgieItem.PerDeelVersen.First().Verzen, _liturgieSettings)).MustHaveHappened();
+                databaseBuilder.Database.Verify(x => x.ZoekSpecifiek(VerwerkingType.bijbeltekst, liturgieItem.Benaming, liturgieItem.PerDeelVersen.First().Deel, liturgieItem.PerDeelVersen.First().Verzen, _liturgieSettingsDefault));
             }
 
             [DataTestMethod]
             [DataRow("Johannes", "3", new[] { "1", "2", "3" })]
             public void NormaalItem_Gevonden(string onderdeel, string fragment, IEnumerable<string> fragmentVerzen)
             {
-                var liturgieItem = FakeBijbeltekstInterpretatie(onderdeel, fragment, fragmentVerzen);
-                var database = FakeDatabase(onderdeel, fragment);
+                var liturgieItem = MockBijbeltekstInvoer(onderdeel, fragment, fragmentVerzen);
+                var database = new LiturgieDatabaseBuilder()
+                    .ZoekSpecifiek_AddOnderdeelAndFragment(onderdeel, fragment)
+                    .Build();
                 var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieLosOp;
 
-                var oplossing = sut.LosOp(liturgieItem, _liturgieSettings);
+                var oplossing = sut.LosOp(liturgieItem, _liturgieSettingsDefault);
 
                 Assert.AreEqual(LiturgieOplossingResultaat.Opgelost, oplossing.Resultaat);
             }
         }
 
-        private static ILiturgieInterpretatieBijbeltekst FakeBijbeltekstInterpretatie(string onderdeel, string fragment, IEnumerable<string> verzen)
+        private static ILiturgieInterpretatieBijbeltekst MockBijbeltekstInvoer(string onderdeel, string fragment, IEnumerable<string> verzen)
         {
-            var liturgieItem = A.Fake<ILiturgieInterpretatieBijbeltekst>();
-            A.CallTo(() => liturgieItem.Benaming).Returns(onderdeel);
-            A.CallTo(() => liturgieItem.Deel).Returns(fragment);
-            var liturgieItemDeel = A.Fake<ILiturgieInterpretatieBijbeltekstDeel>();
-            A.CallTo(() => liturgieItemDeel.Deel).Returns(fragment);
-            A.CallTo(() => liturgieItemDeel.Verzen).Returns(verzen.ToList());
-            A.CallTo(() => liturgieItem.PerDeelVersen).Returns(new[] { liturgieItemDeel });
-            return liturgieItem;
-        }
+            var liturgieItemDeel = new Mock<ILiturgieInterpretatieBijbeltekstDeel>();
+            liturgieItemDeel.SetupGet(x => x.Deel).Returns(fragment);
+            liturgieItemDeel.SetupGet(x => x.Verzen).Returns(verzen);
 
-        private static ILiturgieDatabase.ILiturgieDatabase FakeDatabase(string onderdeel, string fragment, string display = null, LiturgieOplossingResultaat status = LiturgieOplossingResultaat.Opgelost)
-        {
-            var zoekresultaatOnderdeel = A.Fake<IOplossingOnderdeel>();
-            A.CallTo(() => zoekresultaatOnderdeel.OrigineleNaam).Returns(onderdeel);
-            A.CallTo(() => zoekresultaatOnderdeel.VeiligeNaam).Returns(onderdeel);
-            if (display != null)
-                A.CallTo(() => zoekresultaatOnderdeel.DisplayNaam).Returns(display);
-            var zoekresultaatFragment = A.Fake<IOplossingOnderdeel>();
-            A.CallTo(() => zoekresultaatFragment.OrigineleNaam).Returns(fragment);
-            A.CallTo(() => zoekresultaatFragment.VeiligeNaam).Returns(fragment);
-            var zoekresultaat = A.Fake<IOplossing>();
-            A.CallTo(() => zoekresultaat.Onderdeel).Returns(zoekresultaatOnderdeel);
-            A.CallTo(() => zoekresultaat.Fragment).Returns(zoekresultaatFragment);
-            A.CallTo(() => zoekresultaat.Status).Returns(status);
-            var database = A.Fake<ILiturgieDatabase.ILiturgieDatabase>();
-            A.CallTo(database)
-                .Where(d => d.Method.Name == "ZoekOnderdeel")
-                .WithReturnType<IOplossing>()
-                .WithAnyArguments()
-                .Returns(zoekresultaat);
-            return database;
-        }
-
-        private static ILiturgieSettings FakeLiturgieSettings()
-        {
-            var settings = A.Fake<ILiturgieSettings>();
-            A.CallTo(() => settings.ToonBijbeltekstenInLiturgie).Returns(true);
-            return settings;
+            var liturgieItem = new Mock<ILiturgieInterpretatieBijbeltekst>();
+            liturgieItem.SetupGet(x => x.Benaming).Returns(onderdeel);
+            liturgieItem.SetupGet(x => x.Deel).Returns(fragment);
+            liturgieItem.SetupGet(x => x.OptiesGebruiker).Returns(new LiturgieOptiesGebruiker());
+            liturgieItem.SetupGet(x => x.PerDeelVersen).Returns(new[] { liturgieItemDeel.Object });
+            return liturgieItem.Object;
         }
     }
 }

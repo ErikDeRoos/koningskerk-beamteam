@@ -1,10 +1,10 @@
-﻿// Copyright 2016 door Erik de Roos
+﻿// Copyright 2019 door Erik de Roos
 
 namespace ILiturgieDatabase
 {
-    public interface ILiturgieMapmaskArg
+    public class LiturgieMapmaskArg
     {
-        string Name { get; }
-        string RealName { get; }
+        public string Name { get; set; }
+        public string RealName { get; set; }
     }
 }

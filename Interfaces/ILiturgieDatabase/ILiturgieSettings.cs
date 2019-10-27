@@ -1,8 +1,8 @@
 ﻿namespace ILiturgieDatabase
 {
-    public interface ILiturgieSettings
+    public class LiturgieSettings
     {
-        bool ToonBijbeltekstenInLiturgie { get; }
-        bool GebruikDisplayNameVoorZoeken { get; }
+        public bool ToonBijbeltekstenInLiturgie { get; set; }
+        public bool GebruikDisplayNameVoorZoeken { get; set; }
     }
 }

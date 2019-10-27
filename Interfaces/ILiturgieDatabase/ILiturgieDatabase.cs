@@ -5,8 +5,7 @@ namespace ILiturgieDatabase
 {
     public interface ILiturgieDatabase
     {
-        IOplossing ZoekSpecifiek(string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen, ILiturgieSettings settings);
-        IOplossing ZoekSpecifiek(VerwerkingType alsType, string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen, ILiturgieSettings settings);
+        IOplossing ZoekSpecifiek(VerwerkingType alsType, string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen, LiturgieSettings settings);
         IEnumerable<IZoekresultaat> ZoekGeneriekOnderdeelDefault();
         IEnumerable<IZoekresultaat> ZoekGeneriekOnderdeelBijbel();
         IEnumerable<IZoekresultaat> ZoekGeneriekAlleOnderdelen();

@@ -30,12 +30,7 @@ namespace Generator.Database
             _databases = database;
         }
 
-        public IOplossing ZoekSpecifiek(string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen, ILiturgieSettings settings)
-        {
-            return ZoekSpecifiek(VerwerkingType.normaal, onderdeelNaam, fragmentNaam, fragmentDelen, settings);
-        }
-
-        public IOplossing ZoekSpecifiek(VerwerkingType alsType, string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen, ILiturgieSettings settings)
+        public IOplossing ZoekSpecifiek(VerwerkingType alsType, string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen, LiturgieSettings settings)
         {
             var database = alsType == VerwerkingType.normaal ? _databases.GetDefault() : _databases.Extensions.FirstOrDefault(e => e.Name == LiturgieDatabaseSettings.DatabaseNameBijbeltekst);
             if (database == null)
@@ -319,8 +314,8 @@ namespace Generator.Database
         private class Oplossing : IOplossing
         {
             public LiturgieOplossingResultaat Status { get; set; }
-            public IOplossingOnderdeel Onderdeel { get; set; }
-            public IOplossingOnderdeel Fragment { get; set; }
+            public OplossingOnderdeel Onderdeel { get; set; }
+            public OplossingOnderdeel Fragment { get; set; }
             public IEnumerable<ILiturgieContent> Content { get; set; }
             public bool ZonderContentSplitsing { get; set; }
             public bool? StandaardNietTonenInLiturgie { get; set; }
@@ -329,13 +324,6 @@ namespace Generator.Database
             {
                 Status = LiturgieOplossingResultaat.Onbekend;
             }
-        }
-
-        private class OplossingOnderdeel : IOplossingOnderdeel
-        {
-            public string VeiligeNaam { get; set; }
-            public string OrigineleNaam { get; set; }
-            public string DisplayNaam { get; set; }
         }
 
         private class Zoekresultaat : IZoekresultaat
@@ -365,36 +353,22 @@ namespace Generator.Database
 
     public static class MapMasksToLiturgie
     {
-        public static IEnumerable<ILiturgieMapmaskArg> Map(IEnumerable<IMapmask> masks)
+        public static IEnumerable<LiturgieMapmaskArg> Map(IEnumerable<IMapmask> masks)
         {
-            return masks.Select(m => new MaskMap { Name = m.Name, RealName = m.RealName }).ToList();
-        }
-
-        private class MaskMap : ILiturgieMapmaskArg
-        {
-            public string Name { get; set; }
-
-            public string RealName { get; set; }
+            return masks.Select(m => new LiturgieMapmaskArg { Name = m.Name, RealName = m.RealName }).ToList();
         }
     }
 
 
     public static class MapInstellingenToSettings
     {
-        public static ILiturgieSettings Map(IInstellingen instellingen)
+        public static LiturgieSettings Map(IInstellingen instellingen)
         {
             return new LiturgieSettings
             {
                 ToonBijbeltekstenInLiturgie = instellingen.ToonBijbeltekstenInLiturgie,
                 GebruikDisplayNameVoorZoeken = instellingen.GebruikDisplayNameVoorZoeken,
             };
-        }
-
-        private class LiturgieSettings : ILiturgieSettings
-        {
-            public bool ToonBijbeltekstenInLiturgie { get; set; }
-
-            public bool GebruikDisplayNameVoorZoeken { get; set; }
         }
     }
 }

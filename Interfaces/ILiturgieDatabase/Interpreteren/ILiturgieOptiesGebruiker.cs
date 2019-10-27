@@ -1,14 +1,14 @@
-﻿// Copyright 2017 door Erik de Roos
+﻿// Copyright 2019 door Erik de Roos
 namespace ILiturgieDatabase
 {
 
-    public interface ILiturgieOptiesGebruiker
+    public class LiturgieOptiesGebruiker
     {
-        bool NietVerwerkenViaDatabase { get; }
-        bool? ToonInOverzicht { get; }
-        bool? ToonInVolgende { get; }
-        bool AlsBijbeltekst { get; }
-        string AlternatieveNaamOverzicht { get; }
-        string AlternatieveNaam { get; }
+        public bool NietVerwerkenViaDatabase { get; set; }
+        public bool? ToonInOverzicht { get; set; }
+        public bool? ToonInVolgende { get; set; }
+        public bool AlsBijbeltekst { get; set; }
+        public string AlternatieveNaamOverzicht { get; set; }
+        public string AlternatieveNaam { get; set; }
     }
 }

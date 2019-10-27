@@ -30,8 +30,8 @@ namespace PowerpointGenerator
                 .InstancePerLifetimeScope();
             container.RegisterType<mppt.RegelVerwerking.LengteBerekenaar>().As<ILiturgieDatabase.ILengteBerekenaar>();
             container.RegisterType<Generator.LiturgieInterpretator.InterpreteerLiturgieRuw>().As<ILiturgieDatabase.ILiturgieInterpreteer>();
-            container.RegisterGeneric(typeof(Generator.Database.FileSystem.FileEngine<>)).As(typeof(IDatabase.Engine.IEngine<>));
-            container.RegisterGeneric(typeof(Database.EngineManager<>)).As(typeof(IDatabase.IEngineManager<>));
+            container.RegisterType<Generator.Database.FileSystem.FileEngine>().As<IDatabase.Engine.IEngine>();
+            container.RegisterType<Database.EngineManager>().As<IDatabase.IEngineManager>();
             SetMsPowerpointBuilder(container);
         }
 

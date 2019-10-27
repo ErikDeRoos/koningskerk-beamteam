@@ -50,9 +50,9 @@ namespace Generator.LiturgieInterpretator
               .ToList();
         }
 
-        public ILiturgieOptiesGebruiker BepaalBasisOptiesTekstinvoer(string invoerTekst, string uitDatabase)
+        public LiturgieOptiesGebruiker BepaalBasisOptiesTekstinvoer(string invoerTekst, string uitDatabase)
         {
-            var returnValue = new LiturgieOpties();
+            var returnValue = new LiturgieOptiesGebruiker();
             returnValue.NietVerwerkenViaDatabase = String.IsNullOrWhiteSpace(invoerTekst);
             if (returnValue.NietVerwerkenViaDatabase)
                 return returnValue;
@@ -62,7 +62,7 @@ namespace Generator.LiturgieInterpretator
             return returnValue;
         }
 
-        public string MaakTekstVanOpties(ILiturgieOptiesGebruiker opties)
+        public string MaakTekstVanOpties(LiturgieOptiesGebruiker opties)
         {
             if (opties == null)
                 return string.Empty;
@@ -119,7 +119,7 @@ namespace Generator.LiturgieInterpretator
             };
         }
 
-        public ILiturgieOptiesGebruiker BepaalOptiesTekstinvoer(string optiesTekst)
+        public LiturgieOptiesGebruiker BepaalOptiesTekstinvoer(string optiesTekst)
         {
             var heeftOpties = optiesTekst.IndexOfAny(OptieStart) >= 0 && optiesTekst.IndexOfAny(OptieEinde) >= 0;
             var voorOpties = optiesTekst.Split(OptieStart, StringSplitOptions.RemoveEmptyEntries);
@@ -139,9 +139,9 @@ namespace Generator.LiturgieInterpretator
             return VerwerkNormaal(voorOpties, opties);
         }
 
-        private static ILiturgieOptiesGebruiker InterpreteerOpties(string optiesRuw)
+        private static LiturgieOptiesGebruiker InterpreteerOpties(string optiesRuw)
         {
-            var returnValue = new LiturgieOpties();
+            var returnValue = new LiturgieOptiesGebruiker();
             var opties = (!IsNullOrEmpty(optiesRuw) ? optiesRuw : "")
               .Split(OptieScheidingstekens, StringSplitOptions.RemoveEmptyEntries)
               .Select(v => v.Trim())
@@ -165,7 +165,7 @@ namespace Generator.LiturgieInterpretator
                 .FirstOrDefault();
         }
 
-        private static ILiturgieInterpretatie VerwerkNormaal(string[] voorOpties, ILiturgieOptiesGebruiker opties)
+        private static ILiturgieInterpretatie VerwerkNormaal(string[] voorOpties, LiturgieOptiesGebruiker opties)
         {
             var regel = new InterpretatieNormaal();
             if (voorOpties.Length == 0)
@@ -189,7 +189,7 @@ namespace Generator.LiturgieInterpretator
             return regel;
         }
 
-        private static ILiturgieInterpretatieBijbeltekst VerwerkAlsBijbeltekst(string[] voorOpties, ILiturgieOptiesGebruiker opties)
+        private static ILiturgieInterpretatieBijbeltekst VerwerkAlsBijbeltekst(string[] voorOpties, LiturgieOptiesGebruiker opties)
         {
             var regel = new InterpretatieBijbeltekst();
             if (voorOpties.Length == 0)
@@ -279,7 +279,7 @@ namespace Generator.LiturgieInterpretator
             public string TeTonenNaam { get; set; }
             public string TeTonenNaamOpOverzicht { get; set; }
 
-            public ILiturgieOptiesGebruiker OptiesGebruiker { get; set; }
+            public LiturgieOptiesGebruiker OptiesGebruiker { get; set; }
             public IEnumerable<string> Verzen { get; set; }
             public string VerzenZoalsIngevoerd { get; set; }
 
@@ -314,16 +314,6 @@ namespace Generator.LiturgieInterpretator
                     return $"{Deel}: {VerzenZoalsIngevoerd}";
                 return Deel;
             }
-        }
-
-        private class LiturgieOpties : ILiturgieOptiesGebruiker
-        {
-            public bool NietVerwerkenViaDatabase { get; set; }
-            public bool? ToonInOverzicht { get; set; }
-            public bool? ToonInVolgende { get; set; }
-            public bool AlsBijbeltekst { get; set; }
-            public string AlternatieveNaamOverzicht { get; set; }
-            public string AlternatieveNaam { get; set; }
         }
     }
 }

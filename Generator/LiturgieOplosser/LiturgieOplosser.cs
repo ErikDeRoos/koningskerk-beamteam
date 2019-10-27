@@ -28,11 +28,7 @@ namespace Generator.LiturgieOplosser
         }
 
 
-        public ILiturgieOplossing LosOp(ILiturgieInterpretatie item, ILiturgieSettings settings)
-        {
-            return LosOp(item, null, settings);
-        }
-        public ILiturgieOplossing LosOp(ILiturgieInterpretatie item, IEnumerable<ILiturgieMapmaskArg> masks, ILiturgieSettings settings)
+        public ILiturgieOplossing LosOp(ILiturgieInterpretatie item, LiturgieSettings settings, IEnumerable<LiturgieMapmaskArg> masks = null)
         {
             var regel = new Regel {DisplayEdit = new RegelDisplay()};
 
@@ -102,7 +98,7 @@ namespace Generator.LiturgieOplosser
             return new Oplossing(LiturgieOplossingResultaat.Opgelost, item, regel);
         }
 
-        private LiturgieOplossingResultaat? Aanvullen(Regel regel, ILiturgieInterpretatie item, ILiturgieSettings settings)
+        private LiturgieOplossingResultaat? Aanvullen(Regel regel, ILiturgieInterpretatie item, LiturgieSettings settings)
         {
             var setNaam = item.Benaming;
             if (item is ILiturgieInterpretatieBijbeltekst)
@@ -119,11 +115,11 @@ namespace Generator.LiturgieOplosser
 
             return NormaleAanvuller(regel, setNaam, zoekNaam, item.Verzen.ToList(), settings);
         }
-        private LiturgieOplossingResultaat? NormaleAanvuller(Regel regel, string setNaam, string zoekNaam, IEnumerable<string> verzen, ILiturgieSettings settings)
+        private LiturgieOplossingResultaat? NormaleAanvuller(Regel regel, string setNaam, string zoekNaam, IEnumerable<string> verzen, LiturgieSettings settings)
         {
             regel.VerwerkenAlsType = VerwerkingType.normaal;
             var verzenList = verzen.ToList();
-            var resultaat = _database.ZoekSpecifiek(setNaam, zoekNaam, verzenList, settings);
+            var resultaat = _database.ZoekSpecifiek(VerwerkingType.normaal, setNaam, zoekNaam, verzenList, settings);
             if (resultaat.Status != LiturgieOplossingResultaat.Opgelost)
                 return resultaat.Status;
 
@@ -151,7 +147,7 @@ namespace Generator.LiturgieOplosser
 
             return null;
         }
-        private LiturgieOplossingResultaat? BijbeltekstAanvuller(Regel regel, string setNaam, IEnumerable<ILiturgieInterpretatieBijbeltekstDeel> versDelen, ILiturgieSettings settings)
+        private LiturgieOplossingResultaat? BijbeltekstAanvuller(Regel regel, string setNaam, IEnumerable<ILiturgieInterpretatieBijbeltekstDeel> versDelen, LiturgieSettings settings)
         {
             regel.VerwerkenAlsType = VerwerkingType.bijbeltekst;
             var content = new List<ILiturgieContent>();
@@ -167,11 +163,6 @@ namespace Generator.LiturgieOplosser
             regel.Content = content.ToList();
             regel.DisplayEdit.VolledigeContent = versDelenLijst.Count == 1 && !versDelen.FirstOrDefault().Verzen.Any();
             return null;
-        }
-
-        public IEnumerable<ILiturgieOplossing> LosOp(IEnumerable<ILiturgieInterpretatie> items, IEnumerable<ILiturgieMapmaskArg> masks, ILiturgieSettings settings)
-        {
-            return items.Select(i => LosOp(i, masks, settings)).ToList();
         }
 
         /// <summary>
@@ -349,7 +340,7 @@ namespace Generator.LiturgieOplosser
             };
         }
 
-        public ILiturgieOptiesGebruiker ZoekStandaardOptiesUitZoekresultaat(string invoerTekst, IVrijZoekresultaat zoekresultaat)
+        public LiturgieOptiesGebruiker ZoekStandaardOptiesUitZoekresultaat(string invoerTekst, IVrijZoekresultaat zoekresultaat)
         {
             if (string.IsNullOrWhiteSpace(invoerTekst))
                 return null;
@@ -367,13 +358,13 @@ namespace Generator.LiturgieOplosser
             return _liturgieInterperator.BepaalBasisOptiesTekstinvoer(invoerTekst, databaseNaam);
         }
 
-        public ILiturgieOptiesGebruiker ToonOpties(string optiesInTekst)
+        public LiturgieOptiesGebruiker ToonOpties(string optiesInTekst)
         {
             return _liturgieInterperator.BepaalOptiesTekstinvoer(optiesInTekst);
         }
 
 
-        public string MaakTotTekst(string invoerTekst, ILiturgieOptiesGebruiker opties, IVrijZoekresultaat zoekresultaat)
+        public string MaakTotTekst(string invoerTekst, LiturgieOptiesGebruiker opties, IVrijZoekresultaat zoekresultaat)
         {
             var tekstUitOpties = _liturgieInterperator.MaakTekstVanOpties(opties);
             var gebruiktZoekresultaat = zoekresultaat.AlleMogelijkheden

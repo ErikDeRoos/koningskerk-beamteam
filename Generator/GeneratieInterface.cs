@@ -180,7 +180,8 @@ namespace Generator
             // Zoek op het bestandssysteem zo veel mogelijk al op (behalve ppt, die gaan via COM element)
             var masks = MapMasksToLiturgie.Map(instellingen.Masks);
             var settings = MapInstellingenToSettings.Map(instellingen);
-            return _liturgieOplosser.LosOp(ruweLiturgie, masks, settings).ToList();
+
+            return ruweLiturgie.Select(i => _liturgieOplosser.LosOp(i, settings, masks)).ToList();
         }
 
         public PpGenerator.StatusMelding StartGenereren(IEnumerable<ILiturgieOplossing> ingeladenLiturgie, string opslaanAlsBestandsnaam)

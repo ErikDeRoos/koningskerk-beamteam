@@ -1,4 +1,4 @@
-﻿// Copyright 2017 door Erik de Roos
+﻿// Copyright 2019 door Erik de Roos
 using System.Collections.Generic;
 
 namespace ILiturgieDatabase
@@ -14,6 +14,6 @@ namespace ILiturgieDatabase
         string TeTonenNaamOpOverzicht { get; }
         IEnumerable<string> Verzen { get; }
         string VerzenZoalsIngevoerd { get; }
-        ILiturgieOptiesGebruiker OptiesGebruiker { get; }
+        LiturgieOptiesGebruiker OptiesGebruiker { get; }
     }
 }

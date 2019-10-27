@@ -41,7 +41,6 @@
     <Compile Include="Database\FileSystem\ArchiveExtender.cs" />
     <Compile Include="Database\FileSystem\AutoTempFile.cs" />
     <Compile Include="Database\FileSystem\FileEngine.cs" />
-    <Compile Include="Database\FileSystem\FileEngineSetSettings.cs" />
     <Compile Include="Database\FileSystem\FileFinder.cs" />
     <Compile Include="Database\FileSystem\FileZipFinder.cs" />
     <Compile Include="Database\FileSystem\IZipArchiveDirectory.cs" />
