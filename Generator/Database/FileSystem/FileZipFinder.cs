@@ -82,7 +82,7 @@ namespace Generator.Database.FileSystem
 
     public class FileZipBundledItem : IDbItem
     {
-        public IDbName Name { get; }
+        public DbItemName Name { get; }
         public IDbItemContent Content { get; }
 
         internal FileZipBundledItem(IZipArchiveDirectory archiveDir, bool cached)
@@ -134,7 +134,7 @@ namespace Generator.Database.FileSystem
 
     class FileZipItem : IDbItem
     {
-        public IDbName Name { get; }
+        public DbItemName Name { get; }
         public IDbItemContent Content { get; }
 
         public FileZipItem(ZipArchiveEntry entry)

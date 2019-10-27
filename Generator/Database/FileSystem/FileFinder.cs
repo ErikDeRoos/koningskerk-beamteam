@@ -33,7 +33,7 @@ namespace Generator.Database.FileSystem
 
     public class FileBundledItem : IDbItem
     {
-        public IDbName Name { get; }
+        public DbItemName Name { get; }
 
         public IDbItemContent Content { get; }
         private IFileOperations _fileManager;
@@ -91,7 +91,7 @@ namespace Generator.Database.FileSystem
 
     class FileItem : IDbItem
     {
-        public IDbName Name { get; }
+        public DbItemName Name { get; }
         public IDbItemContent Content { get; }
         private IFileOperations _fileManager;
 
@@ -140,11 +140,4 @@ namespace Generator.Database.FileSystem
             }
         }
     }
-
-    class DbItemName : IDbName
-    {
-        public string Name { get; set; }
-        public string SafeName { get; set; }
-    }
-
 }

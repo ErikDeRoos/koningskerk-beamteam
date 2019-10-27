@@ -1,10 +1,10 @@
-﻿// Copyright 2016 door Erik de Roos
+﻿// Copyright 2019 door Erik de Roos
 
 namespace IDatabase.Engine
 {
-    public interface IEngineSelection<T> where T : class, ISetSettings, new()
+    public interface IEngineSelection
     {
         string Name { get; }
-        IEngine<T> Engine { get; }
+        IEngine Engine { get; }
     }
 }

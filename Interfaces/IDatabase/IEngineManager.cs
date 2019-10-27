@@ -1,4 +1,4 @@
-﻿// Copyright 2016 door Erik de Roos
+﻿// Copyright 2019 door Erik de Roos
 using IDatabase.Engine;
 using System.Collections.Generic;
 
@@ -8,17 +8,17 @@ namespace IDatabase
     /// Engine wrapper voor toegang tot andere engines.
     /// Aanname is dat alle engines ingeladen zijn bij het aanmaken van de interface.
     /// </summary>
-    public interface IEngineManager<T> where T : class, ISetSettings, new()
+    public interface IEngineManager
     {
         /// <summary>
         /// De standaard engine
         /// </summary>
         /// <returns></returns>
-        IEngineSelection<T> GetDefault();
+        IEngineSelection GetDefault();
 
         /// <summary>
         /// Alle beschikbare engines
         /// </summary>
-        IEnumerable<IEngineSelection<T>> Extensions { get; }
+        IEnumerable<IEngineSelection> Extensions { get; }
     }
 }

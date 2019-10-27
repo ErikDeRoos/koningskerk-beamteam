@@ -48,14 +48,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Engine\IEngineSelection.cs" />
-    <Compile Include="Engine\EngineMock.cs" />
     <Compile Include="IEngineManager.cs" />
-    <Compile Include="Sets\IDbName.cs" />
-    <Compile Include="Sets\items\IDbItem.cs" />
-    <Compile Include="Sets\items\IDbItemContentcs.cs" />
-    <Compile Include="Sets\IDbSet.cs" />
+    <Compile Include="Models\DbItemName.cs" />
+    <Compile Include="Models\IDbItem.cs" />
+    <Compile Include="Models\IDbItemContentcs.cs" />
+    <Compile Include="Models\IDbSet.cs" />
     <Compile Include="Engine\IEngine.cs" />
-    <Compile Include="Sets\ISetSettings.cs" />
+    <Compile Include="Models\DbSetSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

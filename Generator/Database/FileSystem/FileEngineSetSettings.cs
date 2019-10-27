@@ -3,7 +3,7 @@ using IDatabase;
 
 namespace Generator.Database.FileSystem
 {
-    public class FileEngineSetSettings : ISetSettings
+    public class FileEngineSetSettings : DbSetSettings
     {
         public string DisplayName { get; set; }
 

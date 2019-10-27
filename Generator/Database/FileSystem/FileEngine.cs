@@ -38,12 +38,12 @@ namespace Generator.Database.FileSystem
     /// File-system gebaseerde database. Lazy loading. Read-only.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class FileEngine<T> : IEngine<T> where T : class, ISetSettings, new()
+    public class FileEngine : IEngine
     {
-        public delegate IEngine<T2> Factory<T2>(string databasePad, bool cached) where T2 : class, ISetSettings, new();
+        public delegate IEngine Factory(string databasePad, bool cached);
 
         private bool _cached { get; set; }
-        private IEnumerable<IDbSet<T>> _dirCache;
+        private IEnumerable<IDbSet> _dirCache;
         private string _startDir;
         private IFileOperations _fileManager;
 
@@ -58,14 +58,14 @@ namespace Generator.Database.FileSystem
             _cached = cached;
         }
 
-        private IEnumerable<FileSet<T>> GetDirs(string startDir, bool askCached)
+        private IEnumerable<FileSet> GetDirs(string startDir, bool askCached)
         {
             if (!_fileManager.DirExists(startDir))
-                return new List<FileSet<T>>();
-            return _fileManager.GetDirectories(startDir).Select(d => new FileSet<T>(_fileManager, d, askCached)).ToList();
+                return new List<FileSet>();
+            return _fileManager.GetDirectories(startDir).Select(d => new FileSet(_fileManager, d, askCached)).ToList();
         }
 
-        private IEnumerable<IDbSet<T>> GetDbSet()
+        private IEnumerable<IDbSet> GetDbSet()
         {
             if (!_cached)
                 return GetDirs(_startDir, _cached);
@@ -74,12 +74,12 @@ namespace Generator.Database.FileSystem
             return _dirCache;
         }
 
-        public IEnumerable<IDbSet<T>> Where(Func<IDbSet<T>, bool> query)
+        public IEnumerable<IDbSet> Where(Func<IDbSet, bool> query)
         {
             return GetDbSet().Where(query);
         }
 
-        public IEnumerable<IDbName> GetAllNames()
+        public IEnumerable<DbItemName> GetAllNames()
         {
             return GetDbSet()
                 .Select(db => db.Name)
@@ -87,17 +87,17 @@ namespace Generator.Database.FileSystem
         }
     }
 
-    class FileSet<T> : IDbSet<T> where T : class, ISetSettings, new()
+    class FileSet : IDbSet
     {
         private string _inDir;
         private bool _cached;
         private IEnumerable<IDbItem> _itemCache;
-        private T _settingsCached;
+        private DbSetSettings _settingsCached;
         private IFinder _finderCached;
         private IFileOperations _fileManager;
 
-        public IDbName Name { get; }
-        public T Settings { get { return GetSettings(_cached); } set { ChangeSettings(value, _cached); } }
+        public DbItemName Name { get; }
+        public DbSetSettings Settings { get { return GetSettings(_cached); } set { ChangeSettings(value, _cached); } }
 
         public FileSet(IFileOperations fileManager, string inDir, bool cached)
         {
@@ -141,7 +141,7 @@ namespace Generator.Database.FileSystem
             return GetItemSet().Where(query);
         }
 
-        private T GetSettings(bool cached)
+        private DbSetSettings GetSettings(bool cached)
         {
             if (cached)
             {
@@ -152,29 +152,29 @@ namespace Generator.Database.FileSystem
 
             var fileName = _fileManager.CombineDirectories(_inDir, FileEngineDefaults.SetSettingsName);
             if (!_fileManager.FileExists(fileName))
-                ChangeSettings(new T(), false);
+                ChangeSettings(new DbSetSettings(), false);
             try {
-                var serializer = new XmlSerializer(typeof(T));
+                var serializer = new XmlSerializer(typeof(DbSetSettings));
                 var settings = new XmlReaderSettings();
                 using (var textReader = new StreamReader(_fileManager.FileReadStream(fileName)))
                 {
                     var xmlReader = XmlReader.Create(textReader, settings);
-                    return (serializer.Deserialize(xmlReader) as T) ?? new T();
+                    return (serializer.Deserialize(xmlReader) as DbSetSettings) ?? new DbSetSettings();
                 }
             }
             catch (InvalidOperationException)  // XML niet in juiste format
             {
-                var nieuw = new T();
+                var nieuw = new DbSetSettings();
                 ChangeSettings(nieuw, false);
                 return nieuw;
             }
         }
 
-        private void ChangeSettings(T newSettings, bool cached)
+        private void ChangeSettings(DbSetSettings newSettings, bool cached)
         {
             try {
                 var fileName = _fileManager.CombineDirectories(_inDir, FileEngineDefaults.SetSettingsName);
-                var serializer = new XmlSerializer(typeof(T));
+                var serializer = new XmlSerializer(typeof(DbSetSettings));
                 using (var sw = new StreamWriter(_fileManager.FileWriteStream(fileName)))
                 {
                     serializer.Serialize(sw, newSettings);
@@ -188,7 +188,7 @@ namespace Generator.Database.FileSystem
             }
         }
 
-        public IEnumerable<IDbName> GetAllNames()
+        public IEnumerable<DbItemName> GetAllNames()
         {
             return GetItemSet()
                 .Select(db => db.Name);

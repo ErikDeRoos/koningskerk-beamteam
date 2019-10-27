@@ -59,10 +59,11 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
-    <Compile Include="InterpreteerLiturgieRuwTests.cs" />
-    <Compile Include="LiturgieDatabaseTests.cs" />
-    <Compile Include="LiturgieOplosserBijbeltekst.cs" />
-    <Compile Include="LiturgieOplosserTests.cs" />
+    <Compile Include="Builders\EngineManagerBuilder.cs" />
+    <Compile Include="Oplosser\InterpreteerLiturgieRuwTests.cs" />
+    <Compile Include="Database\LiturgieDatabaseTests.cs" />
+    <Compile Include="Oplosser\LiturgieOplosserBijbeltekst.cs" />
+    <Compile Include="Oplosser\LiturgieOplosserTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

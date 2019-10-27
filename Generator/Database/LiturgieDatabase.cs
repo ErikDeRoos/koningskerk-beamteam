@@ -1,5 +1,4 @@
 ﻿// Copyright 2019 door Erik de Roos
-using Generator.Database.FileSystem;
 using IDatabase;
 using ILiturgieDatabase;
 using ISettings;
@@ -25,8 +24,8 @@ namespace Generator.Database
     /// </summary>
     public class LiturgieDatabase : ILiturgieDatabase.ILiturgieDatabase
     {
-        private readonly IEngineManager<FileEngineSetSettings> _databases;
-        public LiturgieDatabase(IEngineManager<FileEngineSetSettings> database)
+        private readonly IEngineManager _databases;
+        public LiturgieDatabase(IEngineManager database)
         {
             _databases = database;
         }
@@ -156,7 +155,7 @@ namespace Generator.Database
             }
         }
 
-        private static IEnumerable<IContentDelayed> KrijgContentDelayed(IDbItem vanItem, FileEngineSetSettings metSettings)
+        private static IEnumerable<IContentDelayed> KrijgContentDelayed(IDbItem vanItem, DbSetSettings metSettings)
         {
             if (metSettings.ItemsHaveSubContent)
                 return vanItem.Content.TryAccessSubs()

@@ -2,16 +2,16 @@
 
 namespace IDatabase
 {
-    public interface IDbName
+    public class DbItemName
     {
         /// <summary>
         /// Naam van de dataset zoals deze voorkomt op de server (meestal directory naam, case sensitive)
         /// </summary>
-        string Name { get; }
+        public string Name { get; set; }
 
         /// <summary>
         /// De veilige versie van Naam waarin spaties vervangen zijn en alles lowercase is.
         /// </summary>
-        string SafeName { get; }
+        public string SafeName { get; set;  }
     }
 }

@@ -1,19 +1,20 @@
-﻿using IDatabase;
+﻿// Copyright 2019 door Erik de Roos
+using IDatabase;
 using IDatabase.Engine;
 using ISettings;
 using System.Collections.Generic;
 
 namespace PowerpointGenerator.Database
 {
-    class EngineManager<T> : IEngineManager<T> where T : class, ISetSettings, new()
+    class EngineManager : IEngineManager
     {
         private readonly IInstellingenFactory _settings;
-        private readonly Generator.Database.FileSystem.FileEngine<T>.Factory<T> _fac;
+        private readonly Generator.Database.FileSystem.FileEngine.Factory _fac;
 
-        private IEngineSelection<T> _default;
-        private IEngineSelection<T> _bijbeltekst;
+        private IEngineSelection _default;
+        private IEngineSelection _bijbeltekst;
 
-        public IEnumerable<IEngineSelection<T>> Extensions {
+        public IEnumerable<IEngineSelection> Extensions {
             get
             {
                 yield return GetDefault();
@@ -21,15 +22,15 @@ namespace PowerpointGenerator.Database
             }
         }
 
-        public EngineManager(IInstellingenFactory settings, Generator.Database.FileSystem.FileEngine<T>.Factory<T> fac) {
+        public EngineManager(IInstellingenFactory settings, Generator.Database.FileSystem.FileEngine.Factory fac) {
             _settings = settings;
             _fac = fac;
         }
 
-        public IEngineSelection<T> GetDefault()
+        public IEngineSelection GetDefault()
         {
             if (_default == null)
-                _default = new EngineSelection<T>()
+                _default = new EngineSelection()
                 {
                     Name = Generator.Database.LiturgieDatabaseSettings.DatabaseNameDefault,
                     Engine = _fac.Invoke(_settings.LoadFromFile().FullDatabasePath, true)
@@ -37,10 +38,10 @@ namespace PowerpointGenerator.Database
             return _default;
         }
 
-        private IEngineSelection<T> GetBijbeltekst()
+        private IEngineSelection GetBijbeltekst()
         {
             if (_bijbeltekst == null)
-                _bijbeltekst = new EngineSelection<T>()
+                _bijbeltekst = new EngineSelection()
                 {
                     Name = Generator.Database.LiturgieDatabaseSettings.DatabaseNameBijbeltekst,
                     Engine = _fac.Invoke(_settings.LoadFromFile().FullBijbelPath, true)
@@ -48,9 +49,9 @@ namespace PowerpointGenerator.Database
             return _bijbeltekst;
         }
 
-        class EngineSelection<T2> : IEngineSelection<T2> where T2 : class, ISetSettings, new()
+        class EngineSelection : IEngineSelection
         {
-            public IEngine<T2> Engine { get; set; }
+            public IEngine Engine { get; set; }
             public string Name { get; set; }
         }
     }
