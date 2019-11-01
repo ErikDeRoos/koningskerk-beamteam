@@ -8,14 +8,14 @@ namespace mppt.LiedPresentator
 {
     public class LiedFormatter : ILiedFormatter
     {
-        public LiedFormatResult Huidig(ILiturgieRegel regel, ILiturgieContent vanafDeel)
+        public LiedFormatResult Huidig(ISlideOpbouw regel, ILiturgieContent vanafDeel)
         {
             return ToonMetVerzenEnEersteLos(regel, vanafDeel);
         }
 
         /// Je kunt er voor kiezen dat een volgende item gewoon niet aangekondigd wordt. Dat gaat
         /// via 'TonenInVolgende'.
-        public LiedFormatResult Volgende(IEnumerable<ILiturgieRegel> volgenden, int overslaan = 0)
+        public LiedFormatResult Volgende(IEnumerable<ISlideOpbouw> volgenden, int overslaan = 0)
         {
             // Alleen volgende tonen als volgende er is
             if (volgenden != null && volgenden.Any() && overslaan >= 0)
@@ -27,12 +27,12 @@ namespace mppt.LiedPresentator
             return null;
         }
 
-        public LiedFormatResult Liturgie(ILiturgieRegel regel)
+        public LiedFormatResult Liturgie(ISlideOpbouw regel)
         {
             return ToonWaarNodigMetVerzen(regel);
         }
 
-        private static LiedFormatResult ToonWaarNodigMetVerzen(ILiturgieRegel regel)
+        private static LiedFormatResult ToonWaarNodigMetVerzen(ISlideOpbouw regel)
         {
             var result = new LiedFormatResult()
             {
@@ -44,7 +44,7 @@ namespace mppt.LiedPresentator
             return result;
         }
 
-        private static LiedFormatResult ToonMetVerzenEnEersteLos(ILiturgieRegel regel, ILiturgieContent vanafDeelHint)
+        private static LiedFormatResult ToonMetVerzenEnEersteLos(ISlideOpbouw regel, ILiturgieContent vanafDeelHint)
         {
             var result = new LiedFormatResult()
             {

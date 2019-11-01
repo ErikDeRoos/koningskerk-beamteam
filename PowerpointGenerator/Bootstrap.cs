@@ -25,11 +25,13 @@ namespace PowerpointGenerator
         private static void SetGenerator(ContainerBuilder container)
         {
             container.RegisterType<Generator.Database.LiturgieDatabase>().As<ILiturgieDatabase.ILiturgieDatabase>();
-            container.RegisterType<Generator.LiturgieOplosser.LiturgieOplosser>().As<ILiturgieDatabase.ILiturgieLosOp>()
+            container.RegisterType<Generator.LiturgieOplosser.LiturgieOplosser>().As<ILiturgieDatabase.ILiturgieSlideMaker>()
                 .WithParameter("defaultSetNameEmpty", DefaultSetNameEmpty)
                 .InstancePerLifetimeScope();
+            container.RegisterType<Generator.LiturgieOplosser.LiturgieZoeker>().As<ILiturgieDatabase.ILiturgieZoeken>()
+                .InstancePerLifetimeScope();
             container.RegisterType<mppt.RegelVerwerking.LengteBerekenaar>().As<ILiturgieDatabase.ILengteBerekenaar>();
-            container.RegisterType<Generator.LiturgieInterpretator.InterpreteerLiturgieRuw>().As<ILiturgieDatabase.ILiturgieInterpreteer>();
+            container.RegisterType<Generator.LiturgieInterpretator.LiturgieTekstNaarObject>().As<ILiturgieDatabase.ILiturgieTekstNaarObject>();
             container.RegisterType<Generator.Database.FileSystem.FileEngine>().As<IDatabase.Engine.IEngine>();
             container.RegisterType<Database.EngineManager>().As<IDatabase.IEngineManager>();
             SetMsPowerpointBuilder(container);

@@ -8,7 +8,7 @@ namespace PowerpointGenerator.Screens
 {
     public partial class LiturgieEdit : UserControl
     {
-        public ILiturgieLosOp _liturgieOplosser { get; set; }
+        public ILiturgieZoeken _liturgieZoeker { get; set; }
         new private readonly bool DesignMode;
 
         public TextBox TextBoxLiturgie { get { return textBoxLiturgie; } }
@@ -70,7 +70,7 @@ namespace PowerpointGenerator.Screens
         // TODO er lijkt een memoryleak te zijn. Geheugengebruik loopt op als je snel wisselt tussen bijv. 'psalmen ' en 'psalmen 1'. Vermoedelijk de database.
         private void TriggerZoeklijstVeranderd()
         {
-            _huidigZoekresultaat = _liturgieOplosser.VrijZoeken(textBoxZoek.Text, checkBoxAlsBijbeltekst.Checked, _huidigZoekresultaat);
+            _huidigZoekresultaat = _liturgieZoeker.VrijZoeken(textBoxZoek.Text, checkBoxAlsBijbeltekst.Checked, _huidigZoekresultaat);
             if (_huidigZoekresultaat.ZoeklijstAanpassing == VrijZoekresultaatAanpassingType.Geen)
                 return;
 
@@ -98,8 +98,8 @@ namespace PowerpointGenerator.Screens
 
         private void HuidigeTekstInvoegen()
         {
-            var geinterpreteerdeOpties = _liturgieOplosser.ZoekStandaardOptiesUitZoekresultaat(textBoxZoek.Text, _huidigZoekresultaat);
-            var toeTeVoegenTekst = _liturgieOplosser.MaakTotTekst(textBoxZoek.Text, geinterpreteerdeOpties, _huidigZoekresultaat);
+            var geinterpreteerdeOpties = _liturgieZoeker.ZoekStandaardOptiesUitZoekresultaat(textBoxZoek.Text, _huidigZoekresultaat);
+            var toeTeVoegenTekst = _liturgieZoeker.MaakTotTekst(textBoxZoek.Text, geinterpreteerdeOpties, _huidigZoekresultaat);
             var liturgie = textBoxLiturgie.Lines.ToList();
             var huidigeRegel = GetHuidigeRegel();
             if (huidigeRegel != null)

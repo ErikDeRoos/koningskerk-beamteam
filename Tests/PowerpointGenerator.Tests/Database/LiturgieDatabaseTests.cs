@@ -33,7 +33,7 @@ namespace Generator.Tests
 
                 var oplossing = sut.ZoekSpecifiek(VerwerkingType.normaal, onderdeel, fragment, null, _liturgieSettingsDefault);
 
-                Assert.AreEqual(LiturgieOplossingResultaat.Opgelost, oplossing.Status);
+                Assert.AreEqual(DatabaseZoekStatus.Opgelost, oplossing.Status);
             }
 
             [DataTestMethod]
@@ -66,7 +66,7 @@ namespace Generator.Tests
 
                 var oplossing = sut.ZoekSpecifiek(VerwerkingType.bijbeltekst, onderdeel, fragment, null, _liturgieSettingsDefault);
 
-                Assert.AreEqual(LiturgieOplossingResultaat.Opgelost, oplossing.Status);
+                Assert.AreEqual(DatabaseZoekStatus.Opgelost, oplossing.Status);
             }
 
             [DataTestMethod]

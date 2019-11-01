@@ -29,7 +29,7 @@ namespace mppt
         private bool _stop;
         private CancellationTokenSource _token = null;
 
-        private IEnumerable<ILiturgieRegel> _liturgie = new List<ILiturgieRegel>();
+        private IEnumerable<ISlideOpbouw> _liturgie = new List<ISlideOpbouw>();
         private IBuilderBuildSettings _buildSettings;
         private IBuilderBuildDefaults _buildDefaults;
         private IBuilderDependendFiles _dependentFileList;
@@ -49,7 +49,7 @@ namespace mppt
             _stop = false;
         }
 
-        public void PreparePresentation(IEnumerable<ILiturgieRegel> liturgie, IBuilderBuildSettings buildSettings, IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, string opslaanAls)
+        public void PreparePresentation(IEnumerable<ISlideOpbouw> liturgie, IBuilderBuildSettings buildSettings, IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, string opslaanAls)
         {
             _liturgie = liturgie;
             _buildSettings = buildSettings;
@@ -126,7 +126,7 @@ namespace mppt
         /// <summary>
         /// Uitzoeken wat de volgende is
         /// </summary>
-        private static IEnumerable<ILiturgieRegel> Volgende(IEnumerable<ILiturgieRegel> volledigeLiturgie, ILiturgieRegel huidig)
+        private static IEnumerable<ISlideOpbouw> Volgende(IEnumerable<ISlideOpbouw> volledigeLiturgie, ISlideOpbouw huidig)
         {
             var lijst = volledigeLiturgie.ToList();
             var huidigeItemIndex = lijst.IndexOf(huidig);

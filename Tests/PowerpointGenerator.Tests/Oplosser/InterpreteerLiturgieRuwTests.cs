@@ -7,12 +7,12 @@ namespace Generator.Tests
 {
     public class InterpreteerLiturgieRuwTests
     {
-        private ILiturgieInterpreteer _sut;
+        private ILiturgieTekstNaarObject _sut;
 
         [TestInitialize]
         public void Initialise()
         {
-            _sut = new LiturgieInterpretator.InterpreteerLiturgieRuw();
+            _sut = new LiturgieInterpretator.LiturgieTekstNaarObject();
         }
 
         [TestClass]

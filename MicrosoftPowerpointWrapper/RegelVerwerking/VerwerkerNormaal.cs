@@ -20,7 +20,7 @@ namespace mppt.RegelVerwerking
     class VerwerkerNormaal : IVerwerkFactory
     {
         public IVerwerk Init(IMppApplication metApplicatie, IMppPresentatie toevoegenAanPresentatie, IMppFactory metFactory, ILiedFormatter gebruikLiedFormatter, IBuilderBuildSettings buildSettings,
-                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ILiturgieRegel> volledigeLiturgieOpVolgorde, ILengteBerekenaar lengteBerekenaar)
+                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ISlideOpbouw> volledigeLiturgieOpVolgorde, ILengteBerekenaar lengteBerekenaar)
         {
             return new Verwerker(metApplicatie, toevoegenAanPresentatie, metFactory, gebruikLiedFormatter, buildSettings, buildDefaults, dependentFileList, volledigeLiturgieOpVolgorde);
         }
@@ -32,12 +32,12 @@ namespace mppt.RegelVerwerking
             private int _slidesGemist = 0;
 
             public Verwerker(IMppApplication metApplicatie, IMppPresentatie toevoegenAanPresentatie, IMppFactory metFactory, ILiedFormatter gebruikLiedFormatter, IBuilderBuildSettings buildSettings,
-                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ILiturgieRegel> volledigeLiturgieOpVolgorde) 
+                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ISlideOpbouw> volledigeLiturgieOpVolgorde) 
                 : base (metApplicatie, toevoegenAanPresentatie, metFactory, gebruikLiedFormatter, buildSettings, buildDefaults, dependentFileList, volledigeLiturgieOpVolgorde)
             {
             }
 
-            public IVerwerkResultaat Verwerk(ILiturgieRegel regel, IEnumerable<ILiturgieRegel> volgenden, CancellationToken token)
+            public IVerwerkResultaat Verwerk(ISlideOpbouw regel, IEnumerable<ISlideOpbouw> volgenden, CancellationToken token)
             {
                 // Per onderdeel in de regel moet een sheet komen
                 foreach (var inhoud in regel.Content)
@@ -59,7 +59,7 @@ namespace mppt.RegelVerwerking
             /// <summary>
             /// Lied in template plaatsen
             /// </summary>
-            private void InvullenTekstOpTemplate(ILiturgieRegel regel, ILiturgieContent inhoud, IEnumerable<ILiturgieRegel> volgenden, CancellationToken token)
+            private void InvullenTekstOpTemplate(ISlideOpbouw regel, ILiturgieContent inhoud, IEnumerable<ISlideOpbouw> volgenden, CancellationToken token)
             {
                 var tekstOmTeRenderen = inhoud.Inhoud;
                 var tekstOmTeRenderenLijst = new List<string>();
@@ -116,7 +116,7 @@ namespace mppt.RegelVerwerking
             /// <summary>
             /// Algemene slide waarop we alleen template teksten moeten vervangen
             /// </summary>
-            private void ToevoegenSlides(ILiturgieRegel regel, ILiturgieContent inhoud, IEnumerable<ILiturgieRegel> volgenden, CancellationToken token)
+            private void ToevoegenSlides(ISlideOpbouw regel, ILiturgieContent inhoud, IEnumerable<ISlideOpbouw> volgenden, CancellationToken token)
             {
                 //open de presentatie met de sheets erin
                 var presentatie = OpenPps(inhoud.Inhoud);
@@ -175,7 +175,7 @@ namespace mppt.RegelVerwerking
                 presentatie.Dispose();
             }
 
-            private static void VulLiturgieTabel(IMppShapeTable inTabel, IMppFactory mppFactory, ILiedFormatter liedFormatter, IEnumerable<ILiturgieRegel> liturgie, string lezen, string tekst, string instellingenLezen, string instellingenTekst, string instellingLiturgie)
+            private static void VulLiturgieTabel(IMppShapeTable inTabel, IMppFactory mppFactory, ILiedFormatter liedFormatter, IEnumerable<ISlideOpbouw> liturgie, string lezen, string tekst, string instellingenLezen, string instellingenTekst, string instellingLiturgie)
             {
                 var toonLijst = new List<IMppShapeTableContent>();
                 toonLijst.Add(mppFactory.GetMppShapeTableContent1Column(0, instellingLiturgie, false));
@@ -275,7 +275,7 @@ namespace mppt.RegelVerwerking
             /// een nieuw item komt.
             /// Je kunt er echter ook voor kiezen dat een volgende item gewoon niet aangekondigd wordt. Dat gaat
             /// via 'TonenInVolgende'.
-            protected static bool IsLaatsteSlide(IEnumerable<string> tekstOmTeRenderen, string huidigeTekst, ILiturgieRegel regel, ILiturgieContent deel)
+            protected static bool IsLaatsteSlide(IEnumerable<string> tekstOmTeRenderen, string huidigeTekst, ISlideOpbouw regel, ILiturgieContent deel)
             {
                 return tekstOmTeRenderen.Last() == huidigeTekst && regel.Content.Last() == deel;
             }

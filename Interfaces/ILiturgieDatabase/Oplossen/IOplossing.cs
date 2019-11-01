@@ -5,7 +5,7 @@ namespace ILiturgieDatabase
 {
     public interface IOplossing
     {
-        LiturgieOplossingResultaat Status { get; }
+        DatabaseZoekStatus Status { get; }
         OplossingOnderdeel Onderdeel { get; }
         OplossingOnderdeel Fragment { get; }
         IEnumerable<ILiturgieContent> Content { get; }

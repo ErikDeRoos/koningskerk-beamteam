@@ -281,7 +281,7 @@
             // 
             // liturgieEdit1
             // 
-            this.liturgieEdit1._liturgieOplosser = null;
+            this.liturgieEdit1._liturgieZoeker = null;
             this.liturgieEdit1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.liturgieEdit1.Location = new System.Drawing.Point(0, 0);
             this.liturgieEdit1.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);

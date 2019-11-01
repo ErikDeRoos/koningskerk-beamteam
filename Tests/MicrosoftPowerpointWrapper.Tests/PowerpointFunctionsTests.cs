@@ -64,9 +64,9 @@ namespace MicrosoftPowerpointWrapper.Tests
             return pres;
         }
 
-        private static IEnumerable<ILiturgieDatabase.ILiturgieRegel> GetEmptyLiturgie()
+        private static IEnumerable<ILiturgieDatabase.ISlideOpbouw> GetEmptyLiturgie()
         {
-            return new List<ILiturgieDatabase.ILiturgieRegel>();
+            return new List<ILiturgieDatabase.ISlideOpbouw>();
         }
     }
 }

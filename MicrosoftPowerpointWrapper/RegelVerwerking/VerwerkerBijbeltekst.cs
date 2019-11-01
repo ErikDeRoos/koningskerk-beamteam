@@ -18,7 +18,7 @@ namespace mppt.RegelVerwerking
     class VerwerkerBijbeltekst : IVerwerkFactory
     {
         public IVerwerk Init(IMppApplication metApplicatie, IMppPresentatie toevoegenAanPresentatie, IMppFactory metFactory, ILiedFormatter gebruikLiedFormatter, IBuilderBuildSettings buildSettings,
-                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ILiturgieRegel> volledigeLiturgieOpVolgorde, ILengteBerekenaar lengteBerekenaar)
+                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ISlideOpbouw> volledigeLiturgieOpVolgorde, ILengteBerekenaar lengteBerekenaar)
         {
             return new Verwerker(metApplicatie, toevoegenAanPresentatie, metFactory, gebruikLiedFormatter, buildSettings, buildDefaults, dependentFileList, volledigeLiturgieOpVolgorde, lengteBerekenaar);
         }
@@ -29,13 +29,13 @@ namespace mppt.RegelVerwerking
             private int _slidesGemist = 0;
 
             public Verwerker(IMppApplication metApplicatie, IMppPresentatie toevoegenAanPresentatie, IMppFactory metFactory, ILiedFormatter gebruikLiedFormatter, IBuilderBuildSettings buildSettings,
-                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ILiturgieRegel> volledigeLiturgieOpVolgorde, ILengteBerekenaar lengteBerekenaar)
+                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ISlideOpbouw> volledigeLiturgieOpVolgorde, ILengteBerekenaar lengteBerekenaar)
                 : base(metApplicatie, toevoegenAanPresentatie, metFactory, gebruikLiedFormatter, buildSettings, buildDefaults, dependentFileList, volledigeLiturgieOpVolgorde)
             {
                 _lengteBerekenaar = lengteBerekenaar;
             }
 
-            public IVerwerkResultaat Verwerk(ILiturgieRegel regel, IEnumerable<ILiturgieRegel> volgenden, CancellationToken token)
+            public IVerwerkResultaat Verwerk(ISlideOpbouw regel, IEnumerable<ISlideOpbouw> volgenden, CancellationToken token)
             {
                 InvullenTekstOpTemplate(regel, volgenden, token);
 
@@ -45,7 +45,7 @@ namespace mppt.RegelVerwerking
                 };
             }
 
-            private void InvullenTekstOpTemplate(ILiturgieRegel regel, IEnumerable<ILiturgieRegel> volgenden, CancellationToken token)
+            private void InvullenTekstOpTemplate(ISlideOpbouw regel, IEnumerable<ISlideOpbouw> volgenden, CancellationToken token)
             {
                 var tekstPerSlide = OpdelenPerSlide(TekstOpknippen(regel.Content), _buildDefaults.RegelsPerBijbeltekstSlide, _lengteBerekenaar);
 

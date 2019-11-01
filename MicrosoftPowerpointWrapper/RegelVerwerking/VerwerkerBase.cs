@@ -20,13 +20,13 @@ namespace mppt.RegelVerwerking
         protected IBuilderBuildSettings _buildSettings { get; }
         protected IBuilderBuildDefaults _buildDefaults { get; }
         protected IBuilderDependendFiles _dependentFileList { get; }
-        protected IEnumerable<ILiturgieRegel> _liturgie { get; }
+        protected IEnumerable<ISlideOpbouw> _liturgie { get; }
         protected ILiedFormatter _liedFormatter { get; }
 
         protected Regex _tagSearch = new Regex("<[^<>]*>", RegexOptions.Compiled);
 
         public VerwerkBase(IMppApplication metApplicatie, IMppPresentatie toevoegenAanPresentatie, IMppFactory metFactory, ILiedFormatter gebruikLiedFormatter, IBuilderBuildSettings buildSettings,
-                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ILiturgieRegel> volledigeLiturgieOpVolgorde)
+                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ISlideOpbouw> volledigeLiturgieOpVolgorde)
         {
             _applicatie = metApplicatie;
             _presentatie = toevoegenAanPresentatie;
@@ -52,7 +52,7 @@ namespace mppt.RegelVerwerking
         /// <summary>
         /// Kijk of er in de tekst tags staan en vervang deze voor inhoud
         /// </summary>
-        protected TagReplacementResult ProcessForTagReplacement(string text, ILiturgieRegel regel, Func<string, SearchForTagReplacementResult> preflightSearchForTagReplacement = null, Func<string, SearchForTagReplacementResult> additionalSearchForTagReplacement = null)
+        protected TagReplacementResult ProcessForTagReplacement(string text, ISlideOpbouw regel, Func<string, SearchForTagReplacementResult> preflightSearchForTagReplacement = null, Func<string, SearchForTagReplacementResult> additionalSearchForTagReplacement = null)
         {
             if (string.IsNullOrWhiteSpace(text))
                 return TagReplacementResult.NoReplacement;
@@ -77,7 +77,7 @@ namespace mppt.RegelVerwerking
         /// <summary>
         /// 'Standaard' tags waarvoor we hier de in te vullen tekst hebben
         /// </summary>
-        public SearchForTagReplacementResult SearchForTagReplacement(string tag, ILiturgieRegel regel, Func<string, SearchForTagReplacementResult> preflightSearchForTagReplacement, Func<string, SearchForTagReplacementResult> additionalSearchForTagReplacement)
+        public SearchForTagReplacementResult SearchForTagReplacement(string tag, ISlideOpbouw regel, Func<string, SearchForTagReplacementResult> preflightSearchForTagReplacement, Func<string, SearchForTagReplacementResult> additionalSearchForTagReplacement)
         {
             var searchTag = tag.Substring(1, tag.Length - 2).Trim().ToLower();
 
@@ -101,7 +101,7 @@ namespace mppt.RegelVerwerking
             return SearchForTagReplacementResult.Unresolved;
         }
 
-        private SearchForTagReplacementResult DefaultSearchForTagReplacement(string tag, ILiturgieRegel regel)
+        private SearchForTagReplacementResult DefaultSearchForTagReplacement(string tag, ISlideOpbouw regel)
         {
             switch (tag)
             {

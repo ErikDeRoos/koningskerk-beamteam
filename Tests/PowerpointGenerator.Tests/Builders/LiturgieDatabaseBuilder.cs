@@ -13,7 +13,7 @@ namespace Generator.Tests.Builders
             return Database.Object;
         }
 
-        public LiturgieDatabaseBuilder ZoekSpecifiek_AddOnderdeelAndFragment(string onderdeelNaam, string fragmentNaam, string display = null, LiturgieOplossingResultaat status = LiturgieOplossingResultaat.Opgelost)
+        public LiturgieDatabaseBuilder ZoekSpecifiek_AddOnderdeelAndFragment(string onderdeelNaam, string fragmentNaam, string display = null, DatabaseZoekStatus status = DatabaseZoekStatus.Opgelost)
         {
             Database.Setup(x => x.ZoekSpecifiek(It.IsAny<ILiturgieDatabase.VerwerkingType>(), onderdeelNaam, fragmentNaam, It.IsAny<IEnumerable<string>>(), It.IsAny<ILiturgieDatabase.LiturgieSettings>()))
                 .Returns(MockOplossing(onderdeelNaam, fragmentNaam, display, status));
@@ -21,7 +21,7 @@ namespace Generator.Tests.Builders
             return this;
         }
 
-        private static ILiturgieDatabase.IOplossing MockOplossing(string onderdeel, string fragment, string display, LiturgieOplossingResultaat status)
+        private static ILiturgieDatabase.IOplossing MockOplossing(string onderdeel, string fragment, string display, DatabaseZoekStatus status)
         {
             var oplossing = new Mock<IOplossing>();
             oplossing.SetupGet(x => x.Onderdeel).Returns(new OplossingOnderdeel { OrigineleNaam = onderdeel, VeiligeNaam = onderdeel, DisplayNaam = display });

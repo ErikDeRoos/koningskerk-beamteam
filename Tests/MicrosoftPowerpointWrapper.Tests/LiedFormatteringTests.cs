@@ -10,13 +10,13 @@ namespace MicrosoftPowerpointWrapper.Tests
 {
     public class LiedFormatteringTests
     {
-        private ILiturgieRegel _liturgieRegel;
+        private ISlideOpbouw _liturgieRegel;
         private ILiedFormatter _sut;
 
         [TestInitialize]
         public void Initialise()
         {
-            _liturgieRegel = A.Fake<ILiturgieRegel>();
+            _liturgieRegel = A.Fake<ISlideOpbouw>();
             _sut = new LiedFormatter();
         }
 

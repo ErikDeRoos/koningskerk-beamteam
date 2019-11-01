@@ -34,15 +34,15 @@ namespace Generator.Database
         {
             var database = alsType == VerwerkingType.normaal ? _databases.GetDefault() : _databases.Extensions.FirstOrDefault(e => e.Name == LiturgieDatabaseSettings.DatabaseNameBijbeltekst);
             if (database == null)
-                return new Oplossing() { Status = LiturgieOplossingResultaat.DatabaseFout };
+                return new Oplossing() { Status = DatabaseZoekStatus.DatabaseFout };
 
             var set = database.Engine.Where(s => string.Equals(s.Name.SafeName, onderdeelNaam, StringComparison.CurrentCultureIgnoreCase) || (settings.GebruikDisplayNameVoorZoeken && string.Equals(s.Settings.DisplayName, onderdeelNaam, StringComparison.CurrentCultureIgnoreCase))).FirstOrDefault();
             if (set == null)
-                return new Oplossing() { Status = LiturgieOplossingResultaat.SetFout };
+                return new Oplossing() { Status = DatabaseZoekStatus.SetFout };
             // Kijk of we het specifieke item in de set kunnen vinden
             var subSet = set.Where(r => Compare(r.Name.SafeName, fragmentNaam, StringComparison.CurrentCultureIgnoreCase) == 0 || Compare(r.Name.Name, fragmentNaam, StringComparison.CurrentCultureIgnoreCase) == 0).FirstOrDefault();
             if (subSet == null)
-                return new Oplossing() { Status = LiturgieOplossingResultaat.SubSetFout };
+                return new Oplossing() { Status = DatabaseZoekStatus.SubSetFout };
             var returnValue = new Oplossing
             {
                 Onderdeel = new OplossingOnderdeel
@@ -62,7 +62,7 @@ namespace Generator.Database
             // Je kunt geen verzen opgeven als we ze niet los hebben.
             // (Andere kant op kan wel: geen verzen opgeven terwijl ze er wel zijn (wat 'alle verzen' betekend))
             if (fragmentDelen != null && fragmentDelen.Any() && !(set.Settings.ItemsHaveSubContent || set.Settings.ItemIsSubContent))
-                return new Oplossing() { Status = LiturgieOplossingResultaat.VersOnderverdelingMismatch };
+                return new Oplossing() { Status = DatabaseZoekStatus.VersOnderverdelingMismatch };
             if (fragmentDelen == null || !fragmentDelen.Any())
             {
                 // We hebben geen versenlijst en de set instellingen zeggen zonder verzen te zijn dus hebben we n samengevoegd item
@@ -70,7 +70,7 @@ namespace Generator.Database
                 {
                     var content = KrijgDirecteContent(subSet.Content, null);
                     if (content == null)
-                        return new Oplossing() { Status = LiturgieOplossingResultaat.VersOnleesbaar };
+                        return new Oplossing() { Status = DatabaseZoekStatus.VersOnleesbaar };
                     returnValue.Content = new List<ILiturgieContent> { content };
                 }
                 // Een item met alle verzen
@@ -93,15 +93,15 @@ namespace Generator.Database
                     .ToList();
                 // Specifieke verzen moeten allemaal gevonden kunnen worden
                 if (preSelect.Any(c => c.SubSet == null))
-                    return new Oplossing() { Status = LiturgieOplossingResultaat.VersFout };
+                    return new Oplossing() { Status = DatabaseZoekStatus.VersFout };
                 returnValue.Content = preSelect
                     .Select(s => s.SubSet.GetContent())
                     .ToList();
                 // Specifieke verzen moeten allemaal interpreteerbaar zijn
                 if (returnValue.Content.Any(c => c == null))
-                    return new Oplossing() { Status = LiturgieOplossingResultaat.VersOnleesbaar };
+                    return new Oplossing() { Status = DatabaseZoekStatus.VersOnleesbaar };
             }
-            returnValue.Status = LiturgieOplossingResultaat.Opgelost;
+            returnValue.Status = DatabaseZoekStatus.Opgelost;
             return returnValue;
         }
 
@@ -313,7 +313,7 @@ namespace Generator.Database
 
         private class Oplossing : IOplossing
         {
-            public LiturgieOplossingResultaat Status { get; set; }
+            public DatabaseZoekStatus Status { get; set; }
             public OplossingOnderdeel Onderdeel { get; set; }
             public OplossingOnderdeel Fragment { get; set; }
             public IEnumerable<ILiturgieContent> Content { get; set; }
@@ -322,7 +322,7 @@ namespace Generator.Database
 
             public Oplossing()
             {
-                Status = LiturgieOplossingResultaat.Onbekend;
+                Status = DatabaseZoekStatus.Onbekend;
             }
         }
 

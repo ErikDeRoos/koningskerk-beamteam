@@ -48,7 +48,8 @@
     <Compile Include="GeneratieInterface.cs" />
     <Compile Include="GeneratorStatus.cs" />
     <Compile Include="ICompRegistration.cs" />
-    <Compile Include="LiturgieInterpretator\InterpreteerLiturgieRuw.cs" />
+    <Compile Include="LiturgieInterpretator\LiturgieTekstNaarObject.cs" />
+    <Compile Include="LiturgieOplosser\LiturgieZoeker.cs" />
     <Compile Include="LiturgieOplosser\LiturgieOplosser.cs" />
     <Compile Include="Powerpoint\PPGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

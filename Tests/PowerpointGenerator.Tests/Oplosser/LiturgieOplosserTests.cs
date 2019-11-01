@@ -35,9 +35,9 @@ namespace Generator.Tests
                     .Build();
                 var sut = new Generator.LiturgieOplosser.LiturgieOplosser(database, null, DefaultEmptyName);
 
-                var oplossing = sut.LosOp(liturgieItem, _liturgieSettingsDefault);
+                var oplossing = sut.ConverteerNaarSlide(liturgieItem, _liturgieSettingsDefault);
 
-                Assert.AreEqual(oplossing.Resultaat, LiturgieOplossingResultaat.Opgelost);
+                Assert.AreEqual(oplossing.ResultaatStatus, DatabaseZoekStatus.Opgelost);
             }
 
             [DataTestMethod]
@@ -50,9 +50,9 @@ namespace Generator.Tests
                     .Build();
                 var sut = new Generator.LiturgieOplosser.LiturgieOplosser(database, null, DefaultEmptyName);
 
-                var oplossing = sut.LosOp(liturgieItem, _liturgieSettingsDefault);
+                var oplossing = sut.ConverteerNaarSlide(liturgieItem, _liturgieSettingsDefault);
 
-                Assert.AreEqual(oplossing.Resultaat, LiturgieOplossingResultaat.Opgelost);
+                Assert.AreEqual(oplossing.ResultaatStatus, DatabaseZoekStatus.Opgelost);
             }
 
             [DataTestMethod]
@@ -69,9 +69,9 @@ namespace Generator.Tests
                 var database = databaseBuilder.Build();
                 var sut = new Generator.LiturgieOplosser.LiturgieOplosser(database, null, DefaultEmptyName);
 
-                var oplossing = sut.LosOp(liturgieItem, _liturgieSettingsDefault);
+                var oplossing = sut.ConverteerNaarSlide(liturgieItem, _liturgieSettingsDefault);
 
-                Assert.AreEqual(oplossing.Regel.Display.Naam, onderdeel);
+                Assert.AreEqual(oplossing.ResultaatSlide.Display.Naam, onderdeel);
             }
 
             [DataTestMethod]
@@ -84,9 +84,9 @@ namespace Generator.Tests
                     .Build();
                 var sut = new Generator.LiturgieOplosser.LiturgieOplosser(database, null, DefaultEmptyName);
 
-                var oplossing = sut.LosOp(liturgieItem, _liturgieSettingsDefault);
+                var oplossing = sut.ConverteerNaarSlide(liturgieItem, _liturgieSettingsDefault);
 
-                Assert.AreEqual(oplossing.Regel.Display.Naam, display);
+                Assert.AreEqual(oplossing.ResultaatSlide.Display.Naam, display);
             }
 
             [DataTestMethod]
@@ -100,9 +100,9 @@ namespace Generator.Tests
                     .Build();
                 var sut = new Generator.LiturgieOplosser.LiturgieOplosser(database, null, DefaultEmptyName);
 
-                var oplossing = sut.LosOp(liturgieItem, _liturgieSettingsDefault, maskList);
+                var oplossing = sut.ConverteerNaarSlide(liturgieItem, _liturgieSettingsDefault, maskList);
 
-                Assert.AreEqual(oplossing.Regel.Display.Naam, maskUseName);
+                Assert.AreEqual(oplossing.ResultaatSlide.Display.Naam, maskUseName);
             }
 
             [DataTestMethod]
@@ -116,9 +116,9 @@ namespace Generator.Tests
                     .Build();
                 var sut = new Generator.LiturgieOplosser.LiturgieOplosser(database, null, DefaultEmptyName);
 
-                var oplossing = sut.LosOp(liturgieItem, _liturgieSettingsDefault, maskList);
+                var oplossing = sut.ConverteerNaarSlide(liturgieItem, _liturgieSettingsDefault, maskList);
 
-                Assert.AreEqual(oplossing.Regel.Display.Naam, maskUseName);
+                Assert.AreEqual(oplossing.ResultaatSlide.Display.Naam, maskUseName);
             }
 
             [DataTestMethod]
@@ -150,9 +150,9 @@ namespace Generator.Tests
                         VeiligeNaam = "1_Petrus 1",
                     }
                 });
-                var liturgieInterpreteer = new Mock<ILiturgieInterpreteer>();
+                var liturgieInterpreteer = new Mock<ILiturgieTekstNaarObject>();
                 liturgieInterpreteer.Setup(x => x.MaakTekstVanOpties(It.IsAny<LiturgieOptiesGebruiker>())).Returns(string.Empty);
-                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(null, liturgieInterpreteer.Object, DefaultEmptyName)) as ILiturgieLosOp;
+                var sut = new LiturgieOplosser.LiturgieZoeker(null, liturgieInterpreteer.Object);
 
                 var oplossing = sut.MaakTotTekst(invoer, null, zoekresultaat);
 
@@ -171,9 +171,9 @@ namespace Generator.Tests
             };
         }
 
-        private static ILiturgieInterpretatie MockInterpretatie(string onderdeel, string fragment = null)
+        private static ILiturgieTekstObject MockInterpretatie(string onderdeel, string fragment = null)
         {
-            var liturgieItem = new Mock<ILiturgieInterpretatie>();
+            var liturgieItem = new Mock<ILiturgieTekstObject>();
             liturgieItem.SetupGet(x => x.Benaming).Returns(onderdeel);
             liturgieItem.SetupGet(x => x.Deel).Returns(fragment);
             liturgieItem.SetupGet(x => x.OptiesGebruiker).Returns(new LiturgieOptiesGebruiker());

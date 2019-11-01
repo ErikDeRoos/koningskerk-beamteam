@@ -16,7 +16,7 @@ namespace Generator.Powerpoint
     public class PpGenerator : IDisposable
     {
         private State _huidigeStatus;
-        private IEnumerable<ILiturgieRegel> _liturgie;
+        private IEnumerable<ISlideOpbouw> _liturgie;
         private IBuilderBuildSettings _builderSettings;
         private IBuilderBuildDefaults _builderDefaults;
         private IBuilderDependendFiles _builderDependentFileList;
@@ -43,7 +43,7 @@ namespace Generator.Powerpoint
             _setGereedmelding = gereedmeldingDelegate;
         }
 
-        public StatusMelding Initialiseer(IEnumerable<ILiturgieRegel> liturgie, string voorganger, string collecte1, string collecte2, string lezen,
+        public StatusMelding Initialiseer(IEnumerable<ISlideOpbouw> liturgie, string voorganger, string collecte1, string collecte2, string lezen,
           string tekst, IInstellingen instellingen, string opslaanAls)
         {
             lock (_locker)

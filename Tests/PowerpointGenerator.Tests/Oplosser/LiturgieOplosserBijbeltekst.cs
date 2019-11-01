@@ -11,13 +11,13 @@ namespace Generator.Tests
     public class LiturgieOplosserBijbeltekst
     {
         private const string DefaultEmptyName = "!leeg";
-        private ILiturgieInterpreteer _liturgieInterpreteer;
+        private ILiturgieTekstNaarObject _liturgieInterpreteer;
         private LiturgieSettings _liturgieSettingsDefault;
 
         [TestInitialize]
         public void Initialise()
         {
-            _liturgieInterpreteer = new Mock<ILiturgieInterpreteer>().Object;
+            _liturgieInterpreteer = new Mock<ILiturgieTekstNaarObject>().Object;
             _liturgieSettingsDefault = new LiturgieSettings
             {
                 ToonBijbeltekstenInLiturgie = true,
@@ -35,9 +35,9 @@ namespace Generator.Tests
                 var databaseBuilder = new LiturgieDatabaseBuilder()
                     .ZoekSpecifiek_AddOnderdeelAndFragment(onderdeel, fragment);
                 var database = databaseBuilder.Build();
-                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieLosOp;
+                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieSlideMaker;
 
-                var oplossing = sut.LosOp(liturgieItem, _liturgieSettingsDefault);
+                var oplossing = sut.ConverteerNaarSlide(liturgieItem, _liturgieSettingsDefault);
 
                 databaseBuilder.Database.Verify(x => x.ZoekSpecifiek(VerwerkingType.bijbeltekst, liturgieItem.Benaming, liturgieItem.PerDeelVersen.First().Deel, liturgieItem.PerDeelVersen.First().Verzen, _liturgieSettingsDefault));
             }
@@ -50,11 +50,11 @@ namespace Generator.Tests
                 var database = new LiturgieDatabaseBuilder()
                     .ZoekSpecifiek_AddOnderdeelAndFragment(onderdeel, fragment)
                     .Build();
-                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieLosOp;
+                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieSlideMaker;
 
-                var oplossing = sut.LosOp(liturgieItem, _liturgieSettingsDefault);
+                var oplossing = sut.ConverteerNaarSlide(liturgieItem, _liturgieSettingsDefault);
 
-                Assert.AreEqual(LiturgieOplossingResultaat.Opgelost, oplossing.Resultaat);
+                Assert.AreEqual(DatabaseZoekStatus.Opgelost, oplossing.ResultaatStatus);
             }
         }
 

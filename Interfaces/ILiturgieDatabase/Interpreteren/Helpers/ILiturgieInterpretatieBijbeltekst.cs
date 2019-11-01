@@ -5,7 +5,7 @@ namespace ILiturgieDatabase
     /// <summary>
     /// Ruwe liturgie regels voor bijbelteksten, zoals ze ingevoerd zijn
     /// </summary>
-    public interface ILiturgieInterpretatieBijbeltekst : ILiturgieInterpretatie
+    public interface ILiturgieInterpretatieBijbeltekst : ILiturgieTekstObject
     {
         IEnumerable<ILiturgieInterpretatieBijbeltekstDeel> PerDeelVersen { get; }
     }

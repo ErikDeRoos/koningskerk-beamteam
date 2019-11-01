@@ -15,8 +15,8 @@ namespace Generator
     /// </summary>
     public class GeneratieInterface<T> : IDisposable where T : class, ICompRegistration
     {
-        private readonly ILiturgieLosOp _liturgieOplosser;
-        private readonly ILiturgieInterpreteer _liturgieInterpreteer;
+        private readonly ILiturgieSlideMaker _liturgieSlideMaker;
+        private readonly ILiturgieTekstNaarObject _liturgieTekstNaarObject;
         private readonly IInstellingenFactory _instellingenFactory;
         private readonly Func<ISlideBuilder.IBuilder> _builderResolver;
         public T Registration { get; }
@@ -32,10 +32,10 @@ namespace Generator
         private GereedMelding _setGereedmelding;
 
 
-        public GeneratieInterface(ILiturgieLosOp liturgieOplosser, IInstellingenFactory instellingenOplosser, ILiturgieInterpreteer liturgieInterpreteer, Func<ISlideBuilder.IBuilder> builderResolver, ICompRegistration newCompRegistration)
+        public GeneratieInterface(ILiturgieSlideMaker liturgieSlideMaker, IInstellingenFactory instellingenOplosser, ILiturgieTekstNaarObject liturgieTekstNaarObject, Func<ISlideBuilder.IBuilder> builderResolver, ICompRegistration newCompRegistration)
         {
-            _liturgieOplosser = liturgieOplosser;
-            _liturgieInterpreteer = liturgieInterpreteer;
+            _liturgieSlideMaker = liturgieSlideMaker;
+            _liturgieTekstNaarObject = liturgieTekstNaarObject;
             _instellingenFactory = instellingenOplosser;
             _builderResolver = builderResolver;
             _powerpoint = new PpGenerator(_builderResolver, PresentatieVoortgangCallback, PresentatieGereedmeldingCallback);
@@ -170,26 +170,26 @@ namespace Generator
             Registration.Tekst = new string[0];
         }
 
-        public IEnumerable<ILiturgieOplossing> LiturgieOplossingen()
+        public IEnumerable<ITekstNaarSlideConversieResultaat> LiturgieOplossingen()
         {
             var instellingen = _instellingenFactory.LoadFromFile();
 
             // Liturgie uit tekstbox omzetten in leesbare items
-            var ruweLiturgie = _liturgieInterpreteer.VanTekstregels(Registration.Liturgie);
+            var liturgieObjecten = _liturgieTekstNaarObject.VanTekstregels(Registration.Liturgie);
 
             // Zoek op het bestandssysteem zo veel mogelijk al op (behalve ppt, die gaan via COM element)
             var masks = MapMasksToLiturgie.Map(instellingen.Masks);
             var settings = MapInstellingenToSettings.Map(instellingen);
 
-            return ruweLiturgie.Select(i => _liturgieOplosser.LosOp(i, settings, masks)).ToList();
+            return liturgieObjecten.Select(i => _liturgieSlideMaker.ConverteerNaarSlide(i, settings, masks)).ToList();
         }
 
-        public PpGenerator.StatusMelding StartGenereren(IEnumerable<ILiturgieOplossing> ingeladenLiturgie, string opslaanAlsBestandsnaam)
+        public PpGenerator.StatusMelding StartGenereren(IEnumerable<ISlideOpbouw> ingeladenLiturgie, string opslaanAlsBestandsnaam)
         {
             Status = GeneratorStatus.AanHetGenereren;
             var lezenText = string.Join("\n", Registration.Lezen);
             var tekstText = string.Join("\n", Registration.Tekst);
-            var status = _powerpoint.Initialiseer(ingeladenLiturgie.Select(l => l.Regel).ToList(), Registration.Voorganger, Registration.Collecte1e, Registration.Collecte2e, lezenText, tekstText, _instellingenFactory.LoadFromFile(), opslaanAlsBestandsnaam);
+            var status = _powerpoint.Initialiseer(ingeladenLiturgie.ToList(), Registration.Voorganger, Registration.Collecte1e, Registration.Collecte2e, lezenText, tekstText, _instellingenFactory.LoadFromFile(), opslaanAlsBestandsnaam);
             if (status.Fout == null)
                 status = _powerpoint.Start();
             // Stop weer als er een fout is geweest

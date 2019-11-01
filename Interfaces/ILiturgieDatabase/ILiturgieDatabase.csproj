@@ -39,7 +39,8 @@
   <ItemGroup>
     <Compile Include="Interpreteren\Helpers\ILiturgieInterpretatieBijbeltekst.cs" />
     <Compile Include="Interpreteren\ILengteBerekenaar.cs" />
-    <Compile Include="Interpreteren\ILiturgieLosop.cs" />
+    <Compile Include="Interpreteren\ILiturgieZoeken.cs" />
+    <Compile Include="Interpreteren\ILiturgieSlideMaker.cs" />
     <Compile Include="ILiturgieDatabase.cs" />
     <Compile Include="Interpreteren\Helpers\IVrijZoekresultaat.cs" />
     <Compile Include="Interpreteren\ILiturgieOptiesGebruiker.cs" />
@@ -48,14 +49,14 @@
     <Compile Include="Oplossen\Helpers\InhoudType.cs" />
     <Compile Include="Oplossen\Helpers\ILiturgieContent.cs" />
     <Compile Include="Oplossen\Helpers\ILiturgieDisplay.cs" />
-    <Compile Include="Interpreteren\Helpers\ILiturgieOplossing.cs" />
-    <Compile Include="Interpreteren\Helpers\ILiturgieInterpretatie.cs" />
+    <Compile Include="Interpreteren\Helpers\ITekstNaarSlideConversieResultaat.cs" />
+    <Compile Include="Interpreteren\Helpers\ILiturgieTekstObject.cs" />
     <Compile Include="Interpreteren\Helpers\ILiturgieMapmaskArg.cs" />
-    <Compile Include="Interpreteren\ILiturgieInterpreteer.cs" />
-    <Compile Include="Interpreteren\Helpers\LiturgieOplossingResultaat.cs" />
+    <Compile Include="Interpreteren\ILiturgieTekstNaarObject.cs" />
+    <Compile Include="Interpreteren\Helpers\DatabaseZoekStatus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Oplossen\Helpers\IVersenDefault.cs" />
-    <Compile Include="Oplossen\ILiturgieRegel.cs" />
+    <Compile Include="Oplossen\ISlideOpbouw.cs" />
     <Compile Include="Oplossen\VerwerkingType.cs" />
     <Compile Include="Zoeken\IZoekresultaat.cs" />
   </ItemGroup>
