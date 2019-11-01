@@ -164,9 +164,8 @@ namespace Generator.Database.FileSystem
             }
             catch (InvalidOperationException)  // XML niet in juiste format
             {
-                var nieuw = new DbSetSettings();
-                ChangeSettings(nieuw, false);
-                return nieuw;
+                //ChangeSettings(nieuw, false);
+                return new DbSetSettings();
             }
         }
 
