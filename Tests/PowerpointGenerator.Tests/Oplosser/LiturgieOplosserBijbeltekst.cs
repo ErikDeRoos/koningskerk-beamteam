@@ -39,7 +39,7 @@ namespace Generator.Tests
 
                 var oplossing = sut.ConverteerNaarSlide(liturgieItem, _liturgieSettingsDefault);
 
-                databaseBuilder.Database.Verify(x => x.ZoekSpecifiek(VerwerkingType.bijbeltekst, liturgieItem.Benaming, liturgieItem.PerDeelVersen.First().Deel, liturgieItem.PerDeelVersen.First().Verzen, _liturgieSettingsDefault));
+                databaseBuilder.Database.Verify(x => x.ZoekSpecifiekItem(VerwerkingType.bijbeltekst, liturgieItem.Benaming, liturgieItem.PerDeelVersen.First().Deel, liturgieItem.PerDeelVersen.First().Verzen, _liturgieSettingsDefault));
             }
 
             [DataTestMethod]

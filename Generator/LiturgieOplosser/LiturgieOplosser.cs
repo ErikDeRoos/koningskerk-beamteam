@@ -9,7 +9,8 @@ using static System.String;
 namespace Generator.LiturgieOplosser
 {
     /// <summary>
-    /// Zoek naar de opgegeven liturgieen.
+    /// Converteer opgegeven liturgie objecten naar slides door ze in de database op te zoeken.
+    /// Voeg er de nodige aanpassingen aan toe als dit gevraagd wordt in de invoer (andere naam, etc).
     /// </summary>
     public class LiturgieOplosser : ILiturgieSlideMaker
     {
@@ -24,10 +25,9 @@ namespace Generator.LiturgieOplosser
             _liturgieTekstNaarObject = liturgieTekstNaarObject;
         }
 
-
         public ITekstNaarSlideConversieResultaat ConverteerNaarSlide(ILiturgieTekstObject tekstInput, LiturgieSettings settings, IEnumerable<LiturgieMapmaskArg> masks = null)
         {
-            var regel = new Regel {DisplayEdit = new RegelDisplay()};
+            var regel = new Slide {DisplayEdit = new LiturgieDisplay()};
 
             // verwerk de opties
             regel.VerwerkenAlsSlide = !tekstInput.OptiesGebruiker.NietVerwerkenViaDatabase;
@@ -44,7 +44,7 @@ namespace Generator.LiturgieOplosser
             {
                 var fout = Aanvullen(regel, tekstInput, settings);
                 if (fout.HasValue)
-                    return new Oplossing(fout.Value, tekstInput);
+                    return new ConversieResultaat(fout.Value, tekstInput);
             } else
             {
                 regel.VerwerkenAlsType = VerwerkingType.nietverwerken;
@@ -92,10 +92,10 @@ namespace Generator.LiturgieOplosser
             }
 
             // geef de oplossing terug
-            return new Oplossing(DatabaseZoekStatus.Opgelost, tekstInput, regel);
+            return new ConversieResultaat(DatabaseZoekStatus.Opgelost, tekstInput, regel);
         }
 
-        private DatabaseZoekStatus? Aanvullen(Regel regel, ILiturgieTekstObject item, LiturgieSettings settings)
+        private DatabaseZoekStatus? Aanvullen(Slide regel, ILiturgieTekstObject item, LiturgieSettings settings)
         {
             var setNaam = item.Benaming;
             if (item is ILiturgieInterpretatieBijbeltekst)
@@ -112,11 +112,11 @@ namespace Generator.LiturgieOplosser
 
             return NormaleAanvuller(regel, setNaam, zoekNaam, item.Verzen.ToList(), settings);
         }
-        private DatabaseZoekStatus? NormaleAanvuller(Regel regel, string setNaam, string zoekNaam, IEnumerable<string> verzen, LiturgieSettings settings)
+        private DatabaseZoekStatus? NormaleAanvuller(Slide regel, string setNaam, string zoekNaam, IEnumerable<string> verzen, LiturgieSettings settings)
         {
             regel.VerwerkenAlsType = VerwerkingType.normaal;
             var verzenList = verzen.ToList();
-            var resultaat = _database.ZoekSpecifiek(VerwerkingType.normaal, setNaam, zoekNaam, verzenList, settings);
+            var resultaat = _database.ZoekSpecifiekItem(VerwerkingType.normaal, setNaam, zoekNaam, verzenList, settings);
             if (resultaat.Status != DatabaseZoekStatus.Opgelost)
                 return resultaat.Status;
 
@@ -144,14 +144,14 @@ namespace Generator.LiturgieOplosser
 
             return null;
         }
-        private DatabaseZoekStatus? BijbeltekstAanvuller(Regel regel, string setNaam, IEnumerable<ILiturgieInterpretatieBijbeltekstDeel> versDelen, LiturgieSettings settings)
+        private DatabaseZoekStatus? BijbeltekstAanvuller(Slide regel, string setNaam, IEnumerable<ILiturgieInterpretatieBijbeltekstDeel> versDelen, LiturgieSettings settings)
         {
             regel.VerwerkenAlsType = VerwerkingType.bijbeltekst;
             var content = new List<ILiturgieContent>();
             var versDelenLijst = versDelen.ToList();
             foreach(var deel in versDelenLijst)
             {
-                var resultaat = _database.ZoekSpecifiek(VerwerkingType.bijbeltekst, setNaam, deel.Deel, deel.Verzen, settings);
+                var resultaat = _database.ZoekSpecifiekItem(VerwerkingType.bijbeltekst, setNaam, deel.Deel, deel.Verzen, settings);
                 if (resultaat.Status != DatabaseZoekStatus.Opgelost)
                     return resultaat.Status;
                 content.AddRange(resultaat.Content);
@@ -163,23 +163,23 @@ namespace Generator.LiturgieOplosser
         }
 
 
-        private class Oplossing : ITekstNaarSlideConversieResultaat
+        private class ConversieResultaat : ITekstNaarSlideConversieResultaat
         {
             public DatabaseZoekStatus ResultaatStatus { get; }
             public ILiturgieTekstObject InputTekst { get; }
             public ISlideOpbouw ResultaatSlide { get; }
 
-            public Oplossing(DatabaseZoekStatus resultaat, ILiturgieTekstObject interpretatie, ISlideOpbouw regel = null)
+            public ConversieResultaat(DatabaseZoekStatus status, ILiturgieTekstObject invoerTekst, ISlideOpbouw regel = null)
             {
-                ResultaatStatus = resultaat;
-                InputTekst = interpretatie;
+                ResultaatStatus = status;
+                InputTekst = invoerTekst;
                 ResultaatSlide = regel;
             }
         }
-        private class Regel : ISlideOpbouw
+        private class Slide : ISlideOpbouw
         {
             public ILiturgieDisplay Display => DisplayEdit;
-            public RegelDisplay DisplayEdit;
+            public LiturgieDisplay DisplayEdit;
 
             public IEnumerable<ILiturgieContent> Content { get; set; }
 
@@ -193,7 +193,7 @@ namespace Generator.LiturgieOplosser
                 return $"{Display.Naam} {Display.SubNaam}";
             }
         }
-        private class RegelDisplay : ILiturgieDisplay
+        private class LiturgieDisplay : ILiturgieDisplay
         {
             public string Naam { get; set; }
             public string NaamOverzicht { get; set; }

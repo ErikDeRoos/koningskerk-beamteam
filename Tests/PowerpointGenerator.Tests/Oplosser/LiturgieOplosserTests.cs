@@ -120,44 +120,6 @@ namespace Generator.Tests
 
                 Assert.AreEqual(oplossing.ResultaatSlide.Display.Naam, maskUseName);
             }
-
-            [DataTestMethod]
-            [DataRow("1 Petrus 1 : 1", "1_Petrus 1 : 1")]
-            [DataRow("1 Petrus", "1_Petrus")]
-            [DataRow("Sela ik zal er zijn", "Sela ik_zal_er_zijn")]
-            public void MaakTotTekst_werkt(string invoer, string verwachtResultaat)
-            {
-                var zoekresultaat = MockZoekresultaat(new[] 
-                {
-                    new ZoekresultaatItem
-                    {
-                        Weergave = "Sela",
-                        VeiligeNaam = "Sela",
-                    },
-                    new ZoekresultaatItem
-                    {
-                        Weergave = "Sela ik zal er zijn",
-                        VeiligeNaam = "Sela ik_zal_er_zijn",
-                    },
-                    new ZoekresultaatItem
-                    {
-                        Weergave = "1 Petrus",
-                        VeiligeNaam = "1_Petrus",
-                    },
-                    new ZoekresultaatItem
-                    {
-                        Weergave = "1 Petrus 1",
-                        VeiligeNaam = "1_Petrus 1",
-                    }
-                });
-                var liturgieInterpreteer = new Mock<ILiturgieTekstNaarObject>();
-                liturgieInterpreteer.Setup(x => x.MaakTekstVanOpties(It.IsAny<LiturgieOptiesGebruiker>())).Returns(string.Empty);
-                var sut = new LiturgieOplosser.LiturgieZoeker(null, liturgieInterpreteer.Object);
-
-                var oplossing = sut.MaakTotTekst(invoer, null, zoekresultaat);
-
-                Assert.AreEqual(verwachtResultaat, oplossing);
-            }
         }
 
         private static IEnumerable<LiturgieMapmaskArg> MaskList(string maskRealName, string maskUseName)
@@ -178,37 +140,6 @@ namespace Generator.Tests
             liturgieItem.SetupGet(x => x.Deel).Returns(fragment);
             liturgieItem.SetupGet(x => x.OptiesGebruiker).Returns(new LiturgieOptiesGebruiker());
             return liturgieItem.Object;
-        }
-
-        private static IVrijZoekresultaat MockZoekresultaat(ZoekresultaatItem[] zoekresultaten)
-        {
-            var zoekresultaat = new Mock<IVrijZoekresultaat>();
-            zoekresultaat.SetupGet(x => x.AlleMogelijkheden).Returns(zoekresultaten);
-            return zoekresultaat.Object;
-        }
-
-        private class ZoekresultaatItem : IVrijZoekresultaatMogelijkheid
-        {
-            public string Weergave { get; set; }
-            public string VeiligeNaam { get; set; }
-            public string UitDatabase { get; set; }
-
-            public bool Equals(IVrijZoekresultaatMogelijkheid x, IVrijZoekresultaatMogelijkheid y)
-            {
-                if (x == null || y == null)
-                    return false;
-                return x.Weergave == y.Weergave;  // Alleen sorteren op weergave naam
-            }
-
-            public int GetHashCode(IVrijZoekresultaatMogelijkheid obj)
-            {
-                return obj.Weergave.GetHashCode();
-            }
-
-            public override string ToString()
-            {
-                return Weergave;
-            }
         }
     }
 }

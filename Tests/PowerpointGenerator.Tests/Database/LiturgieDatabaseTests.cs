@@ -31,7 +31,7 @@ namespace Generator.Tests
                     .Build();
                 var sut = new Database.LiturgieDatabase(manager);
 
-                var oplossing = sut.ZoekSpecifiek(VerwerkingType.normaal, onderdeel, fragment, null, _liturgieSettingsDefault);
+                var oplossing = sut.ZoekSpecifiekItem(VerwerkingType.normaal, onderdeel, fragment, null, _liturgieSettingsDefault);
 
                 Assert.AreEqual(DatabaseZoekStatus.Opgelost, oplossing.Status);
             }
@@ -49,7 +49,7 @@ namespace Generator.Tests
                     .Build();
                 var sut = new Database.LiturgieDatabase(manager);
 
-                var oplossing = sut.ZoekSpecifiek(VerwerkingType.normaal, onderdeel, fragment, fragmentDelen, _liturgieSettingsDefault);
+                var oplossing = sut.ZoekSpecifiekItem(VerwerkingType.normaal, onderdeel, fragment, fragmentDelen, _liturgieSettingsDefault);
 
                 Assert.AreEqual(opgesplitstAls.Length, oplossing.Content.Count());
                 Assert.IsTrue(oplossing.Content.All(c => opgesplitstAls.Contains(c.Nummer.Value)));
@@ -64,7 +64,7 @@ namespace Generator.Tests
                     .Build(Database.LiturgieDatabaseSettings.DatabaseNameBijbeltekst);
                 var sut = new Database.LiturgieDatabase(manager);
 
-                var oplossing = sut.ZoekSpecifiek(VerwerkingType.bijbeltekst, onderdeel, fragment, null, _liturgieSettingsDefault);
+                var oplossing = sut.ZoekSpecifiekItem(VerwerkingType.bijbeltekst, onderdeel, fragment, null, _liturgieSettingsDefault);
 
                 Assert.AreEqual(DatabaseZoekStatus.Opgelost, oplossing.Status);
             }
@@ -83,7 +83,7 @@ namespace Generator.Tests
                 var delen = new[] { find };
                 var sut = new Database.LiturgieDatabase(manager);
 
-                var oplossing = sut.ZoekSpecifiek(VerwerkingType.bijbeltekst, onderdeel, fragment, delen, _liturgieSettingsDefault);
+                var oplossing = sut.ZoekSpecifiekItem(VerwerkingType.bijbeltekst, onderdeel, fragment, delen, _liturgieSettingsDefault);
 
                 var eersteContent = oplossing.Content.FirstOrDefault();
                 Assert.IsNotNull(eersteContent);

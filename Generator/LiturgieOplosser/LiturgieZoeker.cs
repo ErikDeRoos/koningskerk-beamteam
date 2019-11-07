@@ -57,7 +57,7 @@ namespace Generator.LiturgieOplosser
             {
                 // Fragment is er bij gekomen
                 veranderingGemaakt = true;
-                fragmentLijst = ZoekVerdieping(huidigeZoektermSplit.Benaming).Select(t => new ZoekresultaatItem()
+                fragmentLijst = _database.KrijgAlleFragmentenUitSet(huidigeZoektermSplit.Benaming).Select(t => new ZoekresultaatItem()
                 {
                     Weergave = $"{huidigeZoektermSplit.Benaming} {t.Resultaat}",
                     UitDatabase = t.Database.Weergave,
@@ -86,7 +86,7 @@ namespace Generator.LiturgieOplosser
                 aanname = VoorspelZoekresultaat(nieuwResultaat.AlleMogelijkheden, nieuwResultaat.ZoekTerm).First().Weergave;
 
                 // Fragment toevoegen op basis van aanname
-                fragmentLijst = ZoekVerdieping(aanname).Select(t => new ZoekresultaatItem()
+                fragmentLijst = _database.KrijgAlleFragmentenUitSet(aanname).Select(t => new ZoekresultaatItem()
                 {
                     Weergave = $"{aanname} {t.Resultaat}",
                     UitDatabase = t.Database.Weergave,
@@ -133,27 +133,28 @@ namespace Generator.LiturgieOplosser
                 return _onderdelenLijstCache;
             }
         }
+
+        /// <summary>
+        /// Krijg de basislijst. Dus alle set namen. 
+        /// En indien gewenst ook de inhoud van de 'common' set.
+        /// </summary>
         private IList<IZoekresultaat> ZoekBasisDatabaseLijst(ZoekRestricties zoekRestricties)
         {
             var alleDatabases = Enumerable.Empty<IZoekresultaat>();
 
             // zoekrestricties toepassen
             if (zoekRestricties.ZoekInBijbel && !zoekRestricties.ZoekInLiederen)
-                alleDatabases = _database.ZoekGeneriekOnderdeelBijbel();
+                alleDatabases = _database.KrijgAlleSetNamenInBijbelDb();
             else if (!zoekRestricties.ZoekInBijbel && zoekRestricties.ZoekInLiederen)
-                alleDatabases = _database.ZoekGeneriekOnderdeelDefault();
+                alleDatabases = _database.KrijgAlleSetNamenInNormaleDb();
             else if (zoekRestricties.ZoekInBijbel && zoekRestricties.ZoekInLiederen)
-                alleDatabases = _database.ZoekGeneriekAlleOnderdelen();
+                alleDatabases = _database.KrijgAlleSetNamen();
 
             // Alle slide templates zoals amen, votum, bidden etc)
             if (zoekRestricties.ZoekInCommon)
-                alleDatabases = alleDatabases.Concat(ZoekVerdieping(FileEngineDefaults.CommonFilesSetName));  
+                alleDatabases = alleDatabases.Concat(_database.KrijgAlleFragmentenUitSet(FileEngineDefaults.CommonFilesSetName));  
 
             return alleDatabases.ToList();
-        }
-        private IEnumerable<IZoekresultaat> ZoekVerdieping(string vanOnderdeelNaam)
-        {
-            return _database.ZoekGeneriekAlleFragmenten(vanOnderdeelNaam).ToList();
         }
 
         private Zoekresultaat ZoekresultaatSamenstellen(string zoekTekst, bool alsBijbeltekst, IVrijZoekresultaat vorigResultaat, IEnumerable<IVrijZoekresultaatMogelijkheid> lijst, string aanname, bool lijstIsGewijzigd)

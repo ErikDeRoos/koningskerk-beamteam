@@ -71,9 +71,11 @@
   <ItemGroup>
     <Compile Include="Builders\EngineManagerBuilder.cs" />
     <Compile Include="Builders\LiturgieDatabaseBuilder.cs" />
+    <Compile Include="Builders\ZoekresultaatBuilder.cs" />
     <Compile Include="Oplosser\InterpreteerLiturgieRuwTests.cs" />
     <Compile Include="Database\LiturgieDatabaseTests.cs" />
     <Compile Include="Oplosser\LiturgieOplosserBijbeltekst.cs" />
+    <Compile Include="Oplosser\LiturgieZoekerTests.cs" />
     <Compile Include="Oplosser\LiturgieOplosserTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

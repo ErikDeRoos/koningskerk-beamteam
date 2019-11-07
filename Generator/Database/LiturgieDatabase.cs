@@ -30,7 +30,7 @@ namespace Generator.Database
             _databases = database;
         }
 
-        public IOplossing ZoekSpecifiek(VerwerkingType alsType, string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen, LiturgieSettings settings)
+        public IOplossing ZoekSpecifiekItem(VerwerkingType alsType, string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen, LiturgieSettings settings)
         {
             var database = alsType == VerwerkingType.normaal ? _databases.GetDefault() : _databases.Extensions.FirstOrDefault(e => e.Name == LiturgieDatabaseSettings.DatabaseNameBijbeltekst);
             if (database == null)
@@ -241,29 +241,29 @@ namespace Generator.Database
             }
         }
 
-        public IEnumerable<IZoekresultaat> ZoekGeneriekAlleOnderdelen()
+        public IEnumerable<IZoekresultaat> KrijgAlleSetNamen()
         {
             return _databases.Extensions
                 .SelectMany(de => de.Engine.GetAllNames().Select(n => new Zoekresultaat(de.Name, n.Name, n.SafeName)));
         }
 
-        public IEnumerable<IZoekresultaat> ZoekGeneriekOnderdeelDefault()
+        public IEnumerable<IZoekresultaat> KrijgAlleSetNamenInNormaleDb()
         {
             return _databases.Extensions.Where(e => e.Name == LiturgieDatabaseSettings.DatabaseNameDefault)
                 .SelectMany(de => de.Engine.GetAllNames().Select(n => new Zoekresultaat(de.Name, n.Name, n.SafeName)));
         }
 
-        public IEnumerable<IZoekresultaat> ZoekGeneriekOnderdeelBijbel()
+        public IEnumerable<IZoekresultaat> KrijgAlleSetNamenInBijbelDb()
         {
             return _databases.Extensions.Where(e => e.Name == LiturgieDatabaseSettings.DatabaseNameBijbeltekst)
                 .SelectMany(de => de.Engine.GetAllNames().Select(n => new Zoekresultaat(de.Name, n.Name, n.SafeName)));
         }
 
-        public IEnumerable<IZoekresultaat> ZoekGeneriekAlleFragmenten(string onderdeelNaam)
+        public IEnumerable<IZoekresultaat> KrijgAlleFragmentenUitSet(string setNaam)
         {
             return _databases.Extensions.SelectMany(de => 
                 de.Engine
-                .Where(s => string.Equals(s.Name.SafeName, onderdeelNaam, StringComparison.CurrentCultureIgnoreCase) || string.Equals(s.Settings.DisplayName, onderdeelNaam, StringComparison.CurrentCultureIgnoreCase))
+                .Where(s => string.Equals(s.Name.SafeName, setNaam, StringComparison.CurrentCultureIgnoreCase) || string.Equals(s.Settings.DisplayName, setNaam, StringComparison.CurrentCultureIgnoreCase))
                 .SelectMany(set => set.GetAllNames().Select(n => new Zoekresultaat(de.Name, n.Name, n.SafeName)))
             );
         }
