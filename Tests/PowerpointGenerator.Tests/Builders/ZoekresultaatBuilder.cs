@@ -8,9 +8,9 @@ namespace Generator.Tests.Builders
 {
     public class ZoekresultaatBuilder
     {
-        public ILiturgieDatabase.ILiturgieDatabase LiturgieDatabase { get; private set; }
+        public ILiturgieDatabaseZoek LiturgieDatabase { get; private set; }
         public ILiturgieTekstNaarObject LiturgieTekstNaarObject => new LiturgieTekstNaarObject();
-        public LiturgieDatabaseBuilder _dbBuilder = new LiturgieDatabaseBuilder();
+        public LiturgieDatabaseZoekBuilder _dbBuilder = new LiturgieDatabaseZoekBuilder();
 
         private static readonly ZoekresultaatItem[] basisZoekresultaat = new[] 
         {
@@ -51,15 +51,6 @@ namespace Generator.Tests.Builders
         {
             Build();
             return MockZoekresultaat(basisZoekresultaat);
-        }
-
-        public ZoekresultaatBuilder AddZoekSpecifiek()
-        {
-            foreach (var item in basisZoekresultaat)
-            {
-                _dbBuilder.ZoekSpecifiek_AddOnderdeelAndFragment(item.OnderdeelNaam, item.FragmentNaam, veiligeOnderdeelNaam: item.OnderdeelVeiligeNaam, veiligeFragmentNaam: item.FragmentVeiligeNaam);
-            }
-            return this;
         }
 
         public ZoekresultaatBuilder AddKrijgAlleSetNamen()

@@ -70,6 +70,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Builders\EngineManagerBuilder.cs" />
+    <Compile Include="Builders\LiturgieDatabaseZoekBuilder.cs" />
     <Compile Include="Builders\LiturgieDatabaseBuilder.cs" />
     <Compile Include="Builders\ZoekresultaatBuilder.cs" />
     <Compile Include="Oplosser\InterpreteerLiturgieRuwTests.cs" />

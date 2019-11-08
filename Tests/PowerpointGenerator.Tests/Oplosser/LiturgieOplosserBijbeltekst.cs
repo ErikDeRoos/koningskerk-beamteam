@@ -33,13 +33,13 @@ namespace Generator.Tests
             {
                 var liturgieItem = MockBijbeltekstInvoer(onderdeel, fragment, fragmentVerzen);
                 var databaseBuilder = new LiturgieDatabaseBuilder()
-                    .ZoekSpecifiek_AddOnderdeelAndFragment(onderdeel, fragment);
+                    .KrijgItem_AddOnderdeelAndFragment(onderdeel, fragment);
                 var database = databaseBuilder.Build();
                 var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieSlideMaker;
 
                 var oplossing = sut.ConverteerNaarSlide(liturgieItem, _liturgieSettingsDefault);
 
-                databaseBuilder.Database.Verify(x => x.ZoekSpecifiekItem(VerwerkingType.bijbeltekst, liturgieItem.Benaming, liturgieItem.PerDeelVersen.First().Deel, liturgieItem.PerDeelVersen.First().Verzen, _liturgieSettingsDefault));
+                databaseBuilder.Database.Verify(x => x.KrijgItem(VerwerkingType.bijbeltekst, liturgieItem.Benaming, liturgieItem.PerDeelVersen.First().Deel, liturgieItem.PerDeelVersen.First().Verzen, _liturgieSettingsDefault));
             }
 
             [DataTestMethod]
@@ -48,7 +48,7 @@ namespace Generator.Tests
             {
                 var liturgieItem = MockBijbeltekstInvoer(onderdeel, fragment, fragmentVerzen);
                 var database = new LiturgieDatabaseBuilder()
-                    .ZoekSpecifiek_AddOnderdeelAndFragment(onderdeel, fragment)
+                    .KrijgItem_AddOnderdeelAndFragment(onderdeel, fragment)
                     .Build();
                 var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieSlideMaker;
 

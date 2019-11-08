@@ -44,6 +44,8 @@
     <Compile Include="Database\FileSystem\FileFinder.cs" />
     <Compile Include="Database\FileSystem\FileZipFinder.cs" />
     <Compile Include="Database\FileSystem\IZipArchiveDirectory.cs" />
+    <Compile Include="Database\LiturgieDatabaseSettings.cs" />
+    <Compile Include="Database\LiturgieDatabaseZoek.cs" />
     <Compile Include="Database\LiturgieDatabase.cs" />
     <Compile Include="GeneratieInterface.cs" />
     <Compile Include="GeneratorStatus.cs" />

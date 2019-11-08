@@ -11,14 +11,6 @@ using static System.String;
 
 namespace Generator.Database
 {
-
-    public static class LiturgieDatabaseSettings
-    {
-        public const string VersSamenvoeging = "-";
-        public const string DatabaseNameDefault = "default";
-        public const string DatabaseNameBijbeltekst = "bijbel";
-    }
-
     /// <summary>
     /// Zoek naar de opgegeven liturgieen.
     /// </summary>
@@ -30,7 +22,7 @@ namespace Generator.Database
             _databases = database;
         }
 
-        public IOplossing ZoekSpecifiekItem(VerwerkingType alsType, string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen, LiturgieSettings settings)
+        public IOplossing KrijgItem(VerwerkingType alsType, string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen, LiturgieSettings settings)
         {
             var database = alsType == VerwerkingType.normaal ? _databases.GetDefault() : _databases.Extensions.FirstOrDefault(e => e.Name == LiturgieDatabaseSettings.DatabaseNameBijbeltekst);
             if (database == null)
@@ -241,49 +233,6 @@ namespace Generator.Database
             }
         }
 
-        public IEnumerable<IZoekresultaat> KrijgAlleSetNamen()
-        {
-            return KrijgResultatenUitEngine(_databases.Extensions);
-        }
-        public IEnumerable<IZoekresultaat> KrijgAlleSetNamenInNormaleDb()
-        {
-            return KrijgResultatenUitEngine(_databases.Extensions.Where(e => e.Name == LiturgieDatabaseSettings.DatabaseNameDefault));
-        }
-        public IEnumerable<IZoekresultaat> KrijgAlleSetNamenInBijbelDb()
-        {
-            return KrijgResultatenUitEngine(_databases.Extensions.Where(e => e.Name == LiturgieDatabaseSettings.DatabaseNameBijbeltekst));
-        }
-
-        public IEnumerable<IZoekresultaat> KrijgAlleFragmentenUitAlleDatabases(string setNaam)
-        {
-            return _databases.Extensions.SelectMany(de => KrijgResultatenUitEngine(de, setNaam));
-        }
-        public IEnumerable<IZoekresultaat> KrijgAlleFragmentenUitNormaleDb(string setNaam)
-        {
-            return _databases.Extensions
-                .Where(e => e.Name == LiturgieDatabaseSettings.DatabaseNameDefault)
-                .SelectMany(de => KrijgResultatenUitEngine(de, setNaam));
-        }
-        public IEnumerable<IZoekresultaat> KrijgAlleFragmentenUitBijbelDb(string setNaam)
-        {
-            return _databases.Extensions
-                .Where(e => e.Name == LiturgieDatabaseSettings.DatabaseNameBijbeltekst)
-                .SelectMany(de => KrijgResultatenUitEngine(de, setNaam));
-        }
-
-        private static IEnumerable<Zoekresultaat> KrijgResultatenUitEngine(IEnumerable<IDatabase.Engine.IEngineSelection> engineSet)
-        {
-            return engineSet
-                .SelectMany(de => de.Engine.GetAllNames().Select(n => new Zoekresultaat(de.Name, n.Name, n.SafeName)));
-        }
-        private static IEnumerable<Zoekresultaat> KrijgResultatenUitEngine(IDatabase.Engine.IEngineSelection engineSet, string setNaam)
-        {
-            return engineSet.Engine
-                .Where(s => string.Equals(s.Name.SafeName, setNaam, StringComparison.CurrentCultureIgnoreCase) || string.Equals(s.Settings.DisplayName, setNaam, StringComparison.CurrentCultureIgnoreCase))
-                .SelectMany(set => set.GetAllNames().Select(n => new Zoekresultaat(engineSet.Name, n.Name, n.SafeName)));
-        }
-
-
         private interface IContentDelayed
         {
             string PossibleNummer { get; }
@@ -339,30 +288,6 @@ namespace Generator.Database
             public Oplossing()
             {
                 Status = DatabaseZoekStatus.Onbekend;
-            }
-        }
-
-        private class Zoekresultaat : IZoekresultaat
-        {
-            public IZoekresultaatEntry Resultaat { get; }
-            public IZoekresultaatBron Database { get; }
-
-            public Zoekresultaat(string bron, string itemWeergave, string itemVeiligeNaam)
-            {
-                Database = new ZoekresultaatBron { Weergave = bron };
-                Resultaat = new ZoekresultaatItem { Weergave = itemWeergave, VeiligeNaam = itemVeiligeNaam };
-            }
-
-            private class ZoekresultaatItem : IZoekresultaatEntry
-            {
-                public string Weergave { get; set; }
-                public string VeiligeNaam { get; set; }
-
-            }
-
-            private class ZoekresultaatBron : IZoekresultaatBron
-            {
-                public string Weergave { get; set; }
             }
         }
     }

@@ -12,15 +12,15 @@ namespace Generator.LiturgieOplosser
     /// </summary>
     public class LiturgieZoeker : ILiturgieZoeken
     {
-        private readonly ILiturgieDatabase.ILiturgieDatabase _database;
+        private readonly ILiturgieDatabaseZoek _databaseZoek;
         private readonly ILiturgieTekstNaarObject _liturgieTekstNaarObject;
 
         private IEnumerable<IVrijZoekresultaatMogelijkheid> _onderdelenLijstCache;
         private ZoekRestricties _onderdelenLijstRestrictiesCache;
 
-        public LiturgieZoeker(ILiturgieDatabase.ILiturgieDatabase database, ILiturgieTekstNaarObject liturgieTekstNaarObject)
+        public LiturgieZoeker(ILiturgieDatabaseZoek databaseZoek, ILiturgieTekstNaarObject liturgieTekstNaarObject)
         {
-            _database = database;
+            _databaseZoek = databaseZoek;
             _liturgieTekstNaarObject = liturgieTekstNaarObject;
         }
 
@@ -144,15 +144,15 @@ namespace Generator.LiturgieOplosser
 
             // zoekrestricties toepassen
             if (zoekRestricties.ZoekInBijbel && !zoekRestricties.ZoekInLiederen)
-                alleDatabases = _database.KrijgAlleSetNamenInBijbelDb();
+                alleDatabases = _databaseZoek.KrijgAlleSetNamenInBijbelDb();
             else if (!zoekRestricties.ZoekInBijbel && zoekRestricties.ZoekInLiederen)
-                alleDatabases = _database.KrijgAlleSetNamenInNormaleDb();
+                alleDatabases = _databaseZoek.KrijgAlleSetNamenInNormaleDb();
             else if (zoekRestricties.ZoekInBijbel && zoekRestricties.ZoekInLiederen)
-                alleDatabases = _database.KrijgAlleSetNamen();
+                alleDatabases = _databaseZoek.KrijgAlleSetNamen();
 
             // Alle slide templates zoals amen, votum, bidden etc)
             if (zoekRestricties.ZoekInCommon)
-                alleDatabases = alleDatabases.Concat(_database.KrijgAlleFragmentenUitNormaleDb(FileEngineDefaults.CommonFilesSetName));  
+                alleDatabases = alleDatabases.Concat(_databaseZoek.KrijgAlleFragmentenUitNormaleDb(FileEngineDefaults.CommonFilesSetName));  
 
             return alleDatabases.ToList();
         }
@@ -163,11 +163,11 @@ namespace Generator.LiturgieOplosser
 
             // zoekrestricties toepassen
             if (zoekRestricties.ZoekInBijbel && !zoekRestricties.ZoekInLiederen)
-                alleFragmenten = _database.KrijgAlleFragmentenUitBijbelDb(setNaam);
+                alleFragmenten = _databaseZoek.KrijgAlleFragmentenUitBijbelDb(setNaam);
             else if (!zoekRestricties.ZoekInBijbel && zoekRestricties.ZoekInLiederen)
-                alleFragmenten = _database.KrijgAlleFragmentenUitNormaleDb(setNaam);
+                alleFragmenten = _databaseZoek.KrijgAlleFragmentenUitNormaleDb(setNaam);
             else if (zoekRestricties.ZoekInBijbel && zoekRestricties.ZoekInLiederen)
-                alleFragmenten = _database.KrijgAlleFragmentenUitAlleDatabases(setNaam);
+                alleFragmenten = _databaseZoek.KrijgAlleFragmentenUitAlleDatabases(setNaam);
 
             return alleFragmenten.ToList();
         }

@@ -31,7 +31,7 @@ namespace Generator.Tests
             {
                 var liturgieItem = MockInterpretatie(onderdeel, fragment);
                 var database = new LiturgieDatabaseBuilder()
-                    .ZoekSpecifiek_AddOnderdeelAndFragment(onderdeel, fragment)
+                    .KrijgItem_AddOnderdeelAndFragment(onderdeel, fragment)
                     .Build();
                 var sut = new Generator.LiturgieOplosser.LiturgieOplosser(database, null, DefaultEmptyName);
 
@@ -46,7 +46,7 @@ namespace Generator.Tests
             {
                 var liturgieItem = MockInterpretatie(onderdeel);
                 var database = new LiturgieDatabaseBuilder()
-                    .ZoekSpecifiek_AddOnderdeelAndFragment(FileEngineDefaults.CommonFilesSetName, onderdeel)
+                    .KrijgItem_AddOnderdeelAndFragment(FileEngineDefaults.CommonFilesSetName, onderdeel)
                     .Build();
                 var sut = new Generator.LiturgieOplosser.LiturgieOplosser(database, null, DefaultEmptyName);
 
@@ -63,9 +63,9 @@ namespace Generator.Tests
                 var liturgieItem = MockInterpretatie(onderdeel, fragment);
                 var databaseBuilder = new LiturgieDatabaseBuilder();
                 if (fragment != null)
-                    databaseBuilder.ZoekSpecifiek_AddOnderdeelAndFragment(onderdeel, fragment);
+                    databaseBuilder.KrijgItem_AddOnderdeelAndFragment(onderdeel, fragment);
                 else
-                    databaseBuilder.ZoekSpecifiek_AddOnderdeelAndFragment(FileEngineDefaults.CommonFilesSetName, onderdeel);
+                    databaseBuilder.KrijgItem_AddOnderdeelAndFragment(FileEngineDefaults.CommonFilesSetName, onderdeel);
                 var database = databaseBuilder.Build();
                 var sut = new Generator.LiturgieOplosser.LiturgieOplosser(database, null, DefaultEmptyName);
 
@@ -80,7 +80,7 @@ namespace Generator.Tests
             {
                 var liturgieItem = MockInterpretatie(onderdeel, fragment);
                 var database = new LiturgieDatabaseBuilder()
-                    .ZoekSpecifiek_AddOnderdeelAndFragment(onderdeel, fragment, display)
+                    .KrijgItem_AddOnderdeelAndFragment(onderdeel, fragment, display)
                     .Build();
                 var sut = new Generator.LiturgieOplosser.LiturgieOplosser(database, null, DefaultEmptyName);
 
@@ -96,7 +96,7 @@ namespace Generator.Tests
                 var maskList = MaskList(maskRealName, maskUseName);
                 var liturgieItem = MockInterpretatie(onderdeel, fragment);
                 var database = new LiturgieDatabaseBuilder()
-                    .ZoekSpecifiek_AddOnderdeelAndFragment(onderdeel, fragment)
+                    .KrijgItem_AddOnderdeelAndFragment(onderdeel, fragment)
                     .Build();
                 var sut = new Generator.LiturgieOplosser.LiturgieOplosser(database, null, DefaultEmptyName);
 
@@ -112,7 +112,7 @@ namespace Generator.Tests
                 var maskList = MaskList(maskRealName, maskUseName);
                 var liturgieItem = MockInterpretatie(onderdeel);
                 var database = new LiturgieDatabaseBuilder()
-                    .ZoekSpecifiek_AddOnderdeelAndFragment(FileEngineDefaults.CommonFilesSetName, onderdeel)
+                    .KrijgItem_AddOnderdeelAndFragment(FileEngineDefaults.CommonFilesSetName, onderdeel)
                     .Build();
                 var sut = new Generator.LiturgieOplosser.LiturgieOplosser(database, null, DefaultEmptyName);
 

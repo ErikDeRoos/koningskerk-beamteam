@@ -116,7 +116,7 @@ namespace Generator.LiturgieOplosser
         {
             regel.VerwerkenAlsType = VerwerkingType.normaal;
             var verzenList = verzen.ToList();
-            var resultaat = _database.ZoekSpecifiekItem(VerwerkingType.normaal, setNaam, zoekNaam, verzenList, settings);
+            var resultaat = _database.KrijgItem(VerwerkingType.normaal, setNaam, zoekNaam, verzenList, settings);
             if (resultaat.Status != DatabaseZoekStatus.Opgelost)
                 return resultaat.Status;
 
@@ -151,7 +151,7 @@ namespace Generator.LiturgieOplosser
             var versDelenLijst = versDelen.ToList();
             foreach(var deel in versDelenLijst)
             {
-                var resultaat = _database.ZoekSpecifiekItem(VerwerkingType.bijbeltekst, setNaam, deel.Deel, deel.Verzen, settings);
+                var resultaat = _database.KrijgItem(VerwerkingType.bijbeltekst, setNaam, deel.Deel, deel.Verzen, settings);
                 if (resultaat.Status != DatabaseZoekStatus.Opgelost)
                     return resultaat.Status;
                 content.AddRange(resultaat.Content);

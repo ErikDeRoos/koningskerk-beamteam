@@ -37,6 +37,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ILiturgieDatabaseZoek.cs" />
     <Compile Include="Interpreteren\Helpers\ILiturgieInterpretatieBijbeltekst.cs" />
     <Compile Include="Interpreteren\ILengteBerekenaar.cs" />
     <Compile Include="Interpreteren\ILiturgieZoeken.cs" />
