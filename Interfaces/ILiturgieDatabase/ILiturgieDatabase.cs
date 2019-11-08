@@ -9,6 +9,8 @@ namespace ILiturgieDatabase
         IEnumerable<IZoekresultaat> KrijgAlleSetNamenInNormaleDb();
         IEnumerable<IZoekresultaat> KrijgAlleSetNamenInBijbelDb();
         IEnumerable<IZoekresultaat> KrijgAlleSetNamen();
-        IEnumerable<IZoekresultaat> KrijgAlleFragmentenUitSet(string setNaam);
+        IEnumerable<IZoekresultaat> KrijgAlleFragmentenUitAlleDatabases(string setNaam);
+        IEnumerable<IZoekresultaat> KrijgAlleFragmentenUitNormaleDb(string setNaam);
+        IEnumerable<IZoekresultaat> KrijgAlleFragmentenUitBijbelDb(string setNaam);
     }
 }

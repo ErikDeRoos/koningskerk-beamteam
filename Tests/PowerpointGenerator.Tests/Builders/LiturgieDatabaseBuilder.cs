@@ -17,7 +17,7 @@ namespace Generator.Tests.Builders
             Database.Setup(x => x.KrijgAlleSetNamenInNormaleDb())
                 .Returns(_zoekresultaten);
             foreach(var fragmentGroup in _fragmentZoekresultaten)
-                Database.Setup(x => x.KrijgAlleFragmentenUitSet(fragmentGroup.Key))
+                Database.Setup(x => x.KrijgAlleFragmentenUitNormaleDb(fragmentGroup.Key))
                     .Returns(fragmentGroup.Value);
 
             return Database.Object;

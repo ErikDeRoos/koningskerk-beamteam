@@ -1,4 +1,1 @@
--bugfix: lied versen lijst toont niet meer
--bugfix: ingevoegd moet worden de real name ipv display name (wel display name houden in lijst)
--feature: standaard (foute) bestandsnamen voorzien van underscores ipv spaties, en dit laten werken met de liturgielijst. Bij weergave 'normale' naam tonen.
 -feature: 'blanco' dia niet tonen in 'volgende'

@@ -57,9 +57,9 @@ namespace Generator.LiturgieOplosser
             {
                 // Fragment is er bij gekomen
                 veranderingGemaakt = true;
-                fragmentLijst = _database.KrijgAlleFragmentenUitSet(huidigeZoektermSplit.Benaming).Select(t => new ZoekresultaatItem()
+                fragmentLijst = ZoekFragmenten(zoekRestricties, huidigeZoektermSplit.Benaming).Select(t => new ZoekresultaatItem()
                 {
-                    Weergave = $"{huidigeZoektermSplit.Benaming} {t.Resultaat}",
+                    Weergave = $"{huidigeZoektermSplit.Benaming} {t.Resultaat.Weergave}",
                     UitDatabase = t.Database.Weergave,
                 }).ToList();
 
@@ -86,7 +86,7 @@ namespace Generator.LiturgieOplosser
                 aanname = VoorspelZoekresultaat(nieuwResultaat.AlleMogelijkheden, nieuwResultaat.ZoekTerm).First().Weergave;
 
                 // Fragment toevoegen op basis van aanname
-                fragmentLijst = _database.KrijgAlleFragmentenUitSet(aanname).Select(t => new ZoekresultaatItem()
+                fragmentLijst = ZoekFragmenten(zoekRestricties, aanname).Select(t => new ZoekresultaatItem()
                 {
                     Weergave = $"{aanname} {t.Resultaat}",
                     UitDatabase = t.Database.Weergave,
@@ -152,10 +152,26 @@ namespace Generator.LiturgieOplosser
 
             // Alle slide templates zoals amen, votum, bidden etc)
             if (zoekRestricties.ZoekInCommon)
-                alleDatabases = alleDatabases.Concat(_database.KrijgAlleFragmentenUitSet(FileEngineDefaults.CommonFilesSetName));  
+                alleDatabases = alleDatabases.Concat(_database.KrijgAlleFragmentenUitNormaleDb(FileEngineDefaults.CommonFilesSetName));  
 
             return alleDatabases.ToList();
         }
+
+        private IList<IZoekresultaat> ZoekFragmenten(ZoekRestricties zoekRestricties, string setNaam)
+        {
+            var alleFragmenten = Enumerable.Empty<IZoekresultaat>();
+
+            // zoekrestricties toepassen
+            if (zoekRestricties.ZoekInBijbel && !zoekRestricties.ZoekInLiederen)
+                alleFragmenten = _database.KrijgAlleFragmentenUitBijbelDb(setNaam);
+            else if (!zoekRestricties.ZoekInBijbel && zoekRestricties.ZoekInLiederen)
+                alleFragmenten = _database.KrijgAlleFragmentenUitNormaleDb(setNaam);
+            else if (zoekRestricties.ZoekInBijbel && zoekRestricties.ZoekInLiederen)
+                alleFragmenten = _database.KrijgAlleFragmentenUitAlleDatabases(setNaam);
+
+            return alleFragmenten.ToList();
+        }
+
 
         private Zoekresultaat ZoekresultaatSamenstellen(string zoekTekst, bool alsBijbeltekst, IVrijZoekresultaat vorigResultaat, IEnumerable<IVrijZoekresultaatMogelijkheid> lijst, string aanname, bool lijstIsGewijzigd)
         {
