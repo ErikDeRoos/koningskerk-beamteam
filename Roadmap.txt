@@ -13,5 +13,4 @@ S-Opslaan via het nieuwe powerpoint formaat
 M-database files via json
 M-liturgie voorbeeld tonen
 S-Zoeken in teksten
-S-Solution vereenvoudigen
 S-Begeleidende teksten vereenvoudigen: dit project is de beamteam generator voor kerken, niet iets generieks
