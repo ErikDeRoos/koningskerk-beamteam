@@ -1,8 +1,8 @@
 ﻿// Copyright 2016 door Erik de Roos
 using Autofac;
+using Generator.Tools;
 using System;
 using System.Windows.Forms;
-using Tools;
 
 namespace PowerpointGenerator
 {

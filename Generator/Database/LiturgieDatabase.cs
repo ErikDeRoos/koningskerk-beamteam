@@ -1,6 +1,7 @@
 ﻿// Copyright 2019 door Erik de Roos
-using IDatabase;
-using ILiturgieDatabase;
+using Generator.Database.FileSystem;
+using Generator.Database.Models;
+using Generator.LiturgieInterpretator.Models;
 using ISettings;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ namespace Generator.Database
     /// <summary>
     /// Zoek naar de opgegeven liturgieen.
     /// </summary>
-    public class LiturgieDatabase : ILiturgieDatabase.ILiturgieDatabase
+    public class LiturgieDatabase : ILiturgieDatabase
     {
         private readonly IEngineManager _databases;
         public LiturgieDatabase(IEngineManager database)

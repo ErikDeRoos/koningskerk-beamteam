@@ -1,5 +1,6 @@
 ﻿// Copyright 2019 door Erik de Roos
-using ILiturgieDatabase;
+using Generator.Database.Models;
+using Generator.LiturgieInterpretator.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,7 +57,7 @@ namespace Generator.LiturgieInterpretator
             returnValue.NietVerwerkenViaDatabase = String.IsNullOrWhiteSpace(invoerTekst);
             if (returnValue.NietVerwerkenViaDatabase)
                 return returnValue;
-            returnValue.AlsBijbeltekst = !string.IsNullOrWhiteSpace(uitDatabase) && uitDatabase == Database.LiturgieDatabaseSettings.DatabaseNameBijbeltekst;
+            returnValue.AlsBijbeltekst = !string.IsNullOrWhiteSpace(uitDatabase) && uitDatabase == LiturgieDatabaseSettings.DatabaseNameBijbeltekst;
             returnValue.ToonInOverzicht = true;
             returnValue.ToonInVolgende = true;
             return returnValue;

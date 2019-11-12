@@ -1,6 +1,5 @@
 ﻿// Copyright 2019 door Erik de Roos
-using IDatabase;
-using IFileSystem;
+using Generator.Tools;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;

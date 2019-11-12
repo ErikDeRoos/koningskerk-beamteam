@@ -1,6 +1,5 @@
 ﻿// Copyright 2019 door Erik de Roos
-using IDatabase;
-using IDatabase.Engine;
+using Generator.Database.FileSystem;
 using Moq;
 using System;
 using System.Collections.Generic;

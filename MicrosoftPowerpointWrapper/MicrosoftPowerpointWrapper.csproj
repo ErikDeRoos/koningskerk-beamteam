@@ -70,6 +70,10 @@
     <Compile Include="Connect\MppFactory.cs" />
     <Compile Include="Connect\MppImplement.cs" />
     <Compile Include="Connect\MppInterface.cs" />
+    <Compile Include="IBuilder.cs" />
+    <Compile Include="IBuilderBuildDefaults.cs" />
+    <Compile Include="IBuilderBuildSettings.cs" />
+    <Compile Include="IBuilderDependendFiles.cs" />
     <Compile Include="ISettings.cs" />
     <Compile Include="LiedPresentator\ILiedFormatter.cs" />
     <Compile Include="LiedPresentator\LiedFormatResult.cs" />
@@ -85,17 +89,9 @@
     <Compile Include="RegelVerwerking\VerwerkerNormaal.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Interfaces\ILiturgieDatabase\ILiturgieDatabase.csproj">
-      <Project>{1338d41d-5e66-40f3-845f-170a8dcfb445}</Project>
-      <Name>ILiturgieDatabase</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Interfaces\ISlideBuilder\ISlideBuilder.csproj">
-      <Project>{4ce33a64-db90-489b-9d01-99a88f24f2f7}</Project>
-      <Name>ISlideBuilder</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tools\Tools.csproj">
-      <Project>{4fcc4de1-8d80-43a3-b422-4add6410e2ae}</Project>
-      <Name>Tools</Name>
+    <ProjectReference Include="..\Generator\Generator.csproj">
+      <Project>{E502AED1-D6CD-4E2B-9524-AA333AA1AC21}</Project>
+      <Name>Generator</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

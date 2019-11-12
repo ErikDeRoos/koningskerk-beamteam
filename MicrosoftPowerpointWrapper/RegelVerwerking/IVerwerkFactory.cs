@@ -1,6 +1,6 @@
 ﻿// Copyright 2016 door Erik de Roos
-using ILiturgieDatabase;
-using ISlideBuilder;
+using Generator.Database.Models;
+using Generator.LiturgieInterpretator.Models;
 using mppt.Connect;
 using mppt.LiedPresentator;
 using System.Collections.Generic;

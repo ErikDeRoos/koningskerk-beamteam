@@ -1,5 +1,6 @@
 ﻿// Copyright 2018 door Erik de Roos
-using ILiturgieDatabase;
+using Generator.LiturgieInterpretator;
+using Generator.LiturgieInterpretator.Models;
 using System;
 using System.Linq;
 using System.Windows.Forms;

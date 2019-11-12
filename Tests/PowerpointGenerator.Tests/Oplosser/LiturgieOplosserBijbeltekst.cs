@@ -1,6 +1,8 @@
 ﻿// Copyright 2019 door Erik de Roos
+using Generator.Database.Models;
+using Generator.LiturgieInterpretator;
+using Generator.LiturgieInterpretator.Models;
 using Generator.Tests.Builders;
-using ILiturgieDatabase;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Collections.Generic;
@@ -35,7 +37,7 @@ namespace Generator.Tests
                 var databaseBuilder = new LiturgieDatabaseBuilder()
                     .KrijgItem_AddOnderdeelAndFragment(onderdeel, fragment);
                 var database = databaseBuilder.Build();
-                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieSlideMaker;
+                var sut = (new LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieSlideMaker;
 
                 var oplossing = sut.ConverteerNaarSlide(liturgieItem, _liturgieSettingsDefault);
 
@@ -50,7 +52,7 @@ namespace Generator.Tests
                 var database = new LiturgieDatabaseBuilder()
                     .KrijgItem_AddOnderdeelAndFragment(onderdeel, fragment)
                     .Build();
-                var sut = (new Generator.LiturgieOplosser.LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieSlideMaker;
+                var sut = (new LiturgieOplosser(database, _liturgieInterpreteer, DefaultEmptyName)) as ILiturgieSlideMaker;
 
                 var oplossing = sut.ConverteerNaarSlide(liturgieItem, _liturgieSettingsDefault);
 

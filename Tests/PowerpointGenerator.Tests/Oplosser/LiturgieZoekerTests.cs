@@ -1,4 +1,5 @@
 ﻿// Copyright 2019 door Erik de Roos
+using Generator.LiturgieInterpretator;
 using Generator.Tests.Builders;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
@@ -18,7 +19,7 @@ namespace Generator.Tests
             {
                 var builder = new ZoekresultaatBuilder();
                 var zoekresultaat = builder.BuildDefault();
-                var sut = new LiturgieOplosser.LiturgieZoeker(null, builder.LiturgieTekstNaarObject);
+                var sut = new LiturgieZoeker(null, builder.LiturgieTekstNaarObject);
 
                 var oplossing = sut.MaakTotTekst(invoer, null, zoekresultaat);
 
@@ -36,7 +37,7 @@ namespace Generator.Tests
                 var builder = new ZoekresultaatBuilder()
                     .AddKrijgAlleSetNamen();
                 builder.BuildDefault();
-                var sut = new LiturgieOplosser.LiturgieZoeker(builder.LiturgieDatabase, builder.LiturgieTekstNaarObject);
+                var sut = new LiturgieZoeker(builder.LiturgieDatabase, builder.LiturgieTekstNaarObject);
 
                 var oplossing = sut.VrijZoeken(query);
 
@@ -52,7 +53,7 @@ namespace Generator.Tests
                     .AddKrijgAlleSetNamen()
                     .AddKrijgAlleFragmentenUitSet(setToUse);
                 var zoekresultaat = builder.BuildDefault();
-                var sut = new LiturgieOplosser.LiturgieZoeker(builder.LiturgieDatabase, builder.LiturgieTekstNaarObject);
+                var sut = new LiturgieZoeker(builder.LiturgieDatabase, builder.LiturgieTekstNaarObject);
 
                 var oplossing = sut.VrijZoeken(query, vorigResultaat: zoekresultaat);
 
@@ -68,7 +69,7 @@ namespace Generator.Tests
                     .AddKrijgAlleSetNamen()
                     .AddKrijgAlleFragmentenUitSet(setToUse);
                 builder.BuildDefault();
-                var sut = new LiturgieOplosser.LiturgieZoeker(builder.LiturgieDatabase, builder.LiturgieTekstNaarObject);
+                var sut = new LiturgieZoeker(builder.LiturgieDatabase, builder.LiturgieTekstNaarObject);
 
                 var oplossing = sut.VrijZoeken(query);
 

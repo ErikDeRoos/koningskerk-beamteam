@@ -1,7 +1,8 @@
 ﻿// Copyright 2019 door Remco Veurink en Erik de Roos
-using Generator;
-using ILiturgieDatabase;
+using Generator.Database.Models;
+using Generator.LiturgieInterpretator;
 using ISettings;
+using PowerpointGenerator.Genereren;
 using PowerpointGenerator.Properties;
 using System;
 using System.Diagnostics;

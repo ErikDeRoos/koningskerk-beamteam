@@ -1,10 +1,11 @@
 ﻿// Copyright 2018 door Erik de Roos
 using Autofac.Extras.FakeItEasy;
 using FakeItEasy;
-using ISlideBuilder;
+using Generator.Database.Models;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using mppt;
 using mppt.Connect;
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace MicrosoftPowerpointWrapper.Tests
 {
@@ -64,9 +65,9 @@ namespace MicrosoftPowerpointWrapper.Tests
             return pres;
         }
 
-        private static IEnumerable<ILiturgieDatabase.ISlideOpbouw> GetEmptyLiturgie()
+        private static IEnumerable<ISlideOpbouw> GetEmptyLiturgie()
         {
-            return new List<ILiturgieDatabase.ISlideOpbouw>();
+            return new List<ISlideOpbouw>();
         }
     }
 }

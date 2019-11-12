@@ -1,6 +1,7 @@
-﻿using Generator.Database.FileSystem;
+﻿using Generator.Database;
+using Generator.Database.FileSystem;
 using Generator.LiturgieInterpretator;
-using ILiturgieDatabase;
+using Generator.LiturgieInterpretator.Models;
 using Moq;
 using System.Linq;
 

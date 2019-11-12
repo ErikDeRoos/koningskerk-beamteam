@@ -1,10 +1,10 @@
 ﻿// Copyright 2018 door Erik de Roos
-using ILiturgieDatabase;
-using System.Linq;
-using System.Collections.Generic;
 using FakeItEasy;
-using mppt.LiedPresentator;
+using Generator.Database.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using mppt.LiedPresentator;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MicrosoftPowerpointWrapper.Tests
 {

@@ -1,12 +1,11 @@
 ﻿// Copyright 2017 door  Erik de Roos
-using IFileSystem;
+using Generator.Tools;
 using ISettings;
 using ISettings.CommonImplementation;
-using System.IO;
 using Newtonsoft.Json;
-using System.Linq;
-using Tools;
 using System;
+using System.IO;
+using System.Linq;
 
 namespace PowerpointGenerator.Settings
 {

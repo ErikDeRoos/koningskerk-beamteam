@@ -1,6 +1,6 @@
 ﻿// Copyright 2019 door Erik de Roos
+using Generator.Database.Models;
 using Generator.Tests.Builders;
-using ILiturgieDatabase;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 
@@ -61,7 +61,7 @@ namespace Generator.Tests
             {
                 var manager = new EngineManagerBuilder()
                     .AddOnderdeelAndFragment(onderdeel, fragment)
-                    .Build(Database.LiturgieDatabaseSettings.DatabaseNameBijbeltekst);
+                    .Build(LiturgieDatabaseSettings.DatabaseNameBijbeltekst);
                 var sut = new Database.LiturgieDatabase(manager);
 
                 var oplossing = sut.KrijgItem(VerwerkingType.bijbeltekst, onderdeel, fragment, null, _liturgieSettingsDefault);
@@ -79,7 +79,7 @@ namespace Generator.Tests
             {
                 var manager = new EngineManagerBuilder()
                     .AddOnderdeelAndFragment(onderdeel, fragment, inContent, itemIsSubcontent:true)
-                    .Build(Database.LiturgieDatabaseSettings.DatabaseNameBijbeltekst);
+                    .Build(LiturgieDatabaseSettings.DatabaseNameBijbeltekst);
                 var delen = new[] { find };
                 var sut = new Database.LiturgieDatabase(manager);
 

@@ -1,6 +1,7 @@
 ﻿// Copyright 2017 door Erik de Roos
-using ILiturgieDatabase;
-using ISlideBuilder;
+using Generator.Database.Models;
+using Generator.LiturgieInterpretator.Models;
+using Generator.Tools;
 using mppt.Connect;
 using mppt.LiedPresentator;
 using mppt.RegelVerwerking;
@@ -8,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Tools;
 
 namespace mppt
 {

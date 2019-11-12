@@ -1,5 +1,12 @@
 ﻿// Copyright 2019 door Erik de Roos
 using Autofac;
+using Generator.Database;
+using Generator.Database.FileSystem;
+using Generator.LiturgieInterpretator;
+using Generator.LiturgieInterpretator.Models;
+using Generator.Tools;
+using mppt;
+using PowerpointGenerator.Genereren;
 
 namespace PowerpointGenerator
 {
@@ -11,12 +18,12 @@ namespace PowerpointGenerator
 
         internal static void SetDefault(ContainerBuilder container)
         {
-            container.RegisterType<Tools.LocalFileOperations>().As<IFileSystem.IFileOperations>();
+            container.RegisterType<LocalFileOperations>().As<IFileOperations>();
             container.RegisterType<Settings.SettingsFactory>().As<ISettings.IInstellingenFactory>()
                 .WithParameter("instellingenFileName", SettingsFileName).WithParameter("masksFileName", MasksFileName)
                 .SingleInstance();
-            container.RegisterGeneric(typeof(Generator.GeneratieInterface<>));
-            container.RegisterType<Screens.CompRegistration>().As<Generator.ICompRegistration>();
+            container.RegisterGeneric(typeof(GeneratieInterface<>));
+            container.RegisterType<Screens.CompRegistration>().As<ICompRegistration>();
             SetGenerator(container);
             container.RegisterType<Screens.Form1>().As<System.Windows.Forms.Form>()
                 .OnActivated(f => f.Instance.Opstarten());
@@ -24,22 +31,22 @@ namespace PowerpointGenerator
 
         private static void SetGenerator(ContainerBuilder container)
         {
-            container.RegisterType<Generator.Database.LiturgieDatabase>().As<ILiturgieDatabase.ILiturgieDatabase>();
-            container.RegisterType<Generator.LiturgieOplosser.LiturgieOplosser>().As<ILiturgieDatabase.ILiturgieSlideMaker>()
+            container.RegisterType<LiturgieDatabase>().As<ILiturgieDatabase>();
+            container.RegisterType<LiturgieOplosser>().As<ILiturgieSlideMaker>()
                 .WithParameter("defaultSetNameEmpty", DefaultSetNameEmpty)
                 .InstancePerLifetimeScope();
-            container.RegisterType<Generator.LiturgieOplosser.LiturgieZoeker>().As<ILiturgieDatabase.ILiturgieZoeken>()
+            container.RegisterType<LiturgieZoeker>().As<ILiturgieZoeken>()
                 .InstancePerLifetimeScope();
-            container.RegisterType<mppt.RegelVerwerking.LengteBerekenaar>().As<ILiturgieDatabase.ILengteBerekenaar>();
-            container.RegisterType<Generator.LiturgieInterpretator.LiturgieTekstNaarObject>().As<ILiturgieDatabase.ILiturgieTekstNaarObject>();
-            container.RegisterType<Generator.Database.FileSystem.FileEngine>().As<IDatabase.Engine.IEngine>();
-            container.RegisterType<Database.EngineManager>().As<IDatabase.IEngineManager>();
+            container.RegisterType<mppt.RegelVerwerking.LengteBerekenaar>().As<ILengteBerekenaar>();
+            container.RegisterType<Generator.LiturgieInterpretator.LiturgieTekstNaarObject>().As<ILiturgieTekstNaarObject>();
+            container.RegisterType<FileEngine>().As<IEngine>();
+            container.RegisterType<EngineManager>().As<IEngineManager>();
             SetMsPowerpointBuilder(container);
         }
 
         private static void SetMsPowerpointBuilder(ContainerBuilder container)
         {
-            container.RegisterType<mppt.PowerpointFunctions>().As<ISlideBuilder.IBuilder>();
+            container.RegisterType<mppt.PowerpointFunctions>().As<IBuilder>();
             container.RegisterType<mppt.Connect.MppFactory>().As<mppt.Connect.IMppFactory>();
             container.RegisterType<mppt.Connect.MppApplication>().As<mppt.Connect.IMppApplication>();
             container.RegisterType<mppt.LiedPresentator.LiedFormatter>().As<mppt.LiedPresentator.ILiedFormatter>();

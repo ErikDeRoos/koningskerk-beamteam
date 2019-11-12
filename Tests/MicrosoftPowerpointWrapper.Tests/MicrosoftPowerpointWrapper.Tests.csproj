@@ -85,13 +85,9 @@
     <None Include="Readme.md" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Interfaces\ILiturgieDatabase\ILiturgieDatabase.csproj">
-      <Project>{1338d41d-5e66-40f3-845f-170a8dcfb445}</Project>
-      <Name>ILiturgieDatabase</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Interfaces\ISlideBuilder\ISlideBuilder.csproj">
-      <Project>{4ce33a64-db90-489b-9d01-99a88f24f2f7}</Project>
-      <Name>ISlideBuilder</Name>
+    <ProjectReference Include="..\..\Generator\Generator.csproj">
+      <Project>{E502AED1-D6CD-4E2B-9524-AA333AA1AC21}</Project>
+      <Name>Generator</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\MicrosoftPowerpointWrapper\MicrosoftPowerpointWrapper.csproj">
       <Project>{d65aa3ef-0086-4ca5-802e-a2bb2e3bed20}</Project>

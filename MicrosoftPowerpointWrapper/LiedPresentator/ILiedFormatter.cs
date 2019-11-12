@@ -1,5 +1,5 @@
 ﻿// Copyright 2017 door Erik de Roos
-using ILiturgieDatabase;
+using Generator.Database.Models;
 using System.Collections.Generic;
 
 namespace mppt.LiedPresentator

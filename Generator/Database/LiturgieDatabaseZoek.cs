@@ -1,6 +1,6 @@
 ﻿// Copyright 2019 door Erik de Roos
-using IDatabase;
-using ILiturgieDatabase;
+using Generator.Database.FileSystem;
+using Generator.Database.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,12 +48,12 @@ namespace Generator.Database
                 .SelectMany(de => KrijgResultatenUitEngine(de, setNaam));
         }
 
-        private static IEnumerable<Zoekresultaat> KrijgResultatenUitEngine(IEnumerable<IDatabase.Engine.IEngineSelection> engineSet)
+        private static IEnumerable<Zoekresultaat> KrijgResultatenUitEngine(IEnumerable<IEngineSelection> engineSet)
         {
             return engineSet
                 .SelectMany(de => de.Engine.GetAllNames().Select(n => new Zoekresultaat(de.Name, n.Name, n.SafeName)));
         }
-        private static IEnumerable<Zoekresultaat> KrijgResultatenUitEngine(IDatabase.Engine.IEngineSelection engineSet, string setNaam)
+        private static IEnumerable<Zoekresultaat> KrijgResultatenUitEngine(IEngineSelection engineSet, string setNaam)
         {
             return engineSet.Engine
                 .Where(s => string.Equals(s.Name.SafeName, setNaam, StringComparison.CurrentCultureIgnoreCase) || string.Equals(s.Settings.DisplayName, setNaam, StringComparison.CurrentCultureIgnoreCase))

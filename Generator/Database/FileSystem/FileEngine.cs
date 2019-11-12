@@ -1,13 +1,11 @@
 ﻿// Copyright 2019 door Erik de Roos
-using IDatabase;
+using Generator.Tools;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Serialization;
-using System.IO;
-using IFileSystem;
-using IDatabase.Engine;
 
 namespace Generator.Database.FileSystem
 {

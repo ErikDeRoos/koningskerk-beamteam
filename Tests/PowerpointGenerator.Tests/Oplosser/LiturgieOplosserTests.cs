@@ -1,7 +1,9 @@
 ﻿// Copyright 2019 door Erik de Roos
 using Generator.Database.FileSystem;
+using Generator.Database.Models;
+using Generator.LiturgieInterpretator;
+using Generator.LiturgieInterpretator.Models;
 using Generator.Tests.Builders;
-using ILiturgieDatabase;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Collections.Generic;
@@ -33,7 +35,7 @@ namespace Generator.Tests
                 var database = new LiturgieDatabaseBuilder()
                     .KrijgItem_AddOnderdeelAndFragment(onderdeel, fragment)
                     .Build();
-                var sut = new Generator.LiturgieOplosser.LiturgieOplosser(database, null, DefaultEmptyName);
+                var sut = new LiturgieOplosser(database, null, DefaultEmptyName);
 
                 var oplossing = sut.ConverteerNaarSlide(liturgieItem, _liturgieSettingsDefault);
 
@@ -48,7 +50,7 @@ namespace Generator.Tests
                 var database = new LiturgieDatabaseBuilder()
                     .KrijgItem_AddOnderdeelAndFragment(FileEngineDefaults.CommonFilesSetName, onderdeel)
                     .Build();
-                var sut = new Generator.LiturgieOplosser.LiturgieOplosser(database, null, DefaultEmptyName);
+                var sut = new LiturgieOplosser(database, null, DefaultEmptyName);
 
                 var oplossing = sut.ConverteerNaarSlide(liturgieItem, _liturgieSettingsDefault);
 
@@ -67,7 +69,7 @@ namespace Generator.Tests
                 else
                     databaseBuilder.KrijgItem_AddOnderdeelAndFragment(FileEngineDefaults.CommonFilesSetName, onderdeel);
                 var database = databaseBuilder.Build();
-                var sut = new Generator.LiturgieOplosser.LiturgieOplosser(database, null, DefaultEmptyName);
+                var sut = new LiturgieOplosser(database, null, DefaultEmptyName);
 
                 var oplossing = sut.ConverteerNaarSlide(liturgieItem, _liturgieSettingsDefault);
 
@@ -82,7 +84,7 @@ namespace Generator.Tests
                 var database = new LiturgieDatabaseBuilder()
                     .KrijgItem_AddOnderdeelAndFragment(onderdeel, fragment, display)
                     .Build();
-                var sut = new Generator.LiturgieOplosser.LiturgieOplosser(database, null, DefaultEmptyName);
+                var sut = new LiturgieOplosser(database, null, DefaultEmptyName);
 
                 var oplossing = sut.ConverteerNaarSlide(liturgieItem, _liturgieSettingsDefault);
 
@@ -98,7 +100,7 @@ namespace Generator.Tests
                 var database = new LiturgieDatabaseBuilder()
                     .KrijgItem_AddOnderdeelAndFragment(onderdeel, fragment)
                     .Build();
-                var sut = new Generator.LiturgieOplosser.LiturgieOplosser(database, null, DefaultEmptyName);
+                var sut = new LiturgieOplosser(database, null, DefaultEmptyName);
 
                 var oplossing = sut.ConverteerNaarSlide(liturgieItem, _liturgieSettingsDefault, maskList);
 
@@ -114,7 +116,7 @@ namespace Generator.Tests
                 var database = new LiturgieDatabaseBuilder()
                     .KrijgItem_AddOnderdeelAndFragment(FileEngineDefaults.CommonFilesSetName, onderdeel)
                     .Build();
-                var sut = new Generator.LiturgieOplosser.LiturgieOplosser(database, null, DefaultEmptyName);
+                var sut = new LiturgieOplosser(database, null, DefaultEmptyName);
 
                 var oplossing = sut.ConverteerNaarSlide(liturgieItem, _liturgieSettingsDefault, maskList);
 

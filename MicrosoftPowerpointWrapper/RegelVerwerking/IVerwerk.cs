@@ -1,5 +1,5 @@
 ﻿// Copyright 2016 door Erik de Roos
-using ILiturgieDatabase;
+using Generator.Database.Models;
 using System.Collections.Generic;
 using System.Threading;
 

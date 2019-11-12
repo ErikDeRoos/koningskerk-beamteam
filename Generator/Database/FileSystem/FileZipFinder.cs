@@ -1,11 +1,10 @@
 ﻿// Copyright 2019 door Erik de Roos
-using IDatabase;
+using Generator.Tools;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.IO.Compression;
-using IFileSystem;
+using System.Linq;
 
 namespace Generator.Database.FileSystem
 {
