@@ -29,29 +29,30 @@ namespace Generator.LiturgieInterpretator
 
         public ITekstNaarSlideConversieResultaat ConverteerNaarSlide(ILiturgieTekstObject tekstInput, LiturgieSettings settings, IEnumerable<LiturgieMapmaskArg> masks = null)
         {
-            var regel = new Slide {DisplayEdit = new LiturgieDisplay()};
+            var regel = (Slide)null;
+            var isBlancoSlide = false;
+
+            // zoek de regels in de database en pak ook de naamgeving daar uit over
+            var dbResult = (DatabaseResultaat)null;
+            if (!tekstInput.OptiesGebruiker.NietVerwerkenViaDatabase)
+            {
+                dbResult = Opzoeken(tekstInput, settings);
+                // TODO blanco check 
+                if (dbResult.Status != DatabaseZoekStatus.Opgelost)
+                    return new ConversieResultaat(dbResult.Status, tekstInput);
+                regel = new Slide(dbResult);
+                isBlancoSlide = string.Compare(tekstInput.Benaming, LiturgieOptieSettings.BlancoSlide, true) == 0;
+            }
+            else
+            {
+                regel = new Slide(tekstInput.Benaming, tekstInput.Deel, tekstInput.VerzenZoalsIngevoerd);
+            }
 
             // verwerk de opties
             regel.VerwerkenAlsSlide = !tekstInput.OptiesGebruiker.NietVerwerkenViaDatabase;
-            regel.TonenInOverzicht = tekstInput.OptiesGebruiker.ToonInOverzicht ?? (tekstInput.OptiesGebruiker.AlsBijbeltekst ? settings.ToonBijbeltekstenInLiturgie : true);
+            regel.TonenInOverzicht = tekstInput.OptiesGebruiker.ToonInOverzicht ?? regel.TonenInOverzicht;
             regel.TonenInVolgende = tekstInput.OptiesGebruiker.ToonInVolgende ?? true;
-
-            // regel visualisatie default
-            regel.DisplayEdit.Naam = tekstInput.Benaming;
-            regel.DisplayEdit.SubNaam = tekstInput.Deel;
-            regel.DisplayEdit.VersenGebruikDefault = new VersenDefault();
-
-            // zoek de regels in de database en pak ook de naamgeving daar uit over
-            if (regel.VerwerkenAlsSlide)
-            {
-                var fout = Aanvullen(regel, tekstInput, settings);
-                if (fout.HasValue)
-                    return new ConversieResultaat(fout.Value, tekstInput);
-            } else
-            {
-                regel.VerwerkenAlsType = VerwerkingType.nietverwerken;
-                regel.DisplayEdit.VersenGebruikDefault = new VersenDefault(tekstInput.VerzenZoalsIngevoerd);
-            }
+            regel.OverslaanInVolgende = isBlancoSlide;
 
             // Check of er een mask is (mooiere naam)
             // Anders underscores als spaties tonen
@@ -61,35 +62,31 @@ namespace Generator.LiturgieInterpretator
             else
                 regel.DisplayEdit.Naam = (regel.DisplayEdit.Naam ?? "").Replace("_", " ");
             regel.DisplayEdit.SubNaam = (regel.DisplayEdit.SubNaam ?? "").Replace("_", " ");
-            // Check of de hoofdnaam genegeerd moet worden (is leeg)
-            if (IsNullOrWhiteSpace(regel.DisplayEdit.Naam) && !IsNullOrWhiteSpace(regel.DisplayEdit.SubNaam))
-            {
-                regel.DisplayEdit.Naam = regel.Display.SubNaam;
-                regel.DisplayEdit.SubNaam = null;
-            }
+            
             // regel visualisatie na bewerking
             if (IsNullOrEmpty(regel.DisplayEdit.NaamOverzicht))
                 regel.DisplayEdit.NaamOverzicht = regel.DisplayEdit.Naam;
-            // kijk of de systeem opties nog iets zeggen over alternatieve naamgeving
-            if (!IsNullOrWhiteSpace(tekstInput.TeTonenNaamOpOverzicht))
-            {
-                regel.DisplayEdit.NaamOverzicht = tekstInput.TeTonenNaamOpOverzicht;
-                regel.DisplayEdit.SubNaam = null;
-            }
+            
+            // kijk of de opties nog iets zeggen over alternatieve naamgeving
             if (!IsNullOrWhiteSpace(tekstInput.OptiesGebruiker.AlternatieveNaamOverzicht))
             {
                 regel.DisplayEdit.NaamOverzicht = tekstInput.OptiesGebruiker.AlternatieveNaamOverzicht;
                 regel.DisplayEdit.SubNaam = null;
             }
-            // kijk of de gebruiker opties nog iets zeggen over alternatieve naamgeving
-            if (!IsNullOrWhiteSpace(tekstInput.TeTonenNaam))
+            else if (!IsNullOrWhiteSpace(tekstInput.TeTonenNaamOpOverzicht))
             {
-                regel.DisplayEdit.Naam = tekstInput.TeTonenNaam;
+                regel.DisplayEdit.NaamOverzicht = tekstInput.TeTonenNaamOpOverzicht;
                 regel.DisplayEdit.SubNaam = null;
             }
+            // kijk of de opties nog iets zeggen over alternatieve naamgeving
             if (!IsNullOrWhiteSpace(tekstInput.OptiesGebruiker.AlternatieveNaam))
             {
                 regel.DisplayEdit.Naam = tekstInput.OptiesGebruiker.AlternatieveNaam;
+                regel.DisplayEdit.SubNaam = null;
+            }
+            else if (!IsNullOrWhiteSpace(tekstInput.TeTonenNaam))
+            {
+                regel.DisplayEdit.Naam = tekstInput.TeTonenNaam;
                 regel.DisplayEdit.SubNaam = null;
             }
 
@@ -97,13 +94,12 @@ namespace Generator.LiturgieInterpretator
             return new ConversieResultaat(DatabaseZoekStatus.Opgelost, tekstInput, regel);
         }
 
-        private DatabaseZoekStatus? Aanvullen(Slide regel, ILiturgieTekstObject item, LiturgieSettings settings)
+        private DatabaseResultaat Opzoeken(ILiturgieTekstObject item, LiturgieSettings settings)
         {
             var setNaam = item.Benaming;
             if (item is ILiturgieInterpretatieBijbeltekst)
             {
-                regel.DisplayEdit.VersenGebruikDefault = new VersenDefault(string.Empty);
-                return BijbeltekstAanvuller(regel, setNaam, (item as ILiturgieInterpretatieBijbeltekst).PerDeelVersen.ToList(), settings);
+                return BijbeltekstOpzoeken(setNaam, (item as ILiturgieInterpretatieBijbeltekst).PerDeelVersen.ToList(), settings);
             }
             var zoekNaam = item.Deel;
             if (IsNullOrEmpty(item.Deel))
@@ -112,56 +108,60 @@ namespace Generator.LiturgieInterpretator
                 zoekNaam = item.Benaming;
             }
 
-            return NormaleAanvuller(regel, setNaam, zoekNaam, item.Verzen.ToList(), settings);
+            return NormaalOpzoeken(setNaam, zoekNaam, item.Verzen.ToList(), settings);
         }
-        private DatabaseZoekStatus? NormaleAanvuller(Slide regel, string setNaam, string zoekNaam, IEnumerable<string> verzen, LiturgieSettings settings)
+        private DatabaseResultaat NormaalOpzoeken(string setNaam, string zoekNaam, IEnumerable<string> verzen, LiturgieSettings settings)
         {
-            regel.VerwerkenAlsType = VerwerkingType.normaal;
-            var verzenList = verzen.ToList();
-            var resultaat = _database.KrijgItem(VerwerkingType.normaal, setNaam, zoekNaam, verzenList, settings);
-            if (resultaat.Status != DatabaseZoekStatus.Opgelost)
-                return resultaat.Status;
+            var resultaat = new DatabaseResultaat(VerwerkingType.normaal);
 
-            if (resultaat.Onderdeel.OrigineleNaam == FileEngineDefaults.CommonFilesSetName)
+            var verzenList = verzen.ToList();
+            var dbResult = _database.KrijgItem(VerwerkingType.normaal, setNaam, zoekNaam, verzenList, settings);
+            if (dbResult.Status != DatabaseZoekStatus.Opgelost)
+                return new DatabaseResultaat(dbResult.Status);
+
+            if (dbResult.Onderdeel.OrigineleNaam == FileEngineDefaults.CommonFilesSetName)
             {
-                regel.DisplayEdit.Naam = resultaat.Fragment.OrigineleNaam;
-                regel.DisplayEdit.VersenGebruikDefault = new VersenDefault(string.Empty);  // Expliciet: Common bestanden hebben nooit versen
+                resultaat.DisplayEdit.Naam = dbResult.Fragment.OrigineleNaam;
+                resultaat.DisplayEdit.VersenGebruikDefault = new VersenDefault(string.Empty);  // Expliciet: Common bestanden hebben nooit versen
             }
             else {
-                regel.DisplayEdit.Naam = resultaat.Onderdeel.OrigineleNaam;
-                regel.DisplayEdit.SubNaam = resultaat.Fragment.OrigineleNaam;
+                resultaat.DisplayEdit.Naam = dbResult.Onderdeel.OrigineleNaam;
+                resultaat.DisplayEdit.SubNaam = dbResult.Fragment.OrigineleNaam;
             }
-            regel.Content = resultaat.Content.ToList();
-            if (resultaat.ZonderContentSplitsing)
-                regel.DisplayEdit.VersenGebruikDefault = new VersenDefault(string.Empty);  // Altijd default gebruiken omdat er altijd maar 1 content is
-            regel.DisplayEdit.VolledigeContent = !verzenList.Any();
+            resultaat.Content = dbResult.Content.ToList();
+            if (dbResult.ZonderContentSplitsing)
+                resultaat.DisplayEdit.VersenGebruikDefault = new VersenDefault(string.Empty);  // Altijd default gebruiken omdat er altijd maar 1 content is
+            resultaat.DisplayEdit.VolledigeContent = !verzenList.Any();
 
-            // Basis waarde van tonen in overzicht bepalen (kan nog overschreven worden door de regel specifieke opties)
-            var nietTonenInOverzicht = setNaam == FileEngineDefaults.CommonFilesSetName || (resultaat.StandaardNietTonenInLiturgie ?? false);
-            regel.TonenInOverzicht = !nietTonenInOverzicht;
+            // Basis waarde van tonen in overzicht bepalen
+            if (setNaam != FileEngineDefaults.CommonFilesSetName && !(dbResult.StandaardNietTonenInLiturgie ?? false))
+                resultaat.TonenInOverzicht = true;  // Nullable. Alleen true als we het belangrijk vinden. Is default, kan overschreven worden.
 
             // bepaal de naamgeving
-            if (!IsNullOrWhiteSpace(resultaat.Onderdeel.DisplayNaam))
-                regel.DisplayEdit.Naam = resultaat.Onderdeel.DisplayNaam.Equals(_defaultSetNameEmpty, StringComparison.CurrentCultureIgnoreCase) ? null : resultaat.Onderdeel.DisplayNaam;
+            if (!IsNullOrWhiteSpace(dbResult.Onderdeel.DisplayNaam))
+                resultaat.DisplayEdit.Naam = dbResult.Onderdeel.DisplayNaam.Equals(_defaultSetNameEmpty, StringComparison.CurrentCultureIgnoreCase) ? null : dbResult.Onderdeel.DisplayNaam;
 
-            return null;
+            return resultaat;
         }
-        private DatabaseZoekStatus? BijbeltekstAanvuller(Slide regel, string setNaam, IEnumerable<ILiturgieInterpretatieBijbeltekstDeel> versDelen, LiturgieSettings settings)
+        private DatabaseResultaat BijbeltekstOpzoeken(string setNaam, IEnumerable<ILiturgieInterpretatieBijbeltekstDeel> versDelen, LiturgieSettings settings)
         {
-            regel.VerwerkenAlsType = VerwerkingType.bijbeltekst;
+            var resultaat = new DatabaseResultaat(VerwerkingType.bijbeltekst);
+            resultaat.DisplayEdit.VersenGebruikDefault = new VersenDefault(string.Empty);
             var content = new List<ILiturgieContent>();
             var versDelenLijst = versDelen.ToList();
             foreach(var deel in versDelenLijst)
             {
-                var resultaat = _database.KrijgItem(VerwerkingType.bijbeltekst, setNaam, deel.Deel, deel.Verzen, settings);
-                if (resultaat.Status != DatabaseZoekStatus.Opgelost)
-                    return resultaat.Status;
-                content.AddRange(resultaat.Content);
+                var dbResult = _database.KrijgItem(VerwerkingType.bijbeltekst, setNaam, deel.Deel, deel.Verzen, settings);
+                if (dbResult.Status != DatabaseZoekStatus.Opgelost)
+                    return new DatabaseResultaat(dbResult.Status);
+                content.AddRange(dbResult.Content);
                 // let op, naamgeving wordt buitenom geregeld
             }
-            regel.Content = content.ToList();
-            regel.DisplayEdit.VolledigeContent = versDelenLijst.Count == 1 && !versDelen.FirstOrDefault().Verzen.Any();
-            return null;
+            resultaat.Content = content.ToList();
+            resultaat.DisplayEdit.VolledigeContent = versDelenLijst.Count == 1 && !versDelen.FirstOrDefault().Verzen.Any();
+            resultaat.TonenInOverzicht = settings.ToonBijbeltekstenInLiturgie;
+
+            return resultaat;
         }
 
 
@@ -178,27 +178,67 @@ namespace Generator.LiturgieInterpretator
                 ResultaatSlide = regel;
             }
         }
+        private class DatabaseResultaat
+        {
+            public DatabaseZoekStatus Status { get; } = DatabaseZoekStatus.Opgelost;
+
+            public DatabaseResultaat(VerwerkingType type) { VerwerkenAlsType = type; }
+            public DatabaseResultaat(DatabaseZoekStatus status) { Status = status; }
+
+            public LiturgieDisplayDb DisplayEdit { get; } = new LiturgieDisplayDb();
+
+            public IEnumerable<ILiturgieContent> Content { get; set; }
+
+            public bool? TonenInOverzicht { get; set; }
+            public VerwerkingType VerwerkenAlsType { get; }
+        }
         private class Slide : ISlideOpbouw
         {
             public ILiturgieDisplay Display => DisplayEdit;
-            public LiturgieDisplay DisplayEdit;
+            public LiturgieDisplay DisplayEdit { get; } = new LiturgieDisplay();
 
             public IEnumerable<ILiturgieContent> Content { get; set; }
 
             public bool TonenInOverzicht { get; set; }
-            public bool TonenInVolgende { get; set; }
             public bool VerwerkenAlsSlide { get; set; }
+            public bool TonenInVolgende { get; set; }
+            public bool OverslaanInVolgende { get; set; }
             public VerwerkingType VerwerkenAlsType { get; set; }
+
+            public Slide (DatabaseResultaat opBasisVanDbResult)
+            {
+                DisplayEdit.Naam = opBasisVanDbResult.DisplayEdit.Naam;
+                DisplayEdit.SubNaam = opBasisVanDbResult.DisplayEdit.SubNaam;
+                DisplayEdit.VersenGebruikDefault = opBasisVanDbResult.DisplayEdit.VersenGebruikDefault ?? DisplayEdit.VersenGebruikDefault;
+                DisplayEdit.VolledigeContent = opBasisVanDbResult.DisplayEdit.VolledigeContent;
+                Content = opBasisVanDbResult.Content;
+                TonenInOverzicht = opBasisVanDbResult.TonenInOverzicht ?? false;
+                VerwerkenAlsType = opBasisVanDbResult.VerwerkenAlsType;
+            }
+            public Slide(string naam, string subnaam, string verzenZoalsIngevoerd)
+            {
+                DisplayEdit.Naam = naam;
+                DisplayEdit.SubNaam = subnaam;
+                DisplayEdit.VersenGebruikDefault = new VersenDefault(verzenZoalsIngevoerd);
+                VerwerkenAlsType = VerwerkingType.nietverwerken;
+            }
 
             public override string ToString()
             {
-                return $"{Display.Naam} {Display.SubNaam}";
+                return $"{DisplayEdit.Naam} {DisplayEdit.SubNaam}";
             }
         }
         private class LiturgieDisplay : ILiturgieDisplay
         {
             public string Naam { get; set; }
             public string NaamOverzicht { get; set; }
+            public string SubNaam { get; set; }
+            public bool VolledigeContent { get; set; }
+            public IVersenDefault VersenGebruikDefault { get; set; } = new VersenDefault();
+        }
+        private class LiturgieDisplayDb
+        {
+            public string Naam { get; set; }
             public string SubNaam { get; set; }
             public bool VolledigeContent { get; set; }
             public IVersenDefault VersenGebruikDefault { get; set; }

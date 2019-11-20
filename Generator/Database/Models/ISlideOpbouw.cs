@@ -26,6 +26,10 @@ namespace Generator.Database.Models
         /// </summary>
         bool TonenInVolgende { get; }
         /// <summary>
+        /// Of een voorgaande slide naar de eerstvolgende moet kijken als hij wil verwijzen naar 'volgende'
+        /// </summary>
+        bool OverslaanInVolgende { get; }
+        /// <summary>
         /// Of de inhoud van een afwijkend type is
         /// </summary>
         VerwerkingType VerwerkenAlsType { get; }

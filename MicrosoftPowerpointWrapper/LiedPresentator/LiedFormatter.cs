@@ -1,4 +1,4 @@
-﻿// Copyright 2017 door Erik de Roos
+﻿// Copyright 2019 door Erik de Roos
 using Generator.Database.Models;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,14 +13,16 @@ namespace mppt.LiedPresentator
             return ToonMetVerzenEnEersteLos(regel, vanafDeel);
         }
 
-        /// Je kunt er voor kiezen dat een volgende item gewoon niet aangekondigd wordt. Dat gaat
-        /// via 'TonenInVolgende'.
+        /// Bepaal de naam die getoond gaat worden bij 'volgende'.
+        /// Je hebt hier invloed op door bepaalde slides te laten overslaan (OverslaanInVolgende), 
+        /// of door ze leeg te laten (!TonenInVolgende).
         public LiedFormatResult Volgende(IEnumerable<ISlideOpbouw> volgenden, int overslaan = 0)
         {
+            var komendeSlides = (volgenden ?? Enumerable.Empty<ISlideOpbouw>()).Where(v => !v.OverslaanInVolgende).ToList();
             // Alleen volgende tonen als volgende er is
-            if (volgenden != null && volgenden.Any() && overslaan >= 0)
+            if (komendeSlides.Any() && overslaan >= 0)
             {
-                var volgende = volgenden.Skip(overslaan).FirstOrDefault();
+                var volgende = komendeSlides.Skip(overslaan).FirstOrDefault();
                 if (volgende != null && volgende.TonenInVolgende)
                     return ToonWaarNodigMetVerzen(volgende);
             }

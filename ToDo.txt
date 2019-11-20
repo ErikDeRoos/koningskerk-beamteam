@@ -1,1 +1,2 @@
--feature: 'blanco' dia niet tonen in 'volgende'
+
+-bugfix: unittesten MicrosoftPowerpointWrapper.Tests, herschrijven naar Mock en Builder

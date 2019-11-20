@@ -27,21 +27,21 @@ namespace PowerpointGenerator
             SetGenerator(container);
             container.RegisterType<Screens.Form1>().As<System.Windows.Forms.Form>()
                 .OnActivated(f => f.Instance.Opstarten());
+            SetMsPowerpointBuilder(container);
         }
 
         private static void SetGenerator(ContainerBuilder container)
         {
             container.RegisterType<LiturgieDatabase>().As<ILiturgieDatabase>();
+            container.RegisterType<LiturgieDatabaseZoek>().As<ILiturgieDatabaseZoek>();
             container.RegisterType<LiturgieOplosser>().As<ILiturgieSlideMaker>()
-                .WithParameter("defaultSetNameEmpty", DefaultSetNameEmpty)
-                .InstancePerLifetimeScope();
-            container.RegisterType<LiturgieZoeker>().As<ILiturgieZoeken>()
-                .InstancePerLifetimeScope();
+                .WithParameter("defaultSetNameEmpty", DefaultSetNameEmpty);
+            container.RegisterType<LiturgieZoeker>().As<ILiturgieZoeken>();
             container.RegisterType<mppt.RegelVerwerking.LengteBerekenaar>().As<ILengteBerekenaar>();
-            container.RegisterType<Generator.LiturgieInterpretator.LiturgieTekstNaarObject>().As<ILiturgieTekstNaarObject>();
+            container.RegisterType<LiturgieTekstNaarObject>().As<ILiturgieTekstNaarObject>();
             container.RegisterType<FileEngine>().As<IEngine>();
-            container.RegisterType<EngineManager>().As<IEngineManager>();
-            SetMsPowerpointBuilder(container);
+            container.RegisterType<EngineManager>().As<IEngineManager>()
+                .InstancePerLifetimeScope();
         }
 
         private static void SetMsPowerpointBuilder(ContainerBuilder container)

@@ -19,6 +19,7 @@ namespace Generator.LiturgieInterpretator
         public const string AlsCommando = "als";
         public static readonly char[] OptieParamScheidingstekens = { ':' };
         public const string AlsBijbeltekst = "bijbeltekst";
+        public const string BlancoSlide = "blanco";
     }
 
     /// <summary>
