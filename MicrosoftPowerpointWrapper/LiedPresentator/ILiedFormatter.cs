@@ -6,8 +6,8 @@ namespace mppt.LiedPresentator
 {
     public interface ILiedFormatter
     {
-        LiedFormatResult Huidig(ISlideOpbouw regel, ILiturgieContent vanafDeel);
+        LiedFormatResult Huidig(ISlideInhoud regel, ILiturgieContent vanafDeel);
         LiedFormatResult Volgende(IEnumerable<ISlideOpbouw> volgenden, int overslaan = 0);
-        LiedFormatResult Liturgie(ISlideOpbouw regel);
+        LiedFormatResult Liturgie(ISlideInhoud regel);
     }
 }

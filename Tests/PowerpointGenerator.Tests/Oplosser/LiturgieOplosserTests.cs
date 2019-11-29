@@ -39,7 +39,7 @@ namespace Generator.Tests
 
                 var oplossing = sut.ConverteerNaarSlide(liturgieItem, _liturgieSettingsDefault);
 
-                Assert.AreEqual(oplossing.ResultaatStatus, DatabaseZoekStatus.Opgelost);
+                Assert.AreEqual(DatabaseZoekStatus.Opgelost, oplossing.ResultaatStatus);
             }
 
             [DataTestMethod]
@@ -54,7 +54,7 @@ namespace Generator.Tests
 
                 var oplossing = sut.ConverteerNaarSlide(liturgieItem, _liturgieSettingsDefault);
 
-                Assert.AreEqual(oplossing.ResultaatStatus, DatabaseZoekStatus.Opgelost);
+                Assert.AreEqual(DatabaseZoekStatus.Opgelost, oplossing.ResultaatStatus);
             }
 
             [DataTestMethod]
@@ -73,7 +73,7 @@ namespace Generator.Tests
 
                 var oplossing = sut.ConverteerNaarSlide(liturgieItem, _liturgieSettingsDefault);
 
-                Assert.AreEqual(oplossing.ResultaatSlide.Display.Naam, onderdeel);
+                Assert.AreEqual(onderdeel, oplossing.ResultaatSlide.Display.Naam);
             }
 
             [DataTestMethod]
@@ -88,7 +88,7 @@ namespace Generator.Tests
 
                 var oplossing = sut.ConverteerNaarSlide(liturgieItem, _liturgieSettingsDefault);
 
-                Assert.AreEqual(oplossing.ResultaatSlide.Display.Naam, display);
+                Assert.AreEqual(display, oplossing.ResultaatSlide.Display.Naam);
             }
 
             [DataTestMethod]
@@ -104,7 +104,7 @@ namespace Generator.Tests
 
                 var oplossing = sut.ConverteerNaarSlide(liturgieItem, _liturgieSettingsDefault, maskList);
 
-                Assert.AreEqual(oplossing.ResultaatSlide.Display.Naam, maskUseName);
+                Assert.AreEqual(maskUseName, oplossing.ResultaatSlide.Display.Naam);
             }
 
             [DataTestMethod]
@@ -120,7 +120,7 @@ namespace Generator.Tests
 
                 var oplossing = sut.ConverteerNaarSlide(liturgieItem, _liturgieSettingsDefault, maskList);
 
-                Assert.AreEqual(oplossing.ResultaatSlide.Display.Naam, maskUseName);
+                Assert.AreEqual(maskUseName, oplossing.ResultaatSlide.Display.Naam);
             }
         }
 

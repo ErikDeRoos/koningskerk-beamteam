@@ -35,7 +35,7 @@ namespace mppt.RegelVerwerking
                 _lengteBerekenaar = lengteBerekenaar;
             }
 
-            public IVerwerkResultaat Verwerk(ISlideOpbouw regel, IEnumerable<ISlideOpbouw> volgenden, CancellationToken token)
+            public IVerwerkResultaat Verwerk(ISlideInhoud regel, IEnumerable<ISlideOpbouw> volgenden, CancellationToken token)
             {
                 InvullenTekstOpTemplate(regel, volgenden, token);
 
@@ -45,7 +45,7 @@ namespace mppt.RegelVerwerking
                 };
             }
 
-            private void InvullenTekstOpTemplate(ISlideOpbouw regel, IEnumerable<ISlideOpbouw> volgenden, CancellationToken token)
+            private void InvullenTekstOpTemplate(ISlideInhoud regel, IEnumerable<ISlideOpbouw> volgenden, CancellationToken token)
             {
                 var tekstPerSlide = OpdelenPerSlide(TekstOpknippen(regel.Content), _buildDefaults.RegelsPerBijbeltekstSlide, _lengteBerekenaar);
 
@@ -61,7 +61,7 @@ namespace mppt.RegelVerwerking
                                                             //voor elk object op de slides (we zoeken naar de tekst die vervangen moet worden in de template)
                     foreach (var shape in slide.Shapes().Where(s => s is IMppShapeTextbox).Cast<IMppShapeTextbox>())
                     {
-                        var tagReplacementResult = ProcessForTagReplacement(shape.Text, regel,
+                        var tagReplacementResult = ProcessForTagReplacement(shape.Text,
                             additionalSearchForTagReplacement: (s) => {
                                 switch (s)
                                 {

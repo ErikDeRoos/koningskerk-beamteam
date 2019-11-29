@@ -8,7 +8,7 @@ namespace mppt.LiedPresentator
 {
     public class LiedFormatter : ILiedFormatter
     {
-        public LiedFormatResult Huidig(ISlideOpbouw regel, ILiturgieContent vanafDeel)
+        public LiedFormatResult Huidig(ISlideInhoud regel, ILiturgieContent vanafDeel)
         {
             return ToonMetVerzenEnEersteLos(regel, vanafDeel);
         }
@@ -29,16 +29,16 @@ namespace mppt.LiedPresentator
             return null;
         }
 
-        public LiedFormatResult Liturgie(ISlideOpbouw regel)
+        public LiedFormatResult Liturgie(ISlideInhoud regel)
         {
             return ToonWaarNodigMetVerzen(regel);
         }
 
-        private static LiedFormatResult ToonWaarNodigMetVerzen(ISlideOpbouw regel)
+        private static LiedFormatResult ToonWaarNodigMetVerzen(ISlideInhoud regel)
         {
             var result = new LiedFormatResult()
             {
-                Naam = regel.Display.NaamOverzicht
+                Naam = regel.Display.NaamOverzicht ?? regel.Display.Naam,
             };
             if (!string.IsNullOrWhiteSpace(regel.Display.SubNaam))
                 result.SubNaam = regel.Display.SubNaam;
@@ -46,7 +46,7 @@ namespace mppt.LiedPresentator
             return result;
         }
 
-        private static LiedFormatResult ToonMetVerzenEnEersteLos(ISlideOpbouw regel, ILiturgieContent vanafDeelHint)
+        private static LiedFormatResult ToonMetVerzenEnEersteLos(ISlideInhoud regel, ILiturgieContent vanafDeelHint)
         {
             var result = new LiedFormatResult()
             {
@@ -75,8 +75,8 @@ namespace mppt.LiedPresentator
         /// </remarks>
         private static string LiedVerzen(ILiturgieDisplay regelDisplay, bool toonEersteLos, IEnumerable<ILiturgieContent> vanDelen = null)
         {
-            if (regelDisplay.VersenGebruikDefault.Gebruik || vanDelen == null || (!toonEersteLos && regelDisplay.VolledigeContent))
-                return !string.IsNullOrEmpty(regelDisplay.VersenGebruikDefault.Tekst) ? regelDisplay.VersenGebruikDefault.Tekst : null;
+            if (regelDisplay.VersenGebruikDefault != null || vanDelen == null || (!toonEersteLos && regelDisplay.VolledigeContent))
+                return regelDisplay.VersenGebruikDefault;
             var over = vanDelen.Where(v => v.Nummer.HasValue).Select(v => v.Nummer.Value).ToList();
             if (!over.Any())
                 return null;

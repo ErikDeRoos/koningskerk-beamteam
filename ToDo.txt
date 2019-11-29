@@ -1,2 +1,0 @@
-
--bugfix: unittesten MicrosoftPowerpointWrapper.Tests, herschrijven naar Mock en Builder

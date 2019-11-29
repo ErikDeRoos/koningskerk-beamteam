@@ -122,7 +122,7 @@ namespace Generator.LiturgieInterpretator
             if (dbResult.Onderdeel.OrigineleNaam == FileEngineDefaults.CommonFilesSetName)
             {
                 resultaat.DisplayEdit.Naam = dbResult.Fragment.OrigineleNaam;
-                resultaat.DisplayEdit.VersenGebruikDefault = new VersenDefault(string.Empty);  // Expliciet: Common bestanden hebben nooit versen
+                resultaat.DisplayEdit.VersenGebruikDefault = string.Empty;  // Expliciet: Common bestanden hebben nooit versen
             }
             else {
                 resultaat.DisplayEdit.Naam = dbResult.Onderdeel.OrigineleNaam;
@@ -130,7 +130,7 @@ namespace Generator.LiturgieInterpretator
             }
             resultaat.Content = dbResult.Content.ToList();
             if (dbResult.ZonderContentSplitsing)
-                resultaat.DisplayEdit.VersenGebruikDefault = new VersenDefault(string.Empty);  // Altijd default gebruiken omdat er altijd maar 1 content is
+                resultaat.DisplayEdit.VersenGebruikDefault = string.Empty;  // Altijd default gebruiken omdat er altijd maar 1 content is
             resultaat.DisplayEdit.VolledigeContent = !verzenList.Any();
 
             // Basis waarde van tonen in overzicht bepalen
@@ -146,7 +146,7 @@ namespace Generator.LiturgieInterpretator
         private DatabaseResultaat BijbeltekstOpzoeken(string setNaam, IEnumerable<ILiturgieInterpretatieBijbeltekstDeel> versDelen, LiturgieSettings settings)
         {
             var resultaat = new DatabaseResultaat(VerwerkingType.bijbeltekst);
-            resultaat.DisplayEdit.VersenGebruikDefault = new VersenDefault(string.Empty);
+            resultaat.DisplayEdit.VersenGebruikDefault = string.Empty;
             var content = new List<ILiturgieContent>();
             var versDelenLijst = versDelen.ToList();
             foreach(var deel in versDelenLijst)
@@ -219,7 +219,7 @@ namespace Generator.LiturgieInterpretator
             {
                 DisplayEdit.Naam = naam;
                 DisplayEdit.SubNaam = subnaam;
-                DisplayEdit.VersenGebruikDefault = new VersenDefault(verzenZoalsIngevoerd);
+                DisplayEdit.VersenGebruikDefault = verzenZoalsIngevoerd;
                 VerwerkenAlsType = VerwerkingType.nietverwerken;
             }
 
@@ -234,29 +234,14 @@ namespace Generator.LiturgieInterpretator
             public string NaamOverzicht { get; set; }
             public string SubNaam { get; set; }
             public bool VolledigeContent { get; set; }
-            public IVersenDefault VersenGebruikDefault { get; set; } = new VersenDefault();
+            public string VersenGebruikDefault { get; set; }
         }
         private class LiturgieDisplayDb
         {
             public string Naam { get; set; }
             public string SubNaam { get; set; }
             public bool VolledigeContent { get; set; }
-            public IVersenDefault VersenGebruikDefault { get; set; }
-        }
-        private class VersenDefault : IVersenDefault
-        {
-            public VersenDefault()
-            {
-                Gebruik = false;
-            }
-            public VersenDefault(string tekst)
-            {
-                Tekst = tekst;
-                Gebruik = true;
-            }
-
-            public bool Gebruik { get; set; }
-            public string Tekst { get; set; }
+            public string VersenGebruikDefault { get; set; }
         }
     }
 }

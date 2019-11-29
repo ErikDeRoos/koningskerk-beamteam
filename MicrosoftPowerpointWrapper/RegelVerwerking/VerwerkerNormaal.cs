@@ -37,7 +37,7 @@ namespace mppt.RegelVerwerking
             {
             }
 
-            public IVerwerkResultaat Verwerk(ISlideOpbouw regel, IEnumerable<ISlideOpbouw> volgenden, CancellationToken token)
+            public IVerwerkResultaat Verwerk(ISlideInhoud regel, IEnumerable<ISlideOpbouw> volgenden, CancellationToken token)
             {
                 // Per onderdeel in de regel moet een sheet komen
                 foreach (var inhoud in regel.Content)
@@ -47,7 +47,7 @@ namespace mppt.RegelVerwerking
                     if (inhoud.InhoudType == InhoudType.Tekst)
                         InvullenTekstOpTemplate(regel, inhoud, volgenden, token);
                     else
-                        ToevoegenSlides(regel, inhoud, volgenden, token);
+                        ToevoegenSlides(inhoud, volgenden, token);
                 }
 
                 return new VerwerkResultaat()
@@ -59,7 +59,7 @@ namespace mppt.RegelVerwerking
             /// <summary>
             /// Lied in template plaatsen
             /// </summary>
-            private void InvullenTekstOpTemplate(ISlideOpbouw regel, ILiturgieContent inhoud, IEnumerable<ISlideOpbouw> volgenden, CancellationToken token)
+            private void InvullenTekstOpTemplate(ISlideInhoud regel, ILiturgieContent inhoud, IEnumerable<ISlideOpbouw> volgenden, CancellationToken token)
             {
                 var tekstOmTeRenderen = inhoud.Inhoud;
                 var tekstOmTeRenderenLijst = new List<string>();
@@ -87,7 +87,7 @@ namespace mppt.RegelVerwerking
                                                             //voor elk object op de slides (we zoeken naar de tekst die vervangen moet worden in de template)
                     foreach (var shape in slide.Shapes().Where(s => s is IMppShapeTextbox).Cast<IMppShapeTextbox>())
                     {
-                        var tagReplacementResult = ProcessForTagReplacement(shape.Text, regel, 
+                        var tagReplacementResult = ProcessForTagReplacement(shape.Text, 
                             additionalSearchForTagReplacement: (s) => {
                                 switch (s)
                                 {
@@ -116,7 +116,7 @@ namespace mppt.RegelVerwerking
             /// <summary>
             /// Algemene slide waarop we alleen template teksten moeten vervangen
             /// </summary>
-            private void ToevoegenSlides(ISlideOpbouw regel, ILiturgieContent inhoud, IEnumerable<ISlideOpbouw> volgenden, CancellationToken token)
+            private void ToevoegenSlides(ILiturgieContent inhoud, IEnumerable<ISlideOpbouw> volgenden, CancellationToken token)
             {
                 //open de presentatie met de sheets erin
                 var presentatie = OpenPps(inhoud.Inhoud);
@@ -132,7 +132,7 @@ namespace mppt.RegelVerwerking
 
                     if (textbox != null)
                     {
-                        var tagReplacementResult = ProcessForTagReplacement(textbox.Text, regel,
+                        var tagReplacementResult = ProcessForTagReplacement(textbox.Text,
                             additionalSearchForTagReplacement: (s) => {
                                 LiedFormatResult display;
                                 switch (s)
@@ -275,7 +275,7 @@ namespace mppt.RegelVerwerking
             /// een nieuw item komt.
             /// Je kunt er echter ook voor kiezen dat een volgende item gewoon niet aangekondigd wordt. Dat gaat
             /// via 'TonenInVolgende'.
-            protected static bool IsLaatsteSlide(IEnumerable<string> tekstOmTeRenderen, string huidigeTekst, ISlideOpbouw regel, ILiturgieContent deel)
+            protected static bool IsLaatsteSlide(IEnumerable<string> tekstOmTeRenderen, string huidigeTekst, ISlideInhoud regel, ILiturgieContent deel)
             {
                 return tekstOmTeRenderen.Last() == huidigeTekst && regel.Content.Last() == deel;
             }

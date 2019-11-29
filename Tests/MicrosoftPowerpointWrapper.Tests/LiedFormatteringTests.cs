@@ -1,22 +1,18 @@
-﻿// Copyright 2018 door Erik de Roos
-using FakeItEasy;
-using Generator.Database.Models;
+﻿// Copyright 2019 door Erik de Roos
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MicrosoftPowerpointWrapper.Tests.Builders;
 using mppt.LiedPresentator;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace MicrosoftPowerpointWrapper.Tests
 {
     public class LiedFormatteringTests
     {
-        private ISlideOpbouw _liturgieRegel;
         private ILiedFormatter _sut;
 
         [TestInitialize]
         public void Initialise()
         {
-            _liturgieRegel = A.Fake<ISlideOpbouw>();
             _sut = new LiedFormatter();
         }
 
@@ -27,30 +23,29 @@ namespace MicrosoftPowerpointWrapper.Tests
             [DataRow("Psalm")]
             public void SpecifiekeLiturgieNaam_FormatteertStrak(string naam)
             {
-                A.CallTo(() => _liturgieRegel.Display.NaamOverzicht).Returns(naam);
+                var regel = new SlideBuilder()
+                    .SetDisplay(naamOverzicht: naam)
+                    .Build();
 
-                var geformatteerd = _sut.Liturgie(_liturgieRegel);
+                var geformatteerd = _sut.Liturgie(regel);
 
-                Assert.AreEqual(geformatteerd.Naam, naam);
+                Assert.AreEqual(naam, geformatteerd.Naam);
             }
 
             [DataTestMethod]
             [DataRow("Psalm", "100", 21, 22)]
             public void NaamEnSubnaamEnVersMetVolledigeContent_FormatteertStrak(string naam, string subNaam, int versNummer1, int versNummer2)
             {
-                A.CallTo(() => _liturgieRegel.Display.NaamOverzicht).Returns(naam);
-                A.CallTo(() => _liturgieRegel.Display.SubNaam).Returns(subNaam);
-                A.CallTo(() => _liturgieRegel.Display.VolledigeContent).Returns(true);
-                var liturgieRegelContent1 = A.Fake<ILiturgieContent>();
-                A.CallTo(() => liturgieRegelContent1.Nummer).Returns(versNummer1);
-                var liturgieRegelContent2 = A.Fake<ILiturgieContent>();
-                A.CallTo(() => liturgieRegelContent2.Nummer).Returns(versNummer2);
-                A.CallTo(() => _liturgieRegel.Content).Returns(new List<ILiturgieContent>() { liturgieRegelContent1, liturgieRegelContent2 });
+                var regel = new SlideBuilder()
+                    .SetDisplay(naam: naam, subnaam: subNaam)
+                    .AddContent(versNummer1)
+                    .AddContent(versNummer2)
+                    .Build();
 
-                var geformatteerd = _sut.Liturgie(_liturgieRegel);
+                var geformatteerd = _sut.Liturgie(regel);
 
-                Assert.AreEqual(geformatteerd.Naam, naam);
-                Assert.AreEqual(geformatteerd.SubNaam, subNaam);
+                Assert.AreEqual(naam, geformatteerd.Naam);
+                Assert.AreEqual(subNaam, geformatteerd.SubNaam);
                 Assert.IsNull(geformatteerd.Verzen);
             }
 
@@ -58,22 +53,25 @@ namespace MicrosoftPowerpointWrapper.Tests
             [DataRow("10, 5")]
             public void ZonderDelen_ToontDefault(string defaultNaam)
             {
-                A.CallTo(() => _liturgieRegel.Content).Returns(null);
-                A.CallTo(() => _liturgieRegel.Display.VersenGebruikDefault.Tekst).Returns(defaultNaam);
+                var regel = new SlideBuilder()
+                    .SetDisplayVersenGebruikDefault(defaultNaam)
+                    .Build();
 
-                var geformatteerd = _sut.Liturgie(_liturgieRegel);
+                var geformatteerd = _sut.Liturgie(regel);
 
-                Assert.AreEqual(geformatteerd.Verzen, defaultNaam);
+                Assert.AreEqual(defaultNaam, geformatteerd.Verzen);
             }
 
             [DataTestMethod]
             [DataRow(new [] { 1, 2, 3, 4 })]
             public void VolledigeContent_ToonLeeg(int[] aansluitendeNummerLijst)
             {
-                A.CallTo(() => _liturgieRegel.Display.VolledigeContent).Returns(true);
-                A.CallTo(() => _liturgieRegel.Content).Returns(PrepareContentLijst(aansluitendeNummerLijst).ToList());
+                var regel = new SlideBuilder()
+                    .SetDisplay(volledigeContent: true)
+                    .AddContent(aansluitendeNummerLijst)
+                    .Build();
 
-                var geformatteerd = _sut.Liturgie(_liturgieRegel);
+                var geformatteerd = _sut.Liturgie(regel);
 
                 Assert.IsNull(geformatteerd.Verzen);
             }
@@ -82,13 +80,14 @@ namespace MicrosoftPowerpointWrapper.Tests
             [DataRow(new [] { 1, 2, 3, 4 })]
             public void AansluitendeNummering_ToonGekoppeld(int[] aansluitendeNummerLijst)
             {
-                A.CallTo(() => _liturgieRegel.Display.VolledigeContent).Returns(false);
-                var nummerLijst = PrepareContentLijst(aansluitendeNummerLijst).ToList();
-                A.CallTo(() => _liturgieRegel.Content).Returns(nummerLijst);
+                var regel = new SlideBuilder()
+                    .SetDisplay(volledigeContent: false)
+                    .AddContent(aansluitendeNummerLijst)
+                    .Build();
 
-                var geformatteerd = _sut.Liturgie(_liturgieRegel);
+                var geformatteerd = _sut.Liturgie(regel);
 
-                Assert.AreEqual(geformatteerd.Verzen, $"{nummerLijst.First().Nummer} - {nummerLijst.Last().Nummer}");
+                Assert.AreEqual($"{aansluitendeNummerLijst.First()} - {aansluitendeNummerLijst.Last()}", geformatteerd.Verzen);
             }
 
         }
@@ -101,124 +100,116 @@ namespace MicrosoftPowerpointWrapper.Tests
             [DataRow("Psalm")]
             public void AlleenNaam_FormatteertStrak(string naam)
             {
-                A.CallTo(() => _liturgieRegel.Display.Naam).Returns(naam);
+                var regel = new SlideBuilder()
+                    .SetDisplay(naam: naam)
+                    .Build();
 
-                var geformatteerd = _sut.Huidig(_liturgieRegel, null);
+                var geformatteerd = _sut.Huidig(regel, null);
 
-                Assert.AreEqual(geformatteerd.Naam, naam);
+                Assert.AreEqual(naam, geformatteerd.Naam);
             }
 
             [DataTestMethod]
             [DataRow("Psalm", "100")]
             public void NaamEnSubnaam_FormatteertStrak(string naam, string subNaam)
             {
-                A.CallTo(() => _liturgieRegel.Display.Naam).Returns(naam);
-                A.CallTo(() => _liturgieRegel.Display.SubNaam).Returns(subNaam);
+                var regel = new SlideBuilder()
+                    .SetDisplay(naam: naam, subnaam: subNaam)
+                    .Build();
 
-                var geformatteerd = _sut.Huidig(_liturgieRegel, null);
+                var geformatteerd = _sut.Huidig(regel, null);
 
-                Assert.AreEqual(geformatteerd.Naam, naam);
-                Assert.AreEqual(geformatteerd.SubNaam, subNaam);
+                Assert.AreEqual(naam, geformatteerd.Naam);
+                Assert.AreEqual(subNaam, geformatteerd.SubNaam);
             }
 
             [DataTestMethod]
             [DataRow("Psalm", "100", 21)]
             public void NaamEnSubnaamEnVersMetDeelVanContent_FormatteertStrak(string naam, string subNaam, int versNummer1)
             {
-                A.CallTo(() => _liturgieRegel.Display.Naam).Returns(naam);
-                A.CallTo(() => _liturgieRegel.Display.SubNaam).Returns(subNaam);
-                A.CallTo(() => _liturgieRegel.Display.VolledigeContent).Returns(false);
-                var liturgieRegelContent1 = A.Fake<ILiturgieContent>();
-                A.CallTo(() => liturgieRegelContent1.Nummer).Returns(versNummer1);
-                A.CallTo(() => _liturgieRegel.Content).Returns(new List<ILiturgieContent>() { liturgieRegelContent1 });
+                var regel = new SlideBuilder()
+                    .SetDisplay(naam: naam, subnaam: subNaam, volledigeContent: false)
+                    .AddContent(versNummer1)
+                    .Build();
 
-                var geformatteerd = _sut.Huidig(_liturgieRegel, null);
+                var geformatteerd = _sut.Huidig(regel, null);
 
-                Assert.AreEqual(geformatteerd.Naam, naam);
-                Assert.AreEqual(geformatteerd.SubNaam, subNaam);
-                Assert.AreEqual(geformatteerd.Verzen, $"{versNummer1}");
+                Assert.AreEqual(naam, geformatteerd.Naam);
+                Assert.AreEqual(subNaam, geformatteerd.SubNaam);
+                Assert.AreEqual($"{versNummer1}", geformatteerd.Verzen);
             }
 
             [DataTestMethod]
             [DataRow("Psalm", "100", 21, 22)]
             public void NaamEnSubnaamEnVersMetVolledigeContent_FormatteertStrak(string naam, string subNaam, int versNummer1, int versNummer2)
             {
-                A.CallTo(() => _liturgieRegel.Display.Naam).Returns(naam);
-                A.CallTo(() => _liturgieRegel.Display.SubNaam).Returns(subNaam);
-                A.CallTo(() => _liturgieRegel.Display.VolledigeContent).Returns(true);
-                var liturgieRegelContent1 = A.Fake<ILiturgieContent>();
-                A.CallTo(() => liturgieRegelContent1.Nummer).Returns(versNummer1);
-                var liturgieRegelContent2 = A.Fake<ILiturgieContent>();
-                A.CallTo(() => liturgieRegelContent2.Nummer).Returns(versNummer2);
-                A.CallTo(() => _liturgieRegel.Content).Returns(new List<ILiturgieContent>() { liturgieRegelContent1, liturgieRegelContent2 });
+                var regelBuilder = new SlideBuilder()
+                    .SetDisplay(naam: naam, subnaam: subNaam)
+                    .AddContent(versNummer1)
+                    .AddContent(versNummer2);
+                var regel = regelBuilder.Build();
 
-                var geformatteerd = _sut.Huidig(_liturgieRegel, liturgieRegelContent1);
+                var geformatteerd = _sut.Huidig(regel, regelBuilder.LiturgieContent.First());
 
-                Assert.AreEqual(geformatteerd.Naam, naam);
-                Assert.AreEqual(geformatteerd.SubNaam, subNaam);
-                Assert.AreEqual(geformatteerd.Verzen, $"{versNummer1}, {versNummer2}");
+                Assert.AreEqual(naam, geformatteerd.Naam);
+                Assert.AreEqual(subNaam, geformatteerd.SubNaam);
+                Assert.AreEqual($"{versNummer1}, {versNummer2}", geformatteerd.Verzen);
             }
 
             [DataTestMethod]
             [DataRow(new [] { 1, 2, 3, 4 })]
             public void VolledigeContent_ToonEersteLosToonRestGekoppeld(int[] aansluitendeNummerLijst)
             {
-                A.CallTo(() => _liturgieRegel.Display.VolledigeContent).Returns(true);
-                var nummerLijst = PrepareContentLijst(aansluitendeNummerLijst).ToList();
-                A.CallTo(() => _liturgieRegel.Content).Returns(nummerLijst);
+                var regelBuilder = new SlideBuilder()
+                    .SetDisplay(volledigeContent: true)
+                    .AddContent(aansluitendeNummerLijst);
+                var regel = regelBuilder.Build();
 
-                var geformatteerd = _sut.Huidig(_liturgieRegel, nummerLijst.First());
+                var geformatteerd = _sut.Huidig(regel, regelBuilder.LiturgieContent.First());
 
-                Assert.AreEqual(geformatteerd.Verzen, $"{nummerLijst.First().Nummer}, {nummerLijst.Skip(1).First().Nummer} - {nummerLijst.Last().Nummer}");
+                Assert.AreEqual($"{regelBuilder.LiturgieContent.First().Nummer}, {regelBuilder.LiturgieContent.Skip(1).First().Nummer} - {regelBuilder.LiturgieContent.Last().Nummer}", geformatteerd.Verzen);
             }
 
             [DataTestMethod]
             [DataRow(new [] { 1, 2, 3, 4 })]
             public void AansluitendeNummering_ToonEersteLosToonRestGekoppeld(int[] aansluitendeNummerLijst)
             {
-                A.CallTo(() => _liturgieRegel.Display.VolledigeContent).Returns(false);
-                var nummerLijst = PrepareContentLijst(aansluitendeNummerLijst).ToList();
-                A.CallTo(() => _liturgieRegel.Content).Returns(nummerLijst);
+                var regelBuilder = new SlideBuilder()
+                    .SetDisplay(volledigeContent: false)
+                    .AddContent(aansluitendeNummerLijst);
+                var regel = regelBuilder.Build();
 
-                var geformatteerd = _sut.Huidig(_liturgieRegel, nummerLijst.First());
+                var geformatteerd = _sut.Huidig(regel, regelBuilder.LiturgieContent.First());
 
-                Assert.AreEqual(geformatteerd.Verzen, $"{nummerLijst.First().Nummer}, {nummerLijst.Skip(1).First().Nummer} - {nummerLijst.Last().Nummer}");
+                Assert.AreEqual($"{regelBuilder.LiturgieContent.First().Nummer}, {regelBuilder.LiturgieContent.Skip(1).First().Nummer} - {regelBuilder.LiturgieContent.Last().Nummer}", geformatteerd.Verzen);
             }
 
             [DataTestMethod]
             [DataRow(new [] { 1, 2, 3, 4, 5, 7 })]
             public void AansluitendeNummeringMetLosNummer_ToonLosToonReeksToonLos(int[] aansluitendeNummerLijstMetLaasteLos)
             {
-                A.CallTo(() => _liturgieRegel.Display.VolledigeContent).Returns(false);
-                var nummerLijst = PrepareContentLijst(aansluitendeNummerLijstMetLaasteLos).ToList();
-                A.CallTo(() => _liturgieRegel.Content).Returns(nummerLijst);
+                var regelBuilder = new SlideBuilder()
+                    .SetDisplay(volledigeContent: false)
+                    .AddContent(aansluitendeNummerLijstMetLaasteLos);
+                var regel = regelBuilder.Build();
 
-                var geformatteerd = _sut.Huidig(_liturgieRegel, nummerLijst.First());
+                var geformatteerd = _sut.Huidig(regel, regelBuilder.LiturgieContent.First());
 
-                Assert.AreEqual(geformatteerd.Verzen, $"{nummerLijst.First().Nummer}, {nummerLijst.Skip(1).First().Nummer} - {nummerLijst.OrderByDescending(n => n.Nummer).Skip(1).First().Nummer}, {nummerLijst.Last().Nummer}");
+                Assert.AreEqual($"{regelBuilder.LiturgieContent.First().Nummer}, {regelBuilder.LiturgieContent.Skip(1).First().Nummer} - {regelBuilder.LiturgieContent.OrderByDescending(n => n.Nummer).Skip(1).First().Nummer}, {regelBuilder.LiturgieContent.Last().Nummer}", geformatteerd.Verzen);
             }
 
             [DataTestMethod]
             [DataRow(new [] { 5, 6, 7, 12, 14 })]
             public void AansluitendeNummeringMetLosNummer_ToonLos(int[] aansluitendeNummerLijstMetLaaste2Los)
             {
-                A.CallTo(() => _liturgieRegel.Display.VolledigeContent).Returns(false);
-                var nummerLijst = PrepareContentLijst(aansluitendeNummerLijstMetLaaste2Los).ToList();
-                A.CallTo(() => _liturgieRegel.Content).Returns(nummerLijst);
+                var regelBuilder = new SlideBuilder()
+                    .SetDisplay(volledigeContent: false)
+                    .AddContent(aansluitendeNummerLijstMetLaaste2Los);
+                var regel = regelBuilder.Build();
 
-                var geformatteerd = _sut.Huidig(_liturgieRegel, nummerLijst.First());
+                var geformatteerd = _sut.Huidig(regel, regelBuilder.LiturgieContent.First());
 
-                Assert.AreEqual(geformatteerd.Verzen, string.Join(", ", nummerLijst.Select(n => n.Nummer)));
-            }
-        }
-
-        private static IEnumerable<ILiturgieContent> PrepareContentLijst(int[] aansluitendeNummerLijst)
-        {
-            foreach (var n in aansluitendeNummerLijst)
-            {
-                var added = A.Fake<ILiturgieContent>();
-                A.CallTo(() => added.Nummer).Returns(n);
-                yield return added;
+                Assert.AreEqual(string.Join(", ", regelBuilder.LiturgieContent.Select(n => n.Nummer)), geformatteerd.Verzen);
             }
         }
     }

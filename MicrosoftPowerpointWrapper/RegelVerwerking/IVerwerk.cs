@@ -7,6 +7,6 @@ namespace mppt.RegelVerwerking
 {
     interface IVerwerk
     {
-        IVerwerkResultaat Verwerk(ISlideOpbouw regel, IEnumerable<ISlideOpbouw> volgenden, CancellationToken token);
+        IVerwerkResultaat Verwerk(ISlideInhoud regel, IEnumerable<ISlideOpbouw> volgenden, CancellationToken token);
     }
 }

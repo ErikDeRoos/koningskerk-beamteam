@@ -23,9 +23,9 @@ namespace Generator.Tests.Tools
             {
                 var opgeknipt = SplitRegels.KnipInWoorden(regel).ToList();
 
-                Assert.AreEqual(opgeknipt.Count, verwachtResultaat.Length);
+                Assert.AreEqual(verwachtResultaat.Length, opgeknipt.Count);
                 verwachtResultaat.Select((r, i) => new { r, i }).ToList()
-                    .ForEach(r => Assert.AreEqual(r.r, verwachtResultaat[r.i]));
+                    .ForEach(r => Assert.AreEqual(verwachtResultaat[r.i], r.r));
             }
         }
     }

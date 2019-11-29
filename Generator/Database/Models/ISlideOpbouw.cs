@@ -7,12 +7,8 @@ namespace Generator.Database.Models
     /// <summary>
     /// Instructies hoe de slide opgebouwd moet worden
     /// </summary>
-    public interface ISlideOpbouw
+    public interface ISlideOpbouw : ISlideInhoud
     {
-        /// <summary>
-        /// Tekstuele presentatie
-        /// </summary>
-        ILiturgieDisplay Display { get; }
         /// <summary>
         /// Of deze regel in het liturgie overzicht moet komen
         /// </summary>
@@ -33,6 +29,17 @@ namespace Generator.Database.Models
         /// Of de inhoud van een afwijkend type is
         /// </summary>
         VerwerkingType VerwerkenAlsType { get; }
+    }
+
+    /// <summary>
+    /// Instructies hoe de slide opgebouwd moet worden
+    /// </summary>
+    public interface ISlideInhoud
+    {
+        /// <summary>
+        /// Tekstuele presentatie
+        /// </summary>
+        ILiturgieDisplay Display { get; }
 
         /// <summary>
         /// Inhoud van de regel. 1 of meer. Bij 'VerwerkenAlsSlide' is 'False' dan is er geen content.

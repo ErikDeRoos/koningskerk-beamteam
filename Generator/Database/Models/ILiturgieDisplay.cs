@@ -27,6 +27,6 @@ namespace Generator.Database.Models
         /// <summary>
         /// Basis verzen, als afleiden niet lukt / kan. Indien niet null dan altijd gebruiken
         /// </summary>
-        IVersenDefault VersenGebruikDefault { get; }
+        string VersenGebruikDefault { get; }
     }
 }
