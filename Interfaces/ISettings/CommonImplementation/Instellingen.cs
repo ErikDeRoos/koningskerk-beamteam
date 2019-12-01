@@ -19,37 +19,7 @@ namespace ISettings.CommonImplementation
         private const bool DefaultToonBijbeltekstenInLiturgie = true;
         private const bool DefaultVerkortVerzenBijVolledigeContent = true;
 
-        public static readonly Instellingen Default = new Instellingen()
-        {
-            DatabasePad = "",
-            BijbelPad = "",
-            TemplateLied = "",
-            TemplateTheme = "",
-            TekstChar_a_OnARow = DefaultTekstChar_a_OnARow,
-            TekstFontName = DefaultTekstFontName,
-            TekstFontPointSize = DefaultTekstFontPointSize,
-            RegelsPerLiedSlide = DefaultRegelsperslide,
-            RegelsPerBijbeltekstSlide = DefaultRegelsperbijbeltekstslide,
-            Een2eCollecte = DefaultEen2eCollecte,
-            DeLezenVraag = DefaultDeLezenVraag,
-            DeTekstVraag = DefaultDeTekstVraag,
-            GebruikDisplayNameVoorZoeken = DefaultGebruikDisplayNameVoorZoeken,
-            ToonBijbeltekstenInLiturgie = DefaultToonBijbeltekstenInLiturgie,
-            ToonGeenVersenBijVolledigeContent = DefaultVerkortVerzenBijVolledigeContent,
-            StandaardTeksten = new StandaardTeksten()
-            {
-                Volgende = "Straks :",
-                Voorganger = "Voorganger :",
-                Collecte1 = "1e collecte :",
-                Collecte2 = "2e collecte :",
-                Collecte = "Collecte :",
-                Lezen = "Lezen :",
-                Tekst = "Tekst :",
-                Liturgie = "liturgie",
-                LiturgieLezen = "L ",
-                LiturgieTekst = "T "
-            }
-        };
+        public static readonly Instellingen Default = GetDefault();
 
         public string DatabasePad { get; set; }
         public string BijbelPad { get; set; }
@@ -96,6 +66,42 @@ namespace ISettings.CommonImplementation
         public string FullTemplateBijbeltekst => TemplateBijbeltekst.StartsWith(".") ? System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, TemplateBijbeltekst.Remove(0, 1)) : TemplateBijbeltekst;
 
         public IEnumerable<IMapmask> Masks => _lijstmasks;
+
+
+        public static Instellingen GetDefault() {
+            return new Instellingen()
+            {
+                DatabasePad = @".Resources\Database",
+                BijbelPad = @".Resources\Bijbels\NBV",
+                TemplateTheme = @".Resources\Database\Achtergrond.pptx",
+                TemplateLied = @".Resources\Database\Template Liederen.pptx",
+                TemplateBijbeltekst = @".Resources\Database\Template Bijbeltekst.pptx",
+                TekstChar_a_OnARow = DefaultTekstChar_a_OnARow,
+                TekstFontName = DefaultTekstFontName,
+                TekstFontPointSize = DefaultTekstFontPointSize,
+                RegelsPerLiedSlide = DefaultRegelsperslide,
+                RegelsPerBijbeltekstSlide = DefaultRegelsperbijbeltekstslide,
+                Een2eCollecte = DefaultEen2eCollecte,
+                DeLezenVraag = DefaultDeLezenVraag,
+                DeTekstVraag = DefaultDeTekstVraag,
+                GebruikDisplayNameVoorZoeken = DefaultGebruikDisplayNameVoorZoeken,
+                ToonBijbeltekstenInLiturgie = DefaultToonBijbeltekstenInLiturgie,
+                ToonGeenVersenBijVolledigeContent = DefaultVerkortVerzenBijVolledigeContent,
+                StandaardTeksten = new StandaardTeksten()
+                {
+                    Volgende = "Straks :",
+                    Voorganger = "Voorganger :",
+                    Collecte1 = "1e collecte :",
+                    Collecte2 = "2e collecte :",
+                    Collecte = "Collecte :",
+                    Lezen = "Lezen :",
+                    Tekst = "Tekst :",
+                    Liturgie = "liturgie",
+                    LiturgieLezen = "L ",
+                    LiturgieTekst = "T "
+                }
+            };
+        }
 
         public override string ToString()
         {

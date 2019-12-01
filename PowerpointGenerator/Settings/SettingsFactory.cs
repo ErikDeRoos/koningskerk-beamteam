@@ -26,7 +26,7 @@ namespace PowerpointGenerator.Settings
 
         public bool WriteToFile(IInstellingen instellingen)
         {
-            return WriteToJsonFile(_fileManager, _fileManager.CombineDirectories(_baseDir, _instellingenFileName), _fileManager.CombineDirectories(_baseDir, _masksFileName), (instellingen as Instellingen) ?? GetDefault());
+            return WriteToJsonFile(_fileManager, _fileManager.CombineDirectories(_baseDir, _instellingenFileName), _fileManager.CombineDirectories(_baseDir, _masksFileName), (instellingen as Instellingen) ?? Instellingen.GetDefault());
         }
 
         public IInstellingen LoadFromFile()
@@ -34,7 +34,7 @@ namespace PowerpointGenerator.Settings
             var settingsFromJson = LoadFromJsonFile(_fileManager, _fileManager.CombineDirectories(_baseDir, _instellingenFileName), _fileManager.CombineDirectories(_baseDir, _masksFileName));
             if (settingsFromJson != null)
                 return settingsFromJson;
-            return GetDefault();
+            return Instellingen.GetDefault();
         }
 
         private static bool WriteToJsonFile(IFileOperations fileManager, string instellingenFile, string maskFile, Instellingen instellingen)
@@ -63,6 +63,7 @@ namespace PowerpointGenerator.Settings
                     GebruikDisplayNameVoorZoeken = instellingen.GebruikDisplayNameVoorZoeken,
                     ToonBijbeltekstenInLiturgie = instellingen.ToonBijbeltekstenInLiturgie,
                     StandaardTeksten = instellingen.StandaardTeksten,
+                    ToonGeenVersenBijVolledigeContent = instellingen.ToonGeenVersenBijVolledigeContent,
                 };
 
                 //schrijf instellingen weg
@@ -146,17 +147,6 @@ namespace PowerpointGenerator.Settings
                 FoutmeldingSchrijver.Log(exc);
             }
             return null;
-        }
-
-        private static Instellingen GetDefault()
-        {
-            return new Instellingen() {
-                DatabasePad = @".Resources\Database",
-                BijbelPad = @".Resources\Bijbels\NBV",
-                TemplateTheme = @".Resources\Database\Achtergrond.pptx",
-                TemplateLied = @".Resources\Database\Template Liederen.pptx",
-                TemplateBijbeltekst = @".Resources\Database\Template Bijbeltekst.pptx",
-            };
         }
 
         private class SaveMask
