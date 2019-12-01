@@ -1,11 +1,10 @@
-﻿// Copyright 2018 door Erik de Roos
-using IDatabase;
+﻿// Copyright 2019 door Erik de Roos
+using Generator.Tools;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.IO.Compression;
-using IFileSystem;
+using System.Linq;
 
 namespace Generator.Database.FileSystem
 {
@@ -82,15 +81,24 @@ namespace Generator.Database.FileSystem
 
     public class FileZipBundledItem : IDbItem
     {
-        public string Name { get; }
+        public DbItemName Name { get; }
         public IDbItemContent Content { get; }
 
         internal FileZipBundledItem(IZipArchiveDirectory archiveDir, bool cached)
         {
             var inDir = archiveDir;
 
-            Name = inDir.Name;
+            Name = new DbItemName
+            {
+                Name = inDir.Name,
+                SafeName = FileEngineDefaults.CreateSafeName(inDir.Name)
+            };
             Content = new DirContent(inDir.Entries, cached);
+        }
+
+        public override string ToString()
+        {
+            return Name?.Name;
         }
 
         class DirContent : IDbItemContent
@@ -130,15 +138,25 @@ namespace Generator.Database.FileSystem
 
     class FileZipItem : IDbItem
     {
-        public string Name { get; }
+        public DbItemName Name { get; }
         public IDbItemContent Content { get; }
 
         public FileZipItem(ZipArchiveEntry entry)
         {
             var entry1 = entry;
 
-            Name = Path.GetFileNameWithoutExtension(entry1.Name);
+            var entryName = Path.GetFileNameWithoutExtension(entry1.Name);
+            Name = new DbItemName
+            {
+                Name = entryName,
+                SafeName = FileEngineDefaults.CreateSafeName(entryName),
+            };
             Content = new FileContent(entry1);
+        }
+
+        public override string ToString()
+        {
+            return Name?.Name;
         }
 
         private class FileContent : IDbItemContent

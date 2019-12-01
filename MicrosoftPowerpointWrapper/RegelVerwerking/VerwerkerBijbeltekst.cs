@@ -1,13 +1,13 @@
-﻿// Copyright 2017 door Erik de Roos
-using ILiturgieDatabase;
-using ISlideBuilder;
+﻿// Copyright 2019 door Erik de Roos
+using Generator.Database.Models;
+using Generator.LiturgieInterpretator.Models;
+using Generator.Tools;
 using mppt.Connect;
 using mppt.LiedPresentator;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using Tools;
 
 namespace mppt.RegelVerwerking
 {
@@ -18,7 +18,7 @@ namespace mppt.RegelVerwerking
     class VerwerkerBijbeltekst : IVerwerkFactory
     {
         public IVerwerk Init(IMppApplication metApplicatie, IMppPresentatie toevoegenAanPresentatie, IMppFactory metFactory, ILiedFormatter gebruikLiedFormatter, IBuilderBuildSettings buildSettings,
-                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ILiturgieRegel> volledigeLiturgieOpVolgorde, ILengteBerekenaar lengteBerekenaar)
+                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ISlideOpbouw> volledigeLiturgieOpVolgorde, ILengteBerekenaar lengteBerekenaar)
         {
             return new Verwerker(metApplicatie, toevoegenAanPresentatie, metFactory, gebruikLiedFormatter, buildSettings, buildDefaults, dependentFileList, volledigeLiturgieOpVolgorde, lengteBerekenaar);
         }
@@ -29,13 +29,13 @@ namespace mppt.RegelVerwerking
             private int _slidesGemist = 0;
 
             public Verwerker(IMppApplication metApplicatie, IMppPresentatie toevoegenAanPresentatie, IMppFactory metFactory, ILiedFormatter gebruikLiedFormatter, IBuilderBuildSettings buildSettings,
-                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ILiturgieRegel> volledigeLiturgieOpVolgorde, ILengteBerekenaar lengteBerekenaar)
+                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ISlideOpbouw> volledigeLiturgieOpVolgorde, ILengteBerekenaar lengteBerekenaar)
                 : base(metApplicatie, toevoegenAanPresentatie, metFactory, gebruikLiedFormatter, buildSettings, buildDefaults, dependentFileList, volledigeLiturgieOpVolgorde)
             {
                 _lengteBerekenaar = lengteBerekenaar;
             }
 
-            public IVerwerkResultaat Verwerk(ILiturgieRegel regel, IEnumerable<ILiturgieRegel> volgenden, CancellationToken token)
+            public IVerwerkResultaat Verwerk(ISlideInhoud regel, IEnumerable<ISlideOpbouw> volgenden, CancellationToken token)
             {
                 InvullenTekstOpTemplate(regel, volgenden, token);
 
@@ -45,7 +45,7 @@ namespace mppt.RegelVerwerking
                 };
             }
 
-            private void InvullenTekstOpTemplate(ILiturgieRegel regel, IEnumerable<ILiturgieRegel> volgenden, CancellationToken token)
+            private void InvullenTekstOpTemplate(ISlideInhoud regel, IEnumerable<ISlideOpbouw> volgenden, CancellationToken token)
             {
                 var tekstPerSlide = OpdelenPerSlide(TekstOpknippen(regel.Content), _buildDefaults.RegelsPerBijbeltekstSlide, _lengteBerekenaar);
 
@@ -61,18 +61,18 @@ namespace mppt.RegelVerwerking
                                                             //voor elk object op de slides (we zoeken naar de tekst die vervangen moet worden in de template)
                     foreach (var shape in slide.Shapes().Where(s => s is IMppShapeTextbox).Cast<IMppShapeTextbox>())
                     {
-                        var tagReplacementResult = ProcessForTagReplacement(shape.Text, regel,
+                        var tagReplacementResult = ProcessForTagReplacement(shape.Text,
                             additionalSearchForTagReplacement: (s) => {
                                 switch (s)
                                 {
                                     case "liturgieregel":
-                                        return new SearchForTagReplacementResult(_liedFormatter.Huidig(regel, null).Display);
+                                        return new SearchForTagReplacementResult(_liedFormatter.Huidig(regel, null, _buildDefaults.VerkortVerzenBijVolledigeContent).Display);
                                     case "inhoud":
                                         return new SearchForTagReplacementResult(tekst.ToString());
                                     case "volgende":
                                         //we moeten dan wel al op de laatste slide zitten ('InvullenVolgende' is wel al intelligent maar in het geval van 1
                                         //lange tekst over meerdere dia's kan 'InvullenVolgende' niet de juiste keuze maken)
-                                        var display = tekstPerSlide.Last() == tekst ? _liedFormatter.Volgende(volgenden) : null;
+                                        var display = tekstPerSlide.Last() == tekst ? _liedFormatter.Volgende(volgenden, 0, _buildDefaults.VerkortVerzenBijVolledigeContent) : null;
                                         return new SearchForTagReplacementResult(display != null ? $"{_buildDefaults.LabelVolgende} {display.Display}" : string.Empty);
                                 }
                                 return SearchForTagReplacementResult.Unresolved;

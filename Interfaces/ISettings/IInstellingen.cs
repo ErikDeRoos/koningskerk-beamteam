@@ -21,6 +21,7 @@ namespace ISettings
         bool GebruikDisplayNameVoorZoeken { get; }
 
         bool ToonBijbeltekstenInLiturgie { get; }
+        bool ToonGeenVersenBijVolledigeContent { get; }
 
         IEnumerable<IMapmask> Masks { get; }
         bool AddMask(IMapmask mask);

@@ -1,11 +1,8 @@
 
 Klant wensen, duidelijk:
--Bugfix: bij zoeken (zoals formulier) moet je eerst spatie doen na formulier en weer weghalen voordat zoeken start
-
+-
 
 Klant wensen, onduidelijk:
--Instelling om versen altijd weer te geven in liturgie als alles opgegeven is
--Bijbeltekst vers-weergave formatteren
 -Bugfix: Sommige hoofdstukken worden overgeslagen (ergens in een mailtje of in t werkzaamheden overzicht bestand staat het voorbeeld)
 -Bugfix: Sommige opwekkingen laten 'volgende' in beeld bij bepaalde slides (Opw 585, liturgie 5 mei)
 
@@ -14,5 +11,4 @@ S-Opslaan via het nieuwe powerpoint formaat
 M-database files via json
 M-liturgie voorbeeld tonen
 S-Zoeken in teksten
-S-Solution vereenvoudigen
 S-Begeleidende teksten vereenvoudigen: dit project is de beamteam generator voor kerken, niet iets generieks

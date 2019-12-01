@@ -1,7 +1,8 @@
 ﻿// Copyright 2019 door Remco Veurink en Erik de Roos
-using Generator;
-using ILiturgieDatabase;
+using Generator.Database.Models;
+using Generator.LiturgieInterpretator;
 using ISettings;
+using PowerpointGenerator.Genereren;
 using PowerpointGenerator.Properties;
 using System;
 using System.Diagnostics;
@@ -27,13 +28,13 @@ namespace PowerpointGenerator.Screens
         private readonly GeneratieInterface<CompRegistration> _funcs;
         private readonly string _startBestand;
 
-        public Form1(IInstellingenFactory instellingenOplosser, GeneratieInterface<CompRegistration> funcs, ILiturgieLosOp liturgieOplosser, string startBestand)
+        public Form1(IInstellingenFactory instellingenOplosser, GeneratieInterface<CompRegistration> funcs, ILiturgieZoeken liturgieZoeker, string startBestand)
         {
             _instellingenFactory = instellingenOplosser;
             _funcs = funcs;
             _startBestand = startBestand;
             InitializeComponent();
-            liturgieEdit1._liturgieOplosser = liturgieOplosser;
+            liturgieEdit1._liturgieZoeker = liturgieZoeker;
             Icon = Icon.FromHandle(Resources.Powerpoint_Overlay_icon.GetHicon());
         }
 
@@ -190,16 +191,19 @@ namespace PowerpointGenerator.Screens
                 OpslaanOpLocatie(_funcs.MaakWerkbestand(), _funcs.TempLiturgiePath);
 
                 // creeer lijst van liturgie
-                var ingeladenLiturgie = _funcs.LiturgieOplossingen().ToList();
+                var parsedLiturgie = _funcs.LiturgieOplossingen().ToList();
 
-                //als niet alle liturgie is gevonden geven we een melding of de gebruiker toch door wil gaan met genereren
-                if (ingeladenLiturgie.Any(l => l.Resultaat != LiturgieOplossingResultaat.Opgelost))
+                //als niet alle liturgie is gevonden geven we een melding of de gebruiker wil stoppen of toch door wil gaan
+                var fouten = parsedLiturgie.Where(l => l.ResultaatStatus != DatabaseZoekStatus.Opgelost).ToList();
+                if (fouten.Any())
                 {
-                    var errorformulier = new LiturgieNotFoundFormulier(ingeladenLiturgie.Where(l => l.Resultaat != LiturgieOplossingResultaat.Opgelost));
+                    var errorformulier = new LiturgieNotFoundFormulier(fouten);
                     if (errorformulier.ShowDialog() != DialogResult.OK)
                         return;
-                    ingeladenLiturgie = ingeladenLiturgie.Where(l => l.Resultaat == LiturgieOplossingResultaat.Opgelost).ToList();
                 }
+
+                // We gaan door met alle slides die wel opgelost kunnen worden
+                var slides = parsedLiturgie.Where(l => l.ResultaatStatus == DatabaseZoekStatus.Opgelost).Select(pl => pl.ResultaatSlide).ToList();
 
                 // open een save window voor de presentatie
                 var saveFileDialog1 = new SaveFileDialog
@@ -229,12 +233,12 @@ namespace PowerpointGenerator.Screens
                 progressBar1.Visible = true;
                 progressBar1.Value = 0;
                 progressBar1.Minimum = 0;
-                progressBar1.Maximum = ingeladenLiturgie.Count;
+                progressBar1.Maximum = parsedLiturgie.Count;
 
                 // de knop de status laten reflecteren
                 button1.Text = "Stop";
 
-                var status = _funcs.StartGenereren(ingeladenLiturgie, fileName);
+                var status = _funcs.StartGenereren(slides, fileName);
                 if (status.Fout != null)
                     MessageBox.Show(status.Fout.Melding + "\n\n" + status.Fout.Oplossing, status.Fout.Oplossing);
             }

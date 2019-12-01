@@ -1,7 +1,7 @@
 ﻿// Copyright 2019 door Erik de Roos
 using Generator.Database.FileSystem;
-using IDatabase;
-using ILiturgieDatabase;
+using Generator.Database.Models;
+using Generator.LiturgieInterpretator.Models;
 using ISettings;
 using System;
 using System.Collections.Generic;
@@ -12,55 +12,50 @@ using static System.String;
 
 namespace Generator.Database
 {
-
-    public static class LiturgieDatabaseSettings
-    {
-        public const string VersSamenvoeging = "-";
-        public const string DatabaseNameDefault = "default";
-        public const string DatabaseNameBijbeltekst = "bijbel";
-    }
-
     /// <summary>
     /// Zoek naar de opgegeven liturgieen.
     /// </summary>
-    public class LiturgieDatabase : ILiturgieDatabase.ILiturgieDatabase
+    public class LiturgieDatabase : ILiturgieDatabase
     {
-        private readonly IEngineManager<FileEngineSetSettings> _databases;
-        public LiturgieDatabase(IEngineManager<FileEngineSetSettings> database)
+        private readonly IEngineManager _databases;
+        public LiturgieDatabase(IEngineManager database)
         {
             _databases = database;
         }
 
-        public IOplossing ZoekOnderdeel(string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen, ILiturgieSettings settings)
-        {
-            return ZoekOnderdeel(VerwerkingType.normaal, onderdeelNaam, fragmentNaam, fragmentDelen, settings);
-        }
-
-        public IOplossing ZoekOnderdeel(VerwerkingType alsType, string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen, ILiturgieSettings settings)
+        public IOplossing KrijgItem(VerwerkingType alsType, string onderdeelNaam, string fragmentNaam, IEnumerable<string> fragmentDelen, LiturgieSettings settings)
         {
             var database = alsType == VerwerkingType.normaal ? _databases.GetDefault() : _databases.Extensions.FirstOrDefault(e => e.Name == LiturgieDatabaseSettings.DatabaseNameBijbeltekst);
             if (database == null)
-                return new Oplossing() { Status = LiturgieOplossingResultaat.DatabaseFout };
+                return new Oplossing() { Status = DatabaseZoekStatus.DatabaseFout };
 
-            var set = database.Engine.Where(s => string.Equals(s.Name, onderdeelNaam, StringComparison.OrdinalIgnoreCase) || (settings.GebruikDisplayNameVoorZoeken && string.Equals(s.Settings.DisplayName, onderdeelNaam, StringComparison.OrdinalIgnoreCase))).FirstOrDefault();
+            var set = database.Engine.Where(s => string.Equals(s.Name.SafeName, onderdeelNaam, StringComparison.CurrentCultureIgnoreCase) || (settings.GebruikDisplayNameVoorZoeken && string.Equals(s.Settings.DisplayName, onderdeelNaam, StringComparison.CurrentCultureIgnoreCase))).FirstOrDefault();
             if (set == null)
-                return new Oplossing() { Status = LiturgieOplossingResultaat.SetFout };
-            // Kijk of we het specifieke item in de set kunnen vinden (alleen via de op-schijf naam)
-            var subSet = set.Where(r => Compare(r.Name, fragmentNaam, StringComparison.OrdinalIgnoreCase) == 0).FirstOrDefault();
+                return new Oplossing() { Status = DatabaseZoekStatus.SetFout };
+            // Kijk of we het specifieke item in de set kunnen vinden
+            var subSet = set.Where(r => Compare(r.Name.SafeName, fragmentNaam, StringComparison.CurrentCultureIgnoreCase) == 0 || Compare(r.Name.Name, fragmentNaam, StringComparison.CurrentCultureIgnoreCase) == 0).FirstOrDefault();
             if (subSet == null)
-                return new Oplossing() { Status = LiturgieOplossingResultaat.SubSetFout };
-            var returnValue = new Oplossing()
+                return new Oplossing() { Status = DatabaseZoekStatus.SubSetFout };
+            var returnValue = new Oplossing
             {
-                OnderdeelNaam = set.Name,
-                FragmentNaam = subSet.Name,
+                Onderdeel = new OplossingOnderdeel
+                {
+                    Naam = set.Name.Name,
+                    VeiligeNaam = set.Name.SafeName,
+                    AlternatieveNaam = set.Settings.DisplayName,
+                },
+                Fragment = new OplossingOnderdeel
+                {
+                    Naam = subSet.Name.Name,
+                    VeiligeNaam = subSet.Name.SafeName,
+                },
                 ZonderContentSplitsing = !set.Settings.ItemsHaveSubContent,
-                OnderdeelDisplayNaam = set.Settings.DisplayName,
                 StandaardNietTonenInLiturgie = set.Settings.NotVisibleInIndex,
             };
             // Je kunt geen verzen opgeven als we ze niet los hebben.
             // (Andere kant op kan wel: geen verzen opgeven terwijl ze er wel zijn (wat 'alle verzen' betekend))
             if (fragmentDelen != null && fragmentDelen.Any() && !(set.Settings.ItemsHaveSubContent || set.Settings.ItemIsSubContent))
-                return new Oplossing() { Status = LiturgieOplossingResultaat.VersOnderverdelingMismatch };
+                return new Oplossing() { Status = DatabaseZoekStatus.VersOnderverdelingMismatch };
             if (fragmentDelen == null || !fragmentDelen.Any())
             {
                 // We hebben geen versenlijst en de set instellingen zeggen zonder verzen te zijn dus hebben we n samengevoegd item
@@ -68,7 +63,7 @@ namespace Generator.Database
                 {
                     var content = KrijgDirecteContent(subSet.Content, null);
                     if (content == null)
-                        return new Oplossing() { Status = LiturgieOplossingResultaat.VersOnleesbaar };
+                        return new Oplossing() { Status = DatabaseZoekStatus.VersOnleesbaar };
                     returnValue.Content = new List<ILiturgieContent> { content };
                 }
                 // Een item met alle verzen
@@ -85,21 +80,21 @@ namespace Generator.Database
             {
                 // Specifieke verzen
                 var delayedContent = KrijgContentDelayed(subSet, set.Settings);
-                var preSelect = InterpreteerNummers(fragmentDelen, delayedContent.Select(c => c.Name))  // We houden de volgorde van het opgeven aan omdat die afwijkend kan zijn
+                var preSelect = InterpreteerNummers(fragmentDelen, delayedContent.Select(c => c.PossibleNummer))  // We houden de volgorde van het opgeven aan omdat die afwijkend kan zijn
                     .Select(n => n.ToString())
-                    .Select(n => new { Naam = n, SubSet = delayedContent.FirstOrDefault(c => c.Name == n), })
+                    .Select(n => new { Naam = n, SubSet = delayedContent.FirstOrDefault(c => c.PossibleNummer == n), })
                     .ToList();
                 // Specifieke verzen moeten allemaal gevonden kunnen worden
                 if (preSelect.Any(c => c.SubSet == null))
-                    return new Oplossing() { Status = LiturgieOplossingResultaat.VersFout };
+                    return new Oplossing() { Status = DatabaseZoekStatus.VersFout };
                 returnValue.Content = preSelect
                     .Select(s => s.SubSet.GetContent())
                     .ToList();
                 // Specifieke verzen moeten allemaal interpreteerbaar zijn
                 if (returnValue.Content.Any(c => c == null))
-                    return new Oplossing() { Status = LiturgieOplossingResultaat.VersOnleesbaar };
+                    return new Oplossing() { Status = DatabaseZoekStatus.VersOnleesbaar };
             }
-            returnValue.Status = LiturgieOplossingResultaat.Opgelost;
+            returnValue.Status = DatabaseZoekStatus.Opgelost;
             return returnValue;
         }
 
@@ -148,11 +143,11 @@ namespace Generator.Database
             }
         }
 
-        private static IEnumerable<IContentDelayed> KrijgContentDelayed(IDbItem vanItem, FileEngineSetSettings metSettings)
+        private static IEnumerable<IContentDelayed> KrijgContentDelayed(IDbItem vanItem, DbSetSettings metSettings)
         {
             if (metSettings.ItemsHaveSubContent)
                 return vanItem.Content.TryAccessSubs()
-                    .Select(s => new ContentDelayed(s.Name, s.Content))
+                    .Select(s => new ContentDelayed(s.Name.Name, s.Content))
                     .ToList();
             if (metSettings.ItemIsSubContent) {
                 var content = KrijgDirecteContent(vanItem.Content, null);
@@ -239,59 +234,32 @@ namespace Generator.Database
             }
         }
 
-        public IEnumerable<IZoekresultaat> KrijgAlleOnderdelen()
-        {
-            return _databases.Extensions
-                .SelectMany(de => de.Engine.GetAllNames().Select(n => new Zoekresultaat() { Database = de.Name, Resultaat = n }));
-        }
-
-        public IEnumerable<IZoekresultaat> KrijgOnderdeelDefault()
-        {
-            return _databases.Extensions.Where(e => e.Name == LiturgieDatabaseSettings.DatabaseNameDefault)
-                .SelectMany(de => de.Engine.GetAllNames().Select(n => new Zoekresultaat() { Database = de.Name, Resultaat = n }));
-        }
-
-        public IEnumerable<IZoekresultaat> KrijgOnderdeelBijbel()
-        {
-            return _databases.Extensions.Where(e => e.Name == LiturgieDatabaseSettings.DatabaseNameBijbeltekst)
-                .SelectMany(de => de.Engine.GetAllNames().Select(n => new Zoekresultaat() { Database = de.Name, Resultaat = n }));
-        }
-
-        public IEnumerable<IZoekresultaat> KrijgAlleFragmenten(string onderdeelNaam)
-        {
-            return _databases.Extensions.SelectMany(de => 
-                de.Engine
-                .Where(s => string.Equals(s.Name, onderdeelNaam, StringComparison.OrdinalIgnoreCase) || string.Equals(s.Settings.DisplayName, onderdeelNaam, StringComparison.OrdinalIgnoreCase))
-                .SelectMany(set => set.GetAllNames().Select(n => new Zoekresultaat() { Database = de.Name, Resultaat = n }))
-            );
-        }
-
         private interface IContentDelayed
         {
-            string Name { get; }
+            string PossibleNummer { get; }
             Content GetContent();
         }
         private class ContentDelayed : IContentDelayed
         {
-            public string Name { get; private set; }
-            private IDbItemContent _dbItem;
-            public ContentDelayed(string name, IDbItemContent dbItem)
+            public string PossibleNummer { get; private set; }
+            private readonly IDbItemContent _dbItem;
+            public ContentDelayed(string possibleNummer, IDbItemContent dbItem)
             {
-                Name = name;
+                PossibleNummer = possibleNummer;
                 _dbItem = dbItem;
             }
             public Content GetContent()
             {
-                return KrijgDirecteContent(_dbItem, Name);
+                return KrijgDirecteContent(_dbItem, PossibleNummer);
             }
         }
         private class ContentDirect : IContentDelayed
         {
-            public string Name { get; private set; }
-            private Content _content;
+            public string PossibleNummer { get; private set; }
+            private readonly Content _content;
             public ContentDirect(Content content)
             {
-                Name = content.Nummer.ToString();
+                PossibleNummer = content.Nummer.ToString();
                 _content = content;
             }
             public Content GetContent()
@@ -309,61 +277,40 @@ namespace Generator.Database
             public int? Nummer { get; set; }
         }
 
-        public class Oplossing : IOplossing
+        private class Oplossing : IOplossing
         {
-            public LiturgieOplossingResultaat Status { get; set; }
-            public string OnderdeelNaam { get; set; }
-            public string OnderdeelDisplayNaam { get; set; }
-            public string FragmentNaam { get; set; }
+            public DatabaseZoekStatus Status { get; set; }
+            public OplossingOnderdeel Onderdeel { get; set; }
+            public OplossingOnderdeel Fragment { get; set; }
             public IEnumerable<ILiturgieContent> Content { get; set; }
             public bool ZonderContentSplitsing { get; set; }
             public bool? StandaardNietTonenInLiturgie { get; set; }
 
             public Oplossing()
             {
-                Status = LiturgieOplossingResultaat.Onbekend;
+                Status = DatabaseZoekStatus.Onbekend;
             }
-        }
-
-        private class Zoekresultaat : IZoekresultaat
-        {
-            public string Database { get; set; }
-            public string Resultaat { get; set; }
         }
     }
 
     public static class MapMasksToLiturgie
     {
-        public static IEnumerable<ILiturgieMapmaskArg> Map(IEnumerable<IMapmask> masks)
+        public static IEnumerable<LiturgieMapmaskArg> Map(IEnumerable<IMapmask> masks)
         {
-            return masks.Select(m => new MaskMap { Name = m.Name, RealName = m.RealName }).ToList();
-        }
-
-        private class MaskMap : ILiturgieMapmaskArg
-        {
-            public string Name { get; set; }
-
-            public string RealName { get; set; }
+            return masks.Select(m => new LiturgieMapmaskArg { Name = m.Name, RealName = m.RealName }).ToList();
         }
     }
 
 
     public static class MapInstellingenToSettings
     {
-        public static ILiturgieSettings Map(IInstellingen instellingen)
+        public static LiturgieSettings Map(IInstellingen instellingen)
         {
             return new LiturgieSettings
             {
                 ToonBijbeltekstenInLiturgie = instellingen.ToonBijbeltekstenInLiturgie,
                 GebruikDisplayNameVoorZoeken = instellingen.GebruikDisplayNameVoorZoeken,
             };
-        }
-
-        private class LiturgieSettings : ILiturgieSettings
-        {
-            public bool ToonBijbeltekstenInLiturgie { get; set; }
-
-            public bool GebruikDisplayNameVoorZoeken { get; set; }
         }
     }
 }

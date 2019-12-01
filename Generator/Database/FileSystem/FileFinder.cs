@@ -1,7 +1,5 @@
-﻿// Copyright 2016 door Erik de Roos
-using IDatabase;
-using IFileSystem;
-using System;
+﻿// Copyright 2019 door Erik de Roos
+using Generator.Tools;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -34,15 +32,28 @@ namespace Generator.Database.FileSystem
 
     public class FileBundledItem : IDbItem
     {
-        public string Name { get; }
+        public DbItemName Name { get; }
+
         public IDbItemContent Content { get; }
         private IFileOperations _fileManager;
 
         internal FileBundledItem(IFileOperations fileManager, string dirPath, bool cached)
         {
             _fileManager = fileManager;
-            Name = FileEngineDefaults.ClosestPathName(dirPath);
+
+            var dirName = FileEngineDefaults.ClosestPathName(dirPath);
+            Name = new DbItemName
+            {
+                Name = dirName,
+                SafeName = FileEngineDefaults.CreateSafeName(dirName),
+            };
+
             Content = new DirContent(_fileManager, dirPath, cached);
+        }
+
+        public override string ToString()
+        {
+            return Name?.Name;
         }
 
         private class DirContent : IDbItemContent
@@ -84,16 +95,29 @@ namespace Generator.Database.FileSystem
 
     class FileItem : IDbItem
     {
-        public string Name { get; }
+        public DbItemName Name { get; }
         public IDbItemContent Content { get; }
         private IFileOperations _fileManager;
 
         public FileItem(IFileOperations fileManager, string filePath)
         {
             _fileManager = fileManager;
-            Name = Path.GetFileNameWithoutExtension(filePath);
+
+            var dirPath = Path.GetFileNameWithoutExtension(filePath);
+            Name = new DbItemName
+            {
+                Name = dirPath,
+                SafeName = FileEngineDefaults.CreateSafeName(dirPath),
+            };
             Content = new FileContent(_fileManager, filePath);
         }
+
+        public override string ToString()
+        {
+            return Name?.Name;
+        }
+
+
         class FileContent : IDbItemContent
         {
             private readonly string _filePath;

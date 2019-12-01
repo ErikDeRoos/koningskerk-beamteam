@@ -68,7 +68,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bootstrap.cs" />
-    <Compile Include="Database\EngineManager.cs" />
+    <Compile Include="Genereren\EngineManager.cs" />
+    <Compile Include="Genereren\GeneratieInterface.cs" />
+    <Compile Include="Genereren\GeneratorStatus.cs" />
+    <Compile Include="Genereren\ICompRegistration.cs" />
+    <Compile Include="Genereren\PPGenerator.cs" />
+    <Compile Include="Genereren\SaveFileHandling.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -168,33 +173,13 @@
       <Project>{e502aed1-d6cd-4e2b-9524-aa333aa1ac21}</Project>
       <Name>Generator</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Interfaces\IDatabase\IDatabase.csproj">
-      <Project>{318647d0-b6bb-410e-a547-628049eadb9d}</Project>
-      <Name>IDatabase</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Interfaces\IFileSystem\IFileSystem.csproj">
-      <Project>{10295c3d-bc8b-4fca-a6c8-abc0e1dfe510}</Project>
-      <Name>IFileSystem</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Interfaces\ILiturgieDatabase\ILiturgieDatabase.csproj">
-      <Project>{1338d41d-5e66-40f3-845f-170a8dcfb445}</Project>
-      <Name>ILiturgieDatabase</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Interfaces\ISettings\ISettings.csproj">
       <Project>{76821eaa-462d-4cad-813d-bcff31edad3a}</Project>
       <Name>ISettings</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Interfaces\ISlideBuilder\ISlideBuilder.csproj">
-      <Project>{4ce33a64-db90-489b-9d01-99a88f24f2f7}</Project>
-      <Name>ISlideBuilder</Name>
-    </ProjectReference>
     <ProjectReference Include="..\MicrosoftPowerpointWrapper\MicrosoftPowerpointWrapper.csproj">
       <Project>{d65aa3ef-0086-4ca5-802e-a2bb2e3bed20}</Project>
       <Name>MicrosoftPowerpointWrapper</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tools\Tools.csproj">
-      <Project>{4fcc4de1-8d80-43a3-b422-4add6410e2ae}</Project>
-      <Name>Tools</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

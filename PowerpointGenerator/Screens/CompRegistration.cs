@@ -1,5 +1,5 @@
 ﻿// Copyright 2016 door Erik de Roos
-using Generator;
+using PowerpointGenerator.Genereren;
 using System.Windows.Forms;
 
 namespace PowerpointGenerator.Screens

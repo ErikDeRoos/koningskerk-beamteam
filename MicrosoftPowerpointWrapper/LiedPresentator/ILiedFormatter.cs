@@ -1,13 +1,13 @@
-﻿// Copyright 2017 door Erik de Roos
-using ILiturgieDatabase;
+﻿// Copyright 2019 door Erik de Roos
+using Generator.Database.Models;
 using System.Collections.Generic;
 
 namespace mppt.LiedPresentator
 {
     public interface ILiedFormatter
     {
-        LiedFormatResult Huidig(ILiturgieRegel regel, ILiturgieContent vanafDeel);
-        LiedFormatResult Volgende(IEnumerable<ILiturgieRegel> volgenden, int overslaan = 0);
-        LiedFormatResult Liturgie(ILiturgieRegel regel);
+        LiedFormatResult Huidig(ISlideInhoud regel, ILiturgieContent vanafDeel, bool verkortBijVolledigeContent);
+        LiedFormatResult Volgende(IEnumerable<ISlideOpbouw> volgenden, int overslaan, bool verkortBijVolledigeContent);
+        LiedFormatResult Liturgie(ISlideInhoud regel, bool verkortBijVolledigeContent);
     }
 }
