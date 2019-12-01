@@ -40,13 +40,13 @@ namespace Generator.Database
             {
                 Onderdeel = new OplossingOnderdeel
                 {
-                    OrigineleNaam = set.Name.Name,
+                    Naam = set.Name.Name,
                     VeiligeNaam = set.Name.SafeName,
-                    DisplayNaam = set.Settings.DisplayName,
+                    AlternatieveNaam = set.Settings.DisplayName,
                 },
                 Fragment = new OplossingOnderdeel
                 {
-                    OrigineleNaam = subSet.Name.Name,
+                    Naam = subSet.Name.Name,
                     VeiligeNaam = subSet.Name.SafeName,
                 },
                 ZonderContentSplitsing = !set.Settings.ItemsHaveSubContent,

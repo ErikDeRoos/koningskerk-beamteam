@@ -190,6 +190,11 @@ namespace Generator.Database.FileSystem
             return GetItemSet()
                 .Select(db => db.Name);
         }
+
+        public override string ToString()
+        {
+            return Name?.Name;
+        }
     }
 
     interface IFinder

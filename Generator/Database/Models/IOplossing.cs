@@ -16,7 +16,7 @@ namespace Generator.Database.Models
     public class OplossingOnderdeel
     {
         public string VeiligeNaam { get; set; }
-        public string OrigineleNaam { get; set; }
-        public string DisplayNaam { get; set; }
+        public string Naam { get; set; }
+        public string AlternatieveNaam { get; set; }
     }
 }

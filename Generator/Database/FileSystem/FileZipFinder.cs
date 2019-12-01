@@ -96,6 +96,11 @@ namespace Generator.Database.FileSystem
             Content = new DirContent(inDir.Entries, cached);
         }
 
+        public override string ToString()
+        {
+            return Name?.Name;
+        }
+
         class DirContent : IDbItemContent
         {
             private readonly IEnumerable<ZipArchiveEntry> _entries;
@@ -147,6 +152,11 @@ namespace Generator.Database.FileSystem
                 SafeName = FileEngineDefaults.CreateSafeName(entryName),
             };
             Content = new FileContent(entry1);
+        }
+
+        public override string ToString()
+        {
+            return Name?.Name;
         }
 
         private class FileContent : IDbItemContent

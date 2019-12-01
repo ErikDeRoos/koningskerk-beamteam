@@ -189,6 +189,15 @@ namespace mppt.RegelVerwerking
                     var kolom3 = display.Verzen;
                     if (!string.IsNullOrWhiteSpace(kolom3))
                         kolom3 = $": {kolom3}";
+
+                    // Bijbeltekst altijd in 1e kolom weergeven, en indien niet zo aangeleverd dan alsnog samenvoegen in kolom 1
+                    if (liturgieItem.VerwerkenAlsType == VerwerkingType.bijbeltekst && !string.IsNullOrWhiteSpace(kolom2))
+                    {
+                        kolom1 = $"{kolom1} {kolom2}{kolom3}".TrimEnd();
+                        kolom2 = null;
+                        kolom3 = null;
+                    }
+
                     if (!string.IsNullOrWhiteSpace(kolom2) || !string.IsNullOrWhiteSpace(kolom3))
                         toonLijst.Add(mppFactory.GetMppShapeTableContent3Column(toonLijst.Count, kolom1, kolom2, kolom3));
                     else

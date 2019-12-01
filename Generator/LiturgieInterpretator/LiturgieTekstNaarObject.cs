@@ -207,8 +207,18 @@ namespace Generator.LiturgieInterpretator
             var onthoudenVoorLaatsteElementIsKoppelteken = false;
             var voorBenaming = string.Empty;
             var deelVersen = new List<ILiturgieInterpretatieBijbeltekstDeel>();
+            var compatibilityVerzenZoalsIngevoerd = string.Empty;
             for (int teller = 0; teller < benamingStukken.Length; teller++)
             {
+                // Heropbouwen naamgeving voor weergave op overzicht
+                if (teller > 0)
+                {
+                    compatibilityVerzenZoalsIngevoerd += benamingStukken[teller];
+                    if (teller < benamingStukken.Length - 1)
+                        compatibilityVerzenZoalsIngevoerd += BenamingScheidingstekens.First();
+                }
+
+                //
                 var stuk = benamingStukken[teller].Trim();
                 if (onthoudenVoorLaatsteElementIsKoppelteken)
                     stuk = $"{VersKoppeltekens[0]} {stuk}";
@@ -226,6 +236,7 @@ namespace Generator.LiturgieInterpretator
                     break;
                 }
 
+                //
                 var elementen = teller == 0 ?
                     stuk.Split(BenamingDeelScheidingstekens, StringSplitOptions.RemoveEmptyEntries)
                     : stuk.Replace("-", " - ").Split(BenamingDeelScheidingstekens.Union(VersScheidingstekens).ToArray(), StringSplitOptions.RemoveEmptyEntries);
@@ -250,6 +261,8 @@ namespace Generator.LiturgieInterpretator
                           .Select(v => v.Trim())
                           .ToList()
                     });
+
+                // Volgende loop
                 onthouden = laatsteElement;
                 onthoudenVoorLaatsteElementIsKoppelteken = voorLaatsteElementIsKoppelteken;
             }
@@ -258,12 +271,8 @@ namespace Generator.LiturgieInterpretator
 
             // downward compatibility met ILiturgieInterpretatie
             regel.Deel = deelVersen.FirstOrDefault().Deel;
-            regel.VerzenZoalsIngevoerd = deelVersen.FirstOrDefault().VerzenZoalsIngevoerd;
-            regel.Verzen = deelVersen.FirstOrDefault().Verzen;
-                
-            // bijbeltekst visualisatie handmatig regelen
-            regel.TeTonenNaamOpOverzicht = voorOpties[0];
-            regel.TeTonenNaam = voorOpties[0];
+            regel.VerzenZoalsIngevoerd = compatibilityVerzenZoalsIngevoerd;
+            regel.Verzen = new string[0];
 
             // opties toekennen
             regel.OptiesGebruiker = opties;

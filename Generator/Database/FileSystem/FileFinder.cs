@@ -51,6 +51,11 @@ namespace Generator.Database.FileSystem
             Content = new DirContent(_fileManager, dirPath, cached);
         }
 
+        public override string ToString()
+        {
+            return Name?.Name;
+        }
+
         private class DirContent : IDbItemContent
         {
             private readonly string _inDir;
@@ -106,6 +111,13 @@ namespace Generator.Database.FileSystem
             };
             Content = new FileContent(_fileManager, filePath);
         }
+
+        public override string ToString()
+        {
+            return Name?.Name;
+        }
+
+
         class FileContent : IDbItemContent
         {
             private readonly string _filePath;

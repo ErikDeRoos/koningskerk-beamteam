@@ -99,7 +99,7 @@ namespace Generator.LiturgieInterpretator
             var setNaam = item.Benaming;
             if (item is ILiturgieInterpretatieBijbeltekst)
             {
-                return BijbeltekstOpzoeken(setNaam, (item as ILiturgieInterpretatieBijbeltekst).PerDeelVersen.ToList(), settings);
+                return BijbeltekstOpzoeken(setNaam, item as ILiturgieInterpretatieBijbeltekst, settings);
             }
             var zoekNaam = item.Deel;
             if (IsNullOrEmpty(item.Deel))
@@ -119,14 +119,14 @@ namespace Generator.LiturgieInterpretator
             if (dbResult.Status != DatabaseZoekStatus.Opgelost)
                 return new DatabaseResultaat(dbResult.Status);
 
-            if (dbResult.Onderdeel.OrigineleNaam == FileEngineDefaults.CommonFilesSetName)
+            if (dbResult.Onderdeel.Naam == FileEngineDefaults.CommonFilesSetName)
             {
-                resultaat.DisplayEdit.Naam = dbResult.Fragment.OrigineleNaam;
+                resultaat.DisplayEdit.Naam = dbResult.Fragment.Naam;
                 resultaat.DisplayEdit.VersenGebruikDefault = string.Empty;  // Expliciet: Common bestanden hebben nooit versen
             }
             else {
-                resultaat.DisplayEdit.Naam = dbResult.Onderdeel.OrigineleNaam;
-                resultaat.DisplayEdit.SubNaam = dbResult.Fragment.OrigineleNaam;
+                resultaat.DisplayEdit.Naam = dbResult.Onderdeel.Naam;
+                resultaat.DisplayEdit.SubNaam = dbResult.Fragment.Naam;
             }
             resultaat.Content = dbResult.Content.ToList();
             if (dbResult.ZonderContentSplitsing)
@@ -138,27 +138,35 @@ namespace Generator.LiturgieInterpretator
                 resultaat.TonenInOverzicht = true;  // Nullable. Alleen true als we het belangrijk vinden. Is default, kan overschreven worden.
 
             // bepaal de naamgeving
-            if (!IsNullOrWhiteSpace(dbResult.Onderdeel.DisplayNaam))
-                resultaat.DisplayEdit.Naam = dbResult.Onderdeel.DisplayNaam.Equals(_defaultSetNameEmpty, StringComparison.CurrentCultureIgnoreCase) ? null : dbResult.Onderdeel.DisplayNaam;
+            if (!IsNullOrWhiteSpace(dbResult.Onderdeel.AlternatieveNaam))
+                resultaat.DisplayEdit.Naam = dbResult.Onderdeel.AlternatieveNaam.Equals(_defaultSetNameEmpty, StringComparison.CurrentCultureIgnoreCase) ? null : dbResult.Onderdeel.AlternatieveNaam;
 
             return resultaat;
         }
-        private DatabaseResultaat BijbeltekstOpzoeken(string setNaam, IEnumerable<ILiturgieInterpretatieBijbeltekstDeel> versDelen, LiturgieSettings settings)
+        private DatabaseResultaat BijbeltekstOpzoeken(string setNaam, ILiturgieInterpretatieBijbeltekst item, LiturgieSettings settings)
         {
             var resultaat = new DatabaseResultaat(VerwerkingType.bijbeltekst);
-            resultaat.DisplayEdit.VersenGebruikDefault = string.Empty;
+
             var content = new List<ILiturgieContent>();
-            var versDelenLijst = versDelen.ToList();
-            foreach(var deel in versDelenLijst)
+            var versDelenLijst = item.PerDeelVersen.ToList();
+            var displaySelected = false;
+            foreach (var deel in versDelenLijst)
             {
                 var dbResult = _database.KrijgItem(VerwerkingType.bijbeltekst, setNaam, deel.Deel, deel.Verzen, settings);
                 if (dbResult.Status != DatabaseZoekStatus.Opgelost)
                     return new DatabaseResultaat(dbResult.Status);
                 content.AddRange(dbResult.Content);
-                // let op, naamgeving wordt buitenom geregeld
+
+                if (!displaySelected)
+                {
+                    resultaat.DisplayEdit.Naam = !string.IsNullOrEmpty(dbResult.Onderdeel.AlternatieveNaam) ? dbResult.Onderdeel.AlternatieveNaam : dbResult.Onderdeel.Naam;
+                    resultaat.DisplayEdit.SubNaam = dbResult.Fragment.Naam;
+                    displaySelected = true;
+                }
             }
+            resultaat.DisplayEdit.VersenGebruikDefault = item.VerzenZoalsIngevoerd;
             resultaat.Content = content.ToList();
-            resultaat.DisplayEdit.VolledigeContent = versDelenLijst.Count == 1 && !versDelen.FirstOrDefault().Verzen.Any();
+            resultaat.DisplayEdit.VolledigeContent = versDelenLijst.Count == 1 && !versDelenLijst.FirstOrDefault().Verzen.Any();
             resultaat.TonenInOverzicht = settings.ToonBijbeltekstenInLiturgie;
 
             return resultaat;
