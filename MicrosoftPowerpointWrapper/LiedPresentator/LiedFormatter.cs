@@ -8,15 +8,15 @@ namespace mppt.LiedPresentator
 {
     public class LiedFormatter : ILiedFormatter
     {
-        public LiedFormatResult Huidig(ISlideInhoud regel, ILiturgieContent vanafDeel)
+        public LiedFormatResult Huidig(ISlideInhoud regel, ILiturgieContent vanafDeel, bool verkortBijVolledigeContent)
         {
-            return ToonMetVerzenEnEersteLos(regel, vanafDeel);
+            return ToonMetVerzenEnEersteLos(regel, vanafDeel, verkortBijVolledigeContent);
         }
 
         /// Bepaal de naam die getoond gaat worden bij 'volgende'.
         /// Je hebt hier invloed op door bepaalde slides te laten overslaan (OverslaanInVolgende), 
         /// of door ze leeg te laten (!TonenInVolgende).
-        public LiedFormatResult Volgende(IEnumerable<ISlideOpbouw> volgenden, int overslaan = 0)
+        public LiedFormatResult Volgende(IEnumerable<ISlideOpbouw> volgenden, int overslaan, bool verkortBijVolledigeContent)
         {
             var komendeSlides = (volgenden ?? Enumerable.Empty<ISlideOpbouw>()).Where(v => !v.OverslaanInVolgende).ToList();
             // Alleen volgende tonen als volgende er is
@@ -24,17 +24,17 @@ namespace mppt.LiedPresentator
             {
                 var volgende = komendeSlides.Skip(overslaan).FirstOrDefault();
                 if (volgende != null && volgende.TonenInVolgende)
-                    return ToonWaarNodigMetVerzen(volgende);
+                    return ToonWaarNodigMetVerzen(volgende, verkortBijVolledigeContent);
             }
             return null;
         }
 
-        public LiedFormatResult Liturgie(ISlideInhoud regel)
+        public LiedFormatResult Liturgie(ISlideInhoud regel, bool verkortBijVolledigeContent)
         {
-            return ToonWaarNodigMetVerzen(regel);
+            return ToonWaarNodigMetVerzen(regel, verkortBijVolledigeContent);
         }
 
-        private static LiedFormatResult ToonWaarNodigMetVerzen(ISlideInhoud regel)
+        private static LiedFormatResult ToonWaarNodigMetVerzen(ISlideInhoud regel, bool verkortBijVolledigeContent)
         {
             var result = new LiedFormatResult()
             {
@@ -42,11 +42,11 @@ namespace mppt.LiedPresentator
             };
             if (!string.IsNullOrWhiteSpace(regel.Display.SubNaam))
                 result.SubNaam = regel.Display.SubNaam;
-            result.Verzen = LiedVerzen(regel.Display, false, regel.Content);
+            result.Verzen = LiedVerzen(regel.Display, false, verkortBijVolledigeContent, regel.Content);
             return result;
         }
 
-        private static LiedFormatResult ToonMetVerzenEnEersteLos(ISlideInhoud regel, ILiturgieContent vanafDeelHint)
+        private static LiedFormatResult ToonMetVerzenEnEersteLos(ISlideInhoud regel, ILiturgieContent vanafDeelHint, bool verkortBijVolledigeContent)
         {
             var result = new LiedFormatResult()
             {
@@ -55,12 +55,12 @@ namespace mppt.LiedPresentator
             if (!string.IsNullOrWhiteSpace(regel.Display.SubNaam))
                 result.SubNaam = regel.Display.SubNaam;
             if (regel.Content == null)
-                result.Verzen = LiedVerzen(regel.Display, true);
+                result.Verzen = LiedVerzen(regel.Display, true, verkortBijVolledigeContent);
             else
             {
                 var vanafDeel = vanafDeelHint ?? regel.Content.FirstOrDefault();  // Bij een deel hint tonen we alleen nog de huidige en komende versen
                 var gebruikDeelRegels = regel.Content.SkipWhile(r => r != vanafDeel);
-                result.Verzen = LiedVerzen(regel.Display, true, gebruikDeelRegels);
+                result.Verzen = LiedVerzen(regel.Display, true, verkortBijVolledigeContent, gebruikDeelRegels);
             }
             return result;
         }
@@ -73,9 +73,9 @@ namespace mppt.LiedPresentator
         /// Als het in beeld is dan wordt de eerste in ieder geval los getoond.
         /// <remarks>
         /// </remarks>
-        private static string LiedVerzen(ILiturgieDisplay regelDisplay, bool toonEersteLos, IEnumerable<ILiturgieContent> vanDelen = null)
+        private static string LiedVerzen(ILiturgieDisplay regelDisplay, bool toonEersteLos, bool verkortBijVolledigeContent, IEnumerable<ILiturgieContent> vanDelen = null)
         {
-            if (regelDisplay.VersenGebruikDefault != null || vanDelen == null || (!toonEersteLos && regelDisplay.VolledigeContent))
+            if (regelDisplay.VersenGebruikDefault != null || vanDelen == null || (!toonEersteLos && regelDisplay.VolledigeContent && verkortBijVolledigeContent))
                 return regelDisplay.VersenGebruikDefault;
             var over = vanDelen.Where(v => v.Nummer.HasValue).Select(v => v.Nummer.Value).ToList();
             if (!over.Any())

@@ -1,4 +1,4 @@
-﻿// Copyright 2017 door Erik de Roos
+﻿// Copyright 2019 door Erik de Roos
 using Generator.Database.Models;
 using Generator.LiturgieInterpretator.Models;
 using Generator.Tools;
@@ -66,13 +66,13 @@ namespace mppt.RegelVerwerking
                                 switch (s)
                                 {
                                     case "liturgieregel":
-                                        return new SearchForTagReplacementResult(_liedFormatter.Huidig(regel, null).Display);
+                                        return new SearchForTagReplacementResult(_liedFormatter.Huidig(regel, null, _buildDefaults.VerkortVerzenBijVolledigeContent).Display);
                                     case "inhoud":
                                         return new SearchForTagReplacementResult(tekst.ToString());
                                     case "volgende":
                                         //we moeten dan wel al op de laatste slide zitten ('InvullenVolgende' is wel al intelligent maar in het geval van 1
                                         //lange tekst over meerdere dia's kan 'InvullenVolgende' niet de juiste keuze maken)
-                                        var display = tekstPerSlide.Last() == tekst ? _liedFormatter.Volgende(volgenden) : null;
+                                        var display = tekstPerSlide.Last() == tekst ? _liedFormatter.Volgende(volgenden, 0, _buildDefaults.VerkortVerzenBijVolledigeContent) : null;
                                         return new SearchForTagReplacementResult(display != null ? $"{_buildDefaults.LabelVolgende} {display.Display}" : string.Empty);
                                 }
                                 return SearchForTagReplacementResult.Unresolved;

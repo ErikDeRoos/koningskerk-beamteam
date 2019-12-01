@@ -3,7 +3,6 @@ Klant wensen, duidelijk:
 -
 
 Klant wensen, onduidelijk:
--Instelling om lied versen altijd weer te geven in liturgie, en niet weg te laten als alles opgegeven is
 -Bijbeltekst vers-weergave formatteren
 -Bugfix: Sommige hoofdstukken worden overgeslagen (ergens in een mailtje of in t werkzaamheden overzicht bestand staat het voorbeeld)
 -Bugfix: Sommige opwekkingen laten 'volgende' in beeld bij bepaalde slides (Opw 585, liturgie 5 mei)

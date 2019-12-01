@@ -27,7 +27,7 @@ namespace MicrosoftPowerpointWrapper.Tests
                     .SetDisplay(naamOverzicht: naam)
                     .Build();
 
-                var geformatteerd = _sut.Liturgie(regel);
+                var geformatteerd = _sut.Liturgie(regel, true);
 
                 Assert.AreEqual(naam, geformatteerd.Naam);
             }
@@ -42,7 +42,7 @@ namespace MicrosoftPowerpointWrapper.Tests
                     .AddContent(versNummer2)
                     .Build();
 
-                var geformatteerd = _sut.Liturgie(regel);
+                var geformatteerd = _sut.Liturgie(regel, true);
 
                 Assert.AreEqual(naam, geformatteerd.Naam);
                 Assert.AreEqual(subNaam, geformatteerd.SubNaam);
@@ -57,7 +57,7 @@ namespace MicrosoftPowerpointWrapper.Tests
                     .SetDisplayVersenGebruikDefault(defaultNaam)
                     .Build();
 
-                var geformatteerd = _sut.Liturgie(regel);
+                var geformatteerd = _sut.Liturgie(regel, true);
 
                 Assert.AreEqual(defaultNaam, geformatteerd.Verzen);
             }
@@ -71,7 +71,7 @@ namespace MicrosoftPowerpointWrapper.Tests
                     .AddContent(aansluitendeNummerLijst)
                     .Build();
 
-                var geformatteerd = _sut.Liturgie(regel);
+                var geformatteerd = _sut.Liturgie(regel, true);
 
                 Assert.IsNull(geformatteerd.Verzen);
             }
@@ -85,7 +85,7 @@ namespace MicrosoftPowerpointWrapper.Tests
                     .AddContent(aansluitendeNummerLijst)
                     .Build();
 
-                var geformatteerd = _sut.Liturgie(regel);
+                var geformatteerd = _sut.Liturgie(regel, true);
 
                 Assert.AreEqual($"{aansluitendeNummerLijst.First()} - {aansluitendeNummerLijst.Last()}", geformatteerd.Verzen);
             }
@@ -104,7 +104,7 @@ namespace MicrosoftPowerpointWrapper.Tests
                     .SetDisplay(naam: naam)
                     .Build();
 
-                var geformatteerd = _sut.Huidig(regel, null);
+                var geformatteerd = _sut.Huidig(regel, null, true);
 
                 Assert.AreEqual(naam, geformatteerd.Naam);
             }
@@ -117,7 +117,7 @@ namespace MicrosoftPowerpointWrapper.Tests
                     .SetDisplay(naam: naam, subnaam: subNaam)
                     .Build();
 
-                var geformatteerd = _sut.Huidig(regel, null);
+                var geformatteerd = _sut.Huidig(regel, null, true);
 
                 Assert.AreEqual(naam, geformatteerd.Naam);
                 Assert.AreEqual(subNaam, geformatteerd.SubNaam);
@@ -132,7 +132,7 @@ namespace MicrosoftPowerpointWrapper.Tests
                     .AddContent(versNummer1)
                     .Build();
 
-                var geformatteerd = _sut.Huidig(regel, null);
+                var geformatteerd = _sut.Huidig(regel, null, true);
 
                 Assert.AreEqual(naam, geformatteerd.Naam);
                 Assert.AreEqual(subNaam, geformatteerd.SubNaam);
@@ -149,7 +149,7 @@ namespace MicrosoftPowerpointWrapper.Tests
                     .AddContent(versNummer2);
                 var regel = regelBuilder.Build();
 
-                var geformatteerd = _sut.Huidig(regel, regelBuilder.LiturgieContent.First());
+                var geformatteerd = _sut.Huidig(regel, regelBuilder.LiturgieContent.First(), true);
 
                 Assert.AreEqual(naam, geformatteerd.Naam);
                 Assert.AreEqual(subNaam, geformatteerd.SubNaam);
@@ -165,7 +165,7 @@ namespace MicrosoftPowerpointWrapper.Tests
                     .AddContent(aansluitendeNummerLijst);
                 var regel = regelBuilder.Build();
 
-                var geformatteerd = _sut.Huidig(regel, regelBuilder.LiturgieContent.First());
+                var geformatteerd = _sut.Huidig(regel, regelBuilder.LiturgieContent.First(), true);
 
                 Assert.AreEqual($"{regelBuilder.LiturgieContent.First().Nummer}, {regelBuilder.LiturgieContent.Skip(1).First().Nummer} - {regelBuilder.LiturgieContent.Last().Nummer}", geformatteerd.Verzen);
             }
@@ -179,7 +179,7 @@ namespace MicrosoftPowerpointWrapper.Tests
                     .AddContent(aansluitendeNummerLijst);
                 var regel = regelBuilder.Build();
 
-                var geformatteerd = _sut.Huidig(regel, regelBuilder.LiturgieContent.First());
+                var geformatteerd = _sut.Huidig(regel, regelBuilder.LiturgieContent.First(), true);
 
                 Assert.AreEqual($"{regelBuilder.LiturgieContent.First().Nummer}, {regelBuilder.LiturgieContent.Skip(1).First().Nummer} - {regelBuilder.LiturgieContent.Last().Nummer}", geformatteerd.Verzen);
             }
@@ -193,7 +193,7 @@ namespace MicrosoftPowerpointWrapper.Tests
                     .AddContent(aansluitendeNummerLijstMetLaasteLos);
                 var regel = regelBuilder.Build();
 
-                var geformatteerd = _sut.Huidig(regel, regelBuilder.LiturgieContent.First());
+                var geformatteerd = _sut.Huidig(regel, regelBuilder.LiturgieContent.First(), true);
 
                 Assert.AreEqual($"{regelBuilder.LiturgieContent.First().Nummer}, {regelBuilder.LiturgieContent.Skip(1).First().Nummer} - {regelBuilder.LiturgieContent.OrderByDescending(n => n.Nummer).Skip(1).First().Nummer}, {regelBuilder.LiturgieContent.Last().Nummer}", geformatteerd.Verzen);
             }
@@ -207,7 +207,7 @@ namespace MicrosoftPowerpointWrapper.Tests
                     .AddContent(aansluitendeNummerLijstMetLaaste2Los);
                 var regel = regelBuilder.Build();
 
-                var geformatteerd = _sut.Huidig(regel, regelBuilder.LiturgieContent.First());
+                var geformatteerd = _sut.Huidig(regel, regelBuilder.LiturgieContent.First(), true);
 
                 Assert.AreEqual(string.Join(", ", regelBuilder.LiturgieContent.Select(n => n.Nummer)), geformatteerd.Verzen);
             }

@@ -19,5 +19,6 @@ namespace mppt
         string LabelLiturgie { get; set; }
         string LabelLiturgieLezen { get; set; }
         string LabelLiturgieTekst { get; set; }
+        bool VerkortVerzenBijVolledigeContent { get; set; }
     }
 }

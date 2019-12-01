@@ -1,4 +1,4 @@
-﻿// Copyright 2016 door Remco Veurink en Erik de Roos
+﻿// Copyright 2019 door Remco Veurink en Erik de Roos
 using Generator.Database.Models;
 using ISettings;
 using mppt;
@@ -263,6 +263,7 @@ namespace PowerpointGenerator.Genereren
             public string LabelLiturgie { get; set; }
             public string LabelLiturgieLezen { get; set; }
             public string LabelLiturgieTekst { get; set; }
+            public bool VerkortVerzenBijVolledigeContent { get; set; }
 
             public BuilderDefaults(IInstellingen opBasisVanInstellingen)
             {
@@ -281,6 +282,7 @@ namespace PowerpointGenerator.Genereren
                 FullTemplateTheme = opBasisVanInstellingen.FullTemplateTheme;
                 FullTemplateLied = opBasisVanInstellingen.FullTemplateLied;
                 FullTemplateBijbeltekst = opBasisVanInstellingen.FullTemplateBijbeltekst;
+                VerkortVerzenBijVolledigeContent = opBasisVanInstellingen.ToonGeenVersenBijVolledigeContent;
             }
         }
     }

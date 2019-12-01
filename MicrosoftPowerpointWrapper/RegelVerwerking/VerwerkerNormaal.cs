@@ -92,13 +92,13 @@ namespace mppt.RegelVerwerking
                                 switch (s)
                                 {
                                     case "liturgieregel":
-                                        return new SearchForTagReplacementResult(_liedFormatter.Huidig(regel, inhoud).Display);
+                                        return new SearchForTagReplacementResult(_liedFormatter.Huidig(regel, inhoud, _buildDefaults.VerkortVerzenBijVolledigeContent).Display);
                                     case "inhoud":
                                         return new SearchForTagReplacementResult(tekst);
                                     case "volgende":
                                         //we moeten dan wel al op de laatste slide zitten ('InvullenVolgende' is wel al intelligent maar in het geval van 1
                                         //lange tekst over meerdere dia's kan 'InvullenVolgende' niet de juiste keuze maken)
-                                        var display = IsLaatsteSlide(tekstOmTeRenderenLijst, tekst, regel, inhoud) ? _liedFormatter.Volgende(volgenden) : null;
+                                        var display = IsLaatsteSlide(tekstOmTeRenderenLijst, tekst, regel, inhoud) ? _liedFormatter.Volgende(volgenden, 0, _buildDefaults.VerkortVerzenBijVolledigeContent) : null;
                                         return new SearchForTagReplacementResult(display != null ? $"{_buildDefaults.LabelVolgende} {display.Display}" : string.Empty);
                                 }
                                 return SearchForTagReplacementResult.Unresolved;
@@ -139,11 +139,11 @@ namespace mppt.RegelVerwerking
                                 {
                                     case "volgende":
                                         //als de template de tekst bevat "Volgende" moet daar de Liturgieregel van de volgende sheet komen
-                                        display = _liedFormatter.Volgende(volgenden);
+                                        display = _liedFormatter.Volgende(volgenden, 0, _buildDefaults.VerkortVerzenBijVolledigeContent);
                                         return new SearchForTagReplacementResult(display != null ? $"{_buildDefaults.LabelVolgende} {display.Display}" : string.Empty);
                                     case "volgende_kort":
                                         //verkorte versie van "Volgende"
-                                        display = _liedFormatter.Volgende(volgenden);
+                                        display = _liedFormatter.Volgende(volgenden, 0, _buildDefaults.VerkortVerzenBijVolledigeContent);
                                         return new SearchForTagReplacementResult(display != null ? display.Display : string.Empty);
                                 }
                                 if (s.StartsWith("volgende_over_"))
@@ -152,7 +152,7 @@ namespace mppt.RegelVerwerking
                                     int aantalOverslaan = 0;
                                     if (int.TryParse(aantalOverslaanStr, out aantalOverslaan))
                                     {
-                                        display = _liedFormatter.Volgende(volgenden, aantalOverslaan);
+                                        display = _liedFormatter.Volgende(volgenden, aantalOverslaan, _buildDefaults.VerkortVerzenBijVolledigeContent);
                                         return new SearchForTagReplacementResult(display != null ? $"{_buildDefaults.LabelVolgende} {display.Display}" : string.Empty);
                                     }
                                     else
@@ -166,7 +166,7 @@ namespace mppt.RegelVerwerking
                     else if (table != null)
                     {
                         if (table.GetTitelFromFirstRowCell().Equals("<Liturgie>"))
-                            VulLiturgieTabel(table, _mppFactory, _liedFormatter, _liturgie, _buildSettings.Lezen, _buildSettings.Tekst, _buildDefaults.LabelLiturgieLezen, _buildDefaults.LabelLiturgieTekst, _buildDefaults.LabelLiturgie);
+                            VulLiturgieTabel(table, _mppFactory, _liedFormatter, _liturgie, _buildSettings.Lezen, _buildSettings.Tekst, _buildDefaults.LabelLiturgieLezen, _buildDefaults.LabelLiturgieTekst, _buildDefaults.LabelLiturgie, _buildDefaults.VerkortVerzenBijVolledigeContent);
                     }
                 }
                 //voeg de slides in in het grote geheel
@@ -175,13 +175,13 @@ namespace mppt.RegelVerwerking
                 presentatie.Dispose();
             }
 
-            private static void VulLiturgieTabel(IMppShapeTable inTabel, IMppFactory mppFactory, ILiedFormatter liedFormatter, IEnumerable<ISlideOpbouw> liturgie, string lezen, string tekst, string instellingenLezen, string instellingenTekst, string instellingLiturgie)
+            private static void VulLiturgieTabel(IMppShapeTable inTabel, IMppFactory mppFactory, ILiedFormatter liedFormatter, IEnumerable<ISlideOpbouw> liturgie, string lezen, string tekst, string instellingenLezen, string instellingenTekst, string instellingLiturgie, bool instellingVerkortVerzenBijVolledigeContent)
             {
                 var toonLijst = new List<IMppShapeTableContent>();
                 toonLijst.Add(mppFactory.GetMppShapeTableContent1Column(0, instellingLiturgie, false));
                 foreach (var liturgieItem in liturgie.Where(l => l.TonenInOverzicht))
                 {
-                    var display = liedFormatter.Liturgie(liturgieItem);
+                    var display = liedFormatter.Liturgie(liturgieItem, instellingVerkortVerzenBijVolledigeContent);
                     var kolom1 = display.Naam;
                     if (liturgieItem.VerwerkenAlsType == VerwerkingType.bijbeltekst)
                         kolom1 = $"{instellingenLezen}{kolom1}";

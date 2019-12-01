@@ -1,4 +1,4 @@
-﻿// Copyright 2017 door Erik de Roos
+﻿// Copyright 2019 door Erik de Roos
 using Generator.Database.Models;
 using mppt.Connect;
 using mppt.LiedPresentator;
