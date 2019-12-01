@@ -1,1 +1,1 @@
-
+Bugfix: Formulier moet rechts uitgelijnd zijn op overzicht in voorbeeld liturgie op github. Probleem is waarschijnlijk SubNaam -> Naam bij empty.

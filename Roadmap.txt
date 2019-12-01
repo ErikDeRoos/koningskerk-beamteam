@@ -1,14 +1,12 @@
 
 Klant wensen, duidelijk:
--
+-Keuze tussen ppt of pptx, met voorkeur voor pptx formaat
+-Begeleidende teksten verder vereenvoudigen: dit project is de beamteam generator voor kerken, niet iets generieks
 
 Klant wensen, onduidelijk:
--Bugfix: Sommige hoofdstukken worden overgeslagen (ergens in een mailtje of in t werkzaamheden overzicht bestand staat het voorbeeld)
--Bugfix: Sommige opwekkingen laten 'volgende' in beeld bij bepaalde slides (Opw 585, liturgie 5 mei)
+-Bugfix onderzoek: Sommige opwekkingen laten 'volgende' in beeld bij bepaalde slides (Opw 585, liturgie 5 mei)
 
 Eigen ideeën:
-S-Opslaan via het nieuwe powerpoint formaat
 M-database files via json
 M-liturgie voorbeeld tonen
 S-Zoeken in teksten
-S-Begeleidende teksten vereenvoudigen: dit project is de beamteam generator voor kerken, niet iets generieks
