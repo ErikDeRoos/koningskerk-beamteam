@@ -1,1 +1,4 @@
 Bugfix: Formulier moet rechts uitgelijnd zijn op overzicht in voorbeeld liturgie op github. Probleem is waarschijnlijk SubNaam -> Naam bij empty.
+Bugfix: bij bijbelboek 'Psalm' als weergave 'Psalmen' is kan je 'psalmen' invoegen maar dit wordt dan 'psalm en'
+Bugfix: bij bijbelboek 'Psalm' als weergave 'Psalmen' is kan je 'psal' typen en auto aanvullen toont dan een ToString van een object
+Bugfix: soms komt bij Opwekking 687 'volgende' in beeld terwijl dit niet hoeft
