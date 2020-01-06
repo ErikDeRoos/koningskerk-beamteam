@@ -1,10 +1,11 @@
 
 Klant wensen, duidelijk:
 -Keuze tussen ppt of pptx, met voorkeur voor pptx formaat
--Begeleidende teksten verder vereenvoudigen: dit project is de beamteam generator voor kerken, niet iets generieks
+-Begeleidende teksten github verder vereenvoudigen: dit project is de beamteam generator voor kerken, niet iets generieks
+-Installatie / upgrade handleiding github
 
 Klant wensen, onduidelijk:
--Bugfix onderzoek: Sommige opwekkingen laten 'volgende' in beeld bij bepaalde slides (Opw 585, liturgie 5 mei)
+-Los edit scherm voor huidige liturgie item
 
 Eigen ideeën:
 M-database files via json
