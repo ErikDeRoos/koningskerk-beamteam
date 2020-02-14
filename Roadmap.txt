@@ -1,11 +1,20 @@
 
 Klant wensen, duidelijk:
 -Keuze tussen ppt of pptx, met voorkeur voor pptx formaat
+-Signing van executables
+-Bij openen nieuw powerpoint scherm, controleren of er een powerpoint open staat met wijzigingen en dan dit melden met 'doorgaan, annuleren'
 -Begeleidende teksten github verder vereenvoudigen: dit project is de beamteam generator voor kerken, niet iets generieks
 -Installatie / upgrade handleiding github
 
-Klant wensen, onduidelijk:
--Los edit scherm voor huidige liturgie item
+Klant wensen, technische uitvoering onduidelijk:
+-Eenvoudig '(als:bijbeltekst)' achter je invoer kunnen zetten
+--Keuze om zelf je interface te bepalen: wil je een zoekveld, wil je een wijzig veld die mee gaat met de muis
+--Los edit scherm voor huidige liturgie item
+
+Klant wensen, vraag onduidelijk:
+-Database edit
+--Database edit voor tekstbestanden
+--Database edit voor 'tijdelijke toevoegingen' inclusief welke naam in beeld etc
 
 Eigen ideeën:
 M-database files via json
