@@ -90,7 +90,7 @@ namespace Generator.LiturgieInterpretator
                 // Fragment toevoegen op basis van aanname
                 fragmentLijst = ZoekFragmenten(zoekRestricties, aanname).Select(t => new ZoekresultaatItem()
                 {
-                    Weergave = $"{aanname} {t.Resultaat}",
+                    Weergave = $"{aanname} {t.Resultaat.Weergave}",
                     UitDatabase = t.Database.Weergave,
                 }).ToList();
 
