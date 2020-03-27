@@ -1,4 +1,4 @@
-﻿// Copyright 2019 door Remco Veurink en Erik de Roos
+﻿// Copyright 2020 door Remco Veurink en Erik de Roos
 using System.Collections.Generic;
 using System;
 using System.Linq;
@@ -18,6 +18,7 @@ namespace ISettings.CommonImplementation
         private const bool DefaultGebruikDisplayNameVoorZoeken = true;
         private const bool DefaultToonBijbeltekstenInLiturgie = true;
         private const bool DefaultVerkortVerzenBijVolledigeContent = true;
+        private const bool DefaultVersOnderbrekingOverSlidesHeen = false;
 
         public static readonly Instellingen Default = GetDefault();
 
@@ -37,6 +38,7 @@ namespace ISettings.CommonImplementation
         public bool GebruikDisplayNameVoorZoeken { get; set; }
         public bool ToonBijbeltekstenInLiturgie { get; set; }
         public bool ToonGeenVersenBijVolledigeContent { get; set; }
+        public bool VersOnderbrekingOverSlidesHeen { get; set; }
 
         private readonly List<IMapmask> _lijstmasks = new List<IMapmask>();
         public StandaardTeksten StandaardTeksten { get; set; }
@@ -67,7 +69,6 @@ namespace ISettings.CommonImplementation
 
         public IEnumerable<IMapmask> Masks => _lijstmasks;
 
-
         public static Instellingen GetDefault() {
             return new Instellingen()
             {
@@ -87,6 +88,7 @@ namespace ISettings.CommonImplementation
                 GebruikDisplayNameVoorZoeken = DefaultGebruikDisplayNameVoorZoeken,
                 ToonBijbeltekstenInLiturgie = DefaultToonBijbeltekstenInLiturgie,
                 ToonGeenVersenBijVolledigeContent = DefaultVerkortVerzenBijVolledigeContent,
+                VersOnderbrekingOverSlidesHeen = DefaultVersOnderbrekingOverSlidesHeen,
                 StandaardTeksten = new StandaardTeksten()
                 {
                     Volgende = "Straks :",

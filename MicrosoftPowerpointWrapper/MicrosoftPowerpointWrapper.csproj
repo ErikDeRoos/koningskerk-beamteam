@@ -84,6 +84,8 @@
     <Compile Include="RegelVerwerking\IVerwerkFactory.cs" />
     <Compile Include="RegelVerwerking\IVerwerkResultaat.cs" />
     <Compile Include="RegelVerwerking\LengteBerekenaar.cs" />
+    <Compile Include="RegelVerwerking\TekstVerdelerBijbeltekst.cs" />
+    <Compile Include="RegelVerwerking\TekstVerdelerLied.cs" />
     <Compile Include="RegelVerwerking\VerwerkerBase.cs" />
     <Compile Include="RegelVerwerking\VerwerkerBijbeltekst.cs" />
     <Compile Include="RegelVerwerking\VerwerkerNormaal.cs" />

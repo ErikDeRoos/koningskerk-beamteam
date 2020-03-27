@@ -1,4 +1,4 @@
-﻿// Copyright 2016 door Erik de Roos
+﻿// Copyright 2020 door Erik de Roos
 
 namespace mppt
 {
@@ -20,5 +20,6 @@ namespace mppt
         string LabelLiturgieLezen { get; set; }
         string LabelLiturgieTekst { get; set; }
         bool VerkortVerzenBijVolledigeContent { get; set; }
+        bool VersOnderbrekingOverSlidesHeen { get; set; }
     }
 }

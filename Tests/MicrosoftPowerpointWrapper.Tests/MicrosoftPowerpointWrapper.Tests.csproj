@@ -69,9 +69,11 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="Builders\BijbeltekstBuilder.cs" />
     <Compile Include="Builders\SlideBuilder.cs" />
     <Compile Include="LiedFormatteringTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TekstVerdelerBijbeltekstTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

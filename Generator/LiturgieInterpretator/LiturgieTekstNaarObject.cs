@@ -133,12 +133,13 @@ namespace Generator.LiturgieInterpretator
         private static ILiturgieTekstObject SplitTekstregel(string invoer)
         {
             var invoerTrimmed = invoer.Trim();
-            var voorOpties = invoerTrimmed.Split(OptieStart, StringSplitOptions.RemoveEmptyEntries);
-            var optiesRuw = voorOpties.Length > 1 ? voorOpties[1].Split(OptieEinde, StringSplitOptions.RemoveEmptyEntries)[0].Trim() : Empty;
+            var optiesSplitted = invoerTrimmed.Split(OptieStart, StringSplitOptions.RemoveEmptyEntries);
+            var voorOptiesRuw = optiesSplitted.Length > 0 ? optiesSplitted[0] : string.Empty;
+            var optiesRuw = optiesSplitted.Length > 1 ? optiesSplitted[1].Split(OptieEinde, StringSplitOptions.RemoveEmptyEntries)[0].Trim() : Empty;
             var opties = InterpreteerOpties(optiesRuw);
             if (opties.AlsBijbeltekst)
-                return VerwerkAlsBijbeltekst(voorOpties, opties);
-            return VerwerkNormaal(voorOpties, opties);
+                return VerwerkAlsBijbeltekst(voorOptiesRuw, opties);
+            return VerwerkNormaal(voorOptiesRuw, opties);
         }
 
         private static LiturgieOptiesGebruiker InterpreteerOpties(string optiesRuw)
@@ -167,12 +168,12 @@ namespace Generator.LiturgieInterpretator
                 .FirstOrDefault();
         }
 
-        private static ILiturgieTekstObject VerwerkNormaal(string[] voorOpties, LiturgieOptiesGebruiker opties)
+        private static ILiturgieTekstObject VerwerkNormaal(string voorOpties, LiturgieOptiesGebruiker opties)
         {
             var regel = new InterpretatieNormaal();
             if (voorOpties.Length == 0)
                 return InterpretatieNormaal.Empty;
-            var voorBenamingStukken = voorOpties[0].Trim().Split(BenamingScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
+            var voorBenamingStukken = voorOpties.Trim().Split(BenamingScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
             if (voorBenamingStukken.Length == 0)
                 return InterpretatieNormaal.Empty;
             var preBenamingTrimmed = voorBenamingStukken[0].Trim();
@@ -191,12 +192,12 @@ namespace Generator.LiturgieInterpretator
             return regel;
         }
 
-        private static ILiturgieInterpretatieBijbeltekst VerwerkAlsBijbeltekst(string[] voorOpties, LiturgieOptiesGebruiker opties)
+        private static ILiturgieInterpretatieBijbeltekst VerwerkAlsBijbeltekst(string voorOpties, LiturgieOptiesGebruiker opties)
         {
             var regel = new InterpretatieBijbeltekst();
             if (voorOpties.Length == 0)
                 return InterpretatieBijbeltekst.Empty;
-            var benamingStukken = voorOpties[0].Trim().Split(BenamingScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
+            var benamingStukken = voorOpties.Trim().Split(BenamingScheidingstekens, StringSplitOptions.RemoveEmptyEntries);
             if (benamingStukken.Length == 0)
                 return InterpretatieBijbeltekst.Empty;
             // Opknippen zodat hoofdstukken bij verzen blijven
@@ -271,7 +272,7 @@ namespace Generator.LiturgieInterpretator
 
             // downward compatibility met ILiturgieInterpretatie
             regel.Deel = deelVersen.FirstOrDefault().Deel;
-            regel.VerzenZoalsIngevoerd = compatibilityVerzenZoalsIngevoerd;
+            regel.VerzenZoalsIngevoerd = compatibilityVerzenZoalsIngevoerd.Trim();
             regel.Verzen = new string[0];
 
             // opties toekennen

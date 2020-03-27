@@ -64,6 +64,7 @@ namespace PowerpointGenerator.Settings
                     ToonBijbeltekstenInLiturgie = instellingen.ToonBijbeltekstenInLiturgie,
                     StandaardTeksten = instellingen.StandaardTeksten,
                     ToonGeenVersenBijVolledigeContent = instellingen.ToonGeenVersenBijVolledigeContent,
+                    VersOnderbrekingOverSlidesHeen = instellingen.VersOnderbrekingOverSlidesHeen,
                 };
 
                 //schrijf instellingen weg
@@ -126,6 +127,7 @@ namespace PowerpointGenerator.Settings
                     ToonBijbeltekstenInLiturgie = saveInstellingen.ToonBijbeltekstenInLiturgie ?? Instellingen.Default.ToonBijbeltekstenInLiturgie,
                     ToonGeenVersenBijVolledigeContent = saveInstellingen.ToonGeenVersenBijVolledigeContent ?? Instellingen.Default.ToonGeenVersenBijVolledigeContent,
                     StandaardTeksten = saveInstellingen.StandaardTeksten ?? Instellingen.Default.StandaardTeksten,
+                    VersOnderbrekingOverSlidesHeen = saveInstellingen.VersOnderbrekingOverSlidesHeen ?? Instellingen.Default.VersOnderbrekingOverSlidesHeen,
                 };
 
                 if (!fileManager.FileExists(maskFile))
@@ -173,7 +175,8 @@ namespace PowerpointGenerator.Settings
             public bool? GebruikDisplayNameVoorZoeken { get; set; }
             public bool? ToonBijbeltekstenInLiturgie { get; set; }
             public bool? ToonGeenVersenBijVolledigeContent { get; set; }
-            
+            public bool? VersOnderbrekingOverSlidesHeen { get; set; }
+
             public StandaardTeksten StandaardTeksten { get; set; }
         }
     }

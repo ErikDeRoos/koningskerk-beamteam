@@ -55,6 +55,7 @@ namespace PowerpointGenerator.Screens
             checkBox4.Checked = vanInstellingen.GebruikDisplayNameVoorZoeken;
             checkBox5.Checked = vanInstellingen.ToonBijbeltekstenInLiturgie;
             checkBox6.Checked = vanInstellingen.ToonGeenVersenBijVolledigeContent;
+            checkBox7.Checked = vanInstellingen.VersOnderbrekingOverSlidesHeen;
         }
 
         #region Eventhandlers
@@ -196,6 +197,7 @@ namespace PowerpointGenerator.Screens
             instellingen.GebruikDisplayNameVoorZoeken = checkBox4.Checked;
             instellingen.ToonBijbeltekstenInLiturgie = checkBox5.Checked;
             instellingen.ToonGeenVersenBijVolledigeContent = checkBox6.Checked;
+            instellingen.VersOnderbrekingOverSlidesHeen = checkBox7.Checked;
 
             Instellingen = instellingen;
         }

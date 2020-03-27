@@ -8,6 +8,7 @@ namespace ISettings
         int TekstChar_a_OnARow { get; }
         string TekstFontName { get; }
         float TekstFontPointSize { get; }
+        bool VersOnderbrekingOverSlidesHeen { get; }
 
         string DatabasePad { get; }
         string BijbelPad { get; }

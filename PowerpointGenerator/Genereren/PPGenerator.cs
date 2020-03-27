@@ -264,6 +264,7 @@ namespace PowerpointGenerator.Genereren
             public string LabelLiturgieLezen { get; set; }
             public string LabelLiturgieTekst { get; set; }
             public bool VerkortVerzenBijVolledigeContent { get; set; }
+            public bool VersOnderbrekingOverSlidesHeen { get; set; }
 
             public BuilderDefaults(IInstellingen opBasisVanInstellingen)
             {
@@ -283,6 +284,7 @@ namespace PowerpointGenerator.Genereren
                 FullTemplateLied = opBasisVanInstellingen.FullTemplateLied;
                 FullTemplateBijbeltekst = opBasisVanInstellingen.FullTemplateBijbeltekst;
                 VerkortVerzenBijVolledigeContent = opBasisVanInstellingen.ToonGeenVersenBijVolledigeContent;
+                VersOnderbrekingOverSlidesHeen = opBasisVanInstellingen.VersOnderbrekingOverSlidesHeen;
             }
         }
     }
