@@ -1,4 +1,4 @@
-﻿// Copyright 2018 door Remco Veurink en Erik de Roos
+﻿// Copyright 2020 door Remco Veurink en Erik de Roos
 
 using System;
 using System.Collections.Generic;
@@ -56,6 +56,7 @@ namespace PowerpointGenerator.Screens
             checkBox5.Checked = vanInstellingen.ToonBijbeltekstenInLiturgie;
             checkBox6.Checked = vanInstellingen.ToonGeenVersenBijVolledigeContent;
             checkBox7.Checked = vanInstellingen.VersOnderbrekingOverSlidesHeen;
+            checkBox8.Checked = vanInstellingen.ToonAlsLiedOnderbrokenWordt;
         }
 
         #region Eventhandlers
@@ -198,6 +199,7 @@ namespace PowerpointGenerator.Screens
             instellingen.ToonBijbeltekstenInLiturgie = checkBox5.Checked;
             instellingen.ToonGeenVersenBijVolledigeContent = checkBox6.Checked;
             instellingen.VersOnderbrekingOverSlidesHeen = checkBox7.Checked;
+            instellingen.ToonAlsLiedOnderbrokenWordt = checkBox8.Checked;
 
             Instellingen = instellingen;
         }

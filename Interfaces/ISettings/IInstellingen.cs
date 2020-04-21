@@ -30,5 +30,6 @@ namespace ISettings
 
         string FullDatabasePath { get; }
         string FullBijbelPath { get; }
+        bool ToonAlsLiedOnderbrokenWordt { get; set; }
     }
 }

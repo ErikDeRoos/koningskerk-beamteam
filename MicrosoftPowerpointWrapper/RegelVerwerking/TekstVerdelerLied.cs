@@ -7,11 +7,12 @@ namespace mppt.RegelVerwerking
     public class TekstVerdelerLied
     {
         private const string NieuweSlideAanduiding = "#";
+        private const string OnderbrekingAanduiding = " >>";
 
         /// <summary>
         /// Vul de liedtekst over meerdere slides
         /// </summary>
-        public static SlideVuller InvullenLiedTekst(string tempinhoud, int regelsPerLiedSlide)
+        public static SlideVuller InvullenLiedTekst(string tempinhoud, int regelsPerLiedSlide, bool visualiseerAfbreking)
         {
             var returnValue = new SlideVuller();
             var regels = SplitRegels.Split(tempinhoud);
@@ -67,8 +68,8 @@ namespace mppt.RegelVerwerking
             var overLines = regels.Skip(overStart).ToList();
 
             // afbreek teken tonen alleen als een vers doormidden gebroken is
-            if (!SkipRegel(insertLines.Last()) && overLines.Any() && !SkipRegel(overLines.First()))
-                returnValue.Invullen += "\r\n >>";
+            if (visualiseerAfbreking && !SkipRegel(insertLines.Last()) && overLines.Any() && !SkipRegel(overLines.First()))
+                returnValue.Invullen += $"\r\n{OnderbrekingAanduiding}";
 
             // Geef de resterende regels terug
             returnValue.Over = string.Join("", overLines.Select((l, i) => l + (i + 1 == overLines.Count ? "" : "\r\n")));

@@ -19,6 +19,7 @@ namespace ISettings.CommonImplementation
         private const bool DefaultToonBijbeltekstenInLiturgie = true;
         private const bool DefaultVerkortVerzenBijVolledigeContent = true;
         private const bool DefaultVersOnderbrekingOverSlidesHeen = false;
+        private const bool DefaultToonAlsLiedOnderbrokenWordt = true;
 
         public static readonly Instellingen Default = GetDefault();
 
@@ -39,6 +40,7 @@ namespace ISettings.CommonImplementation
         public bool ToonBijbeltekstenInLiturgie { get; set; }
         public bool ToonGeenVersenBijVolledigeContent { get; set; }
         public bool VersOnderbrekingOverSlidesHeen { get; set; }
+        public bool ToonAlsLiedOnderbrokenWordt { get; set; }
 
         private readonly List<IMapmask> _lijstmasks = new List<IMapmask>();
         public StandaardTeksten StandaardTeksten { get; set; }
@@ -89,6 +91,7 @@ namespace ISettings.CommonImplementation
                 ToonBijbeltekstenInLiturgie = DefaultToonBijbeltekstenInLiturgie,
                 ToonGeenVersenBijVolledigeContent = DefaultVerkortVerzenBijVolledigeContent,
                 VersOnderbrekingOverSlidesHeen = DefaultVersOnderbrekingOverSlidesHeen,
+                ToonAlsLiedOnderbrokenWordt = DefaultToonAlsLiedOnderbrokenWordt,
                 StandaardTeksten = new StandaardTeksten()
                 {
                     Volgende = "Straks :",

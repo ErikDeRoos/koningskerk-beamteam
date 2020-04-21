@@ -20,6 +20,7 @@ namespace mppt
         string LabelLiturgieLezen { get; set; }
         string LabelLiturgieTekst { get; set; }
         bool VerkortVerzenBijVolledigeContent { get; set; }
-        bool VersOnderbrekingOverSlidesHeen { get; set; }
+        bool BijbeltekstVersOnderbrekingOverSlidesHeen { get; set; }
+        bool LiedtekstVisualiseerAfbreking { get; set; }
     }
 }

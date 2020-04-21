@@ -46,7 +46,7 @@ namespace mppt.RegelVerwerking
 
             private void InvullenTekstOpTemplate(ISlideInhoud regel, IEnumerable<ISlideOpbouw> volgenden, CancellationToken token)
             {
-                var tekstPerSlide = TekstVerdelerBijbeltekst.OpdelenPerSlide(TekstOpknippen(regel.Content), _buildDefaults.RegelsPerBijbeltekstSlide, _lengteBerekenaar, _buildDefaults.VersOnderbrekingOverSlidesHeen);
+                var tekstPerSlide = TekstVerdelerBijbeltekst.OpdelenPerSlide(TekstOpknippen(regel.Content), _buildDefaults.RegelsPerBijbeltekstSlide, _lengteBerekenaar, _buildDefaults.BijbeltekstVersOnderbrekingOverSlidesHeen);
 
                 //zolang er nog iets is in te voegen in sheets
                 foreach (var tekst in tekstPerSlide)

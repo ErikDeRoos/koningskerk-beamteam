@@ -65,6 +65,7 @@ namespace PowerpointGenerator.Settings
                     StandaardTeksten = instellingen.StandaardTeksten,
                     ToonGeenVersenBijVolledigeContent = instellingen.ToonGeenVersenBijVolledigeContent,
                     VersOnderbrekingOverSlidesHeen = instellingen.VersOnderbrekingOverSlidesHeen,
+                    ToonAlsLiedOnderbrokenWordt = instellingen.ToonAlsLiedOnderbrokenWordt
                 };
 
                 //schrijf instellingen weg
@@ -128,6 +129,7 @@ namespace PowerpointGenerator.Settings
                     ToonGeenVersenBijVolledigeContent = saveInstellingen.ToonGeenVersenBijVolledigeContent ?? Instellingen.Default.ToonGeenVersenBijVolledigeContent,
                     StandaardTeksten = saveInstellingen.StandaardTeksten ?? Instellingen.Default.StandaardTeksten,
                     VersOnderbrekingOverSlidesHeen = saveInstellingen.VersOnderbrekingOverSlidesHeen ?? Instellingen.Default.VersOnderbrekingOverSlidesHeen,
+                    ToonAlsLiedOnderbrokenWordt = saveInstellingen.ToonAlsLiedOnderbrokenWordt ?? Instellingen.Default.ToonAlsLiedOnderbrokenWordt,
                 };
 
                 if (!fileManager.FileExists(maskFile))
@@ -176,6 +178,7 @@ namespace PowerpointGenerator.Settings
             public bool? ToonBijbeltekstenInLiturgie { get; set; }
             public bool? ToonGeenVersenBijVolledigeContent { get; set; }
             public bool? VersOnderbrekingOverSlidesHeen { get; set; }
+            public bool? ToonAlsLiedOnderbrokenWordt { get; set; }
 
             public StandaardTeksten StandaardTeksten { get; set; }
         }

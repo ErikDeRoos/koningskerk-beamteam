@@ -68,7 +68,7 @@ namespace mppt.RegelVerwerking
                         return;
 
                     // plaats zo veel mogelijk tekst op de slide totdat het niet meer past, krijg de restjes terug
-                    var uitzoeken = TekstVerdelerLied.InvullenLiedTekst(tekstOmTeRenderen, _buildDefaults.RegelsPerLiedSlide);
+                    var uitzoeken = TekstVerdelerLied.InvullenLiedTekst(tekstOmTeRenderen, _buildDefaults.RegelsPerLiedSlide, _buildDefaults.LiedtekstVisualiseerAfbreking);
                     tekstOmTeRenderenLijst.Add(uitzoeken.Invullen);
                     tekstOmTeRenderen = uitzoeken.Over;
                 }
