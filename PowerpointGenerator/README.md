@@ -5,7 +5,7 @@ Gebruikt windows forms, gemaakt met visual studio 2015 en draait icm alle window
 In de release bundels zijn databases aanwezig die copyright beschermd materiaal bevatten.
 Je bent verplicht licentieafspraken te hebben met de betreffende partijen wil je de gegenereerde presentaties in kunnen zetten in een kerkdienst.
 
-Copyright (C) 2017 by Erik de Roos.
+Copyright (C) 2020 by Erik de Roos.
 
 Original idea by Remco Veurink. Further worked on by Erik de Roos.
 
