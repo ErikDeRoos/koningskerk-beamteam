@@ -361,13 +361,13 @@ namespace PowerpointGenerator.Screens
             }
         }
 
-        private void PresentatieVoortgangCallback(int lijstStart, int lijstEind, int bijItem)
+        private void PresentatieVoortgangCallback(int lijstTotaal, int bijItem, float individueleVoortgang)
         {
             var actie = new Action(() =>
             {
-                progressBar1.Value = bijItem;
-                progressBar1.Minimum = lijstStart;
-                progressBar1.Maximum = lijstEind;
+                progressBar1.Minimum = 0;
+                progressBar1.Maximum = lijstTotaal * 100;
+                progressBar1.Value = bijItem * 100 + (int)(individueleVoortgang * 100);
                 progressBar1.Refresh();
             });
             Invoke(actie);

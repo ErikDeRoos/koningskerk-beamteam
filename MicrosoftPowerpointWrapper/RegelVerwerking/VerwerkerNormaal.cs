@@ -6,6 +6,7 @@ using Generator.LiturgieInterpretator.Models;
 using Generator.Tools;
 using mppt.Connect;
 using mppt.LiedPresentator;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -20,9 +21,10 @@ namespace mppt.RegelVerwerking
     class VerwerkerNormaal : IVerwerkFactory
     {
         public IVerwerk Init(IMppApplication metApplicatie, IMppPresentatie toevoegenAanPresentatie, IMppFactory metFactory, ILiedFormatter gebruikLiedFormatter, IBuilderBuildSettings buildSettings,
-                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ISlideOpbouw> volledigeLiturgieOpVolgorde, ILengteBerekenaar lengteBerekenaar)
+                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ISlideOpbouw> volledigeLiturgieOpVolgorde, ILengteBerekenaar lengteBerekenaar, 
+                Action<float> progressReport = null)
         {
-            return new Verwerker(metApplicatie, toevoegenAanPresentatie, metFactory, gebruikLiedFormatter, buildSettings, buildDefaults, dependentFileList, volledigeLiturgieOpVolgorde);
+            return new Verwerker(metApplicatie, toevoegenAanPresentatie, metFactory, gebruikLiedFormatter, buildSettings, buildDefaults, dependentFileList, volledigeLiturgieOpVolgorde, progressReport);
         }
 
         private class Verwerker : VerwerkBase, IVerwerk
@@ -30,14 +32,18 @@ namespace mppt.RegelVerwerking
             private int _slidesGemist = 0;
 
             public Verwerker(IMppApplication metApplicatie, IMppPresentatie toevoegenAanPresentatie, IMppFactory metFactory, ILiedFormatter gebruikLiedFormatter, IBuilderBuildSettings buildSettings,
-                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ISlideOpbouw> volledigeLiturgieOpVolgorde) 
-                : base (metApplicatie, toevoegenAanPresentatie, metFactory, gebruikLiedFormatter, buildSettings, buildDefaults, dependentFileList, volledigeLiturgieOpVolgorde)
+                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ISlideOpbouw> volledigeLiturgieOpVolgorde, Action<float> progressReport) 
+                : base (metApplicatie, toevoegenAanPresentatie, metFactory, gebruikLiedFormatter, buildSettings, buildDefaults, dependentFileList, volledigeLiturgieOpVolgorde, progressReport)
             {
             }
 
             public IVerwerkResultaat Verwerk(ISlideInhoud regel, IEnumerable<ISlideOpbouw> volgenden, CancellationToken token)
             {
+                var content = regel.Content.ToList();
+                ZetProgressieStatistiekenSets(content.Count);
+
                 // Per onderdeel in de regel moet een sheet komen
+                var index = 0;
                 foreach (var inhoud in regel.Content)
                 {
                     if (token.IsCancellationRequested)
@@ -46,6 +52,9 @@ namespace mppt.RegelVerwerking
                         InvullenTekstOpTemplate(regel, inhoud, volgenden, token);
                     else
                         ToevoegenSlides(inhoud, volgenden, token);
+
+                    index++;
+                    ZetProgressieBijSet(index);
                 }
 
                 return new VerwerkResultaat()
@@ -73,7 +82,10 @@ namespace mppt.RegelVerwerking
                     tekstOmTeRenderen = uitzoeken.Over;
                 }
 
+                ZetProgressieStatistieken(tekstOmTeRenderenLijst.Count);
+
                 //zolang er nog iets is in te voegen in sheets
+                var index = 0;
                 foreach (var tekst in tekstOmTeRenderenLijst)
                 {
                     if (token.IsCancellationRequested)
@@ -108,6 +120,9 @@ namespace mppt.RegelVerwerking
                     _slidesGemist += _presentatie.SlidesKopieNaarPresentatie(new List<IMppSlide> { slide });
                     //sluit de template weer af
                     presentatie.Dispose();
+
+                    index++;
+                    ZetProgressieBijPagina(index);
                 }
             }
 

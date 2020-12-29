@@ -1,4 +1,4 @@
-﻿// Copyright 2019 door Erik de Roos
+﻿// Copyright 2020 door Erik de Roos
 using Generator.Database;
 using Generator.Database.Models;
 using Generator.LiturgieInterpretator;
@@ -28,7 +28,7 @@ namespace PowerpointGenerator.Genereren
         //generator
         private PpGenerator _powerpoint;
         public GeneratorStatus Status { get; private set; }
-        public delegate void Voortgang(int lijstStart, int lijstEind, int bijItem);
+        public delegate void Voortgang(int lijstTotaal, int bijItem, float individueleVoortgang);
         private Voortgang _setVoortgang;
         public delegate void GereedMelding(string opgeslagenAlsBestand = null, string foutmelding = null, int? slidesGemist = null);
         private GereedMelding _setGereedmelding;
@@ -106,11 +106,11 @@ namespace PowerpointGenerator.Genereren
             _setGereedmelding = callback;
         }
 
-        private void PresentatieVoortgangCallback(int lijstStart, int lijstEind, int bijItem)
+        private void PresentatieVoortgangCallback(int lijstTotaal, int bijItem, float individueleVoortgang)
         {
             if (Status == GeneratorStatus.Gestopt)
                 return;
-            _setVoortgang?.Invoke(lijstStart, lijstEind, bijItem);
+            _setVoortgang?.Invoke(lijstTotaal, bijItem, individueleVoortgang);
         }
         private void PresentatieGereedmeldingCallback(string opgeslagenAlsBestand = null, string foutmelding = null, int? slidesGemist = null)
         {

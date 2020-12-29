@@ -1,4 +1,4 @@
-﻿// Copyright 2019 door Remco Veurink en Erik de Roos
+﻿// Copyright 2020 door Remco Veurink en Erik de Roos
 using Generator.Database.Models;
 using ISettings;
 using mppt;
@@ -28,7 +28,7 @@ namespace PowerpointGenerator.Genereren
         private Thread _stopThread;
         private readonly object _locker = new object();
 
-        public delegate void Voortgang(int lijstStart, int lijstEind, int bijItem);
+        public delegate void Voortgang(int lijstTotaal, int bijItem, float individueelProgressie);
         private readonly Voortgang _setVoortgang;
         public delegate void GereedMelding(string opgeslagenAlsBestand = null, string foutmelding = null, int? slidesGemist = null);
         private readonly GereedMelding _setGereedmelding;
@@ -136,9 +136,9 @@ namespace PowerpointGenerator.Genereren
             _setGereedmelding.Invoke(_opslaanAls, _gereedMetFout, _slidesGemist);
         }
 
-        private void PresentatieVoortgangCallback(int lijstStart, int lijstEind, int bijItem)
+        private void PresentatieVoortgangCallback(int lijstTotaal, int bijItem, float individueleProgressie)
         {
-            _setVoortgang.Invoke(lijstStart, lijstEind, bijItem);
+            _setVoortgang.Invoke(lijstTotaal, bijItem, individueleProgressie);
         }
         private void PresentatieStatusWijzigingCallback(Status nieuweStatus, string foutmelding = null, int? slidesGemist = null)
         {

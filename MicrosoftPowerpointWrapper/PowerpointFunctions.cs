@@ -1,4 +1,4 @@
-﻿// Copyright 2017 door Erik de Roos
+﻿// Copyright 2020 door Erik de Roos
 using Generator.Database.Models;
 using Generator.LiturgieInterpretator.Models;
 using Generator.Tools;
@@ -35,7 +35,7 @@ namespace mppt
         private IBuilderDependendFiles _dependentFileList;
         private string _opslaanAls;
 
-        public Action<int, int, int> Voortgang { get; set; }
+        public Action<int, int, float> Voortgang { get; set; }
         public Action<Status, string, int?> StatusWijziging { get; set; }
 
         public PowerpointFunctions(IMppFactory mppFactory, ILiedFormatter liedFormatter, ILengteBerekenaar lengteBerekenaar)
@@ -85,12 +85,14 @@ namespace mppt
                     var hardeLijst = _liturgie.Where(l => l.VerwerkenAlsSlide).ToList();
                     foreach (var regel in hardeLijst)
                     {
+                        var lijstTotaal = _liturgie.Count();
+                        var bijItem = hardeLijst.IndexOf(regel);
+
                         var resultaat = _regelVerwerker[regel.VerwerkenAlsType]
-                            .Init(applicatie, presentatie, _mppFactory, _liedFormatter, _buildSettings, _buildDefaults, _dependentFileList, _liturgie, _lengteBerekenaar)
+                            .Init(applicatie, presentatie, _mppFactory, _liedFormatter, _buildSettings, _buildDefaults, _dependentFileList, _liturgie, _lengteBerekenaar, (p) => Voortgang?.Invoke(lijstTotaal, bijItem, p))
                             .Verwerk(regel, Volgende(_liturgie, regel), _token.Token);
                         slidesGemist += resultaat.SlidesGemist;
 
-                        Voortgang?.Invoke(0, _liturgie.Count(), hardeLijst.IndexOf(regel) + 1);
                         if (_stop)
                             break;
                     }

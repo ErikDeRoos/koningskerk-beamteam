@@ -13,7 +13,7 @@ namespace mppt.RegelVerwerking
 {
     abstract class VerwerkBase
     {
-        protected IMppApplication _applicatie { get; }
+        private IMppApplication _applicatie { get; }
         protected IMppPresentatie _presentatie { get; }
         protected IMppFactory _mppFactory { get; }
         protected IBuilderBuildSettings _buildSettings { get; }
@@ -21,11 +21,15 @@ namespace mppt.RegelVerwerking
         protected IBuilderDependendFiles _dependentFileList { get; }
         protected IEnumerable<ISlideOpbouw> _liturgie { get; }
         protected ILiedFormatter _liedFormatter { get; }
+        private Action<float> _progressReport { get; }
 
         protected Regex _tagSearch = new Regex("<[^<>]*>", RegexOptions.Compiled);
+        private int _paginasTeMaken;
+        private int? _paginaSetsTeMaken;
+        private int _bijPaginaSet;
 
         public VerwerkBase(IMppApplication metApplicatie, IMppPresentatie toevoegenAanPresentatie, IMppFactory metFactory, ILiedFormatter gebruikLiedFormatter, IBuilderBuildSettings buildSettings,
-                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ISlideOpbouw> volledigeLiturgieOpVolgorde)
+                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ISlideOpbouw> volledigeLiturgieOpVolgorde, Action<float> progressReport)
         {
             _applicatie = metApplicatie;
             _presentatie = toevoegenAanPresentatie;
@@ -35,6 +39,7 @@ namespace mppt.RegelVerwerking
             _dependentFileList = dependentFileList;
             _liturgie = volledigeLiturgieOpVolgorde;
             _liedFormatter = gebruikLiedFormatter;
+            _progressReport = progressReport;
         }
 
         /// <summary>
@@ -47,6 +52,32 @@ namespace mppt.RegelVerwerking
             //controleer voor het openen van de presentatie op het meegegeven path of de presentatie bestaat
             return File.Exists(path) ? _applicatie.Open(path, metWindow: false) : null;
         }
+
+        protected void ZetProgressieStatistieken(int paginasTeMaken)
+        {
+            _paginasTeMaken = paginasTeMaken;
+        }
+        protected void ZetProgressieStatistiekenSets(int paginaSetsTeMaken)
+        {
+            _paginaSetsTeMaken = paginaSetsTeMaken;
+        }
+        protected void ZetProgressieBijPagina(float bijPagina)
+        {
+            if (!_paginaSetsTeMaken.HasValue)
+                _progressReport?.Invoke(bijPagina / _paginasTeMaken);
+            else
+            {
+                // Gebruik sets om te berekenen
+                var globaleProgressie = (float)_bijPaginaSet / _paginaSetsTeMaken.Value;
+                var individueleProgressie = bijPagina / _paginasTeMaken;
+                _progressReport?.Invoke(globaleProgressie + (1 / (float)_paginaSetsTeMaken.Value) * individueleProgressie);
+            }
+        }
+        protected void ZetProgressieBijSet(int bijSet)
+        {
+            _bijPaginaSet = bijSet;
+        }
+
 
         /// <summary>
         /// Kijk of er in de tekst tags staan en vervang deze voor inhoud

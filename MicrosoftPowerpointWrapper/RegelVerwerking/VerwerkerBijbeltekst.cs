@@ -3,6 +3,7 @@ using Generator.Database.Models;
 using Generator.LiturgieInterpretator.Models;
 using mppt.Connect;
 using mppt.LiedPresentator;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -17,9 +18,10 @@ namespace mppt.RegelVerwerking
     class VerwerkerBijbeltekst : IVerwerkFactory
     {
         public IVerwerk Init(IMppApplication metApplicatie, IMppPresentatie toevoegenAanPresentatie, IMppFactory metFactory, ILiedFormatter gebruikLiedFormatter, IBuilderBuildSettings buildSettings,
-                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ISlideOpbouw> volledigeLiturgieOpVolgorde, ILengteBerekenaar lengteBerekenaar)
+                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ISlideOpbouw> volledigeLiturgieOpVolgorde, ILengteBerekenaar lengteBerekenaar,
+                Action<float> progressReport = null)
         {
-            return new Verwerker(metApplicatie, toevoegenAanPresentatie, metFactory, gebruikLiedFormatter, buildSettings, buildDefaults, dependentFileList, volledigeLiturgieOpVolgorde, lengteBerekenaar);
+            return new Verwerker(metApplicatie, toevoegenAanPresentatie, metFactory, gebruikLiedFormatter, buildSettings, buildDefaults, dependentFileList, volledigeLiturgieOpVolgorde, lengteBerekenaar, progressReport);
         }
 
         private class Verwerker : VerwerkBase, IVerwerk
@@ -28,8 +30,9 @@ namespace mppt.RegelVerwerking
             private int _slidesGemist = 0;
 
             public Verwerker(IMppApplication metApplicatie, IMppPresentatie toevoegenAanPresentatie, IMppFactory metFactory, ILiedFormatter gebruikLiedFormatter, IBuilderBuildSettings buildSettings,
-                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ISlideOpbouw> volledigeLiturgieOpVolgorde, ILengteBerekenaar lengteBerekenaar)
-                : base(metApplicatie, toevoegenAanPresentatie, metFactory, gebruikLiedFormatter, buildSettings, buildDefaults, dependentFileList, volledigeLiturgieOpVolgorde)
+                IBuilderBuildDefaults buildDefaults, IBuilderDependendFiles dependentFileList, IEnumerable<ISlideOpbouw> volledigeLiturgieOpVolgorde, ILengteBerekenaar lengteBerekenaar,
+                Action<float> progressReport)
+                : base(metApplicatie, toevoegenAanPresentatie, metFactory, gebruikLiedFormatter, buildSettings, buildDefaults, dependentFileList, volledigeLiturgieOpVolgorde, progressReport)
             {
                 _lengteBerekenaar = lengteBerekenaar;
             }
@@ -46,9 +49,12 @@ namespace mppt.RegelVerwerking
 
             private void InvullenTekstOpTemplate(ISlideInhoud regel, IEnumerable<ISlideOpbouw> volgenden, CancellationToken token)
             {
-                var tekstPerSlide = TekstVerdelerBijbeltekst.OpdelenPerSlide(TekstOpknippen(regel.Content), _buildDefaults.RegelsPerBijbeltekstSlide, _lengteBerekenaar, _buildDefaults.BijbeltekstVersOnderbrekingOverSlidesHeen);
+                var tekstPerSlide = TekstVerdelerBijbeltekst.OpdelenPerSlide(TekstOpknippen(regel.Content), _buildDefaults.RegelsPerBijbeltekstSlide, _lengteBerekenaar, _buildDefaults.BijbeltekstVersOnderbrekingOverSlidesHeen)
+                    .ToList();
+                ZetProgressieStatistieken(tekstPerSlide.Count);
 
                 //zolang er nog iets is in te voegen in sheets
+                int index = 0;
                 foreach (var tekst in tekstPerSlide)
                 {
                     if (token.IsCancellationRequested)
@@ -83,6 +89,9 @@ namespace mppt.RegelVerwerking
                     _slidesGemist += _presentatie.SlidesKopieNaarPresentatie(new List<IMppSlide> { slide });
                     //sluit de template weer af
                     presentatie.Dispose();
+
+                    index++;
+                    ZetProgressieBijPagina(index);
                 }
             }
 
