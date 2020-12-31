@@ -1,4 +1,4 @@
-﻿// Copyright 2019 door Erik de Roos
+﻿// Copyright 2020 door Erik de Roos
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +14,7 @@ namespace mppt.Connect
         private Application _applicatie;
         public MppApplication()
         {
+            
             _applicatie = new Application { Visible = MsoTriState.msoTrue };
         }
 
