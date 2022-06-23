@@ -1,3 +1,10 @@
+Deze tool is tot aan corona 2020 actief bijgehouden. Daarna 2 jaar de nieuwe ontwikkelingen rond beamen in de kerk afgewacht.
+In 2022 is besloten om over te gaan op kerkbeamer.nl
+
+Deze tool wordt dus niet meer actief onderhouden maar ontvangt nog wel security updates.
+
+
+-------------------------------------------
 
 Klant wensen, duidelijk:
 -Keuze tussen ppt of pptx, met voorkeur voor pptx formaat
