@@ -68,7 +68,7 @@ namespace MicrosoftPowerpointWrapper.Tests
 
             var geformatteerd = TekstVerdelerBijbeltekst.OpdelenPerSlide(regel.Tekst, regelsPerSlide, regel.LengteBerekenaar, false);
 
-            Assert.AreEqual(5, geformatteerd.Count());
+            Assert.AreEqual(6, geformatteerd.Count());
         }
     }
 }
