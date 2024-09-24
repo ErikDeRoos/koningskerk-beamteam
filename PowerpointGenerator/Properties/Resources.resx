@@ -121,7 +121,7 @@
     <value>Niet opgeslagen wegens te lang pad</value>
   </data>
   <data name="Form1_Opslaan_pp_filter" xml:space="preserve">
-    <value>Powerpoint bestand (*.ppt)|*.ppt|Powerpoint bestanden (*.pptx)|*.pptx</value>
+    <value>Powerpoint bestanden (*.pptx)|*.pptx|Powerpoint bestand (*.ppt)|*.ppt</value>
   </data>
   <data name="Form1_Opslaan_pp_title" xml:space="preserve">
     <value>Sla de presentatie op</value>
