@@ -136,6 +136,7 @@
             this.textBoxLiturgie.Location = new System.Drawing.Point(0, 0);
             this.textBoxLiturgie.Multiline = true;
             this.textBoxLiturgie.Name = "textBoxLiturgie";
+            this.textBoxLiturgie.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBoxLiturgie.Size = new System.Drawing.Size(418, 361);
             this.textBoxLiturgie.TabIndex = 1;
             // 
