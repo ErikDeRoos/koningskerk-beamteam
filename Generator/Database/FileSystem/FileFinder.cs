@@ -131,7 +131,7 @@ namespace Generator.Database.FileSystem
                 _fileManager = fileManager;
                 _filePath = filePath;
 
-                Type = _filePath != null ? Path.GetExtension(_filePath).Substring(1) : string.Empty;
+                Type = _filePath != null && _filePath.Length > 0 ? Path.GetExtension(_filePath).Substring(1) : string.Empty;
             }
 
             public Stream GetContentStream()

@@ -1,4 +1,4 @@
-﻿// Copyright 2019 door Erik de Roos
+﻿// Copyright 2024 door Erik de Roos
 
 using System.Xml.Serialization;
 
@@ -33,5 +33,10 @@ namespace Generator.Database.FileSystem
         /// </summary>
         [XmlElement(ElementName = "NotVisibleInIndex")]
         public bool NotVisibleInIndex { get; set; }
+        /// <summary>
+        /// Geavanceerde settings voor complexe items
+        /// </summary>
+        [XmlElement(ElementName = "AdvancedSettingString")]
+        public string AdvancedSettingString { get; set; }
     }
 }

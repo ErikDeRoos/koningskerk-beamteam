@@ -1,4 +1,4 @@
-﻿// Copyright 2019 door Erik de Roos
+﻿// Copyright 2024 door Erik de Roos
 using Generator.Database.FileSystem;
 using Generator.Database.Models;
 using ISettings;

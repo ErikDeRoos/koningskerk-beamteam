@@ -52,6 +52,7 @@
     <Compile Include="Database\FileSystem\IEngineManager.cs" />
     <Compile Include="Database\FileSystem\IEngineSelection.cs" />
     <Compile Include="Database\FileSystem\IZipArchiveDirectory.cs" />
+    <Compile Include="Database\FileSystem\XmlFileOperations.cs" />
     <Compile Include="Database\ILiturgieDatabase.cs" />
     <Compile Include="Database\ILiturgieDatabaseZoek.cs" />
     <Compile Include="Database\Models\ILiturgieContent.cs" />

@@ -1,4 +1,4 @@
-﻿// Copyright 2019 door Erik de Roos
+﻿// Copyright 2024 door Erik de Roos
 using Generator.Tools;
 using System;
 using System.Collections.Generic;
@@ -13,6 +13,7 @@ namespace Generator.Database.FileSystem
     {
         public const string BundleTypeDir = "<dir>";
         public const string CommonFilesSetName = "Common";
+        public const string DbSettingsName = "instellingen.xml";
         public const string SetSettingsName = "instellingen.xml";
         public const string SetArchiveName = "inhoud.zip";
         public static readonly char NotSafe = ' ';
@@ -44,6 +45,7 @@ namespace Generator.Database.FileSystem
         private IEnumerable<IDbSet> _dirCache;
         private string _startDir;
         private IFileOperations _fileManager;
+        private IFileOperations _dataManager;
 
         /// <param name="cached">
         /// True = cache structure (paths, filetrees and settings), 
@@ -51,7 +53,7 @@ namespace Generator.Database.FileSystem
         /// </param>
         public FileEngine(IFileOperations fileManager, string databasePad, bool cached)
         {
-            _fileManager = fileManager;
+            _fileManager = _dataManager = fileManager;
             _startDir = databasePad;
             _cached = cached;
         }
@@ -60,7 +62,15 @@ namespace Generator.Database.FileSystem
         {
             if (!_fileManager.DirExists(startDir))
                 return new List<FileSet>();
-            return _fileManager.GetDirectories(startDir).Select(d => new FileSet(_fileManager, d, askCached)).ToList();
+
+            var dbSettings = FileSet.ReadXmlSettings(_fileManager, startDir, FileEngineDefaults.DbSettingsName);
+            if (dbSettings.UseContainer)
+            {
+                // Wrap file manager in a container manager, to mimic a container file system that is in xml
+                _dataManager = new XmlFileOperations(_fileManager, startDir, XmlFileOperations.CreateSettingsFromSettingString(dbSettings.AdvancedSettingString));
+            }
+
+            return _dataManager.GetDirectories(startDir).Select(d => new FileSet(_dataManager, d, askCached)).ToList();
         }
 
         private IEnumerable<IDbSet> GetDbSet()
@@ -115,7 +125,7 @@ namespace Generator.Database.FileSystem
         {
             if (_cached && _finderCached != null)
                 return _finderCached;
-            var finder = (IFinder)null;
+            IFinder finder;
             if (Settings.UseContainer)
                 finder = new FileZipFinder(_fileManager, _inDir, FileEngineDefaults.SetArchiveName, Settings.ItemsHaveSubContent, _cached);
             else
@@ -148,13 +158,19 @@ namespace Generator.Database.FileSystem
                 return _settingsCached;
             }
 
-            var fileName = _fileManager.CombineDirectories(_inDir, FileEngineDefaults.SetSettingsName);
-            if (!_fileManager.FileExists(fileName))
-                ChangeSettings(new DbSetSettings(), false);
-            try {
+            return ReadXmlSettings(_fileManager, _inDir, FileEngineDefaults.SetSettingsName);
+        }
+
+        public static DbSetSettings ReadXmlSettings(IFileOperations fileOperations, string dir, string settingsName)
+        {
+            var fileName = fileOperations.CombineDirectories(dir, settingsName);
+            if (!fileOperations.FileExists(fileName))
+                return new DbSetSettings();
+            try
+            {
                 var serializer = new XmlSerializer(typeof(DbSetSettings));
                 var settings = new XmlReaderSettings();
-                using (var textReader = new StreamReader(_fileManager.FileReadStream(fileName)))
+                using (var textReader = new StreamReader(fileOperations.FileReadStream(fileName)))
                 {
                     var xmlReader = XmlReader.Create(textReader, settings);
                     return (serializer.Deserialize(xmlReader) as DbSetSettings) ?? new DbSetSettings();
@@ -169,19 +185,25 @@ namespace Generator.Database.FileSystem
 
         private void ChangeSettings(DbSetSettings newSettings, bool cached)
         {
-            try {
-                var fileName = _fileManager.CombineDirectories(_inDir, FileEngineDefaults.SetSettingsName);
-                var serializer = new XmlSerializer(typeof(DbSetSettings));
-                using (var sw = new StreamWriter(_fileManager.FileWriteStream(fileName)))
-                {
-                    serializer.Serialize(sw, newSettings);
-                    sw.Flush();
-                }
+            try 
+            {
+                WriteXmlSettings(_fileManager, _inDir, FileEngineDefaults.SetSettingsName, newSettings);
             }
             finally
             {
                 if (cached)
                     _settingsCached = newSettings;
+            }
+        }
+
+        public static void WriteXmlSettings(IFileOperations fileOperations, string dir, string settingsName, DbSetSettings newSettings)
+        {
+            var fileName = fileOperations.CombineDirectories(dir, settingsName);
+            var serializer = new XmlSerializer(typeof(DbSetSettings));
+            using (var sw = new StreamWriter(fileOperations.FileWriteStream(fileName)))
+            {
+                serializer.Serialize(sw, newSettings);
+                sw.Flush();
             }
         }
 

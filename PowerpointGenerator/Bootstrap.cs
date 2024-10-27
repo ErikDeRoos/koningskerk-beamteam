@@ -1,4 +1,4 @@
-﻿// Copyright 2019 door Erik de Roos
+﻿// Copyright 2024 door Erik de Roos
 using Autofac;
 using Generator.Database;
 using Generator.Database.FileSystem;
