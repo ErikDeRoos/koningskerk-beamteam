@@ -1,4 +1,4 @@
-﻿// Copyright 2019 door Erik de Roos
+﻿// Copyright 2024 door Erik de Roos
 using Generator.LiturgieInterpretator.Models;
 
 namespace Generator.LiturgieInterpretator
@@ -6,6 +6,11 @@ namespace Generator.LiturgieInterpretator
 
     public interface ILiturgieZoeken
     {
+        /// <summary>
+        /// Doe een 'voor check' op de zoekopdracht en geef aan of er een ander resultaat verwacht kan worden
+        /// </summary>
+        bool GaatVrijZoekenAnderResultaatGeven(string zoekTekst, bool alsBijbeltekst = false, IVrijZoekresultaat vorigResultaat = null);
+
         /// <summary>
         /// Zoek in alle databases naar de opgegeven tekst
         /// </summary>

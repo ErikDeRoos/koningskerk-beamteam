@@ -1,4 +1,4 @@
-﻿// Copyright 2019 door Erik de Roos
+﻿// Copyright 2024 door Erik de Roos
 using Generator.Database;
 using Generator.Database.FileSystem;
 using Generator.Database.Models;
@@ -27,6 +27,20 @@ namespace Generator.LiturgieInterpretator
         }
 
         /// <summary>
+        /// Doe een 'voor check' op de zoekopdracht en geef aan of er een ander resultaat verwacht kan worden
+        /// </summary>
+        public bool GaatVrijZoekenAnderResultaatGeven(string zoekTekst, bool alsBijbeltekst = false, IVrijZoekresultaat vorigResultaat = null)
+        {
+            var veiligeZoekTekst = (zoekTekst ?? "").TrimStart();
+
+            // Los van het detecteren van de verandering voor de 'hele lijst terug geven', kunnen we ook bepalen of er daadwerkelijk een verandering is
+            if (vorigResultaat != null && vorigResultaat.AlsBijbeltekst == alsBijbeltekst && veiligeZoekTekst == vorigResultaat.ZoekTerm)
+                return false;
+
+            return true;
+        }
+
+        /// <summary>
         /// Dit maakt een lijst van resultaten die voldoen aan de zoektekst. Filteren gebeurd hier niet maar in de UI zelf.
         /// We helpen de UX beleving door de UI niet direct alle mogelijkheden meteen terug te geven, alleen te verdiepen waar de gebruiker
         /// echt naar zoekt.
@@ -35,6 +49,9 @@ namespace Generator.LiturgieInterpretator
         /// </summary>
         public IVrijZoekresultaat VrijZoeken(string zoekTekst, bool alsBijbeltekst = false, IVrijZoekresultaat vorigResultaat = null)
         {
+            // Let op: Omdat de UI zelf filtert detecteren we hier alleen overgangen.
+            // Oftewel, wij geven een complete lijst terug en de UI filtert zelf.
+
             var veiligeZoekTekst = (zoekTekst ?? "").TrimStart();
             var veranderingGemaakt = vorigResultaat == null;
             var zoekRestricties = new ZoekRestricties(alsBijbeltekst);
@@ -46,13 +63,11 @@ namespace Generator.LiturgieInterpretator
             var vorigeZoektermSplit = _liturgieTekstNaarObject.VanTekstregel(vorigResultaat == null ? "" : vorigResultaat.ZoekTerm);
             var huidigeZoektermSplit = _liturgieTekstNaarObject.VanTekstregel(veiligeZoekTekst);
 
-            // Wisselen tussen bijbeltekst vinkje of niet geeft natuurlijk grote wijziging
+            // Er is een wijziging er een overgang is van bijbeltekst naar normale tekst of andersom
             if (vorigResultaat != null && vorigResultaat.AlsBijbeltekst != alsBijbeltekst)
             {
                 veranderingGemaakt = true;
             }
-
-            // Let op: Omdat de UI zelf filtert detecteren we hier alleen overgangen.
 
             // Kijk of er in de zoektekst een spatie is gebruikt, dan komt er nu een overgang aan
             if ((veiligeZoekTekst.Length > 0 && laatsteZoektekenIsFragmentWissel) || (string.IsNullOrWhiteSpace(vorigeZoektermSplit.Deel) && !string.IsNullOrWhiteSpace(huidigeZoektermSplit.Deel)))
@@ -285,16 +300,19 @@ namespace Generator.LiturgieInterpretator
             public string VeiligeNaam { get; set; }
             public string UitDatabase { get; set; }
 
+            public override bool Equals(object obj)
+            {
+                if (obj is IVrijZoekresultaatMogelijkheid vrijZoekresultaat)
+                    return Equals(this, vrijZoekresultaat);
+
+                return base.Equals(obj);
+            }
+
             public bool Equals(IVrijZoekresultaatMogelijkheid x, IVrijZoekresultaatMogelijkheid y)
             {
                 if (x == null || y == null)
                     return false;
-                return x.Weergave == y.Weergave;  // Alleen sorteren op weergave naam
-            }
-
-            public int GetHashCode(IVrijZoekresultaatMogelijkheid obj)
-            {
-                return obj.Weergave.GetHashCode();
+                return x.Weergave.Equals(y.Weergave, System.StringComparison.InvariantCultureIgnoreCase);  // Alleen equals checks op weergave naam
             }
 
             public override string ToString()

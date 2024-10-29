@@ -1,4 +1,4 @@
-﻿// Copyright 2017 door Erik de Roos
+﻿// Copyright 2024 door Erik de Roos
 using System.Collections.Generic;
 
 namespace Generator.LiturgieInterpretator.Models
@@ -22,7 +22,7 @@ namespace Generator.LiturgieInterpretator.Models
         Deel
     }
 
-    public interface IVrijZoekresultaatMogelijkheid : IEqualityComparer<IVrijZoekresultaatMogelijkheid>
+    public interface IVrijZoekresultaatMogelijkheid
     {
         string Weergave { get; }
         string VeiligeNaam { get; }

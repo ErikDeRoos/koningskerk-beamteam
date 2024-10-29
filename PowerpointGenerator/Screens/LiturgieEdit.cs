@@ -1,4 +1,4 @@
-﻿// Copyright 2018 door Erik de Roos
+﻿// Copyright 2024 door Erik de Roos
 using Generator.LiturgieInterpretator;
 using Generator.LiturgieInterpretator.Models;
 using System;
@@ -71,7 +71,10 @@ namespace PowerpointGenerator.Screens
         // TODO er lijkt een memoryleak te zijn. Geheugengebruik loopt op als je snel wisselt tussen bijv. 'psalmen ' en 'psalmen 1'. Vermoedelijk de database.
         private void TriggerZoeklijstVeranderd()
         {
-            _huidigZoekresultaat = _liturgieZoeker.VrijZoeken(textBoxZoek.Text, checkBoxAlsBijbeltekst.Checked, _huidigZoekresultaat);
+            if (!_liturgieZoeker.GaatVrijZoekenAnderResultaatGeven(textBoxZoek.Text, checkBoxAlsBijbeltekst.Checked, _huidigZoekresultaat))
+                return;
+
+           _huidigZoekresultaat = _liturgieZoeker.VrijZoeken(textBoxZoek.Text, checkBoxAlsBijbeltekst.Checked, _huidigZoekresultaat);
             if (_huidigZoekresultaat.ZoeklijstAanpassing == VrijZoekresultaatAanpassingType.Geen)
                 return;
 
@@ -115,11 +118,10 @@ namespace PowerpointGenerator.Screens
             var postion = textBoxLiturgie.SelectionStart;
             var rowStartPosition = 0;
             var atLineNumber = 0;
-            var rowEndPosition = 0;
             var lines = textBoxLiturgie.Lines.ToList();
             foreach (var row in lines)
             {
-                rowEndPosition = rowStartPosition + row.Length;
+                int rowEndPosition = rowStartPosition + row.Length;
                 if (postion <= rowEndPosition)
                     break;
                 atLineNumber++;

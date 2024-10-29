@@ -108,16 +108,19 @@ namespace Generator.Tests.Builders
             public string FragmentNaam { get; set; }
             public string FragmentVeiligeNaam { get { return FileEngineDefaults.CreateSafeName(FragmentNaam); } }
 
+            public override bool Equals(object obj)
+            {
+                if (obj is IVrijZoekresultaatMogelijkheid vrijZoekresultaat)
+                    return Equals(this, vrijZoekresultaat);
+
+                return base.Equals(obj);
+            }
+
             public bool Equals(IVrijZoekresultaatMogelijkheid x, IVrijZoekresultaatMogelijkheid y)
             {
                 if (x == null || y == null)
                     return false;
-                return x.Weergave == y.Weergave;  // Alleen sorteren op weergave naam
-            }
-
-            public int GetHashCode(IVrijZoekresultaatMogelijkheid obj)
-            {
-                return obj.Weergave.GetHashCode();
+                return x.Weergave.Equals(y.Weergave, System.StringComparison.InvariantCultureIgnoreCase);  // Alleen equals checks op weergave naam
             }
 
             public override string ToString()
