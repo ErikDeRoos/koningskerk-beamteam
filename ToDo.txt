@@ -1,7 +1,5 @@
-QoL: extra uitlees optie om bijbel via xml te doen
 Bugfix: Kopieren slide neemt opmaak niet over
 QoL: Bij kopieren uit slide opties voor 'begrijpen' of er 1 vers op 1 slide staat (of 2 of meer, instellen via instellingen.xml)
-QoL: bij opslaan pptx default ipv ppt
 QoL: <liturgie_noncol>, tabel met 1 rij en tabjes
 QoL: optie om na genereren niet powerpoint te herstarten
 QoL: zoeknaam in instellingen.xml
@@ -9,10 +7,9 @@ QoL: thema veld incl tag
 QoL: collecte bestand mogelijkheid incl xml, vrije optie, collecte uitleg (per collecte vakje er bij) incl tag
 QoL: 3e collecte
 QoL: collecte uitleg (per collecte vakje er bij) incl tag
-Bugfix: scrollbar op liturgie
 Wishlist: optie om powerpoint on top te houden indien gewenst
 
 Bugfix: Formulier moet rechts uitgelijnd zijn op overzicht in voorbeeld liturgie op github. Probleem is waarschijnlijk SubNaam -> Naam bij empty.
 Bugfix: bij bijbelboek 'Psalm' als weergave 'Psalmen' is kan je 'psalmen' invoegen maar dit wordt dan 'psalm en'
 Bugfix: soms komt bij Opwekking 687 'volgende' in beeld terwijl dit niet hoeft. Opw 585 doet dit ook.
-Bugfix: bijbeltekst versen extracten uit database, kijk of er 1 nummer overgeslagen wordt. Dit zou een paar bugs met bepaalde hoofdstukken oplossen.
+Bugfix: bijbeltekst versen extracten uit database, kijk of er 1 nummer overgeslagen wordt (sommige teksten doen dit). Dit zou een paar bugs met bepaalde hoofdstukken oplossen.
