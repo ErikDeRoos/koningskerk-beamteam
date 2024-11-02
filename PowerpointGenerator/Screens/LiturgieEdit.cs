@@ -79,7 +79,7 @@ namespace PowerpointGenerator.Screens
 
             // We gaan kijken wat de verandering is.
             // Dit moet wat slimmer dan gewoon verwijderen/toevoegen omdat deze lijst zich instabiel gedraagt
-            textBoxZoek.SuspendLayout();
+            //textBoxZoek.SuspendLayout();  // Suspenden lijkt het issue alleen maar te verergeren
             lock (_dropdownLocker)  // Lock om te voorkomen dat werk nog niet af is als we er nog een x in komen (lijkt namelijk te gebeuren)
             {
                 if (_huidigZoekresultaat == null || _huidigZoekresultaat.ZoeklijstAanpassing == VrijZoekresultaatAanpassingType.Alles || _huidigZoekresultaat.DeltaMogelijkhedenVerwijderd.Count() > 50)
@@ -98,7 +98,7 @@ namespace PowerpointGenerator.Screens
                     }
                 }
             }
-            textBoxZoek.ResumeLayout();
+            //textBoxZoek.ResumeLayout();
         }
 
         private void HuidigeTekstInvoegen()
