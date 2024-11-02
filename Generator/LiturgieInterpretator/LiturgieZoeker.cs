@@ -77,6 +77,7 @@ namespace Generator.LiturgieInterpretator
                 fragmentLijst = ZoekFragmenten(zoekRestricties, huidigeZoektermSplit.Benaming).Select(t => new ZoekresultaatItem()
                 {
                     Weergave = $"{huidigeZoektermSplit.Benaming} {t.Resultaat.Weergave}",
+                    VeiligeNaam = $"{huidigeZoektermSplit.Benaming} {t.Resultaat.VeiligeNaam}",
                     UitDatabase = t.Database.Weergave,
                 });
 
@@ -104,27 +105,34 @@ namespace Generator.LiturgieInterpretator
 
             // Het kan zijn dat bij het vorige zoekresultaat nog meerdere opties mogelijk waren, maar dat er nu nog maar 1 optie mogelijk is,
             // terwijl je nog wel een paar tekens moet typen. Dat kan handiger,  we maken de aanname dat je deze ene optie bedoelt:
-            if (!laatsteZoektekenIsFragmentWissel && vorigResultaat.Aanname == null && VoorspelZoekresultaat(vorigResultaat.AlleMogelijkheden, vorigResultaat.ZoekTerm).Count() > 1 && VoorspelZoekresultaat(nieuwResultaat.AlleMogelijkheden, nieuwResultaat.ZoekTerm).Count() == 1)
+            var voorspelAllVorig = VoorspelZoekresultaat(vorigResultaat.AlleMogelijkheden, vorigResultaat.ZoekTerm).ToArray();
+            if (!laatsteZoektekenIsFragmentWissel && vorigResultaat.Aanname == null && voorspelAllVorig.Count() > 1 && voorspelAllVorig.Count() == 1)
             {
                 veranderingGemaakt = true;
-                aanname = VoorspelZoekresultaat(nieuwResultaat.AlleMogelijkheden, nieuwResultaat.ZoekTerm).First().Weergave;
+                var voorspel = voorspelAllVorig.First();
+                aanname = voorspel.Weergave;
 
                 // Fragment toevoegen op basis van aanname
                 fragmentLijst = ZoekFragmenten(zoekRestricties, aanname).Select(t => new ZoekresultaatItem()
                 {
                     Weergave = $"{aanname} {t.Resultaat.Weergave}",
+                    VeiligeNaam = $"{voorspel.VeiligeNaam} {t.Resultaat.VeiligeNaam}",
                     UitDatabase = t.Database.Weergave,
                 });
 
                 nieuwResultaat = ZoekresultaatSamenstellen(veiligeZoekTekst, alsBijbeltekst, vorigResultaat, onderdeelLijst.Union(fragmentLijst), aanname, veranderingGemaakt);
             }
             // Als de aanname niet meer gemaakt kan worden
-            else if (!string.IsNullOrEmpty(vorigResultaat.Aanname) && VoorspelZoekresultaat(nieuwResultaat.AlleMogelijkheden, nieuwResultaat.ZoekTerm).Count() > VoorspelZoekresultaat(vorigResultaat.AlleMogelijkheden, vorigResultaat.ZoekTerm).Count())
+            else if (!string.IsNullOrEmpty(vorigResultaat.Aanname))
             {
-                veranderingGemaakt = true;
-                aanname = null;
+                var voorspelAllNieuw = VoorspelZoekresultaat(nieuwResultaat.AlleMogelijkheden, nieuwResultaat.ZoekTerm).ToArray();
+                if (voorspelAllNieuw.Count() > 1 && voorspelAllVorig.Count() == 1)
+                {
+                    veranderingGemaakt = true;
+                    aanname = null;
 
-                nieuwResultaat = ZoekresultaatSamenstellen(veiligeZoekTekst, alsBijbeltekst, vorigResultaat, onderdeelLijst.Union(fragmentLijst), aanname, veranderingGemaakt);
+                    nieuwResultaat = ZoekresultaatSamenstellen(veiligeZoekTekst, alsBijbeltekst, vorigResultaat, onderdeelLijst.Union(fragmentLijst), aanname, veranderingGemaakt);
+                }
             }
 
             return nieuwResultaat;

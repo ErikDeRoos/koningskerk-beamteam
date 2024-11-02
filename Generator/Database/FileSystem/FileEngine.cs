@@ -91,7 +91,7 @@ namespace Generator.Database.FileSystem
         {
             return GetDbSet()
                 .Select(db => db.Name)
-                .ToList();
+                .ToArray();
         }
     }
 
