@@ -58,7 +58,7 @@ namespace Generator.LiturgieInterpretator
             var aanname = vorigResultaat?.Aanname;
             var laatsteZoektekenIsFragmentWissel = veiligeZoekTekst.Length > 0 ? LiturgieInterpretator.LiturgieTekstNaarObject.BenamingDeelScheidingstekens.Contains(veiligeZoekTekst.Last()) : false;
 
-            var onderdeelLijst = KrijgBasisDatabaseLijst(zoekRestricties, true);
+            var onderdeelLijst = KrijgBasisDatabaseLijst(zoekRestricties);
             var fragmentLijst = Enumerable.Empty<IVrijZoekresultaatMogelijkheid>();
             var vorigeZoektermSplit = _liturgieTekstNaarObject.VanTekstregel(vorigResultaat == null ? "" : vorigResultaat.ZoekTerm);
             var huidigeZoektermSplit = _liturgieTekstNaarObject.VanTekstregel(veiligeZoekTekst);
@@ -78,7 +78,7 @@ namespace Generator.LiturgieInterpretator
                 {
                     Weergave = $"{huidigeZoektermSplit.Benaming} {t.Resultaat.Weergave}",
                     UitDatabase = t.Database.Weergave,
-                }).ToList();
+                });
 
                 // Geen aannames meer
                 aanname = null;
@@ -95,6 +95,13 @@ namespace Generator.LiturgieInterpretator
             if (vorigResultaat == null)
                 return nieuwResultaat;
 
+            // Als je een stuk tekst weggehaald hebt, dan krijgt het zoekcomponent moeite met opnieuw laden van data. Daarom hier expliciet data reloaden.
+            if (veiligeZoekTekst.Length == 0 || veiligeZoekTekst.Length < vorigResultaat.ZoekTerm.Length)
+            {
+                nieuwResultaat.ZoeklijstAanpassing = VrijZoekresultaatAanpassingType.Alles;
+                return nieuwResultaat;
+            }
+
             // Het kan zijn dat bij het vorige zoekresultaat nog meerdere opties mogelijk waren, maar dat er nu nog maar 1 optie mogelijk is,
             // terwijl je nog wel een paar tekens moet typen. Dat kan handiger,  we maken de aanname dat je deze ene optie bedoelt:
             if (!laatsteZoektekenIsFragmentWissel && vorigResultaat.Aanname == null && VoorspelZoekresultaat(vorigResultaat.AlleMogelijkheden, vorigResultaat.ZoekTerm).Count() > 1 && VoorspelZoekresultaat(nieuwResultaat.AlleMogelijkheden, nieuwResultaat.ZoekTerm).Count() == 1)
@@ -107,7 +114,7 @@ namespace Generator.LiturgieInterpretator
                 {
                     Weergave = $"{aanname} {t.Resultaat.Weergave}",
                     UitDatabase = t.Database.Weergave,
-                }).ToList();
+                });
 
                 nieuwResultaat = ZoekresultaatSamenstellen(veiligeZoekTekst, alsBijbeltekst, vorigResultaat, onderdeelLijst.Union(fragmentLijst), aanname, veranderingGemaakt);
             }
@@ -129,7 +136,7 @@ namespace Generator.LiturgieInterpretator
         }
 
 
-        private IEnumerable<IVrijZoekresultaatMogelijkheid> KrijgBasisDatabaseLijst(ZoekRestricties zoekRestricties, bool cached)
+        private IEnumerable<IVrijZoekresultaatMogelijkheid> KrijgBasisDatabaseLijst(ZoekRestricties zoekRestricties, bool cached = true)
         {
             if (!cached)
                 return ZoekBasisDatabaseLijst(zoekRestricties)
@@ -139,12 +146,12 @@ namespace Generator.LiturgieInterpretator
                         VeiligeNaam = t.Resultaat.VeiligeNaam,
                         UitDatabase = t.Database.Weergave,
                     })
-                    .Distinct().ToList();
+                    .ToArray();
             else
             {
                 if (_onderdelenLijstCache == null || !zoekRestricties.Equals(_onderdelenLijstRestrictiesCache))
                 {
-                    _onderdelenLijstCache = KrijgBasisDatabaseLijst(zoekRestricties, false);
+                    _onderdelenLijstCache = KrijgBasisDatabaseLijst(zoekRestricties, cached: false);
                     _onderdelenLijstRestrictiesCache = zoekRestricties;
                 }
                 return _onderdelenLijstCache;
@@ -155,7 +162,7 @@ namespace Generator.LiturgieInterpretator
         /// Krijg de basislijst. Dus alle set namen. 
         /// En indien gewenst ook de inhoud van de 'common' set.
         /// </summary>
-        private IList<IZoekresultaat> ZoekBasisDatabaseLijst(ZoekRestricties zoekRestricties)
+        private IEnumerable<IZoekresultaat> ZoekBasisDatabaseLijst(ZoekRestricties zoekRestricties)
         {
             var alleDatabases = Enumerable.Empty<IZoekresultaat>();
 
@@ -171,10 +178,17 @@ namespace Generator.LiturgieInterpretator
             if (zoekRestricties.ZoekInCommon)
                 alleDatabases = alleDatabases.Concat(_databaseZoek.KrijgAlleFragmentenUitNormaleDb(FileEngineDefaults.CommonFilesSetName));  
 
-            return alleDatabases.ToList();
+            var uniekeNamen = new HashSet<string>();
+            foreach (var zoekresultaat in alleDatabases)
+            {
+                if (uniekeNamen.Contains(zoekresultaat.Resultaat.Weergave))
+                    continue;
+                uniekeNamen.Add(zoekresultaat.Resultaat.Weergave);
+                yield return zoekresultaat;
+            }
         }
 
-        private IList<IZoekresultaat> ZoekFragmenten(ZoekRestricties zoekRestricties, string setNaam)
+        private IEnumerable<IZoekresultaat> ZoekFragmenten(ZoekRestricties zoekRestricties, string setNaam)
         {
             var alleFragmenten = Enumerable.Empty<IZoekresultaat>();
 
@@ -186,7 +200,14 @@ namespace Generator.LiturgieInterpretator
             else if (zoekRestricties.ZoekInBijbel && zoekRestricties.ZoekInLiederen)
                 alleFragmenten = _databaseZoek.KrijgAlleFragmentenUitAlleDatabases(setNaam);
 
-            return alleFragmenten.ToList();
+            var uniekeNamen = new HashSet<string>();
+            foreach (var zoekresultaat in alleFragmenten)
+            {
+                if (uniekeNamen.Contains(zoekresultaat.Resultaat.Weergave))
+                    continue;
+                uniekeNamen.Add(zoekresultaat.Resultaat.Weergave);
+                yield return zoekresultaat;
+            }
         }
 
 
@@ -201,22 +222,26 @@ namespace Generator.LiturgieInterpretator
             if (!lijstIsGewijzigd && vorigResultaat != null)
             {
                 aanpassing = VrijZoekresultaatAanpassingType.Geen;
-                zoekLijst = vorigResultaat.AlleMogelijkheden.ToList();
+                zoekLijst = vorigResultaat.AlleMogelijkheden;
                 vermoedelijkeDatabase = vorigResultaat.VermoedelijkeDatabase;
             }
             else
             {
-                zoekLijst = lijst.Distinct().OrderBy(z => z.Weergave).ToList();
+                zoekLijst = lijst.Distinct().OrderBy(z => z.Weergave).ToArray();
                 if (aanpassing == VrijZoekresultaatAanpassingType.Alles && vorigResultaat != null)
                 {
-                    zoekLijstDeltaToegevoegd = zoekLijst.Where(z => !vorigResultaat.AlleMogelijkheden.Contains(z)).ToList();
-                    zoekLijstDeltaVerwijderd = vorigResultaat.AlleMogelijkheden.Where(z => !zoekLijst.Contains(z)).ToList();
+                    var alleMogelijkhedenHash = vorigResultaat.AlleMogelijkheden.Select(a => a.Weergave).Distinct().ToHashSet();
+                    zoekLijstDeltaToegevoegd = zoekLijst.Where(z => !alleMogelijkhedenHash.Contains(z.Weergave)).ToArray();
+
+                    var zoekLijstHash = zoekLijst.Select(a => a.Weergave).Distinct().ToHashSet();
+                    zoekLijstDeltaVerwijderd = vorigResultaat.AlleMogelijkheden.Where(z => !zoekLijstHash.Contains(z.Weergave)).ToArray();
+                    
                     if (zoekLijstDeltaVerwijderd.Count() != vorigResultaat.AlleMogelijkheden.Count())
                         aanpassing = VrijZoekresultaatAanpassingType.Deel;
                 }
 
-                var databases = zoekLijst.Select(z => z.UitDatabase).Distinct().ToList();
-                if (databases.Count == 1)
+                var databases = zoekLijst.Select(z => z.UitDatabase).Distinct().ToArray();
+                if (databases.Length == 1)
                     vermoedelijkeDatabase = databases.First();
             }
 
@@ -226,7 +251,7 @@ namespace Generator.LiturgieInterpretator
                 AlsBijbeltekst = alsBijbeltekst,
                 Aanname = aanname,
                 VermoedelijkeDatabase = vermoedelijkeDatabase,
-                AlleMogelijkheden = zoekLijst.ToList(),
+                AlleMogelijkheden = zoekLijst,
                 DeltaMogelijkhedenToegevoegd = zoekLijstDeltaToegevoegd,
                 DeltaMogelijkhedenVerwijderd = zoekLijstDeltaVerwijderd,
                 ZoeklijstAanpassing = aanpassing,
@@ -313,6 +338,11 @@ namespace Generator.LiturgieInterpretator
                 if (x == null || y == null)
                     return false;
                 return x.Weergave.Equals(y.Weergave, System.StringComparison.InvariantCultureIgnoreCase);  // Alleen equals checks op weergave naam
+            }
+
+            public override int GetHashCode()
+            {
+                return Weergave.GetHashCode();
             }
 
             public override string ToString()

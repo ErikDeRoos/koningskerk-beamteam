@@ -68,7 +68,6 @@ namespace PowerpointGenerator.Screens
 
         // TODO de werkwijze van het aanpassen van de autocomplete source veroorzaakt soms een access violation. Bijv. snel typen na opstarten.
         // TODO soms triggert de autoselect en wordt je tekst vanzelf geselecteerd, dat is irritant.
-        // TODO er lijkt een memoryleak te zijn. Geheugengebruik loopt op als je snel wisselt tussen bijv. 'psalmen ' en 'psalmen 1'. Vermoedelijk de database.
         private void TriggerZoeklijstVeranderd()
         {
             if (!_liturgieZoeker.GaatVrijZoekenAnderResultaatGeven(textBoxZoek.Text, checkBoxAlsBijbeltekst.Checked, _huidigZoekresultaat))
@@ -86,11 +85,13 @@ namespace PowerpointGenerator.Screens
                 if (_huidigZoekresultaat == null || _huidigZoekresultaat.ZoeklijstAanpassing == VrijZoekresultaatAanpassingType.Alles || _huidigZoekresultaat.DeltaMogelijkhedenVerwijderd.Count() > 50)
                 {
                     textBoxZoek.AutoCompleteCustomSource.Clear();
-                    textBoxZoek.AutoCompleteCustomSource.AddRange(_huidigZoekresultaat.AlleMogelijkheden.Select(m => m.Weergave).ToArray());
+                    if (_huidigZoekresultaat.AlleMogelijkheden.Count() > 0)
+                        textBoxZoek.AutoCompleteCustomSource.AddRange(_huidigZoekresultaat.AlleMogelijkheden.Select(m => m.Weergave).ToArray());
                 }
                 else if (_huidigZoekresultaat.ZoeklijstAanpassing == VrijZoekresultaatAanpassingType.Deel)
                 {
-                    textBoxZoek.AutoCompleteCustomSource.AddRange(_huidigZoekresultaat.DeltaMogelijkhedenToegevoegd.Select(m => m.Weergave).ToArray());
+                    if (_huidigZoekresultaat.DeltaMogelijkhedenToegevoegd.Count() > 0)
+                        textBoxZoek.AutoCompleteCustomSource.AddRange(_huidigZoekresultaat.DeltaMogelijkhedenToegevoegd.Select(m => m.Weergave).ToArray());
                     foreach (var item in _huidigZoekresultaat.DeltaMogelijkhedenVerwijderd)
                     {
                         textBoxZoek.AutoCompleteCustomSource.Remove(item.Weergave);

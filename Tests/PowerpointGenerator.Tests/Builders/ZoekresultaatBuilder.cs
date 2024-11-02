@@ -123,6 +123,11 @@ namespace Generator.Tests.Builders
                 return x.Weergave.Equals(y.Weergave, System.StringComparison.InvariantCultureIgnoreCase);  // Alleen equals checks op weergave naam
             }
 
+            public override int GetHashCode()
+            {
+                return Weergave.GetHashCode();
+            }
+
             public override string ToString()
             {
                 return Weergave;

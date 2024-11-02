@@ -1,4 +1,4 @@
-﻿// Copyright 2019 door Erik de Roos
+﻿// Copyright 2024 door Erik de Roos
 using Generator.Database.FileSystem;
 using Generator.Database.Models;
 using Generator.LiturgieInterpretator.Models;
@@ -18,6 +18,10 @@ namespace Generator.Database
     public class LiturgieDatabase : ILiturgieDatabase
     {
         private readonly IEngineManager _databases;
+
+        private readonly Dictionary<IDbItem, IContentDelayed[]> _cachedContentDelayed = new Dictionary<IDbItem, IContentDelayed[]>();
+        private readonly Dictionary<IDbItemContent, Content> _cachedContentDirect = new Dictionary<IDbItemContent, Content>();
+
         public LiturgieDatabase(IEngineManager database)
         {
             _databases = database;
@@ -73,7 +77,7 @@ namespace Generator.Database
                         .Select(s => s.GetContent())
                         .Where(s => s != null)  // omdat we alles ophalen kunnen hier dingen in zitten die niet kloppen
                         .OrderBy(s => s.Nummer)  // Op volgorde van nummer
-                        .ToList();
+                        .ToArray();
                 }
             }
             else
@@ -83,13 +87,13 @@ namespace Generator.Database
                 var preSelect = InterpreteerNummers(fragmentDelen, delayedContent.Select(c => c.PossibleNummer))  // We houden de volgorde van het opgeven aan omdat die afwijkend kan zijn
                     .Select(n => n.ToString())
                     .Select(n => new { Naam = n, SubSet = delayedContent.FirstOrDefault(c => c.PossibleNummer == n), })
-                    .ToList();
+                    .ToArray();
                 // Specifieke verzen moeten allemaal gevonden kunnen worden
                 if (preSelect.Any(c => c.SubSet == null))
                     return new Oplossing() { Status = DatabaseZoekStatus.VersFout };
                 returnValue.Content = preSelect
                     .Select(s => s.SubSet.GetContent())
-                    .ToList();
+                    .ToArray();
                 // Specifieke verzen moeten allemaal interpreteerbaar zijn
                 if (returnValue.Content.Any(c => c == null))
                     return new Oplossing() { Status = DatabaseZoekStatus.VersOnleesbaar };
@@ -101,7 +105,7 @@ namespace Generator.Database
         private static IEnumerable<int> InterpreteerNummers(IEnumerable<string> nummerSets, IEnumerable<string> avaliableNummers)
         {
             int parseAvaliableNummer = 0;
-            var avaliableList = avaliableNummers.Where(s => int.TryParse(s, out parseAvaliableNummer)).Select(s => parseAvaliableNummer).ToList();
+            var avaliableList = avaliableNummers.Where(s => int.TryParse(s, out parseAvaliableNummer)).Select(s => parseAvaliableNummer).ToArray();
             foreach (var nummerSet in nummerSets)
             {
                 var safeNummerSet = (nummerSet ?? "").Trim();
@@ -143,27 +147,39 @@ namespace Generator.Database
             }
         }
 
-        private static IEnumerable<IContentDelayed> KrijgContentDelayed(IDbItem vanItem, DbSetSettings metSettings)
+        private IEnumerable<IContentDelayed> KrijgContentDelayed(IDbItem vanItem, DbSetSettings metSettings)
         {
+            if (_cachedContentDelayed.ContainsKey(vanItem))
+                return _cachedContentDelayed[vanItem];
+
+            var content = Array.Empty<IContentDelayed>();
             if (metSettings.ItemsHaveSubContent)
-                return vanItem.Content.TryAccessSubs()
-                    .Select(s => new ContentDelayed(s.Name.Name, s.Content))
-                    .ToList();
-            if (metSettings.ItemIsSubContent) {
-                var content = KrijgDirecteContent(vanItem.Content, null);
-                if (content.InhoudType == InhoudType.Tekst)
-                    return SplitFile(content.Inhoud)
-                        .Select(s => new ContentDirect(s))
-                        .ToList();
+            {
+                content = vanItem.Content.TryAccessSubs()
+                    .Select(s => new ContentDelayed(KrijgDirecteContent, s.Name.Name, s.Content))
+                    .ToArray();
             }
-            return new List<IContentDelayed>();
+            else if (metSettings.ItemIsSubContent) 
+            {
+                var contentDirect = KrijgDirecteContent(vanItem.Content, null);
+                if (contentDirect.InhoudType == InhoudType.Tekst)
+                    content = SplitFile(contentDirect.Inhoud)
+                        .Select(s => new ContentDirect(s))
+                        .ToArray();
+            }
+            _cachedContentDelayed.Add(vanItem, content);
+
+            return content;
         }
 
-        private static Content KrijgDirecteContent(IDbItemContent metItem, string possibleNummer)
+        private Content KrijgDirecteContent(IDbItemContent metItem, string possibleNummer)
         {
+            if (_cachedContentDirect.ContainsKey(metItem))
+                return _cachedContentDirect[metItem];
+
+            Content content = null;
             int? nummer = null;
-            int parseNummer;
-            if (int.TryParse(possibleNummer ?? "", out parseNummer))
+            if (int.TryParse(possibleNummer ?? "", out int parseNummer))
                 nummer = parseNummer;
             switch (metItem.Type)
             {
@@ -172,15 +188,19 @@ namespace Generator.Database
                     {
                         var rdr = new StreamReader(fs, Encoding.Default);
                         // geef de inhoud als tekst terug
-                        return new Content { Inhoud = rdr.ReadToEnd(), InhoudType = InhoudType.Tekst, Nummer = nummer };
+                        content = new Content { Inhoud = rdr.ReadToEnd(), InhoudType = InhoudType.Tekst, Nummer = nummer };
                     }
+                    break;
                 case "ppt":
                 case "pptx":
                     // geef de inhoud als link terug
-                    return new Content { Inhoud = metItem.PersistentLink, InhoudType = InhoudType.PptLink, Nummer = nummer };
+                    content = new Content { Inhoud = metItem.PersistentLink, InhoudType = InhoudType.PptLink, Nummer = nummer };
+                    break;
             }
+            _cachedContentDirect.Add(metItem, content);
+
             // Geef een leeg item terug als we het niet konden verwerken
-            return null;
+            return content;
         }
 
         private static IEnumerable<Content> SplitFile(string fileContent)
@@ -243,14 +263,16 @@ namespace Generator.Database
         {
             public string PossibleNummer { get; private set; }
             private readonly IDbItemContent _dbItem;
-            public ContentDelayed(string possibleNummer, IDbItemContent dbItem)
+            private readonly Func<IDbItemContent, string, Content> _krijgDirecteContent;
+            public ContentDelayed(Func<IDbItemContent, string, Content> krijgDirecteContent, string possibleNummer, IDbItemContent dbItem)
             {
+                _krijgDirecteContent = krijgDirecteContent;
                 PossibleNummer = possibleNummer;
                 _dbItem = dbItem;
             }
             public Content GetContent()
             {
-                return KrijgDirecteContent(_dbItem, PossibleNummer);
+                return _krijgDirecteContent(_dbItem, PossibleNummer);
             }
         }
         private class ContentDirect : IContentDelayed
